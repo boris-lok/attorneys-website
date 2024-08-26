@@ -2,17 +2,17 @@
     import type {Avatar} from "../models/member";
 
     export let avatar: Avatar;
-    export let tags: string[] = ["Rust", "Python", "C++", "Go", "Typescript", "Scala", "Kotlin"];
+    export let tags: string[] = [];
 </script>
 
-<main>
-    <div class="avatar-container">
+<div class="avatar-container">
+    <div class="avatar-content">
         <img class="avatar" src="avatar.svg" alt="Avatar"/>
         <p>{ avatar.name }</p>
     </div>
     {#if tags.length > 0}
         <div class="divider"></div>
-        <div class="content">
+        <div class="tags-container">
             <div class="tags">
                 {#each tags as tag}
                     <p class="tag">{tag}</p>
@@ -20,19 +20,22 @@
             </div>
         </div>
     {/if}
-</main>
+</div>
 
 <style lang="scss">
-  main {
+  @import "../../constants";
+
+  div.avatar-container {
     position: relative;
     display: flex;
     flex-direction: column;
     row-gap: 4px;
     padding: 4px 8px;
     margin: 0 16px;
-    box-shadow: 0 0 16px 0 rgba(0, 0, 0, .15);
+    box-shadow: 0 0 10px 0 rgba(170, 170, 170, .2);
     border-radius: 4px;
     overflow: clip;
+    height: 110px;
 
     p {
       margin: 0;
@@ -42,17 +45,17 @@
     div.divider {
       width: 100%;
       height: 1px;
-      background-color: rgba(0,0,0,.2);
+      background-color: $grey;
     }
 
-    div.avatar-container {
+    div.avatar-content {
       position: relative;
       display: flex;
       flex-direction: row;
       column-gap: 6px;
       align-items: center;
       max-width: 100%;
-
+      height: 100%;
 
       img.avatar {
         width: 64px;
@@ -61,7 +64,7 @@
       }
     }
 
-    div.content {
+    div.tags-container {
       display: flex;
       flex-direction: column;
       row-gap: 4px;
@@ -81,6 +84,13 @@
           padding: 2px 4px;
         }
       }
+    }
+  }
+
+  @media only screen and (min-width: $breakpoint-sm) {
+    div.avatar-container {
+      width: 320px;
+      max-width: 320px;
     }
   }
 </style>

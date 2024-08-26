@@ -2,17 +2,41 @@
     import type {Avatar as avatar} from '../models/member';
     import Avatar from './avatar.svelte';
 
-    let members: avatar[] = [
+    let members: (avatar & { tags: string[] })[] = [
         {
             id: "1",
-            name: "Boris", url: ""
+            name: "Boris",
+            url: "",
+            tags: ["Engineer", "Frontend"]
+        },
+        {
+            id: "2",
+            name: "Lily",
+            url: "",
+            tags: []
         }
     ];
 </script>
 
-<main>
-    <p>Member List page</p>
+<div class="member-list-container">
     {#each members as member}
-        <Avatar avatar={member}/>
+        <Avatar avatar={member} tags={member.tags}/>
     {/each}
-</main>
+</div>
+
+<style lang="scss">
+  @import "../../constants";
+
+  div.member-list-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  @media only screen and (min-width: $breakpoint-md) {
+    div.member-list-container {
+      flex-direction: row;
+    }
+  }
+</style>

@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {Avatar as avatar} from '../models/member';
-    import Avatar from './avatar.svelte';
+    import Avatar from './Avatar.svelte';
 
     let members: (avatar & { tags: string[] })[] = [
         {

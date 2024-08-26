@@ -1,6 +1,6 @@
 <script lang="ts">
     import {Router, Link, Route} from 'svelte-routing';
-    import Member from './lib/components/member.svelte'
+    import Member from './lib/components/Member.svelte'
 
     export let url = '';
 </script>

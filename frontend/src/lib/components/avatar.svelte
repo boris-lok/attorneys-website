@@ -7,7 +7,7 @@
 
 <main>
     <div class="avatar-container">
-        <img class="avatar" src="../../../public/avatar.svg" alt="Avatar"/>
+        <img class="avatar" src="avatar.svg" alt="Avatar"/>
         <p>{ avatar.name }</p>
     </div>
     {#if tags.length > 0}

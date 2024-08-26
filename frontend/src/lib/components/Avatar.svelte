@@ -1,5 +1,6 @@
 <script lang="ts">
     import type {Avatar} from "../models/member";
+    import avatarIcon from "../assets/avatar.svg";
 
     export let avatar: Avatar;
     export let tags: string[] = [];
@@ -7,7 +8,7 @@
 
 <div class="avatar-container">
     <div class="avatar-content">
-        <img class="avatar" src="avatar.svg" alt="Avatar"/>
+        <img class="avatar" src={avatarIcon} alt="Avatar"/>
         <p>{ avatar.name }</p>
     </div>
     {#if tags.length > 0}

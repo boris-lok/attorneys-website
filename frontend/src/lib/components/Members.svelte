@@ -1,8 +1,8 @@
 <script lang="ts">
-    import type {Avatar as avatar} from '../models/member';
+    import type {Member} from '../models/member';
     import Avatar from './Avatar.svelte';
 
-    let members: (avatar & { tags: string[] })[] = [
+    let members: Member[] = [
         {
             id: "1",
             name: "Boris",

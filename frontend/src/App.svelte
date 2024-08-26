@@ -1,6 +1,7 @@
 <script lang="ts">
     import {Router, link, Route} from 'svelte-routing';
-    import Member from './lib/components/Members.svelte';
+    import Members from './lib/components/Members.svelte';
+    import Member from './lib/components/Member.svelte';
     import {faBars} from "@fortawesome/free-solid-svg-icons";
     import Fa from "svelte-fa";
 
@@ -34,7 +35,8 @@
         </div>
 
         <div class="main-container">
-            <Route path="/members" component={Member}></Route>
+            <Route path="/members/:id" component={Member}></Route>
+            <Route path="/members" component={Members}></Route>
         </div>
 
         <div class="footer-container">

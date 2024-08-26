@@ -2,7 +2,6 @@
     import {Router, link, Route} from 'svelte-routing';
     import Member from './lib/components/Members.svelte';
     import {faBars} from "@fortawesome/free-solid-svg-icons";
-
     import Fa from "svelte-fa";
 
     export let url = '';
@@ -17,8 +16,10 @@
             <nav>
                 <ul class:collapsed={collapsed}>
                     <li>
-                        <div class="bars" on:click={toggleCollapsed}>
-                            <Fa icon={faBars} color="#ffffff"/>
+                        <div class="bars">
+                            <button type="button" on:click={toggleCollapsed}>
+                                <Fa icon={faBars} color="#ffffff"/>
+                            </button>
                         </div>
                     </li>
                     <li class:collapsed={collapsed}>
@@ -74,11 +75,18 @@
         }
 
         div.bars {
-          display: flex;
-          align-items: center;
-          width: 32px;
+          width: 100%;
           height: 100%;
-          cursor: pointer;
+          display: flex;
+          justify-content: flex-end;
+
+          button {
+            width: 32px;
+            height: 100%;
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+          }
         }
 
         a {

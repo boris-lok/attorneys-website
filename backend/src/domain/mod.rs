@@ -1,3 +1,3 @@
-mod create_member;
-mod entities;
+pub mod create_member;
+pub mod entities;
 

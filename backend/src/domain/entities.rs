@@ -3,6 +3,7 @@ pub enum Language {
     EN,
 }
 
+#[derive(Eq, PartialEq, Clone)]
 pub struct MemberID(pub(crate) String);
 
 impl TryFrom<String> for MemberID {
@@ -39,6 +40,22 @@ impl TryFrom<String> for Language {
             "en" => Ok(Language::EN),
             "tw" => Ok(Language::TW),
             _ => Err(()),
+        }
+    }
+}
+
+pub struct Member {
+    pub(crate) member_id: MemberID,
+    pub(crate) member_name: MemberName,
+    pub(crate) default_language: Language,
+}
+
+impl Member {
+    pub fn new(member_id: MemberID, member_name: MemberName, default_language: Language) -> Self {
+        Member {
+            member_id,
+            member_name,
+            default_language,
         }
     }
 }

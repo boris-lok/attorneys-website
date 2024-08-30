@@ -11,7 +11,7 @@ pub trait MemberRepository {
         &mut self,
         member_id: MemberID,
         member_name: MemberName,
-        default_language: Language,
+        language: Language,
     ) -> Insert;
 }
 
@@ -41,7 +41,7 @@ impl MemberRepository for InMemoryMemberRepository {
         &mut self,
         member_id: MemberID,
         member_name: MemberName,
-        default_language: Language,
+        language: Language,
     ) -> Insert {
         if self.error {
             return Insert::Error;
@@ -53,7 +53,7 @@ impl MemberRepository for InMemoryMemberRepository {
 
         let member_id_cloned = member_id.clone();
         self.members
-            .push(Member::new(member_id_cloned, member_name, default_language));
+            .push(Member::new(member_id_cloned, member_name, language));
         Insert::Ok(member_id)
     }
 }

@@ -4,7 +4,7 @@ use crate::repositories::member_repository::{Insert, MemberRepository};
 struct Request {
     member_id: String,
     name: String,
-    default_language: String,
+    language: String,
 }
 
 enum Response {
@@ -18,7 +18,7 @@ fn execute(repo: &mut dyn MemberRepository, req: Request) -> Response {
     match (
         MemberID::try_from(req.member_id),
         MemberName::try_from(req.name),
-        Language::try_from(req.default_language),
+        Language::try_from(req.language),
     ) {
         (Ok(id), Ok(name), Ok(lang)) => match repo.insert(id, name, lang) {
             Insert::Ok(member_id) => Response::Ok(member_id.0),
@@ -42,7 +42,7 @@ mod tests {
         let req = Request {
             member_id: member_id.clone(),
             name: String::from("Boris"),
-            default_language: "en".to_string(),
+            language: "en".to_string(),
         };
 
         let res = execute(&mut repo, req);
@@ -61,7 +61,7 @@ mod tests {
         let req = Request {
             member_id,
             name: String::from(""),
-            default_language: "en".to_string(),
+            language: "en".to_string(),
         };
 
         let res = execute(&mut repo, req);
@@ -84,7 +84,7 @@ mod tests {
         let req = Request {
             member_id: duplicated_member_id,
             name: "Lily".to_string(),
-            default_language: "en".to_string(),
+            language: "en".to_string(),
         };
 
         let res = execute(&mut repo, req);
@@ -102,7 +102,7 @@ mod tests {
         let req = Request {
             member_id,
             name: String::from("Boris"),
-            default_language: "en".to_string(),
+            language: "en".to_string(),
         };
 
         let res = execute(&mut repo, req);

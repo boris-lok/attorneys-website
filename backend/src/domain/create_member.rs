@@ -1,20 +1,21 @@
 use crate::domain::entities::{Language, MemberID, MemberName};
 use crate::repositories::member_repository::{Insert, MemberRepository};
+use std::sync::Arc;
 
-struct Request {
-    member_id: String,
-    name: String,
-    language: String,
+pub(crate) struct Request {
+    pub(crate) member_id: String,
+    pub(crate) name: String,
+    pub(crate) language: String,
 }
 
-enum Response {
+pub(crate) enum Response {
     BadRequest,
     Conflict,
     Error,
     Ok(String),
 }
 
-fn execute(repo: &mut dyn MemberRepository, req: Request) -> Response {
+pub fn execute(repo: Arc<dyn MemberRepository>, req: Request) -> Response {
     match (
         MemberID::try_from(req.member_id),
         MemberName::try_from(req.name),
@@ -37,7 +38,7 @@ mod tests {
 
     #[test]
     fn it_should_return_the_member_id_otherwise() {
-        let mut repo = InMemoryMemberRepository::new();
+        let repo = Arc::new(InMemoryMemberRepository::new());
         let member_id = Ulid::new().to_string();
         let req = Request {
             member_id: member_id.clone(),
@@ -45,7 +46,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(&mut repo, req);
+        let res = execute(repo, req);
 
         match res {
             Response::Ok(id) => assert_eq!(id, member_id),
@@ -55,7 +56,7 @@ mod tests {
 
     #[test]
     fn it_should_return_bad_request_error_when_request_is_invalid() {
-        let mut repo = InMemoryMemberRepository::new();
+        let repo = Arc::new(InMemoryMemberRepository::new());
         let member_id = Ulid::new().to_string();
 
         let req = Request {
@@ -64,7 +65,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(&mut repo, req);
+        let res = execute(repo, req);
 
         match res {
             Response::BadRequest => {}
@@ -77,7 +78,7 @@ mod tests {
         let member_id = MemberID::try_from(Ulid::new().to_string()).unwrap();
         let name = MemberName::try_from(String::from("Boris")).unwrap();
         let default_language = Language::EN;
-        let mut repo = InMemoryMemberRepository::new();
+        let repo = Arc::new(InMemoryMemberRepository::new());
         let duplicated_member_id = member_id.0.clone();
         repo.insert(member_id, name, default_language);
 
@@ -87,7 +88,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(&mut repo, req);
+        let res = execute(repo, req);
 
         match res {
             Response::Conflict => {}
@@ -97,7 +98,7 @@ mod tests {
 
     #[test]
     fn it_should_return_an_error_when_an_unexpected_error_happens() {
-        let mut repo = InMemoryMemberRepository::new().with_error();
+        let mut repo = Arc::new(InMemoryMemberRepository::new().with_error());
         let member_id = Ulid::new().to_string();
         let req = Request {
             member_id,
@@ -105,7 +106,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(&mut repo, req);
+        let res = execute(repo, req);
 
         match res {
             Response::Error => {}

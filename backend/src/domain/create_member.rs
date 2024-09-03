@@ -1,5 +1,5 @@
 use crate::domain::entities::{Language, MemberID, MemberName};
-use crate::repositories::member_repository::{Insert, MemberRepository};
+use crate::repositories::member_repository::{InsertError, MemberRepository};
 use std::sync::Arc;
 
 pub(crate) struct Request {
@@ -8,25 +8,24 @@ pub(crate) struct Request {
     pub(crate) language: String,
 }
 
-pub(crate) enum Response {
+pub(crate) enum Error {
     BadRequest,
     Conflict,
-    Error,
-    Ok(String),
+    Unknown,
 }
 
-pub fn execute(repo: Arc<dyn MemberRepository>, req: Request) -> Response {
+pub fn execute(repo: Arc<dyn MemberRepository>, req: Request) -> Result<String, Error> {
     match (
         MemberID::try_from(req.member_id),
         MemberName::try_from(req.name),
         Language::try_from(req.language),
     ) {
         (Ok(id), Ok(name), Ok(lang)) => match repo.insert(id, name, lang) {
-            Insert::Ok(member_id) => Response::Ok(member_id.0),
-            Insert::Conflict => Response::Conflict,
-            Insert::Error => Response::Error,
+            Ok(member_id) => Ok(member_id.0),
+            Err(InsertError::Conflict) => Err(Error::Conflict),
+            Err(InsertError::Unknown) => Err(Error::Unknown),
         },
-        _ => Response::BadRequest,
+        _ => Err(Error::BadRequest),
     }
 }
 
@@ -49,7 +48,7 @@ mod tests {
         let res = execute(repo, req);
 
         match res {
-            Response::Ok(id) => assert_eq!(id, member_id),
+            Ok(id) => assert_eq!(id, member_id),
             _ => unreachable!(),
         }
     }
@@ -68,7 +67,7 @@ mod tests {
         let res = execute(repo, req);
 
         match res {
-            Response::BadRequest => {}
+            Err(Error::BadRequest) => {}
             _ => unreachable!(),
         }
     }
@@ -80,7 +79,8 @@ mod tests {
         let default_language = Language::EN;
         let repo = Arc::new(InMemoryMemberRepository::new());
         let duplicated_member_id = member_id.0.clone();
-        repo.insert(member_id, name, default_language);
+        repo.insert(member_id, name, default_language)
+            .expect("Failed to insert a fake data");
 
         let req = Request {
             member_id: duplicated_member_id,
@@ -91,14 +91,14 @@ mod tests {
         let res = execute(repo, req);
 
         match res {
-            Response::Conflict => {}
+            Err(Error::Conflict) => {}
             _ => unreachable!(),
         }
     }
 
     #[test]
     fn it_should_return_an_error_when_an_unexpected_error_happens() {
-        let mut repo = Arc::new(InMemoryMemberRepository::new().with_error());
+        let repo = Arc::new(InMemoryMemberRepository::new().with_error());
         let member_id = Ulid::new().to_string();
         let req = Request {
             member_id,
@@ -109,7 +109,7 @@ mod tests {
         let res = execute(repo, req);
 
         match res {
-            Response::Error => {}
+            Err(Error::Unknown) => {}
             _ => unreachable!(),
         }
     }

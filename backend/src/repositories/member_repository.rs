@@ -1,14 +1,19 @@
 use crate::domain::entities::{Language, Member, MemberID, MemberName};
 use std::sync::Mutex;
 
-pub enum Insert {
-    Ok(MemberID),
+#[derive(Debug)]
+pub enum InsertError {
     Conflict,
-    Error,
+    Unknown,
 }
 
 pub trait MemberRepository {
-    fn insert(&self, member_id: MemberID, member_name: MemberName, language: Language) -> Insert;
+    fn insert(
+        &self,
+        member_id: MemberID,
+        member_name: MemberName,
+        language: Language,
+    ) -> Result<MemberID, InsertError>;
 }
 
 pub struct InMemoryMemberRepository {
@@ -34,22 +39,27 @@ impl InMemoryMemberRepository {
 }
 
 impl MemberRepository for InMemoryMemberRepository {
-    fn insert(&self, member_id: MemberID, member_name: MemberName, _: Language) -> Insert {
+    fn insert(
+        &self,
+        member_id: MemberID,
+        member_name: MemberName,
+        _: Language,
+    ) -> Result<MemberID, InsertError> {
         if self.error {
-            return Insert::Error;
+            return Err(InsertError::Unknown);
         }
 
         let mut lock = match self.members.lock() {
             Ok(lock) => lock,
-            _ => return Insert::Error,
+            _ => return Err(InsertError::Unknown),
         };
 
         if lock.iter().any(|m| m.member_id == member_id) {
-            return Insert::Conflict;
+            return Err(InsertError::Conflict);
         }
 
         let member_id_cloned = member_id.clone();
         lock.push(Member::new(member_id_cloned, member_name));
-        Insert::Ok(member_id)
+        Ok(member_id)
     }
 }

@@ -1,5 +1,6 @@
 use crate::api::api_error::ApiError;
-use crate::domain::create_member::{execute, Request, Response};
+use crate::domain::create_member;
+use crate::domain::create_member::{execute, Request};
 use crate::repositories::member_repository::MemberRepository;
 use axum::{Extension, Json};
 use axum_extra::extract::WithRejection;
@@ -31,9 +32,9 @@ pub async fn create_member(
     };
 
     match execute(member_repo, request) {
-        Response::BadRequest => Err(ApiError::BadRequest),
-        Response::Conflict => Err(ApiError::MemberAlreadyExists),
-        Response::Error => Err(ApiError::InternalServerError),
-        Response::Ok(id) => Ok(Json(CreateMemberResponse { member_id: id })),
+        Ok(id) => Ok(Json(CreateMemberResponse { member_id: id })),
+        Err(create_member::Error::BadRequest) => Err(ApiError::BadRequest),
+        Err(create_member::Error::Conflict) => Err(ApiError::MemberAlreadyExists),
+        Err(create_member::Error::Unknown) => Err(ApiError::InternalServerError),
     }
 }

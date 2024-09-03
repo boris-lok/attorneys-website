@@ -1,3 +1,7 @@
+use crate::domain::create_member::Data;
+use serde::Serialize;
+
+#[derive(Debug)]
 pub enum Language {
     TW,
     EN,
@@ -18,20 +22,6 @@ impl TryFrom<String> for MemberID {
     }
 }
 
-pub struct MemberName(pub(crate) String);
-
-impl TryFrom<String> for MemberName {
-    type Error = ();
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            Err(())
-        } else {
-            Ok(MemberName(value))
-        }
-    }
-}
-
 impl TryFrom<String> for Language {
     type Error = ();
 
@@ -44,16 +34,46 @@ impl TryFrom<String> for Language {
     }
 }
 
+#[derive(Debug, Serialize)]
+pub(crate) struct MemberData {
+    pub(crate) name: String,
+    pub(crate) description: String,
+}
+
+impl TryFrom<Data> for MemberData {
+    type Error = ();
+
+    fn try_from(value: Data) -> Result<Self, Self::Error> {
+        let name = value.name.trim().to_string();
+        let description = value.description.trim().to_string();
+        if name.is_empty() || description.is_empty() {
+            Err(())
+        } else {
+            Ok(MemberData { name, description })
+        }
+    }
+}
+
 pub struct Member {
     pub(crate) member_id: MemberID,
-    pub(crate) member_name: MemberName,
 }
 
 impl Member {
-    pub fn new(member_id: MemberID, member_name: MemberName) -> Self {
-        Member {
-            member_id,
-            member_name,
-        }
+    pub fn new(member_id: MemberID) -> Self {
+        Member { member_id }
+    }
+}
+#[derive(Debug, Clone)]
+pub struct ContentID(pub(crate) String);
+
+#[derive(Debug, Clone)]
+pub struct ContentData(pub(crate) String);
+
+impl TryFrom<MemberData> for ContentData {
+    type Error = ();
+
+    fn try_from(value: MemberData) -> Result<Self, Self::Error> {
+        let data = serde_json::to_string(&value).map_err(|_| ())?;
+        Ok(ContentData(data))
     }
 }

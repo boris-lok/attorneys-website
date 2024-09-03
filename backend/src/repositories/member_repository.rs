@@ -1,4 +1,4 @@
-use crate::domain::entities::{Language, Member, MemberID, MemberName};
+use crate::domain::entities::{Member, MemberID};
 use std::sync::Mutex;
 
 #[derive(Debug)]
@@ -7,13 +7,8 @@ pub enum InsertError {
     Unknown,
 }
 
-pub trait MemberRepository {
-    fn insert(
-        &self,
-        member_id: MemberID,
-        member_name: MemberName,
-        language: Language,
-    ) -> Result<MemberID, InsertError>;
+pub trait IMemberRepository {
+    fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError>;
 }
 
 pub struct InMemoryMemberRepository {
@@ -38,13 +33,8 @@ impl InMemoryMemberRepository {
     }
 }
 
-impl MemberRepository for InMemoryMemberRepository {
-    fn insert(
-        &self,
-        member_id: MemberID,
-        member_name: MemberName,
-        _: Language,
-    ) -> Result<MemberID, InsertError> {
+impl IMemberRepository for InMemoryMemberRepository {
+    fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError> {
         if self.error {
             return Err(InsertError::Unknown);
         }
@@ -59,7 +49,7 @@ impl MemberRepository for InMemoryMemberRepository {
         }
 
         let member_id_cloned = member_id.clone();
-        lock.push(Member::new(member_id_cloned, member_name));
+        lock.push(Member::new(member_id_cloned));
         Ok(member_id)
     }
 }

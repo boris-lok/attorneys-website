@@ -1,7 +1,8 @@
 use crate::domain::entities::{ContentData, ContentID, Language};
 use sqlx::{Postgres, Transaction};
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub enum InsertError {
     Conflict,
@@ -51,10 +52,7 @@ impl IContentRepository for InMemoryContentRepository {
             return Err(InsertError::Unknown);
         }
 
-        let mut lock = match self.content.lock() {
-            Ok(lock) => lock,
-            _ => return Err(InsertError::Unknown),
-        };
+        let mut lock = self.content.lock().await;
 
         let key = format!("{}_{:?}", content_id.clone().0, language);
         if lock.contains_key(&key) {
@@ -67,22 +65,25 @@ impl IContentRepository for InMemoryContentRepository {
     }
 }
 
-pub struct SqlxContentRepository {}
+#[derive(Debug)]
+pub struct SqlxContentRepository<'tx> {
+    tx: Arc<tokio::sync::Mutex<Transaction<'tx, Postgres>>>,
+}
 
-impl SqlxContentRepository {
-    pub fn new() -> Self {
-        Self {}
+impl<'tx> SqlxContentRepository<'tx> {
+    pub fn new(tx: Arc<Mutex<Transaction<'tx, Postgres>>>) -> Self {
+        Self { tx }
     }
 }
 
 #[async_trait::async_trait]
-impl IContentRepository for SqlxContentRepository {
+impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
     async fn insert(
         &self,
         content_id: ContentID,
         content: ContentData,
         language: Language,
     ) -> Result<ContentID, InsertError> {
-        todo!()
+        Ok(content_id)
     }
 }

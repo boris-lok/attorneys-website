@@ -72,12 +72,11 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
         let mut lock = self.tx.lock().await;
         let l1 = lock.acquire().await.unwrap();
 
-        let result = sqlx::query("DELETE FROM \"testcases\" WHERE id = $1")
-            .bind("1")
+        sqlx::query("INSERT INTO \"members\" (id) VALUES ($1);")
+            .bind(member_id.0.clone())
             .execute(l1)
             .await
-            .map_err(|_| InsertError::Unknown)?
-            .rows_affected();
+            .map_err(|_| InsertError::Unknown)?;
 
         Ok(member_id)
     }

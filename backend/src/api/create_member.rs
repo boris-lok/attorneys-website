@@ -45,18 +45,10 @@ pub async fn create_member(
         .map_err(|_| ApiError::InternalServerError)?;
     let uow_pointer = Arc::new(Mutex::new(uow));
 
-    let res = match execute(uow_pointer.clone(), request).await {
+    match execute(uow_pointer, request).await {
         Ok(id) => Ok(Json(CreateMemberResponse { member_id: id })),
         Err(create_member::Error::BadRequest) => Err(ApiError::BadRequest),
         Err(create_member::Error::Conflict) => Err(ApiError::MemberAlreadyExists),
         Err(create_member::Error::Unknown) => Err(ApiError::InternalServerError),
-    };
-
-    let u = Arc::try_unwrap(uow_pointer).map_err(|_| ApiError::InternalServerError)?;
-    let uow = u.into_inner();
-    uow.commit()
-        .await
-        .map_err(|_| ApiError::InternalServerError)?;
-
-    res
+    }
 }

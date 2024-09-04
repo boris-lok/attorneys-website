@@ -7,6 +7,7 @@ async fn main() {
     let port = 1234;
 
     let configuration = get_configuration().expect("Can't get configuration");
+    println!("{:?}", &configuration);
 
     let address = format!("{}:{}", host, port);
     let listener = TcpListener::bind(&address)

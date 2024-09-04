@@ -4,6 +4,7 @@ use crate::repositories::content_repository::{
 use crate::repositories::member_repository::{
     IMemberRepository, InMemoryMemberRepository, SqlxMemberRepository,
 };
+use anyhow::anyhow;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -16,8 +17,8 @@ pub trait IMemberUnitOfWork {
     fn member_repository(&mut self) -> &mut Self::MemberRepo;
     fn content_repository(&mut self) -> &mut Self::ContentRepo;
 
-    async fn commit(self) -> anyhow::Result<()>;
-    async fn rollback(self) -> anyhow::Result<()>;
+    async fn commit(mut self) -> anyhow::Result<()>;
+    async fn rollback(mut self) -> anyhow::Result<()>;
 }
 
 #[derive(Debug)]
@@ -86,6 +87,7 @@ impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
 pub struct SqlxMemberUnitOfWork<'tx> {
     tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
     member_repository: Option<SqlxMemberRepository<'tx>>,
+    content_repository: Option<SqlxContentRepository<'tx>>,
 }
 
 impl<'tx> SqlxMemberUnitOfWork<'tx> {
@@ -96,6 +98,7 @@ impl<'tx> SqlxMemberUnitOfWork<'tx> {
         Ok(Self {
             tx,
             member_repository: None,
+            content_repository: None,
         })
     }
 }
@@ -103,7 +106,7 @@ impl<'tx> SqlxMemberUnitOfWork<'tx> {
 #[async_trait::async_trait]
 impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
     type MemberRepo = SqlxMemberRepository<'tx>;
-    type ContentRepo = SqlxContentRepository;
+    type ContentRepo = SqlxContentRepository<'tx>;
 
     fn member_repository(&mut self) -> &mut Self::MemberRepo {
         if self.member_repository.is_none() {
@@ -114,19 +117,38 @@ impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
     }
 
     fn content_repository(&mut self) -> &mut Self::ContentRepo {
-        todo!()
+        if self.content_repository.is_none() {
+            let content_repo = SqlxContentRepository::new(self.tx.clone());
+            self.content_repository = Some(content_repo);
+        }
+        self.content_repository.as_mut().unwrap()
     }
 
-    async fn commit(self) -> anyhow::Result<()> {
-        let lock = Arc::try_unwrap(self.tx).unwrap();
-        lock.into_inner().commit().await?;
+    async fn commit(mut self) -> anyhow::Result<()> {
+        // clear all transactions, otherwise, `Arc::try_unwrap()` will fail
+        drop(self.member_repository);
+        drop(self.content_repository);
 
-        Ok(())
+        match Arc::try_unwrap(self.tx) {
+            Ok(lock) => {
+                lock.into_inner().commit().await?;
+                Ok(())
+            }
+            Err(_) => Err(anyhow!("can't commit transaction")),
+        }
     }
 
-    async fn rollback(self) -> anyhow::Result<()> {
-        let lock = Arc::try_unwrap(self.tx).unwrap();
-        lock.into_inner().rollback().await?;
-        Ok(())
+    async fn rollback(mut self) -> anyhow::Result<()> {
+        // clear all transactions, otherwise, `Arc::try_unwrap()` will fail
+        drop(self.member_repository);
+        drop(self.content_repository);
+
+        match Arc::try_unwrap(self.tx) {
+            Ok(lock) => {
+                lock.into_inner().rollback().await?;
+                Ok(())
+            }
+            Err(_) => Err(anyhow!("can't rollback transaction")),
+        }
     }
 }

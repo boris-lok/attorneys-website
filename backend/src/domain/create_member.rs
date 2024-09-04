@@ -1,7 +1,7 @@
 use crate::domain::entities::{ContentData, ContentID, Language, MemberData, MemberID};
 use crate::repositories::content_repository::IContentRepository;
 use crate::repositories::member_repository::IMemberRepository;
-use crate::uow::member_uow::{IMemberUnitOfWork, SqlxMemberUnitOfWork};
+use crate::uow::member_uow::IMemberUnitOfWork;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -22,17 +22,14 @@ pub(crate) enum Error {
     Unknown,
 }
 
-pub async fn execute<MemberRepo, ContentRepo>(
-    uow: Arc<
-        Mutex<
-            dyn IMemberUnitOfWork<ContentRepo = ContentRepo, MemberRepo = MemberRepo> + Send + Sync,
-        >,
-    >,
+pub async fn execute<IUnitOfWork, IMemberRepo, IContentRepo>(
+    uow: Arc<Mutex<IUnitOfWork>>,
     req: Request,
 ) -> Result<String, Error>
 where
-    MemberRepo: IMemberRepository + Send + Sync,
-    ContentRepo: IContentRepository + Send + Sync,
+    IMemberRepo: IMemberRepository + Send + Sync,
+    IContentRepo: IContentRepository + Send + Sync,
+    IUnitOfWork: IMemberUnitOfWork<MemberRepo = IMemberRepo, ContentRepo = IContentRepo>,
 {
     let mut lock = uow.lock().await;
 
@@ -57,6 +54,16 @@ where
         Err(crate::repositories::content_repository::InsertError::Conflict) => Err(Error::Conflict),
         Err(crate::repositories::content_repository::InsertError::Unknown) => Err(Error::Unknown),
     }?;
+
+    drop(lock);
+    if let Ok(uow) = Arc::try_unwrap(uow) {
+        uow.into_inner()
+            .commit()
+            .await
+            .map_err(|_| Error::Unknown)?;
+    } else {
+        println!("Failed to unwrap uow");
+    }
 
     Ok(content_id.to_string())
 }

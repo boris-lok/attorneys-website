@@ -66,7 +66,7 @@ impl TryFrom<String> for Environment {
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
-    let configuration_directory = base_path.join("configuration");
+    let configuration_directory = base_path.join("src/configuration");
 
     let environment: Environment = std::env::var("APP_ENVIRONMENT")
         .unwrap_or_else(|_| "local".to_owned())

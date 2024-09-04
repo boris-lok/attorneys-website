@@ -22,7 +22,7 @@ pub(crate) enum Error {
 
 pub fn execute<MemberRepo, ContentRepo>(
     uow: Arc<
-        dyn crate::uow::member_uow::IUnitOfWork<ContentRepo = ContentRepo, MemberRepo = MemberRepo>,
+        dyn crate::uow::member_uow::IMemberUnitOfWork<ContentRepo = ContentRepo, MemberRepo = MemberRepo>,
     >,
     req: Request,
 ) -> Result<String, Error>
@@ -53,12 +53,12 @@ where
 mod tests {
     use super::*;
     use crate::repositories::member_repository::IMemberRepository;
-    use crate::uow::member_uow::IUnitOfWork;
+    use crate::uow::member_uow::IMemberUnitOfWork;
     use ulid::Ulid;
 
     #[test]
     fn it_should_return_the_member_id_otherwise() {
-        let mut uow = crate::uow::member_uow::InMemoryUnitOfWork::new();
+        let mut uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
         uow.begin().unwrap();
         let member_id = Ulid::new().to_string();
         let req = Request {
@@ -80,7 +80,7 @@ mod tests {
 
     #[test]
     fn it_should_return_bad_request_error_when_request_is_invalid() {
-        let mut uow = crate::uow::member_uow::InMemoryUnitOfWork::new();
+        let mut uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
         uow.begin().unwrap();
         let member_id = Ulid::new().to_string();
 
@@ -105,7 +105,7 @@ mod tests {
     fn it_should_return_a_conflict_error_when_member_id_is_already_exists() {
         let member_id = MemberID::try_from(Ulid::new().to_string()).unwrap();
         let duplicated_member_id = member_id.0.clone();
-        let mut uow = crate::uow::member_uow::InMemoryUnitOfWork::new();
+        let mut uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
         uow.begin().unwrap();
         uow.member_repository()
             .insert(member_id)
@@ -130,7 +130,7 @@ mod tests {
 
     #[test]
     fn it_should_return_an_error_when_an_unexpected_error_happens() {
-        let uow = crate::uow::member_uow::InMemoryUnitOfWork::new();
+        let uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
         let mut uow = uow.with_error();
         uow.begin().unwrap();
         let member_id = Ulid::new().to_string();

@@ -2,7 +2,7 @@ use crate::repositories::content_repository::{IContentRepository, InMemoryConten
 use crate::repositories::member_repository::{IMemberRepository, InMemoryMemberRepository};
 use std::sync::Arc;
 
-pub trait IUnitOfWork {
+pub trait IMemberUnitOfWork {
     type MemberRepo: IMemberRepository;
     type ContentRepo: IContentRepository;
 
@@ -14,13 +14,13 @@ pub trait IUnitOfWork {
     fn rollback(&self) -> anyhow::Result<()>;
 }
 
-pub struct InMemoryUnitOfWork {
+pub struct InMemoryMemberUnitOfWork {
     error: bool,
     member_repository: Option<Arc<InMemoryMemberRepository>>,
     content_repository: Option<Arc<InMemoryContentRepository>>,
 }
 
-impl InMemoryUnitOfWork {
+impl InMemoryMemberUnitOfWork {
     pub fn new() -> Self {
         Self {
             error: false,
@@ -37,7 +37,7 @@ impl InMemoryUnitOfWork {
     }
 }
 
-impl IUnitOfWork for InMemoryUnitOfWork {
+impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
     type MemberRepo = InMemoryMemberRepository;
     type ContentRepo = InMemoryContentRepository;
 

@@ -2,8 +2,8 @@ use crate::domain::entities::{ContentData, ContentID, Language, MemberData, Memb
 use crate::repositories::content_repository::IContentRepository;
 use crate::repositories::member_repository::IMemberRepository;
 use crate::uow::member_uow::{IMemberUnitOfWork, SqlxMemberUnitOfWork};
-use sqlx::PgPool;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub(crate) struct Request {
     pub(crate) member_id: String,
@@ -22,30 +22,19 @@ pub(crate) enum Error {
     Unknown,
 }
 
-pub async fn execute(pool: &PgPool, req: Request) -> Result<String, Error> {
-    let uow = SqlxMemberUnitOfWork::new(pool)
-        .await
-        .map_err(|_| Error::Unknown)?;
-    let uow_pointer = Arc::new(Mutex::new(uow));
-
-    let res = inner_execute(uow_pointer.clone(), req).await;
-
-    let u = Arc::try_unwrap(uow_pointer).unwrap();
-    let a = u.into_inner().unwrap();
-    a.commit().await.map_err(|_| Error::Unknown)?;
-
-    res
-}
-
-async fn inner_execute<MemberRepo, ContentRepo>(
-    uow: Arc<Mutex<dyn IMemberUnitOfWork<ContentRepo = ContentRepo, MemberRepo = MemberRepo>>>,
+pub async fn execute<MemberRepo, ContentRepo>(
+    uow: Arc<
+        Mutex<
+            dyn IMemberUnitOfWork<ContentRepo = ContentRepo, MemberRepo = MemberRepo> + Send + Sync,
+        >,
+    >,
     req: Request,
 ) -> Result<String, Error>
 where
-    MemberRepo: IMemberRepository,
-    ContentRepo: IContentRepository,
+    MemberRepo: IMemberRepository + Send + Sync,
+    ContentRepo: IContentRepository + Send + Sync,
 {
-    let mut lock = uow.lock().map_err(|_| Error::Unknown)?;
+    let mut lock = uow.lock().await;
 
     let member_id = MemberID::try_from(req.member_id).map_err(|_| Error::BadRequest)?;
     let language = Language::try_from(req.language).map_err(|_| Error::BadRequest)?;
@@ -92,7 +81,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = inner_execute(Arc::new(Mutex::new(uow)), req).await;
+        let res = execute(Arc::new(Mutex::new(uow)), req).await;
 
         match res {
             Ok(id) => assert_eq!(id, member_id),
@@ -114,7 +103,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = inner_execute(Arc::new(Mutex::new(uow)), req).await;
+        let res = execute(Arc::new(Mutex::new(uow)), req).await;
 
         match res {
             Err(Error::BadRequest) => {}
@@ -141,7 +130,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = inner_execute(Arc::new(Mutex::new(uow)), req).await;
+        let res = execute(Arc::new(Mutex::new(uow)), req).await;
 
         match res {
             Err(Error::Conflict) => {}
@@ -163,7 +152,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = inner_execute(Arc::new(Mutex::new(uow)), req).await;
+        let res = execute(Arc::new(Mutex::new(uow)), req).await;
 
         match res {
             Err(Error::Unknown) => {}

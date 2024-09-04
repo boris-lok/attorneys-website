@@ -1,16 +1,21 @@
 use crate::api::api_error::ApiError;
 use crate::domain::create_member;
-use crate::domain::create_member::{execute, Request};
-use crate::repositories::member_repository::IMemberRepository;
-use axum::{Extension, Json};
+use crate::domain::create_member::{execute, Data, Request};
+use crate::startup::AppState;
+use crate::uow::member_uow::{IMemberUnitOfWork, SqlxMemberUnitOfWork};
+use axum::extract::State;
+use axum::Json;
 use axum_extra::extract::WithRejection;
+use axum_macros::debug_handler;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use tokio::sync::Mutex;
 use ulid::Ulid;
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct CreateMemberRequest {
     name: String,
+    description: String,
     language: String,
 }
 
@@ -19,23 +24,39 @@ pub(crate) struct CreateMemberResponse {
     member_id: String,
 }
 
+#[debug_handler]
 pub async fn create_member(
-    Extension(member_repo): Extension<Arc<dyn IMemberRepository + Sync + Send>>,
+    State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<CreateMemberRequest>, ApiError>,
 ) -> Result<Json<CreateMemberResponse>, ApiError> {
     let member_id = Ulid::new().to_string();
 
-    Ok(Json(CreateMemberResponse { member_id }))
+    let request = Request {
+        member_id,
+        data: Data {
+            name: req.name,
+            description: req.description,
+        },
+        language: req.language,
+    };
 
-    // let request = Request {
-    //     member_id,
-    //     language: req.language,
-    // };
-    //
-    // match execute(member_repo, request) {
-    //     Ok(id) => Ok(Json(CreateMemberResponse { member_id: id })),
-    //     Err(create_member::Error::BadRequest) => Err(ApiError::BadRequest),
-    //     Err(create_member::Error::Conflict) => Err(ApiError::MemberAlreadyExists),
-    //     Err(create_member::Error::Unknown) => Err(ApiError::InternalServerError),
-    // }
+    let uow = SqlxMemberUnitOfWork::new(&state.pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+    let uow_pointer = Arc::new(Mutex::new(uow));
+
+    let res = match execute(uow_pointer.clone(), request).await {
+        Ok(id) => Ok(Json(CreateMemberResponse { member_id: id })),
+        Err(create_member::Error::BadRequest) => Err(ApiError::BadRequest),
+        Err(create_member::Error::Conflict) => Err(ApiError::MemberAlreadyExists),
+        Err(create_member::Error::Unknown) => Err(ApiError::InternalServerError),
+    };
+
+    let u = Arc::try_unwrap(uow_pointer).map_err(|_| ApiError::InternalServerError)?;
+    let uow = u.into_inner();
+    uow.commit()
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+
+    res
 }

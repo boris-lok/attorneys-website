@@ -7,7 +7,7 @@ pub enum Language {
     EN,
 }
 
-#[derive(Eq, PartialEq, Clone)]
+#[derive(Eq, PartialEq, Clone, Debug)]
 pub struct MemberID(pub(crate) String);
 
 impl TryFrom<String> for MemberID {
@@ -54,6 +54,7 @@ impl TryFrom<Data> for MemberData {
     }
 }
 
+#[derive(Debug)]
 pub struct Member {
     pub(crate) member_id: MemberID,
 }

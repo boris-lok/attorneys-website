@@ -1,4 +1,5 @@
 use crate::domain::entities::{ContentData, ContentID, Language};
+use sqlx::{Postgres, Transaction};
 use std::collections::HashMap;
 use std::sync::Mutex;
 
@@ -6,8 +7,9 @@ pub enum InsertError {
     Conflict,
     Unknown,
 }
+#[async_trait::async_trait]
 pub trait IContentRepository {
-    fn insert(
+    async fn insert(
         &self,
         content_id: ContentID,
         content: ContentData,
@@ -15,6 +17,7 @@ pub trait IContentRepository {
     ) -> Result<ContentID, InsertError>;
 }
 
+#[derive(Debug)]
 pub struct InMemoryContentRepository {
     error: bool,
     content: Mutex<HashMap<String, ContentData>>,
@@ -36,8 +39,9 @@ impl InMemoryContentRepository {
     }
 }
 
+#[async_trait::async_trait]
 impl IContentRepository for InMemoryContentRepository {
-    fn insert(
+    async fn insert(
         &self,
         content_id: ContentID,
         content: ContentData,
@@ -60,5 +64,25 @@ impl IContentRepository for InMemoryContentRepository {
         lock.insert(key, content);
 
         Ok(content_id)
+    }
+}
+
+pub struct SqlxContentRepository {}
+
+impl SqlxContentRepository {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
+#[async_trait::async_trait]
+impl IContentRepository for SqlxContentRepository {
+    async fn insert(
+        &self,
+        content_id: ContentID,
+        content: ContentData,
+        language: Language,
+    ) -> Result<ContentID, InsertError> {
+        todo!()
     }
 }

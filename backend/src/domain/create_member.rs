@@ -1,7 +1,9 @@
 use crate::domain::entities::{ContentData, ContentID, Language, MemberData, MemberID};
 use crate::repositories::content_repository::IContentRepository;
 use crate::repositories::member_repository::IMemberRepository;
-use std::sync::Arc;
+use crate::uow::member_uow::{IMemberUnitOfWork, SqlxMemberUnitOfWork};
+use sqlx::PgPool;
+use std::sync::{Arc, Mutex};
 
 pub(crate) struct Request {
     pub(crate) member_id: String,
@@ -20,21 +22,36 @@ pub(crate) enum Error {
     Unknown,
 }
 
-pub fn execute<MemberRepo, ContentRepo>(
-    uow: Arc<
-        dyn crate::uow::member_uow::IMemberUnitOfWork<ContentRepo = ContentRepo, MemberRepo = MemberRepo>,
-    >,
+pub async fn execute(pool: &PgPool, req: Request) -> Result<String, Error> {
+    let uow = SqlxMemberUnitOfWork::new(pool)
+        .await
+        .map_err(|_| Error::Unknown)?;
+    let uow_pointer = Arc::new(Mutex::new(uow));
+
+    let res = inner_execute(uow_pointer.clone(), req).await;
+
+    let u = Arc::try_unwrap(uow_pointer).unwrap();
+    let a = u.into_inner().unwrap();
+    a.commit().await.map_err(|_| Error::Unknown)?;
+
+    res
+}
+
+async fn inner_execute<MemberRepo, ContentRepo>(
+    uow: Arc<Mutex<dyn IMemberUnitOfWork<ContentRepo = ContentRepo, MemberRepo = MemberRepo>>>,
     req: Request,
 ) -> Result<String, Error>
 where
     MemberRepo: IMemberRepository,
     ContentRepo: IContentRepository,
 {
+    let mut lock = uow.lock().map_err(|_| Error::Unknown)?;
+
     let member_id = MemberID::try_from(req.member_id).map_err(|_| Error::BadRequest)?;
     let language = Language::try_from(req.language).map_err(|_| Error::BadRequest)?;
     let data = MemberData::try_from(req.data).map_err(|_| Error::BadRequest)?;
 
-    let content_id = match uow.member_repository().insert(member_id) {
+    let content_id = match lock.member_repository().insert(member_id).await {
         Ok(id) => Ok(ContentID(id.0)),
         Err(crate::repositories::member_repository::InsertError::Conflict) => Err(Error::Conflict),
         Err(crate::repositories::member_repository::InsertError::Unknown) => Err(Error::Unknown),
@@ -42,11 +59,17 @@ where
 
     let data = ContentData::try_from(data).map_err(|_| Error::BadRequest)?;
 
-    match uow.content_repository().insert(content_id, data, language) {
+    let content_id = match lock
+        .content_repository()
+        .insert(content_id, data, language)
+        .await
+    {
         Ok(id) => Ok(id.0),
         Err(crate::repositories::content_repository::InsertError::Conflict) => Err(Error::Conflict),
         Err(crate::repositories::content_repository::InsertError::Unknown) => Err(Error::Unknown),
-    }
+    }?;
+
+    Ok(content_id.to_string())
 }
 
 #[cfg(test)]
@@ -56,10 +79,9 @@ mod tests {
     use crate::uow::member_uow::IMemberUnitOfWork;
     use ulid::Ulid;
 
-    #[test]
-    fn it_should_return_the_member_id_otherwise() {
-        let mut uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
-        uow.begin().unwrap();
+    #[tokio::test]
+    async fn it_should_return_the_member_id_otherwise() {
+        let uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
         let member_id = Ulid::new().to_string();
         let req = Request {
             member_id: member_id.clone(),
@@ -70,7 +92,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(Arc::new(uow), req);
+        let res = inner_execute(Arc::new(Mutex::new(uow)), req).await;
 
         match res {
             Ok(id) => assert_eq!(id, member_id),
@@ -78,10 +100,9 @@ mod tests {
         }
     }
 
-    #[test]
-    fn it_should_return_bad_request_error_when_request_is_invalid() {
-        let mut uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
-        uow.begin().unwrap();
+    #[tokio::test]
+    async fn it_should_return_bad_request_error_when_request_is_invalid() {
+        let uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
         let member_id = Ulid::new().to_string();
 
         let req = Request {
@@ -93,7 +114,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(Arc::new(uow), req);
+        let res = inner_execute(Arc::new(Mutex::new(uow)), req).await;
 
         match res {
             Err(Error::BadRequest) => {}
@@ -101,14 +122,14 @@ mod tests {
         }
     }
 
-    #[test]
-    fn it_should_return_a_conflict_error_when_member_id_is_already_exists() {
+    #[tokio::test]
+    async fn it_should_return_a_conflict_error_when_member_id_is_already_exists() {
         let member_id = MemberID::try_from(Ulid::new().to_string()).unwrap();
         let duplicated_member_id = member_id.0.clone();
         let mut uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
-        uow.begin().unwrap();
         uow.member_repository()
             .insert(member_id)
+            .await
             .expect("Failed to insert a fake data");
 
         let req = Request {
@@ -120,7 +141,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(Arc::new(uow), req);
+        let res = inner_execute(Arc::new(Mutex::new(uow)), req).await;
 
         match res {
             Err(Error::Conflict) => {}
@@ -128,11 +149,10 @@ mod tests {
         }
     }
 
-    #[test]
-    fn it_should_return_an_error_when_an_unexpected_error_happens() {
+    #[tokio::test]
+    async fn it_should_return_an_error_when_an_unexpected_error_happens() {
         let uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
-        let mut uow = uow.with_error();
-        uow.begin().unwrap();
+        let uow = uow.with_error();
         let member_id = Ulid::new().to_string();
         let req = Request {
             member_id,
@@ -143,7 +163,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(Arc::new(uow), req);
+        let res = inner_execute(Arc::new(Mutex::new(uow)), req).await;
 
         match res {
             Err(Error::Unknown) => {}

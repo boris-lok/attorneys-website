@@ -1,5 +1,7 @@
 use crate::domain::entities::{Member, MemberID};
-use std::sync::Mutex;
+use sqlx::{Acquire, Postgres, Transaction};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[derive(Debug)]
 pub enum InsertError {
@@ -7,10 +9,12 @@ pub enum InsertError {
     Unknown,
 }
 
+#[async_trait::async_trait]
 pub trait IMemberRepository {
-    fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError>;
+    async fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError>;
 }
 
+#[derive(Debug)]
 pub struct InMemoryMemberRepository {
     error: bool,
     members: Mutex<Vec<Member>>,
@@ -32,16 +36,14 @@ impl InMemoryMemberRepository {
     }
 }
 
+#[async_trait::async_trait]
 impl IMemberRepository for InMemoryMemberRepository {
-    fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError> {
+    async fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError> {
         if self.error {
             return Err(InsertError::Unknown);
         }
 
-        let mut lock = match self.members.lock() {
-            Ok(lock) => lock,
-            _ => return Err(InsertError::Unknown),
-        };
+        let mut lock = self.members.lock().await;
 
         if lock.iter().any(|m| m.member_id == member_id) {
             return Err(InsertError::Conflict);
@@ -49,6 +51,34 @@ impl IMemberRepository for InMemoryMemberRepository {
 
         let member_id_cloned = member_id.clone();
         lock.push(Member::new(member_id_cloned));
+        Ok(member_id)
+    }
+}
+
+#[derive(Debug)]
+pub struct SqlxMemberRepository<'tx> {
+    tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
+}
+
+impl<'tx> SqlxMemberRepository<'tx> {
+    pub fn new(tx: Arc<Mutex<Transaction<'tx, Postgres>>>) -> Self {
+        Self { tx }
+    }
+}
+
+#[async_trait::async_trait]
+impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
+    async fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError> {
+        let mut lock = self.tx.lock().await;
+        let l1 = lock.acquire().await.unwrap();
+
+        let result = sqlx::query("DELETE FROM \"testcases\" WHERE id = $1")
+            .bind("1")
+            .execute(l1)
+            .await
+            .map_err(|_| InsertError::Unknown)?
+            .rows_affected();
+
         Ok(member_id)
     }
 }

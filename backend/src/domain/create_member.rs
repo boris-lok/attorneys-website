@@ -23,7 +23,7 @@ pub(crate) enum Error {
 }
 
 pub async fn execute<IUnitOfWork, IMemberRepo, IContentRepo>(
-    uow: Arc<Mutex<IUnitOfWork>>,
+    uow: Mutex<IUnitOfWork>,
     req: Request,
 ) -> Result<String, Error>
 where
@@ -56,14 +56,10 @@ where
     }?;
 
     drop(lock);
-    if let Ok(uow) = Arc::try_unwrap(uow) {
-        uow.into_inner()
-            .commit()
-            .await
-            .map_err(|_| Error::Unknown)?;
-    } else {
-        println!("Failed to unwrap uow");
-    }
+    uow.into_inner()
+        .commit()
+        .await
+        .map_err(|_| Error::Unknown)?;
 
     Ok(content_id.to_string())
 }
@@ -88,7 +84,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(Arc::new(Mutex::new(uow)), req).await;
+        let res = execute(Mutex::new(uow), req).await;
 
         match res {
             Ok(id) => assert_eq!(id, member_id),
@@ -110,7 +106,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(Arc::new(Mutex::new(uow)), req).await;
+        let res = execute(Mutex::new(uow), req).await;
 
         match res {
             Err(Error::BadRequest) => {}
@@ -137,7 +133,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(Arc::new(Mutex::new(uow)), req).await;
+        let res = execute(Mutex::new(uow), req).await;
 
         match res {
             Err(Error::Conflict) => {}
@@ -159,7 +155,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(Arc::new(Mutex::new(uow)), req).await;
+        let res = execute(Mutex::new(uow), req).await;
 
         match res {
             Err(Error::Unknown) => {}

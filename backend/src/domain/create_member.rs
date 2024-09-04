@@ -1,4 +1,6 @@
 use crate::domain::entities::{ContentData, ContentID, Language, MemberData, MemberID};
+use crate::repositories::content_repository::IContentRepository;
+use crate::repositories::member_repository::IMemberRepository;
 use std::sync::Arc;
 
 pub(crate) struct Request {
@@ -18,12 +20,21 @@ pub(crate) enum Error {
     Unknown,
 }
 
-pub fn execute(uow: Arc<crate::uow::member_uow::MemberUOW>, req: Request) -> Result<String, Error> {
+pub fn execute<MemberRepo, ContentRepo>(
+    uow: Arc<
+        dyn crate::uow::member_uow::IUnitOfWork<ContentRepo = ContentRepo, MemberRepo = MemberRepo>,
+    >,
+    req: Request,
+) -> Result<String, Error>
+where
+    MemberRepo: IMemberRepository,
+    ContentRepo: IContentRepository,
+{
     let member_id = MemberID::try_from(req.member_id).map_err(|_| Error::BadRequest)?;
     let language = Language::try_from(req.language).map_err(|_| Error::BadRequest)?;
     let data = MemberData::try_from(req.data).map_err(|_| Error::BadRequest)?;
 
-    let content_id = match uow.member_repository.insert(member_id) {
+    let content_id = match uow.member_repository().insert(member_id) {
         Ok(id) => Ok(ContentID(id.0)),
         Err(crate::repositories::member_repository::InsertError::Conflict) => Err(Error::Conflict),
         Err(crate::repositories::member_repository::InsertError::Unknown) => Err(Error::Unknown),
@@ -31,7 +42,7 @@ pub fn execute(uow: Arc<crate::uow::member_uow::MemberUOW>, req: Request) -> Res
 
     let data = ContentData::try_from(data).map_err(|_| Error::BadRequest)?;
 
-    match uow.content_repository.insert(content_id, data, language) {
+    match uow.content_repository().insert(content_id, data, language) {
         Ok(id) => Ok(id.0),
         Err(crate::repositories::content_repository::InsertError::Conflict) => Err(Error::Conflict),
         Err(crate::repositories::content_repository::InsertError::Unknown) => Err(Error::Unknown),
@@ -41,18 +52,14 @@ pub fn execute(uow: Arc<crate::uow::member_uow::MemberUOW>, req: Request) -> Res
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::repositories::content_repository::InMemoryContentRepository;
-    use crate::repositories::member_repository::{IMemberRepository, InMemoryMemberRepository};
+    use crate::repositories::member_repository::IMemberRepository;
+    use crate::uow::member_uow::IUnitOfWork;
     use ulid::Ulid;
 
     #[test]
     fn it_should_return_the_member_id_otherwise() {
-        let member_repo = Arc::new(InMemoryMemberRepository::new());
-        let content_repo = Arc::new(InMemoryContentRepository::new());
-        let uow = Arc::new(crate::uow::member_uow::MemberUOW {
-            member_repository: member_repo.clone(),
-            content_repository: content_repo.clone(),
-        });
+        let mut uow = crate::uow::member_uow::InMemoryUnitOfWork::new();
+        uow.begin().unwrap();
         let member_id = Ulid::new().to_string();
         let req = Request {
             member_id: member_id.clone(),
@@ -63,7 +70,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(uow, req);
+        let res = execute(Arc::new(uow), req);
 
         match res {
             Ok(id) => assert_eq!(id, member_id),
@@ -73,12 +80,8 @@ mod tests {
 
     #[test]
     fn it_should_return_bad_request_error_when_request_is_invalid() {
-        let member_repo = Arc::new(InMemoryMemberRepository::new());
-        let content_repo = Arc::new(InMemoryContentRepository::new());
-        let uow = Arc::new(crate::uow::member_uow::MemberUOW {
-            member_repository: member_repo.clone(),
-            content_repository: content_repo.clone(),
-        });
+        let mut uow = crate::uow::member_uow::InMemoryUnitOfWork::new();
+        uow.begin().unwrap();
         let member_id = Ulid::new().to_string();
 
         let req = Request {
@@ -90,7 +93,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(uow, req);
+        let res = execute(Arc::new(uow), req);
 
         match res {
             Err(Error::BadRequest) => {}
@@ -101,16 +104,12 @@ mod tests {
     #[test]
     fn it_should_return_a_conflict_error_when_member_id_is_already_exists() {
         let member_id = MemberID::try_from(Ulid::new().to_string()).unwrap();
-        let member_repo = Arc::new(InMemoryMemberRepository::new());
         let duplicated_member_id = member_id.0.clone();
-        member_repo
+        let mut uow = crate::uow::member_uow::InMemoryUnitOfWork::new();
+        uow.begin().unwrap();
+        uow.member_repository()
             .insert(member_id)
             .expect("Failed to insert a fake data");
-        let content_repo = Arc::new(InMemoryContentRepository::new());
-        let uow = Arc::new(crate::uow::member_uow::MemberUOW {
-            member_repository: member_repo.clone(),
-            content_repository: content_repo.clone(),
-        });
 
         let req = Request {
             member_id: duplicated_member_id,
@@ -121,7 +120,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(uow, req);
+        let res = execute(Arc::new(uow), req);
 
         match res {
             Err(Error::Conflict) => {}
@@ -131,12 +130,9 @@ mod tests {
 
     #[test]
     fn it_should_return_an_error_when_an_unexpected_error_happens() {
-        let member_repo = Arc::new(InMemoryMemberRepository::new().with_error());
-        let content_repo = Arc::new(InMemoryContentRepository::new());
-        let uow = Arc::new(crate::uow::member_uow::MemberUOW {
-            member_repository: member_repo.clone(),
-            content_repository: content_repo.clone(),
-        });
+        let uow = crate::uow::member_uow::InMemoryUnitOfWork::new();
+        let mut uow = uow.with_error();
+        uow.begin().unwrap();
         let member_id = Ulid::new().to_string();
         let req = Request {
             member_id,
@@ -147,7 +143,7 @@ mod tests {
             language: "en".to_string(),
         };
 
-        let res = execute(uow, req);
+        let res = execute(Arc::new(uow), req);
 
         match res {
             Err(Error::Unknown) => {}

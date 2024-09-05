@@ -110,7 +110,7 @@ impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
 
     fn member_repository(&mut self) -> &mut Self::MemberRepo {
         if self.member_repository.is_none() {
-            let member_repo = SqlxMemberRepository::new(self.tx.clone());
+            let member_repo = SqlxMemberRepository::new(Arc::downgrade(&self.tx));
             self.member_repository = Some(member_repo);
         }
         self.member_repository.as_mut().unwrap()
@@ -118,17 +118,20 @@ impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
 
     fn content_repository(&mut self) -> &mut Self::ContentRepo {
         if self.content_repository.is_none() {
-            let content_repo = SqlxContentRepository::new(self.tx.clone());
+            // Use Arc::downgrade to obtain a weak reference to the transaction
+            // if we don't do this, when we call the commit/rollback method will fail.
+            // It can't `try_unwrap` because there are at least two strong references, preventing
+            // the use of `try_unwrap`.
+            //
+            // If we want to use strong references, then we need to drop the repository
+            // when we try to call commit/rollback methods.
+            let content_repo = SqlxContentRepository::new(Arc::downgrade(&self.tx));
             self.content_repository = Some(content_repo);
         }
         self.content_repository.as_mut().unwrap()
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {
-        // clear all transactions, otherwise, `Arc::try_unwrap()` will fail
-        drop(self.member_repository);
-        drop(self.content_repository);
-
         match Arc::try_unwrap(self.tx) {
             Ok(lock) => {
                 lock.into_inner().commit().await?;
@@ -139,10 +142,6 @@ impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
     }
 
     async fn rollback(mut self) -> anyhow::Result<()> {
-        // clear all transactions, otherwise, `Arc::try_unwrap()` will fail
-        drop(self.member_repository);
-        drop(self.content_repository);
-
         match Arc::try_unwrap(self.tx) {
             Ok(lock) => {
                 lock.into_inner().rollback().await?;

@@ -1,1 +1,1 @@
-pub mod member_uow;
+pub mod member;

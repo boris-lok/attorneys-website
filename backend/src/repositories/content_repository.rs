@@ -1,7 +1,7 @@
 use crate::domain::entities::{ContentData, ContentID, Language};
 use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, Weak};
 use tokio::sync::Mutex;
 
 pub enum InsertError {
@@ -67,11 +67,11 @@ impl IContentRepository for InMemoryContentRepository {
 
 #[derive(Debug)]
 pub struct SqlxContentRepository<'tx> {
-    tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
+    tx: Weak<Mutex<Transaction<'tx, Postgres>>>,
 }
 
 impl<'tx> SqlxContentRepository<'tx> {
-    pub fn new(tx: Arc<Mutex<Transaction<'tx, Postgres>>>) -> Self {
+    pub fn new(tx: Weak<Mutex<Transaction<'tx, Postgres>>>) -> Self {
         Self { tx }
     }
 }
@@ -84,7 +84,8 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         content: ContentData,
         language: Language,
     ) -> Result<ContentID, InsertError> {
-        let mut lock = self.tx.lock().await;
+        let conn_ptr = self.tx.upgrade().ok_or(InsertError::Unknown)?;
+        let mut lock = conn_ptr.lock().await;
         let conn = lock.acquire().await.unwrap();
 
         sqlx::query(

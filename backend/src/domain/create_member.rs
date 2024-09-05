@@ -1,7 +1,7 @@
 use crate::domain::entities::{ContentData, ContentID, Language, MemberData, MemberID};
 use crate::repositories::content_repository::IContentRepository;
 use crate::repositories::member_repository::IMemberRepository;
-use crate::uow::member_uow::IMemberUnitOfWork;
+use crate::uow::member::IMemberUnitOfWork;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -68,12 +68,12 @@ where
 mod tests {
     use super::*;
     use crate::repositories::member_repository::IMemberRepository;
-    use crate::uow::member_uow::IMemberUnitOfWork;
+    use crate::uow::member::IMemberUnitOfWork;
     use ulid::Ulid;
 
     #[tokio::test]
     async fn it_should_return_the_member_id_otherwise() {
-        let uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
+        let uow = crate::uow::member::InMemoryMemberUnitOfWork::new();
         let member_id = Ulid::new().to_string();
         let req = Request {
             member_id: member_id.clone(),
@@ -94,7 +94,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_should_return_bad_request_error_when_request_is_invalid() {
-        let uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
+        let uow = crate::uow::member::InMemoryMemberUnitOfWork::new();
         let member_id = Ulid::new().to_string();
 
         let req = Request {
@@ -118,7 +118,7 @@ mod tests {
     async fn it_should_return_a_conflict_error_when_member_id_is_already_exists() {
         let member_id = MemberID::try_from(Ulid::new().to_string()).unwrap();
         let duplicated_member_id = member_id.0.clone();
-        let mut uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
+        let mut uow = crate::uow::member::InMemoryMemberUnitOfWork::new();
         uow.member_repository()
             .insert(member_id)
             .await
@@ -143,7 +143,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_should_return_an_error_when_an_unexpected_error_happens() {
-        let uow = crate::uow::member_uow::InMemoryMemberUnitOfWork::new();
+        let uow = crate::uow::member::InMemoryMemberUnitOfWork::new();
         let uow = uow.with_error();
         let member_id = Ulid::new().to_string();
         let req = Request {

@@ -1,6 +1,6 @@
 use crate::domain::entities::{Member, MemberID};
 use sqlx::{Acquire, Postgres, Transaction};
-use std::sync::Arc;
+use std::sync::{Arc, Weak};
 use tokio::sync::Mutex;
 
 #[derive(Debug)]
@@ -57,11 +57,11 @@ impl IMemberRepository for InMemoryMemberRepository {
 
 #[derive(Debug)]
 pub struct SqlxMemberRepository<'tx> {
-    tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
+    tx: Weak<Mutex<Transaction<'tx, Postgres>>>,
 }
 
 impl<'tx> SqlxMemberRepository<'tx> {
-    pub fn new(tx: Arc<Mutex<Transaction<'tx, Postgres>>>) -> Self {
+    pub fn new(tx: Weak<Mutex<Transaction<'tx, Postgres>>>) -> Self {
         Self { tx }
     }
 }
@@ -69,7 +69,8 @@ impl<'tx> SqlxMemberRepository<'tx> {
 #[async_trait::async_trait]
 impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
     async fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError> {
-        let mut lock = self.tx.lock().await;
+        let conn_ptr = self.tx.upgrade().ok_or(InsertError::Unknown)?;
+        let mut lock = conn_ptr.lock().await;
         let conn = lock.acquire().await.unwrap();
 
         sqlx::query("INSERT INTO \"members\" (id, created_at) VALUES ($1, now());")

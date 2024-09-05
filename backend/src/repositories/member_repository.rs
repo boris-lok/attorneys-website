@@ -70,11 +70,11 @@ impl<'tx> SqlxMemberRepository<'tx> {
 impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
     async fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError> {
         let mut lock = self.tx.lock().await;
-        let l1 = lock.acquire().await.unwrap();
+        let conn = lock.acquire().await.unwrap();
 
-        sqlx::query("INSERT INTO \"members\" (id) VALUES ($1);")
+        sqlx::query("INSERT INTO \"members\" (id, created_at) VALUES ($1, now());")
             .bind(member_id.0.clone())
-            .execute(l1)
+            .execute(conn)
             .await
             .map_err(|_| InsertError::Unknown)?;
 

@@ -34,6 +34,14 @@ impl TryFrom<String> for Language {
     }
 }
 
+impl Language {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Language::TW => "zh",
+            Language::EN => "en",
+        }
+    }
+}
 #[derive(Debug, Serialize)]
 pub(crate) struct MemberData {
     pub(crate) name: String,
@@ -68,13 +76,13 @@ impl Member {
 pub struct ContentID(pub(crate) String);
 
 #[derive(Debug, Clone)]
-pub struct ContentData(pub(crate) String);
+pub struct ContentData(pub(crate) serde_json::Value);
 
 impl TryFrom<MemberData> for ContentData {
-    type Error = ();
+    type Error = anyhow::Error;
 
-    fn try_from(value: MemberData) -> Result<Self, Self::Error> {
-        let data = serde_json::to_string(&value).map_err(|_| ())?;
+    fn try_from(value: MemberData) -> anyhow::Result<Self> {
+        let data = serde_json::value::to_value(&value)?;
         Ok(ContentData(data))
     }
 }

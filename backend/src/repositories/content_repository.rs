@@ -1,5 +1,5 @@
 use crate::domain::entities::{ContentData, ContentID, Language};
-use sqlx::{Postgres, Transaction};
+use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -67,7 +67,7 @@ impl IContentRepository for InMemoryContentRepository {
 
 #[derive(Debug)]
 pub struct SqlxContentRepository<'tx> {
-    tx: Arc<tokio::sync::Mutex<Transaction<'tx, Postgres>>>,
+    tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
 }
 
 impl<'tx> SqlxContentRepository<'tx> {
@@ -84,6 +84,23 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         content: ContentData,
         language: Language,
     ) -> Result<ContentID, InsertError> {
+        let mut lock = self.tx.lock().await;
+        let conn = lock.acquire().await.unwrap();
+
+        sqlx::query(
+            "INSERT INTO \"content\" (id, data, language, created_at) VALUES ($1, $2, $3, now());",
+        )
+        .bind(content_id.0.clone())
+        .bind(content.0)
+        .bind(language.as_str())
+        .execute(conn)
+        .await
+        .map_err(|e| {
+            println!("Failed to insert content: {:?}", e);
+
+            InsertError::Unknown
+        })?;
+
         Ok(content_id)
     }
 }

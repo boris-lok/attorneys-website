@@ -8,7 +8,6 @@ use axum::Json;
 use axum_extra::extract::WithRejection;
 use axum_macros::debug_handler;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 use tokio::sync::Mutex;
 use ulid::Ulid;
 

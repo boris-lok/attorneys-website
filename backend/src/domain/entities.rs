@@ -14,10 +14,9 @@ impl TryFrom<String> for MemberID {
     type Error = ();
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            Err(())
-        } else {
-            Ok(MemberID(value))
+        match value.is_empty() {
+            true => Err(()),
+            false => Ok(MemberID(value)),
         }
     }
 }
@@ -86,3 +85,12 @@ impl TryFrom<MemberData> for ContentData {
         Ok(ContentData(data))
     }
 }
+
+#[derive(Debug, Serialize)]
+pub struct AvatarData {
+    pub(crate) large_image: String,
+    pub(crate) small_image: String,
+}
+
+#[derive(Debug)]
+pub struct AvatarJson(pub(crate) serde_json::Value);

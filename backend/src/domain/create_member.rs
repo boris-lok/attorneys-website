@@ -21,14 +21,9 @@ pub(crate) enum Error {
     Unknown,
 }
 
-pub async fn execute<IUnitOfWork, IMemberRepo, IContentRepo>(
-    uow: Mutex<IUnitOfWork>,
-    req: Request,
-) -> Result<String, Error>
+pub async fn execute<IUnitOfWork>(uow: Mutex<IUnitOfWork>, req: Request) -> Result<String, Error>
 where
-    IMemberRepo: IMemberRepository + Send + Sync,
-    IContentRepo: IContentRepository + Send + Sync,
-    IUnitOfWork: IMemberUnitOfWork<MemberRepo = IMemberRepo, ContentRepo = IContentRepo>,
+    IUnitOfWork: IMemberUnitOfWork,
 {
     let mut lock = uow.lock().await;
 

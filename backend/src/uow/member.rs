@@ -1,3 +1,6 @@
+use crate::repositories::avatar_repository::{
+    IAvatarRepository, InMemoryAvatarRepository, SqlxAvatarRepository,
+};
 use crate::repositories::content_repository::{
     IContentRepository, InMemoryContentRepository, SqlxContentRepository,
 };
@@ -11,11 +14,9 @@ use tokio::sync::Mutex;
 
 #[async_trait::async_trait]
 pub trait IMemberUnitOfWork {
-    type MemberRepo: IMemberRepository;
-    type ContentRepo: IContentRepository;
-
-    fn member_repository(&mut self) -> &mut Self::MemberRepo;
-    fn content_repository(&mut self) -> &mut Self::ContentRepo;
+    fn member_repository(&mut self) -> &mut impl IMemberRepository;
+    fn content_repository(&mut self) -> &mut impl IContentRepository;
+    fn avatar_repository(&mut self) -> &mut impl IAvatarRepository;
 
     async fn commit(mut self) -> anyhow::Result<()>;
     #[allow(dead_code)]
@@ -27,6 +28,7 @@ pub struct InMemoryMemberUnitOfWork {
     error: bool,
     member_repository: Option<InMemoryMemberRepository>,
     content_repository: Option<InMemoryContentRepository>,
+    avatar_repository: Option<InMemoryAvatarRepository>,
 }
 
 #[cfg(test)]
@@ -36,6 +38,7 @@ impl InMemoryMemberUnitOfWork {
             error: false,
             member_repository: None,
             content_repository: None,
+            avatar_repository: None,
         }
     }
 
@@ -49,10 +52,7 @@ impl InMemoryMemberUnitOfWork {
 
 #[async_trait::async_trait]
 impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
-    type MemberRepo = InMemoryMemberRepository;
-    type ContentRepo = InMemoryContentRepository;
-
-    fn member_repository(&mut self) -> &mut Self::MemberRepo {
+    fn member_repository(&mut self) -> &mut impl IMemberRepository {
         if self.member_repository.is_none() {
             let member_repo = if self.error {
                 InMemoryMemberRepository::new().with_error()
@@ -64,7 +64,7 @@ impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
         self.member_repository.as_mut().unwrap()
     }
 
-    fn content_repository(&mut self) -> &mut Self::ContentRepo {
+    fn content_repository(&mut self) -> &mut impl IContentRepository {
         if self.content_repository.is_none() {
             let content_repo = if self.error {
                 InMemoryContentRepository::new().with_error()
@@ -74,6 +74,18 @@ impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
             self.content_repository = Some(content_repo);
         }
         self.content_repository.as_mut().unwrap()
+    }
+
+    fn avatar_repository(&mut self) -> &mut impl IAvatarRepository {
+        if self.avatar_repository.is_none() {
+            let avatar_repo = if self.error {
+                InMemoryAvatarRepository::new().with_error()
+            } else {
+                InMemoryAvatarRepository::new()
+            };
+            self.avatar_repository = Some(avatar_repo);
+        }
+        self.avatar_repository.as_mut().unwrap()
     }
 
     async fn commit(self) -> anyhow::Result<()> {
@@ -90,6 +102,7 @@ pub struct SqlxMemberUnitOfWork<'tx> {
     tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
     member_repository: Option<SqlxMemberRepository<'tx>>,
     content_repository: Option<SqlxContentRepository<'tx>>,
+    avatar_repository: Option<SqlxAvatarRepository<'tx>>,
 }
 
 impl<'tx> SqlxMemberUnitOfWork<'tx> {
@@ -101,16 +114,14 @@ impl<'tx> SqlxMemberUnitOfWork<'tx> {
             tx,
             member_repository: None,
             content_repository: None,
+            avatar_repository: None,
         })
     }
 }
 
 #[async_trait::async_trait]
 impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
-    type MemberRepo = SqlxMemberRepository<'tx>;
-    type ContentRepo = SqlxContentRepository<'tx>;
-
-    fn member_repository(&mut self) -> &mut Self::MemberRepo {
+    fn member_repository(&mut self) -> &mut impl IMemberRepository {
         if self.member_repository.is_none() {
             let member_repo = SqlxMemberRepository::new(Arc::downgrade(&self.tx));
             self.member_repository = Some(member_repo);
@@ -118,7 +129,7 @@ impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
         self.member_repository.as_mut().unwrap()
     }
 
-    fn content_repository(&mut self) -> &mut Self::ContentRepo {
+    fn content_repository(&mut self) -> &mut impl IContentRepository {
         if self.content_repository.is_none() {
             // Use Arc::downgrade to obtain a weak reference to the transaction
             // if we don't do this, when we call the commit/rollback method will fail.
@@ -131,6 +142,14 @@ impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
             self.content_repository = Some(content_repo);
         }
         self.content_repository.as_mut().unwrap()
+    }
+
+    fn avatar_repository(&mut self) -> &mut impl IAvatarRepository {
+        if self.avatar_repository.is_none() {
+            let avatar_repo = SqlxAvatarRepository::new(Arc::downgrade(&self.tx));
+            self.avatar_repository = Some(avatar_repo);
+        }
+        self.avatar_repository.as_mut().unwrap()
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {

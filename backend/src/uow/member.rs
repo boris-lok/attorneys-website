@@ -18,6 +18,7 @@ pub trait IMemberUnitOfWork {
     fn content_repository(&mut self) -> &mut Self::ContentRepo;
 
     async fn commit(mut self) -> anyhow::Result<()>;
+    #[allow(dead_code)]
     async fn rollback(mut self) -> anyhow::Result<()>;
 }
 
@@ -28,6 +29,7 @@ pub struct InMemoryMemberUnitOfWork {
     content_repository: Option<InMemoryContentRepository>,
 }
 
+#[cfg(test)]
 impl InMemoryMemberUnitOfWork {
     pub fn new() -> Self {
         Self {

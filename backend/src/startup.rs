@@ -1,11 +1,9 @@
 use crate::api::{create_member, health_check, upload_member_image};
 use crate::configuration::{DatabaseSettings, Settings};
-use axum::handler::Handler;
 use axum::routing::{get, post};
 use axum::Router;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
-use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 

@@ -2,7 +2,7 @@ use crate::api::api_error::ApiError;
 use crate::domain::create_member;
 use crate::domain::create_member::{execute, Data, Request};
 use crate::startup::AppState;
-use crate::uow::member::{IMemberUnitOfWork, SqlxMemberUnitOfWork};
+use crate::uow::member::SqlxMemberUnitOfWork;
 use axum::extract::State;
 use axum::Json;
 use axum_extra::extract::WithRejection;

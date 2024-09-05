@@ -2,7 +2,6 @@ use crate::domain::entities::{ContentData, ContentID, Language, MemberData, Memb
 use crate::repositories::content_repository::IContentRepository;
 use crate::repositories::member_repository::IMemberRepository;
 use crate::uow::member::IMemberUnitOfWork;
-use std::sync::Arc;
 use tokio::sync::Mutex;
 
 pub(crate) struct Request {

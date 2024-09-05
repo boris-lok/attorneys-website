@@ -1,7 +1,7 @@
 use crate::domain::entities::{ContentData, ContentID, Language};
 use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;
-use std::sync::{Arc, Weak};
+use std::sync::Weak;
 use tokio::sync::Mutex;
 
 pub enum InsertError {

@@ -1,6 +1,6 @@
 use crate::domain::entities::{Member, MemberID};
 use sqlx::{Acquire, Postgres, Transaction};
-use std::sync::{Arc, Weak};
+use std::sync::Weak;
 use tokio::sync::Mutex;
 
 #[derive(Debug)]

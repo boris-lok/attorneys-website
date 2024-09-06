@@ -1,4 +1,5 @@
 use crate::domain::entities::{Member, MemberID};
+use anyhow::anyhow;
 use sqlx::{Acquire, Postgres, Transaction};
 use std::sync::Weak;
 use tokio::sync::Mutex;
@@ -12,6 +13,7 @@ pub enum InsertError {
 #[async_trait::async_trait]
 pub trait IMemberRepository {
     async fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError>;
+    async fn contains(&self, member_id: &MemberID) -> anyhow::Result<bool>;
 }
 
 #[derive(Debug)]
@@ -53,6 +55,15 @@ impl IMemberRepository for InMemoryMemberRepository {
         lock.push(Member::new(member_id_cloned));
         Ok(member_id)
     }
+
+    async fn contains(&self, member_id: &MemberID) -> anyhow::Result<bool> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let mut lock = self.members.lock().await;
+        Ok(lock.iter().any(|m| m.member_id == *member_id))
+    }
 }
 
 #[derive(Debug)]
@@ -80,5 +91,9 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
             .map_err(|_| InsertError::Unknown)?;
 
         Ok(member_id)
+    }
+
+    async fn contains(&self, member_id: &MemberID) -> anyhow::Result<bool> {
+        todo!()
     }
 }

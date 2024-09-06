@@ -34,6 +34,21 @@ frontend/dist
 frontend/dist-ssr
 frontend/*.local
 
+ui/logs
+ui/*.log
+ui/npm-debug.log*
+ui/yarn-debug.log*
+ui/yarn-error.log*
+ui/pnpm-debug.log*
+ui/lerna-debug.log*
+ui/.npmrc
+
+ui/node_modules
+ui/dist
+ui/dist-ssr
+ui/*.local
+
+
 # Editor directories and files
 **/.DS_Store
 **/*.suo

@@ -1,26 +1,61 @@
 use crate::api::api_error::ApiError;
-use axum::extract::Multipart;
-use tokio::fs::File;
-use tokio::io::AsyncWriteExt;
+use crate::domain::upload_avatar::{execute, Error, Request};
+use crate::startup::AppState;
+use crate::uow::member::SqlxMemberUnitOfWork;
+use crate::utils::image::ImageUtil;
+use axum::extract::{Multipart, Path, State};
+use axum::Extension;
+use axum_macros::debug_handler;
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
-pub async fn upload_member_image(mut multipart: Multipart) -> Result<(), ApiError> {
-    while let Some(field) = multipart.next_field().await.unwrap() {
-        let name = field.name().unwrap().to_string();
-        let file_name = field.file_name().unwrap().to_string();
+pub async fn upload_member_image(
+    State(state): State<AppState>,
+    Extension(image_util): Extension<Arc<ImageUtil>>,
+    Path(params): Path<HashMap<String, String>>,
+    mut multipart: Multipart,
+) -> Result<(), ApiError> {
+    let uow = SqlxMemberUnitOfWork::new(&state.pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+    let uow = Mutex::new(uow);
+    let member_id = params.get("id").ok_or(ApiError::BadRequest)?;
+
+    while let Some(field) = multipart
+        .next_field()
+        .await
+        .map_err(|e| ApiError::BadRequest)?
+    {
         let content_type = field.content_type().unwrap().to_string();
 
-        println!("Field Name: {name}");
-        println!("File Name: {file_name}");
-        println!("Content Type: {content_type}");
+        if content_type.starts_with("image/") {
+            let data = field.bytes().await.map_err(|e| ApiError::BadRequest)?;
+            let data = data.to_vec();
+            let req = Request {
+                member_id: member_id.to_string(),
+                data,
+            };
 
-        let data = field.bytes().await.unwrap();
-
-        let file_path = format!("./uploads/{file_name}");
-
-        let mut file = File::create(&file_path).await.unwrap();
-        file.write(&data).await.unwrap();
-
-        println!("Saved file to: {file_path}");
+            match execute(uow, image_util, req).await {
+                Ok(_) => {}
+                Err(Error::MemberNotFound) => return Err(ApiError::BadRequest),
+                Err(Error::BadRequest) => return Err(ApiError::BadRequest),
+                Err(Error::ImageProcess) => {
+                    println!("image process");
+                    return Err(ApiError::InternalServerError);
+                }
+                Err(Error::CreateImage) => {
+                    println!("create image");
+                    return Err(ApiError::InternalServerError);
+                }
+                Err(Error::Unknown) => {
+                    println!("unknown error");
+                    return Err(ApiError::InternalServerError);
+                }
+            }
+            break;
+        }
     }
 
     Ok(())

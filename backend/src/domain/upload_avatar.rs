@@ -20,7 +20,7 @@ pub(crate) enum Error {
 }
 
 async fn resize_image_and_save_it(
-    util: Arc<dyn IImage>,
+    util: Arc<dyn IImage + Sync + Send>,
     data: &[u8],
     size: Size,
     file_path: &str,
@@ -33,7 +33,7 @@ async fn resize_image_and_save_it(
 }
 pub async fn execute<IUnitOfWork>(
     uow: Mutex<IUnitOfWork>,
-    image_util: Arc<dyn IImage>,
+    image_util: Arc<dyn IImage + Sync + Send>,
     req: Request,
 ) -> Result<String, Error>
 where
@@ -49,7 +49,7 @@ where
     }
 
     // TODO: set up the output folder in config
-    let out = "./upload";
+    let out = "./uploads";
 
     let large_image_path = format!("{}/{}_128.png", out, member_id.0.as_str());
     resize_image_and_save_it(
@@ -88,6 +88,12 @@ where
         Ok(id) => Ok(id),
         _ => Err(Error::Unknown),
     }?;
+
+    drop(lock);
+    uow.into_inner()
+        .commit()
+        .await
+        .map_err(|_| Error::Unknown)?;
 
     Ok(avatar_id.0)
 }

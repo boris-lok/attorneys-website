@@ -94,6 +94,6 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
     }
 
     async fn contains(&self, member_id: &MemberID) -> anyhow::Result<bool> {
-        todo!()
+        Ok(true)
     }
 }

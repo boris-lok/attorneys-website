@@ -42,9 +42,9 @@ pub async fn create_member(
     let uow = SqlxMemberUnitOfWork::new(&state.pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?;
-    let uow_pointer = Mutex::new(uow);
+    let uow = Mutex::new(uow);
 
-    match execute(uow_pointer, request).await {
+    match execute(uow, request).await {
         Ok(id) => Ok(Json(CreateMemberResponse { member_id: id })),
         Err(create_member::Error::BadRequest) => Err(ApiError::BadRequest),
         Err(create_member::Error::Conflict) => Err(ApiError::MemberAlreadyExists),

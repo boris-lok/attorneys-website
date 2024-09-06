@@ -5,7 +5,6 @@ use crate::uow::member::SqlxMemberUnitOfWork;
 use crate::utils::image::ImageUtil;
 use axum::extract::{Multipart, Path, State};
 use axum::Extension;
-use axum_macros::debug_handler;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -25,12 +24,12 @@ pub async fn upload_member_image(
     while let Some(field) = multipart
         .next_field()
         .await
-        .map_err(|e| ApiError::BadRequest)?
+        .map_err(|_| ApiError::BadRequest)?
     {
         let content_type = field.content_type().unwrap().to_string();
 
         if content_type.starts_with("image/") {
-            let data = field.bytes().await.map_err(|e| ApiError::BadRequest)?;
+            let data = field.bytes().await.map_err(|_| ApiError::BadRequest)?;
             let data = data.to_vec();
             let req = Request {
                 member_id: member_id.to_string(),

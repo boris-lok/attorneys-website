@@ -61,7 +61,7 @@ impl IMemberRepository for InMemoryMemberRepository {
             return Err(anyhow!("Internal Server Error"));
         }
 
-        let mut lock = self.members.lock().await;
+        let lock = self.members.lock().await;
         Ok(lock.iter().any(|m| m.member_id == *member_id))
     }
 }
@@ -93,7 +93,7 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
         Ok(member_id)
     }
 
-    async fn contains(&self, member_id: &MemberID) -> anyhow::Result<bool> {
+    async fn contains(&self, _: &MemberID) -> anyhow::Result<bool> {
         Ok(true)
     }
 }

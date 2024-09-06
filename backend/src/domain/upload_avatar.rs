@@ -43,7 +43,7 @@ where
     let member_id = MemberID::try_from(req.member_id).map_err(|_| Error::BadRequest)?;
 
     match lock.member_repository().contains(&member_id).await {
-        Ok(exist) if exist == false => return Err(Error::MemberNotFound),
+        Ok(exist) if !exist => return Err(Error::MemberNotFound),
         Err(_) => return Err(Error::Unknown),
         Ok(_) => {}
     }
@@ -55,10 +55,7 @@ where
     resize_image_and_save_it(
         image_util.clone(),
         &req.data,
-        Size {
-            width: 128,
-            height: 128,
-        },
+        Size::new(128, 128),
         &large_image_path,
     )
     .await?;
@@ -66,10 +63,7 @@ where
     resize_image_and_save_it(
         image_util.clone(),
         &req.data,
-        Size {
-            width: 48,
-            height: 48,
-        },
+        Size::new(48, 48),
         &small_image_path,
     )
     .await?;

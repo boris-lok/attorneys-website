@@ -20,7 +20,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"iterare": "^1.2.1",
 		"sass": "^1.78.0",
+		"svelte-i18n": "^4.0.0",
 		"svelte-markdown": "^0.4.1"
 	}
 }

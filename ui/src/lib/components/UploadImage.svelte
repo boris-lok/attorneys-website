@@ -6,6 +6,7 @@
     let isDragging = false;
     let image: HTMLElement;
     const dispatch = createEventDispatcher();
+    let file: File | undefined;
 
     // Handle file drop
     function handleDrop(e: DragEvent) {
@@ -46,7 +47,7 @@
 
     function handleInputFiles(files: File[] | FileList) {
         if (files.length > 0) {
-            const file = iterate(files)
+            file = iterate(files)
                 .find(e => e.type.startsWith("image/"));
             if (file) {
                 generatePreview(file);
@@ -56,49 +57,92 @@
             }
         }
     }
+
+    function onDeleteClicked() {
+        file = undefined;
+    }
 </script>
 
-<div class="dropzone-wrapper" on:drop={handleDrop} on:dragover={handleDragOver} on:dragleave={handleDragLeave}
-     class:is-dragging={isDragging}>
-    <div class="dropzone-desc">
-        <p>{$t('upload_image_hint')}</p>
-    </div>
-    <input type="file" name="image" class="dropzone" on:change={onInputChanged}/>
+<div class="image-wrapper">
+    {#if !file}
+        <div class="dropzone-wrapper" on:drop={handleDrop} on:dragover={handleDragOver} on:dragleave={handleDragLeave}
+             class:is-dragging={isDragging}>
+            <div class="dropzone-desc">
+                <p>{$t('upload_image_hint')}</p>
+            </div>
+            <input type="file" name="image" class="dropzone" on:change={onInputChanged}/>
+
+        </div>
+    {/if}
+    {#if file}
+        <div class="preview-zone-wrapper">
+            <img src="" bind:this={image} alt="Preview" width="128" height="128">
+            <i class="material-icon" on:click={onDeleteClicked}>delete</i>
+        </div>
+    {/if}
 </div>
 
-<div>
-    <img src="" bind:this={image} alt="Preview" width="128" height="auto">
-</div>
 
 <style lang="scss">
-  .dropzone-wrapper {
-    border: 2px dashed $grey;
-    color: $black;
-    position: relative;
+  .image-wrapper {
+    width: 100%;
     height: 144px;
+    overflow: clip;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-    &:hover, &.is-dragging {
-      border-color: $light-orange;
-    }
-
-    .dropzone-desc {
-      position: absolute;
-      display: flex;
+    .dropzone-wrapper {
+      border: 2px dashed $grey;
+      color: $black;
+      position: relative;
       width: 100%;
-      height: 100%;
-      justify-content: center;
-      align-items: center;
-      font-size: 18px;
-    }
-
-    .dropzone {
-      position: absolute;
-      outline: none;
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-      opacity: 0;
       box-sizing: border-box;
+      height: 144px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover, &.is-dragging {
+        border-color: $light-orange;
+      }
+
+      .dropzone-desc {
+        position: absolute;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+      }
+
+      .dropzone {
+        position: absolute;
+        outline: none;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        opacity: 0;
+        box-sizing: border-box;
+      }
+    }
+
+    .preview-zone-wrapper {
+      height: 128px;
+      position: relative;
+
+      i {
+        position: absolute;
+        top: calc(50% - 24px + 3px);
+        right: -64px;
+        padding: 6px;
+        border-radius: 50%;
+        cursor: pointer;
+        color: $deep-red;
+        box-shadow: 0 0 4px 1px $grey;
+      }
     }
   }
 </style>

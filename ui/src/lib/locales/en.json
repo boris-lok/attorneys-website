@@ -1,7 +1,9 @@
 {
   "create.members.name": "Name",
   "create.members.create_btn": "Create",
+  "create.members.preview_btn": "Preview",
   "create.members.cancel_btn": "Cancel",
   "create.members.description": "Description",
-  "upload_image_hint": "Choose an image file ot drag it here"
+  "upload_image_hint": "Choose an image file ot drag it here",
+  "member.attorney.suffix": "Attorney"
 }

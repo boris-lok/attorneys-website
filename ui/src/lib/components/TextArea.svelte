@@ -4,7 +4,7 @@
 
 <div class="textarea-wrapper">
     <label>{label}</label>
-    <textarea rows="20"></textarea>
+    <textarea rows="20" on:input></textarea>
 </div>
 
 <style lang="scss">

@@ -5,5 +5,7 @@
   "create.members.cancel_btn": "返回",
   "create.members.description": "簡介",
   "upload_image_hint": "選擇頭像",
-  "member.attorney.suffix": "律師"
+  "member.attorney.suffix": "律師",
+  "brand": "義修法律事務所",
+  "members": "專業團隊"
 }

@@ -51,32 +51,30 @@
     }
 </script>
 
-<main>
-    <!--{#if !isPreview}-->
-    <section>
-        <div class="wrapper">
-            <div class="form-wrapper">
-                <UploadImage on:change={onImageChanged}/>
-                <div class="base-information-wrapper">
-                    <Input label={$t('create.members.name')} name="name" on:input={onNameChanged}/>
-                    <TextArea label={$t('create.members.description')} on:input={onDescriptionChanged}/>
-                    <div class="btn-container">
-                        <LoadingButton text={$t('create.members.create_btn')} classname="primary-blue"/>
-                        <LoadingButton text={$t('create.members.preview_btn')} classname="primary-orange"
-                                       on:click={onPreviewClicked}/>
-                        <LoadingButton text={$t('create.members.cancel_btn')} classname="primary-red"/>
-                    </div>
+<!--{#if !isPreview}-->
+<section>
+    <div class="wrapper">
+        <div class="form-wrapper">
+            <UploadImage on:change={onImageChanged}/>
+            <div class="base-information-wrapper">
+                <Input label={$t('create.members.name')} name="name" on:input={onNameChanged}/>
+                <TextArea label={$t('create.members.description')} on:input={onDescriptionChanged}/>
+                <div class="btn-container">
+                    <LoadingButton text={$t('create.members.create_btn')} classname="primary-blue"/>
+                    <LoadingButton text={$t('create.members.preview_btn')} classname="primary-orange"
+                                   on:click={onPreviewClicked}/>
+                    <LoadingButton text={$t('create.members.cancel_btn')} classname="primary-red"/>
                 </div>
             </div>
         </div>
-    </section>
-    <!--{/if}-->
-    {#if isPreview && m}
-        <div>
-            <Member member={m}/>
-        </div>
-    {/if}
-</main>
+    </div>
+</section>
+<!--{/if}-->
+{#if isPreview && m}
+    <div>
+        <Member member={m}/>
+    </div>
+{/if}
 
 <style lang="scss">
   .wrapper {

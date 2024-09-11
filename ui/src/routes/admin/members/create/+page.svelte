@@ -6,12 +6,16 @@
     import UploadImage from "$lib/components/UploadImage.svelte";
     import type {MemberPreview} from "$lib/models/Member";
     import Member from "$lib/components/Member.svelte";
+    import {finalize, from, tap} from "rxjs";
+    import {Members} from "$lib/services";
+    import {startWithTap} from "$lib/utils";
 
     let m: MemberPreview | undefined;
     let isPreview = false;
     let name = "";
     let description = "";
     let avatar: File | undefined;
+    let loading = false;
 
     // Handle image changed
     function onImageChanged(e: CustomEvent) {
@@ -37,7 +41,7 @@
     }
 
     // Handle preview button clicked and show the data
-    function onPreviewClicked() {
+    function onPreviewBtnClicked() {
         if (validate()) {
             isPreview = true;
             m = {
@@ -48,10 +52,44 @@
             console.log(`${JSON.stringify(m)}`);
         }
     }
+
+    // Handle back button clicked and hide the preview section
+    function onBackBtnClicked() {
+        isPreview = false;
+    }
+
+    function onCreateBtnClicked() {
+        if (validate() && !loading) {
+            from(Members.create({name: name, description: description}, 'zh'))
+                .pipe(
+                    startWithTap(() => loading = true),
+                    finalize(() => loading = false),
+                )
+                .subscribe({
+                    next: (res) => {
+                        console.log(`Create a member successfully, got member_id: ${JSON.stringify(res)}`);
+                        console.log(`Create a member successfully, got member_id: ${JSON.stringify(res.member_id)}`);
+                        if (avatar) {
+                            from(Members.uploadAvatar(res.member_id, avatar))
+                                .pipe(
+                                    startWithTap(() => loading = true),
+                                    finalize(() => loading = false),
+                                ).subscribe({
+                                error: e => {
+                                    console.error(`Can't upload an avatar, got an error: ${e}`)
+                                }
+                            })
+                        }
+                    },
+                    error: e => {
+                        console.error(`Can't create a member, got an error: ${e}`)
+                    }
+                })
+        }
+    }
 </script>
 
-<!--{#if !isPreview}-->
-<section>
+<section class:hidden={isPreview}>
     <div class="wrapper">
         <div class="form-wrapper">
             <UploadImage on:change={onImageChanged}/>
@@ -59,23 +97,32 @@
                 <Input label={$t('create.members.name')} name="name" on:input={onNameChanged}/>
                 <TextArea label={$t('create.members.description')} on:input={onDescriptionChanged}/>
                 <div class="btn-container">
-                    <LoadingButton text={$t('create.members.create_btn')} classname="primary-blue"/>
+                    <LoadingButton text={$t('create.members.create_btn')} classname="primary-blue"
+                                   on:click={onCreateBtnClicked}/>
                     <LoadingButton text={$t('create.members.preview_btn')} classname="primary-orange"
-                                   on:click={onPreviewClicked}/>
+                                   on:click={onPreviewBtnClicked}/>
                     <LoadingButton text={$t('create.members.cancel_btn')} classname="primary-red"/>
                 </div>
             </div>
         </div>
     </div>
 </section>
-<!--{/if}-->
 {#if isPreview && m}
-    <div>
+    <div class="preview-section">
         <Member member={m}/>
+        <div class="btn-container">
+            <LoadingButton text={$t('create.members.create_btn')} classname="primary-blue"
+                           on:click={onCreateBtnClicked}/>
+            <LoadingButton text={$t('create.members.back_btn')} classname="primary-red" on:click={onBackBtnClicked}/>
+        </div>
     </div>
 {/if}
 
 <style lang="scss">
+  section.hidden {
+    display: none;
+  }
+
   .wrapper {
     width: 100%;
     padding: 24px 16px;
@@ -97,14 +144,21 @@
         flex-direction: column;
         gap: 24px;
 
-        .btn-container {
-          display: flex;
-          flex-direction: row;
-          column-gap: 12px;
-          width: 100%;
-          justify-content: center;
-        }
+
       }
     }
+  }
+
+  .preview-section {
+    display: inline-block;
+    padding: 2rem 0;
+  }
+
+  .btn-container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 12px;
+    width: 100%;
+    justify-content: center;
   }
 </style>

@@ -1,4 +1,4 @@
-type Member = {
+export type Member = {
   name: string;
   description: string;
 };

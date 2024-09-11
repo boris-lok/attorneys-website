@@ -3,7 +3,7 @@ use serde::Serialize;
 
 #[derive(Debug)]
 pub enum Language {
-    TW,
+    ZH,
     EN,
 }
 
@@ -27,7 +27,7 @@ impl TryFrom<String> for Language {
     fn try_from(value: String) -> Result<Self, Self::Error> {
         match value.to_lowercase().as_str() {
             "en" => Ok(Language::EN),
-            "tw" => Ok(Language::TW),
+            "zh" => Ok(Language::ZH),
             _ => Err(()),
         }
     }
@@ -36,7 +36,7 @@ impl TryFrom<String> for Language {
 impl Language {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Language::TW => "zh",
+            Language::ZH => "zh",
             Language::EN => "en",
         }
     }

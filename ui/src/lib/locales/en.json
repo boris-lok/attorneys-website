@@ -7,5 +7,8 @@
   "upload_image_hint": "Choose an image file ot drag it here",
   "member.attorney.suffix": "Attorney",
   "brand": "義修法律事務所",
-  "members": "Members"
+  "members": "Members",
+  "about_us": "About Us",
+  "about_us.content": "We are a company",
+  "contact_us": "Contact Us"
 }

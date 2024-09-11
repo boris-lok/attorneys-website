@@ -7,46 +7,45 @@
     import type {MemberPreview} from "$lib/models/Member";
     import Member from "$lib/components/Member.svelte";
 
-    let member: Partial<MemberPreview> = {};
     let m: MemberPreview | undefined;
     let isPreview = false;
+    let name = "";
+    let description = "";
+    let avatar: File | undefined;
 
+    // Handle image changed
     function onImageChanged(e: CustomEvent) {
-        member = {
-            ...member,
-            file: e.detail.file,
-        }
-        console.log(e.detail.file);
+        avatar = e.detail.file;
+        console.log(`avatar has been changed: ${avatar}`);
     }
 
+    // Handle name changed
     function onNameChanged(e: Event) {
         const target = e.target as HTMLInputElement;
-        member = {
-            ...member,
-            name: target.value.trim(),
-        }
+        name = target.value.trim();
     }
 
+    // Handle description changed
     function onDescriptionChanged(e: Event) {
         const target = e.target as HTMLTextAreaElement;
-        member = {
-            ...member,
-            description: target.value.trim(),
-        }
+        description = target.value.trim();
     }
 
-    function onPreviewClicked() {
-        if (member.name && member.description && member.file) {
-            isPreview = true;
-            const name = member.name;
-            const description = member.description;
-            const file = member.file;
+    // Check the name and description is not empty
+    function validate() {
+        return name.trim() !== "" && description !== "";
+    }
 
+    // Handle preview button clicked and show the data
+    function onPreviewClicked() {
+        if (validate()) {
+            isPreview = true;
             m = {
                 name: name,
                 description: description,
-                file: file,
+                file: avatar,
             }
+            console.log(`${JSON.stringify(m)}`);
         }
     }
 </script>

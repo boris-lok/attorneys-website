@@ -1,12 +1,30 @@
 <script lang="ts">
     import {t} from 'svelte-i18n';
     import iterate from 'iterare';
-    import {createEventDispatcher} from "svelte";
+    import {createEventDispatcher, onMount} from "svelte";
+    import {BehaviorSubject} from "rxjs";
 
     let isDragging = false;
     let image: HTMLElement;
     const dispatch = createEventDispatcher();
-    let file: File | undefined;
+    let hasImage = false;
+    let file = new BehaviorSubject<File | undefined>(undefined);
+
+    onMount(() => {
+        const disposer = file.subscribe({
+            next: (f) => {
+                hasImage = !!f;
+                console.log(`change`);
+                dispatch("change", {
+                    file: f
+                });
+            }
+        })
+
+        return () => {
+            disposer.unsubscribe();
+        }
+    })
 
     // Handle file drop
     function handleDrop(e: DragEvent) {
@@ -46,25 +64,24 @@
     }
 
     function handleInputFiles(files: File[] | FileList) {
+        let newFile = undefined;
         if (files.length > 0) {
-            file = iterate(files)
+            newFile = iterate(files)
                 .find(e => e.type.startsWith("image/"));
-            if (file) {
-                generatePreview(file);
-                dispatch("change", {
-                    file: file
-                });
+            if (newFile) {
+                generatePreview(newFile);
             }
         }
+        file.next(newFile);
     }
 
     function onDeleteClicked() {
-        file = undefined;
+        file.next(undefined);
     }
 </script>
 
 <div class="image-wrapper">
-    {#if !file}
+    {#if !hasImage}
         <div class="dropzone-wrapper" on:drop={handleDrop} on:dragover={handleDragOver} on:dragleave={handleDragLeave}
              class:is-dragging={isDragging}>
             <div class="dropzone-desc">
@@ -74,7 +91,7 @@
 
         </div>
     {/if}
-    {#if file}
+    {#if hasImage}
         <div class="preview-zone-wrapper">
             <img src="" bind:this={image} alt="Preview" width="128" height="128">
             <i class="material-icon" on:click={onDeleteClicked}>delete</i>

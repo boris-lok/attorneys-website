@@ -1,14 +1,17 @@
 <script lang="ts">
     import type {MemberPreview} from "$lib/models/Member";
     import SvelteMarkdown from "svelte-markdown";
-    import {onMount} from "svelte";
     import {t} from "svelte-i18n";
 
     export let member: MemberPreview;
     let image: HTMLElement;
 
-    onMount(() => {
+    let hasImage = false;
+
+    function handleMemberChanged(member: MemberPreview) {
+        hasImage = false;
         if ('file' in member && member.file) {
+            hasImage = true;
             const reader = new FileReader();
             reader.onload = () => {
                 if (typeof reader.result === "string") {
@@ -17,19 +20,22 @@
             }
             reader.readAsDataURL(member.file);
         }
-    });
+    }
+
+    $: handleMemberChanged(member);
 </script>
 
 <div class="member-wrapper">
     <section>
-        <img class="avatar-wrapper" bind:this={image} alt="{member.name}" src="" width="128" height="128"/>
-    </section>
-    <section>
-        <p class="name-wrapper">{member.name}&nbsp;{$t('member.attorney.suffix')}</p>
+        <div class="avatar-wrapper">
+            <img bind:this={image} alt="{member.name}" src="" width="128" height="128" class:show={hasImage}/>
+            <span class="material-icon" class:show={!hasImage}>account_circle</span>
+            <p>{member.name}&nbsp;{$t('member.attorney.suffix')}</p>
+        </div>
     </section>
     <section>
         <div class="description-wrapper">
-            <SvelteMarkdown source={member.description} />
+            <SvelteMarkdown source={member.description}/>
         </div>
     </section>
 </div>
@@ -38,22 +44,74 @@
   .member-wrapper {
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
-    padding: 24px 16px;
+    padding: 1.5rem 1rem;
     align-items: center;
+    gap: 1rem;
 
-    .avatar-wrapper {
-      border-radius: 50%;
+    section {
+      width: 100%;
     }
 
-    .name-wrapper {
-      font-size: 20px;
+    .avatar-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+
+      img {
+        display: none;
+        border-radius: 50%;
+
+        &.show {
+          display: block;
+        }
+      }
+
+      span {
+        display: none;
+        font-size: 128px;
+
+        &.show {
+          display: block;
+        }
+      }
+
+      p {
+        font-size: 20px;
+        margin: 0;
+      }
     }
 
     .description-wrapper {
       border-radius: 4px;
       box-shadow: 0 0 10px 0 $grey;
       padding: 24px 16px;
+      width: 100%;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .member-wrapper {
+      flex-direction: row;
+
+      section:nth-child(1) {
+        width: 25%;
+      }
+
+      section:nth-child(2) {
+        width: 75%;
+        min-height: 560px;
+
+        .description-wrapper {
+          display: flex;
+          flex-direction: column;
+          box-shadow: none;
+          height: 66vh;
+          overflow-y: auto;
+          justify-content: center;
+          background-color: $white;
+        }
+      }
     }
   }
 </style>

@@ -1,4 +1,5 @@
 use crate::domain::entities::{AvatarJson, MemberID};
+use anyhow::anyhow;
 use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;
 use std::sync::Weak;
@@ -37,6 +38,16 @@ impl InMemoryAvatarRepository {
             ..self
         }
     }
+
+    pub async fn get(&self, id: &MemberID) -> anyhow::Result<Option<AvatarJson>> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let lock = self.content.lock().await;
+
+        Ok(lock.get(id.as_str()).cloned())
+    }
 }
 
 #[async_trait::async_trait]
@@ -52,7 +63,7 @@ impl IAvatarRepository for InMemoryAvatarRepository {
 
         let mut lock = self.content.lock().await;
 
-        let key = avatar_id.0.clone();
+        let key = avatar_id.to_string();
         if lock.contains_key(&key) {
             return Err(InsertError::Conflict);
         }
@@ -86,7 +97,7 @@ impl<'tx> IAvatarRepository for SqlxAvatarRepository<'tx> {
         let conn = lock.acquire().await.unwrap();
 
         sqlx::query("INSERT INTO \"avatar\" (id, data) VALUES ($1, $2); ")
-            .bind(member_id.0.as_str())
+            .bind(member_id.as_str())
             .bind(avatar_json.0)
             .execute(conn)
             .await

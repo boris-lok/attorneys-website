@@ -1,25 +1,19 @@
-use crate::domain::entities::{Member, MemberID};
+use crate::domain::entities::MemberID;
 use anyhow::anyhow;
 use sqlx::{Acquire, Postgres, Row, Transaction};
 use std::sync::Weak;
 use tokio::sync::Mutex;
 
-#[derive(Debug)]
-pub enum InsertError {
-    Conflict,
-    Unknown,
-}
-
 #[async_trait::async_trait]
 pub trait IMemberRepository {
-    async fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError>;
+    async fn insert(&self, member_id: MemberID) -> anyhow::Result<MemberID>;
     async fn contains(&self, member_id: &MemberID) -> anyhow::Result<bool>;
 }
 
 #[derive(Debug)]
 pub struct InMemoryMemberRepository {
     error: bool,
-    members: Mutex<Vec<Member>>,
+    members: Mutex<Vec<String>>,
 }
 
 impl InMemoryMemberRepository {
@@ -36,23 +30,35 @@ impl InMemoryMemberRepository {
             ..self
         }
     }
+
+    pub async fn get(&self, id: &MemberID) -> anyhow::Result<Option<String>> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let lock = self.members.lock().await;
+
+        Ok(lock
+            .iter()
+            .find(|e| e.as_str() == id.as_str())
+            .map(|e| e.to_owned()))
+    }
 }
 
 #[async_trait::async_trait]
 impl IMemberRepository for InMemoryMemberRepository {
-    async fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError> {
+    async fn insert(&self, member_id: MemberID) -> anyhow::Result<MemberID> {
         if self.error {
-            return Err(InsertError::Unknown);
+            return Err(anyhow!("Internal Server Error"));
         }
 
         let mut lock = self.members.lock().await;
 
-        if lock.iter().any(|m| m.member_id == member_id) {
-            return Err(InsertError::Conflict);
+        if lock.iter().any(|id| id == member_id.as_str()) {
+            return Err(anyhow!("{} already exists", member_id));
         }
 
-        let member_id_cloned = member_id.clone();
-        lock.push(Member::new(member_id_cloned));
+        lock.push(member_id.to_string());
         Ok(member_id)
     }
 
@@ -61,8 +67,9 @@ impl IMemberRepository for InMemoryMemberRepository {
             return Err(anyhow!("Internal Server Error"));
         }
 
+        let m_id = &member_id.as_str();
         let lock = self.members.lock().await;
-        Ok(lock.iter().any(|m| m.member_id == *member_id))
+        Ok(lock.iter().any(|id| id == m_id))
     }
 }
 
@@ -79,16 +86,15 @@ impl<'tx> SqlxMemberRepository<'tx> {
 
 #[async_trait::async_trait]
 impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
-    async fn insert(&self, member_id: MemberID) -> Result<MemberID, InsertError> {
-        let conn_ptr = self.tx.upgrade().ok_or(InsertError::Unknown)?;
+    async fn insert(&self, member_id: MemberID) -> anyhow::Result<MemberID> {
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
         let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await.unwrap();
+        let conn = lock.acquire().await?;
 
         sqlx::query("INSERT INTO \"member\" (id, created_at) VALUES ($1, now());")
-            .bind(member_id.0.as_str())
+            .bind(member_id.as_str())
             .execute(conn)
-            .await
-            .map_err(|_| InsertError::Unknown)?;
+            .await?;
 
         Ok(member_id)
     }
@@ -101,7 +107,7 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
         let conn = lock.acquire().await?;
 
         let res = sqlx::query(query)
-            .bind(id.0.as_str())
+            .bind(id.as_str())
             .fetch_optional(conn)
             .await
             .map(|row| match row {

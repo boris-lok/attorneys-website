@@ -15,10 +15,10 @@ pub(crate) struct Data {
     pub(crate) description: String,
 }
 
+#[derive(Debug)]
 pub(crate) enum Error {
     BadRequest,
-    Conflict,
-    Unknown,
+    Unknown(String),
 }
 
 pub async fn execute<IUnitOfWork>(uow: Mutex<IUnitOfWork>, req: Request) -> Result<String, Error>
@@ -32,9 +32,8 @@ where
     let data = MemberData::try_from(req.data).map_err(|_| Error::BadRequest)?;
 
     let content_id = match lock.member_repository().insert(member_id).await {
-        Ok(id) => Ok(ContentID(id.0)),
-        Err(crate::repositories::member_repository::InsertError::Conflict) => Err(Error::Conflict),
-        Err(crate::repositories::member_repository::InsertError::Unknown) => Err(Error::Unknown),
+        Ok(id) => Ok(ContentID::try_from(id).unwrap()),
+        Err(e) => return Err(Error::Unknown(e.to_string())),
     }?;
 
     let data = ContentData::try_from(data).map_err(|_| Error::BadRequest)?;
@@ -44,16 +43,15 @@ where
         .insert(content_id, data, language)
         .await
     {
-        Ok(id) => Ok(id.0),
-        Err(crate::repositories::content_repository::InsertError::Conflict) => Err(Error::Conflict),
-        Err(crate::repositories::content_repository::InsertError::Unknown) => Err(Error::Unknown),
+        Ok(id) => Ok(id),
+        Err(e) => return Err(Error::Unknown(e.to_string())),
     }?;
 
     drop(lock);
     uow.into_inner()
         .commit()
         .await
-        .map_err(|_| Error::Unknown)?;
+        .map_err(|e| Error::Unknown(e.to_string()))?;
 
     Ok(content_id.to_string())
 }
@@ -111,7 +109,7 @@ mod tests {
     #[tokio::test]
     async fn it_should_return_a_conflict_error_when_member_id_is_already_exists() {
         let member_id = MemberID::try_from(Ulid::new().to_string()).unwrap();
-        let duplicated_member_id = member_id.0.clone();
+        let duplicated_member_id = member_id.clone();
         let mut uow = crate::uow::member::InMemoryMemberUnitOfWork::new();
         uow.member_repository()
             .insert(member_id)
@@ -119,7 +117,7 @@ mod tests {
             .expect("Failed to insert a fake data");
 
         let req = Request {
-            member_id: duplicated_member_id,
+            member_id: duplicated_member_id.as_str().to_string(),
             data: Data {
                 name: "Boris".to_string(),
                 description: "Boris is an engineer".to_string(),
@@ -130,7 +128,7 @@ mod tests {
         let res = execute(Mutex::new(uow), req).await;
 
         match res {
-            Err(Error::Conflict) => {}
+            Err(Error::Unknown(_)) => {}
             _ => unreachable!(),
         }
     }
@@ -152,7 +150,7 @@ mod tests {
         let res = execute(Mutex::new(uow), req).await;
 
         match res {
-            Err(Error::Unknown) => {}
+            Err(Error::Unknown(_)) => {}
             _ => unreachable!(),
         }
     }

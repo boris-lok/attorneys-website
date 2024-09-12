@@ -1,3 +1,4 @@
+use crate::domain::entities::{ContentID, Language, Member, MemberID};
 use crate::repositories::avatar_repository::{
     IAvatarRepository, InMemoryAvatarRepository, SqlxAvatarRepository,
 };
@@ -17,6 +18,13 @@ pub trait IMemberUnitOfWork {
     fn member_repository(&mut self) -> &mut impl IMemberRepository;
     fn content_repository(&mut self) -> &mut impl IContentRepository;
     fn avatar_repository(&mut self) -> &mut impl IAvatarRepository;
+
+    // Get a member with full details
+    async fn get_member<'id, 'lang>(
+        &mut self,
+        member_id: &'id MemberID,
+        language: &'lang Language,
+    ) -> anyhow::Result<Option<Member>>;
 
     async fn commit(mut self) -> anyhow::Result<()>;
     #[allow(dead_code)]
@@ -88,6 +96,48 @@ impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
         self.avatar_repository.as_mut().unwrap()
     }
 
+    async fn get_member<'id, 'lang>(
+        &mut self,
+        member_id: &'id MemberID,
+        language: &'lang Language,
+    ) -> anyhow::Result<Option<Member>> {
+        let member = self
+            .member_repository
+            .as_mut()
+            .unwrap()
+            .get(&member_id)
+            .await?;
+        let content_id = ContentID::try_from(member_id.clone()).unwrap();
+        let content = self
+            .content_repository
+            .as_mut()
+            .unwrap()
+            .get(&content_id, &language)
+            .await?;
+        let avatar = self
+            .avatar_repository
+            .as_mut()
+            .unwrap()
+            .get(&member_id)
+            .await?;
+
+        match (member, content, avatar) {
+            (None, None, None) => Ok(None),
+            (Some(_), None, None) => Ok(None),
+            (Some(member_id), Some(content), None) => Ok(Some(Member {
+                member_id,
+                content: content.0,
+                avatar_data: None,
+            })),
+            (Some(member_id), Some(content), Some(avatar)) => Ok(Some(Member {
+                member_id,
+                content: content.0,
+                avatar_data: Some(avatar.0),
+            })),
+            _ => unreachable!(),
+        }
+    }
+
     async fn commit(self) -> anyhow::Result<()> {
         Ok(())
     }
@@ -150,6 +200,14 @@ impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
             self.avatar_repository = Some(avatar_repo);
         }
         self.avatar_repository.as_mut().unwrap()
+    }
+
+    async fn get_member<'id, 'lang>(
+        &mut self,
+        member_id: &'id MemberID,
+        language: &'lang Language,
+    ) -> anyhow::Result<Option<Member>> {
+        todo!()
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {

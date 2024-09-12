@@ -1,14 +1,15 @@
 use crate::domain::create_member::Data;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Language {
     ZH,
     EN,
 }
 
 #[derive(Eq, PartialEq, Clone, Debug)]
-pub struct MemberID(pub(crate) String);
+pub struct MemberID(String);
 
 impl TryFrom<String> for MemberID {
     type Error = ();
@@ -18,6 +19,18 @@ impl TryFrom<String> for MemberID {
             true => Err(()),
             false => Ok(MemberID(value)),
         }
+    }
+}
+
+impl Display for MemberID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.clone())
+    }
+}
+
+impl MemberID {
+    pub fn as_str(&self) -> &str {
+        &self.0
     }
 }
 
@@ -41,7 +54,7 @@ impl Language {
         }
     }
 }
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone, Deserialize)]
 pub(crate) struct MemberData {
     pub(crate) name: String,
     pub(crate) description: String,
@@ -61,18 +74,28 @@ impl TryFrom<Data> for MemberData {
     }
 }
 
-#[derive(Debug)]
-pub struct Member {
-    pub(crate) member_id: MemberID,
-}
+#[derive(Debug, Clone)]
+pub struct ContentID(String);
 
-impl Member {
-    pub fn new(member_id: MemberID) -> Self {
-        Member { member_id }
+impl TryFrom<MemberID> for ContentID {
+    type Error = ();
+
+    fn try_from(value: MemberID) -> Result<Self, Self::Error> {
+        Ok(ContentID(value.0))
     }
 }
-#[derive(Debug, Clone)]
-pub struct ContentID(pub(crate) String);
+
+impl Display for ContentID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.clone())
+    }
+}
+
+impl ContentID {
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct ContentData(pub(crate) serde_json::Value);
@@ -92,5 +115,12 @@ pub struct AvatarData {
     pub(crate) small_image: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AvatarJson(pub(crate) serde_json::Value);
+
+#[derive(Debug, Serialize)]
+pub struct Member {
+    pub member_id: String,
+    pub content: serde_json::Value,
+    pub avatar_data: Option<serde_json::Value>,
+}

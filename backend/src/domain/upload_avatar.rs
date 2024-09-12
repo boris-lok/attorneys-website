@@ -48,7 +48,7 @@ where
         Ok(exist) if !exist => return Err(Error::MemberNotFound),
         Err(_) => return Err(Error::Unknown),
         Ok(_) => {}
-    }
+    };
 
     // TODO: set up the output folder in config
     let out = "/Users/boris/Documents/workspace/projects/attorneys-website/ui/static/avatar";
@@ -58,7 +58,7 @@ where
         &req.data,
         Size::new(128, 128),
         out,
-        member_id.0.as_str(),
+        member_id.as_str(),
     )
     .await?;
 
@@ -67,7 +67,7 @@ where
         &req.data,
         Size::new(48, 48),
         out,
-        member_id.0.as_str(),
+        member_id.as_str(),
     )
     .await?;
 
@@ -92,7 +92,7 @@ where
         .await
         .map_err(|_| Error::Unknown)?;
 
-    Ok(avatar_id.0)
+    Ok(avatar_id.to_string())
 }
 
 #[cfg(test)]
@@ -120,8 +120,9 @@ mod test {
         let util = FakeImageUtil::new();
         let mut uow = crate::uow::member::InMemoryMemberUnitOfWork::new();
         let member_id = Ulid::new().to_string();
+        let member_id = MemberID::try_from(member_id).unwrap();
         uow.member_repository()
-            .insert(MemberID(member_id.clone()))
+            .insert(member_id.clone())
             .await
             .expect("can't insert a member");
 
@@ -130,14 +131,14 @@ mod test {
             .expect("read the test file");
 
         let req = Request {
-            member_id: member_id.clone(),
+            member_id: member_id.as_str().to_string(),
             data: buffer,
         };
 
         let res = execute(Mutex::new(uow), Arc::new(util), req).await;
 
         match res {
-            Ok(id) => assert_eq!(id, member_id),
+            Ok(id) => assert_eq!(id, member_id.as_str()),
             Err(_) => unreachable!(),
         }
     }
@@ -148,13 +149,14 @@ mod test {
         let util = FakeImageUtil::new();
         let mut uow = crate::uow::member::InMemoryMemberUnitOfWork::new();
         let member_id = Ulid::new().to_string();
+        let member_id = MemberID::try_from(member_id).unwrap();
         uow.member_repository()
-            .insert(MemberID(member_id.clone()))
+            .insert(member_id.clone())
             .await
             .expect("can't insert a member");
 
         let req = Request {
-            member_id: member_id.clone(),
+            member_id: member_id.as_str().to_string(),
             data: vec![1, 2, 3, 4],
         };
 
@@ -172,8 +174,9 @@ mod test {
         let util = FakeImageUtil::new().with_save_file_error();
         let mut uow = crate::uow::member::InMemoryMemberUnitOfWork::new();
         let member_id = Ulid::new().to_string();
+        let member_id = MemberID::try_from(member_id).unwrap();
         uow.member_repository()
-            .insert(MemberID(member_id.clone()))
+            .insert(member_id.clone())
             .await
             .expect("can't insert a member");
 
@@ -182,7 +185,7 @@ mod test {
             .expect("read the test file");
 
         let req = Request {
-            member_id: member_id.clone(),
+            member_id: member_id.as_str().to_string(),
             data: buffer,
         };
 

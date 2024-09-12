@@ -1,13 +1,10 @@
 use crate::domain::entities::{ContentData, ContentID, Language};
+use anyhow::anyhow;
 use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;
 use std::sync::Weak;
 use tokio::sync::Mutex;
 
-pub enum InsertError {
-    Conflict,
-    Unknown,
-}
 #[async_trait::async_trait]
 pub trait IContentRepository {
     async fn insert(
@@ -15,7 +12,7 @@ pub trait IContentRepository {
         content_id: ContentID,
         content: ContentData,
         language: Language,
-    ) -> Result<ContentID, InsertError>;
+    ) -> anyhow::Result<ContentID>;
 }
 
 #[derive(Debug)]
@@ -38,6 +35,21 @@ impl InMemoryContentRepository {
             ..self
         }
     }
+
+    pub async fn get(
+        &self,
+        id: &ContentID,
+        language: &Language,
+    ) -> anyhow::Result<Option<ContentData>> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let lock = self.content.lock().await;
+        let key = format!("{}_{}", id.as_str(), language.as_str());
+
+        Ok(lock.get(&key).cloned())
+    }
 }
 
 #[async_trait::async_trait]
@@ -47,16 +59,16 @@ impl IContentRepository for InMemoryContentRepository {
         content_id: ContentID,
         content: ContentData,
         language: Language,
-    ) -> Result<ContentID, InsertError> {
+    ) -> anyhow::Result<ContentID> {
         if self.error {
-            return Err(InsertError::Unknown);
+            return Err(anyhow!("Internal Server Error"));
         }
 
         let mut lock = self.content.lock().await;
 
-        let key = format!("{}_{:?}", content_id.clone().0, language);
+        let key = format!("{}_{}", content_id.as_str(), language.as_str());
         if lock.contains_key(&key) {
-            return Err(InsertError::Conflict);
+            return Err(anyhow!("{} already exists", content_id.as_str()));
         }
 
         lock.insert(key, content);
@@ -83,24 +95,19 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         content_id: ContentID,
         content: ContentData,
         language: Language,
-    ) -> Result<ContentID, InsertError> {
-        let conn_ptr = self.tx.upgrade().ok_or(InsertError::Unknown)?;
+    ) -> anyhow::Result<ContentID> {
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
         let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await.unwrap();
+        let conn = lock.acquire().await?;
 
         sqlx::query(
             "INSERT INTO \"content\" (id, data, language, created_at) VALUES ($1, $2, $3, now());",
         )
-        .bind(content_id.0.clone())
+        .bind(content_id.as_str())
         .bind(content.0)
         .bind(language.as_str())
         .execute(conn)
-        .await
-        .map_err(|e| {
-            println!("Failed to insert content: {:?}", e);
-
-            InsertError::Unknown
-        })?;
+        .await?;
 
         Ok(content_id)
     }

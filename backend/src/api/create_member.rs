@@ -41,13 +41,12 @@ pub async fn create_member(
 
     let uow = SqlxMemberUnitOfWork::new(&state.pool)
         .await
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
     let uow = Mutex::new(uow);
 
     match execute(uow, request).await {
         Ok(id) => Ok(Json(CreateMemberResponse { member_id: id })),
         Err(create_member::Error::BadRequest) => Err(ApiError::BadRequest),
-        Err(create_member::Error::Conflict) => Err(ApiError::MemberAlreadyExists),
-        Err(create_member::Error::Unknown) => Err(ApiError::InternalServerError),
+        Err(create_member::Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
     }
 }

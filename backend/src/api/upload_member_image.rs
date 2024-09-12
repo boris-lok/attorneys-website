@@ -17,7 +17,7 @@ pub async fn upload_member_image(
 ) -> Result<(), ApiError> {
     let uow = SqlxMemberUnitOfWork::new(&state.pool)
         .await
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
     let uow = Mutex::new(uow);
     let member_id = params.get("id").ok_or(ApiError::BadRequest)?;
 
@@ -41,16 +41,17 @@ pub async fn upload_member_image(
                 Err(Error::MemberNotFound) => return Err(ApiError::BadRequest),
                 Err(Error::BadRequest) => return Err(ApiError::BadRequest),
                 Err(Error::ImageProcess) => {
-                    println!("image process");
-                    return Err(ApiError::InternalServerError);
+                    return Err(ApiError::InternalServerError(
+                        "Can't resize image".to_string(),
+                    ))
                 }
                 Err(Error::CreateImage) => {
-                    println!("create image");
-                    return Err(ApiError::InternalServerError);
+                    return Err(ApiError::InternalServerError(
+                        "Can't create image".to_string(),
+                    ));
                 }
                 Err(Error::Unknown) => {
-                    println!("unknown error");
-                    return Err(ApiError::InternalServerError);
+                    return Err(ApiError::InternalServerError("Unknown error".to_string()));
                 }
             }
             break;

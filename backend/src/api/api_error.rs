@@ -9,9 +9,7 @@ pub enum ApiError {
     #[error(transparent)]
     JsonExtractorRejection(#[from] JsonRejection),
     #[error("Internal Server Error")]
-    InternalServerError,
-    #[error("Member already exists")]
-    MemberAlreadyExists,
+    InternalServerError(String),
     #[error("Bad Request")]
     BadRequest,
 }
@@ -23,8 +21,7 @@ impl IntoResponse for ApiError {
                 json_rejection.status(),
                 format!("Json parsing error: {}", json_rejection.body_text()),
             ),
-            ApiError::InternalServerError => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
-            ApiError::MemberAlreadyExists => (StatusCode::CONFLICT, self.to_string()),
+            ApiError::InternalServerError(reason) => (StatusCode::INTERNAL_SERVER_ERROR, reason),
             ApiError::BadRequest => (StatusCode::BAD_REQUEST, self.to_string()),
         };
 

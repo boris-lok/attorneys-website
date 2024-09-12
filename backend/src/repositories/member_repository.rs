@@ -1,6 +1,6 @@
 use crate::domain::entities::{Member, MemberID};
 use anyhow::anyhow;
-use sqlx::{Acquire, Postgres, Transaction};
+use sqlx::{Acquire, Postgres, Row, Transaction};
 use std::sync::Weak;
 use tokio::sync::Mutex;
 
@@ -85,7 +85,7 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
         let conn = lock.acquire().await.unwrap();
 
         sqlx::query("INSERT INTO \"member\" (id, created_at) VALUES ($1, now());")
-            .bind(member_id.0.clone())
+            .bind(member_id.0.as_str())
             .execute(conn)
             .await
             .map_err(|_| InsertError::Unknown)?;
@@ -93,7 +93,22 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
         Ok(member_id)
     }
 
-    async fn contains(&self, _: &MemberID) -> anyhow::Result<bool> {
-        Ok(true)
+    async fn contains(&self, id: &MemberID) -> anyhow::Result<bool> {
+        let query = "SELECT id FROM \"member\" WHERE id = $1 limit 1";
+
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        let res = sqlx::query(query)
+            .bind(id.0.as_str())
+            .fetch_optional(conn)
+            .await
+            .map(|row| match row {
+                None => false,
+                Some(row) => row.len() > 0,
+            })?;
+
+        Ok(res)
     }
 }

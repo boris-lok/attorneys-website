@@ -55,7 +55,7 @@
       z-index: $layout-nav-index;
       max-height: 0;
       overflow: hidden;
-      transition: max-height .5s cubic-bezier(.65, .05, .36, 1);
+      transition: max-height .5s cubic-bezier(.86,0,.07,1) ;
 
       &.active {
         max-height: 100vh;

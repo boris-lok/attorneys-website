@@ -60,17 +60,15 @@
 
     function onCreateBtnClicked() {
         if (validate() && !loading) {
-            from(Members.create({name: name, description: description}, 'zh'))
+            Members.create({name: name, description: description}, 'zh')
                 .pipe(
                     startWithTap(() => loading = true),
                     finalize(() => loading = false),
                 )
                 .subscribe({
                     next: (res) => {
-                        console.log(`Create a member successfully, got member_id: ${JSON.stringify(res)}`);
-                        console.log(`Create a member successfully, got member_id: ${JSON.stringify(res.member_id)}`);
                         if (avatar) {
-                            from(Members.uploadAvatar(res.member_id, avatar))
+                            Members.uploadAvatar(res.member_id, avatar)
                                 .pipe(
                                     startWithTap(() => loading = true),
                                     finalize(() => loading = false),

@@ -1,32 +1,44 @@
-import type {Member} from "$lib/models/Member";
-import type {Language} from "$lib/models/Language";
+import type { Member } from "$lib/models/Member";
+import type { Language } from "$lib/models/Language";
+import { from, Observable } from "rxjs";
 
-const BASE_URL = 'http://localhost:1234';
+const BASE_URL = "http://localhost:1234/api/v1";
+const ADMIN_URL = `${BASE_URL}/admin`;
 const TIMEOUT = 5000;
 
 export const Members = {
-    create: async (member: Member, lang: Language) => {
-        let data = JSON.stringify({
-            ...member,
-            language: lang,
-        });
-        const res = await fetch(`${BASE_URL}/api/v1/admin/members`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            body: data,
-            signal: AbortSignal.timeout(TIMEOUT),
-        });
-        return res.json();
-    },
-    uploadAvatar: async (memberId: string, file: File) => {
-        const formData = new FormData();
-        formData.append('avatar', file);
-        return fetch(`${BASE_URL}/api/v1/admin/members/${memberId}/upload`, {
-            method: 'POST',
-            body: formData,
-        });
-    }
-}
+  create: (member: Member, lang: Language) => {
+    let data = JSON.stringify({
+      ...member,
+      language: lang,
+    });
+
+    const request: Promise<{ member_id: string }> = fetch(
+      `${ADMIN_URL}/members`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: data,
+        signal: AbortSignal.timeout(TIMEOUT),
+      },
+    ).then((res) => res.json());
+
+    return from(request);
+  },
+  uploadAvatar: (memberId: string, file: File) => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const request: Promise<Response> = fetch(
+      `${ADMIN_URL}/members/${memberId}/avatar`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+
+    return from(request);
+  },
+};

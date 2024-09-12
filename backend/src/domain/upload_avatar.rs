@@ -23,13 +23,15 @@ async fn resize_image_and_save_it(
     util: Arc<dyn IImage + Sync + Send>,
     data: &[u8],
     size: Size,
-    file_path: &str,
-) -> Result<(), Error> {
+    out: &str,
+    id: &str,
+) -> Result<String, Error> {
     let image = util.resize(data, size).map_err(|_| Error::ImageProcess)?;
-    util.save_to_file(file_path, image)
+    let path = format!("{}/{}_{}_{}.png", out, id, image.width(), image.height());
+    util.save_to_file(path.as_str(), image)
         .await
         .map_err(|_| Error::CreateImage)?;
-    Ok(())
+    Ok(path)
 }
 pub async fn execute<IUnitOfWork>(
     uow: Mutex<IUnitOfWork>,
@@ -49,22 +51,23 @@ where
     }
 
     // TODO: set up the output folder in config
-    let out = "./uploads";
+    let out = "/Users/boris/Documents/workspace/projects/attorneys-website/ui/static/avatar";
 
-    let large_image_path = format!("{}/{}_128.png", out, member_id.0.as_str());
-    resize_image_and_save_it(
+    let large_image_path = resize_image_and_save_it(
         image_util.clone(),
         &req.data,
         Size::new(128, 128),
-        &large_image_path,
+        out,
+        member_id.0.as_str(),
     )
     .await?;
-    let small_image_path = format!("{}/{}_48.png", out, member_id.0.as_str());
-    resize_image_and_save_it(
+
+    let small_image_path = resize_image_and_save_it(
         image_util.clone(),
         &req.data,
         Size::new(48, 48),
-        &small_image_path,
+        out,
+        member_id.0.as_str(),
     )
     .await?;
 

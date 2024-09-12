@@ -21,7 +21,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let image_util = ImageUtil {};
     let member_routes = Router::new()
         .route("/members", post(create_member))
-        .route("/members/:id/upload", post(upload_member_image));
+        .route("/members/:id/avatar", post(upload_member_image));
 
     let admin_routes = Router::new().merge(member_routes);
 

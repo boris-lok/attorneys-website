@@ -25,7 +25,12 @@ fn resize_image(data: &[u8], size: Size) -> anyhow::Result<DynamicImage> {
     let img = ImageReader::new(Cursor::new(data))
         .with_guessed_format()?
         .decode()?;
-    Ok(img.resize(size.width, size.height, FilterType::Nearest))
+    let w = img.width();
+    let h = img.height();
+    if w <= size.width && h <= size.height {
+        return Ok(img);
+    }
+    Ok(img.resize(size.width, size.height, FilterType::CatmullRom))
 }
 
 #[derive(Debug)]

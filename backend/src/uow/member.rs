@@ -132,7 +132,7 @@ impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
             (Some(member_id), Some(content), Some(avatar)) => Ok(Some(Member {
                 member_id,
                 content: content.0,
-                avatar_data: Some(avatar.0),
+                avatar_data: Some(avatar.get()),
             })),
             _ => unreachable!(),
         }

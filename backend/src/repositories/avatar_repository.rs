@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::sync::Weak;
 use tokio::sync::Mutex;
 
+#[derive(Debug)]
 pub enum InsertError {
     Conflict,
     Unknown,
@@ -98,7 +99,7 @@ impl<'tx> IAvatarRepository for SqlxAvatarRepository<'tx> {
 
         sqlx::query("INSERT INTO \"avatar\" (id, data) VALUES ($1, $2); ")
             .bind(member_id.as_str())
-            .bind(avatar_json.0)
+            .bind(avatar_json.get())
             .execute(conn)
             .await
             .map_err(|e| {

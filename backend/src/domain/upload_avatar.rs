@@ -75,11 +75,11 @@ where
         large_image: large_image_path,
         small_image: small_image_path,
     };
-    let avatar_json = serde_json::value::to_value(&avatar_data).map_err(|_| Error::Unknown)?;
+    let avatar_json = AvatarJson::try_from(avatar_data).map_err(|_| Error::Unknown)?;
 
     let avatar_id = match lock
         .avatar_repository()
-        .insert(member_id.clone(), AvatarJson(avatar_json))
+        .insert(member_id.clone(), avatar_json)
         .await
     {
         Ok(id) => Ok(id),

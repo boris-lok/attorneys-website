@@ -13,6 +13,13 @@ pub trait IContentRepository {
         content: ContentData,
         language: Language,
     ) -> anyhow::Result<ContentID>;
+
+    async fn update(
+        &self,
+        content_id: &ContentID,
+        data: ContentData,
+        language: Language,
+    ) -> anyhow::Result<()>;
 }
 
 #[derive(Debug)]
@@ -75,6 +82,28 @@ impl IContentRepository for InMemoryContentRepository {
 
         Ok(content_id)
     }
+
+    async fn update(
+        &self,
+        content_id: &ContentID,
+        data: ContentData,
+        language: Language,
+    ) -> anyhow::Result<()> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let mut lock = self.content.lock().await;
+
+        let key = format!("{}_{}", content_id.as_str(), language.as_str());
+        if !lock.contains_key(&key) {
+            return Err(anyhow!("{} doesn't exists", content_id.as_str()));
+        }
+
+        lock.entry(key).and_modify(|e| *e = data);
+
+        Ok(())
+    }
 }
 
 #[derive(Debug)]
@@ -110,5 +139,14 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         .await?;
 
         Ok(content_id)
+    }
+
+    async fn update(
+        &self,
+        content_id: &ContentID,
+        data: ContentData,
+        language: Language,
+    ) -> anyhow::Result<()> {
+        todo!()
     }
 }

@@ -1,4 +1,3 @@
-use crate::domain::create_member::Data;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
@@ -95,6 +94,12 @@ impl ContentID {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+}
+
+#[derive(Debug, Serialize)]
+pub(crate) struct Data {
+    pub(crate) name: String,
+    pub(crate) description: String,
 }
 
 #[derive(Debug, Clone)]

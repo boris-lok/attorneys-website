@@ -1,4 +1,4 @@
-use crate::domain::entities::{ContentData, ContentID, Language, MemberData, MemberID};
+use crate::domain::entities::{ContentData, ContentID, Data, Language, MemberData, MemberID};
 use crate::repositories::content_repository::IContentRepository;
 use crate::repositories::member_repository::IMemberRepository;
 use crate::uow::member::IMemberUnitOfWork;
@@ -8,11 +8,6 @@ pub(crate) struct Request {
     pub(crate) member_id: String,
     pub(crate) data: Data,
     pub(crate) language: String,
-}
-
-pub(crate) struct Data {
-    pub(crate) name: String,
-    pub(crate) description: String,
 }
 
 #[derive(Debug)]
@@ -27,16 +22,22 @@ where
 {
     let mut lock = uow.lock().await;
 
-    let member_id = MemberID::try_from(req.member_id).map_err(|_| Error::BadRequest)?;
-    let language = Language::try_from(req.language).map_err(|_| Error::BadRequest)?;
-    let data = MemberData::try_from(req.data).map_err(|_| Error::BadRequest)?;
+    let (member_id, data, language) = match (
+        MemberID::try_from(req.member_id),
+        MemberData::try_from(req.data),
+        Language::try_from(req.language),
+    ) {
+        (Ok(member_id), Ok(data), Ok(language)) => (member_id, data, language),
+        _ => return Err(Error::BadRequest),
+    };
 
     let content_id = match lock.member_repository().insert(member_id).await {
         Ok(id) => Ok(ContentID::try_from(id).unwrap()),
         Err(e) => return Err(Error::Unknown(e.to_string())),
     }?;
 
-    let data = ContentData::try_from(data).map_err(|_| Error::BadRequest)?;
+    let data = ContentData::try_from(data)
+        .map_err(|_| Error::Unknown("Can't parse data to json".to_string()))?;
 
     let content_id = match lock
         .content_repository()

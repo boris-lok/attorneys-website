@@ -51,53 +51,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::entities::{AvatarData, AvatarJson, ContentData, ContentID, MemberData};
-    use crate::repositories::avatar_repository::IAvatarRepository;
-    use crate::repositories::content_repository::IContentRepository;
-    use crate::repositories::member_repository::IMemberRepository;
-    use crate::uow::member::InMemoryMemberUnitOfWork;
+    use crate::domain::entities::{AvatarData, MemberData};
+    use crate::domain::test_helper::create_fake_member_helper;
     use ulid::Ulid;
-
-    async fn create_fake_member_helper(
-        member_id: MemberID,
-        content: Option<MemberData>,
-        avatar_data: Option<AvatarData>,
-        language: Language,
-    ) -> InMemoryMemberUnitOfWork {
-        let mut uow = crate::uow::member::InMemoryMemberUnitOfWork::new();
-        uow.member_repository()
-            .insert(member_id.clone())
-            .await
-            .expect("Failed to insert a fake member");
-        if content.is_some() {
-            let content_id = ContentID::try_from(member_id.clone()).unwrap();
-            uow.content_repository()
-                .insert(
-                    content_id,
-                    ContentData::try_from(content.unwrap()).unwrap(),
-                    language,
-                )
-                .await
-                .expect("Failed to insert a fake content");
-        } else {
-            // TODO: needs to initialize avatar repository
-            let _ = uow.content_repository();
-        }
-
-        if avatar_data.is_some() {
-            let json =
-                AvatarJson::try_from(avatar_data.unwrap()).expect("Failed to parse avatar json");
-            uow.avatar_repository()
-                .insert(member_id.clone(), json)
-                .await
-                .expect("Failed to insert a fake avatar");
-        } else {
-            // TODO: needs to initialize avatar repository
-            let _ = uow.avatar_repository();
-        }
-
-        uow
-    }
 
     #[tokio::test]
     async fn it_should_return_a_member_otherwise() {
@@ -115,6 +71,7 @@ mod tests {
             Some(content.clone()),
             Some(avatar.clone()),
             Language::EN,
+            false,
         )
         .await;
 
@@ -148,9 +105,14 @@ mod tests {
             name: "Boris".to_string(),
             description: "Boris is a engineer".to_string(),
         };
-        let uow =
-            create_fake_member_helper(member_id.clone(), Some(data.clone()), None, Language::EN)
-                .await;
+        let uow = create_fake_member_helper(
+            member_id.clone(),
+            Some(data.clone()),
+            None,
+            Language::EN,
+            false,
+        )
+        .await;
 
         let req = Request {
             member_id: member_id.as_str().to_string(),
@@ -174,7 +136,8 @@ mod tests {
     #[tokio::test]
     async fn it_should_return_an_error_when_member_is_not_found() {
         let member_id = MemberID::try_from(Ulid::new().to_string()).unwrap();
-        let uow = create_fake_member_helper(member_id.clone(), None, None, Language::EN).await;
+        let uow =
+            create_fake_member_helper(member_id.clone(), None, None, Language::EN, false).await;
 
         let req = Request {
             member_id: member_id.as_str().to_string(),

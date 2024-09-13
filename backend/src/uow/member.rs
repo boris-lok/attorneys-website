@@ -50,7 +50,10 @@ impl InMemoryMemberUnitOfWork {
         }
     }
 
-    pub fn with_error(self) -> Self {
+    pub fn with_error(mut self) -> Self {
+        self.member_repository = self.member_repository.map(|r| r.with_error());
+        self.content_repository = self.content_repository.map(|r| r.with_error());
+        self.avatar_repository = self.avatar_repository.map(|r| r.with_error());
         Self {
             error: true,
             ..self

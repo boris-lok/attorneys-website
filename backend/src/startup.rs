@@ -1,4 +1,4 @@
-use crate::api::{create_member, health_check, upload_member_image};
+use crate::api::{create_member, get_member, health_check, upload_member_image};
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
 use axum::routing::{get, post};
@@ -21,7 +21,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let image_util = ImageUtil {};
     let member_routes = Router::new()
         .route("/members", post(create_member))
-        .route("/members/:id/avatar", post(upload_member_image));
+        .route("/members/:id/avatar", post(upload_member_image))
+        .route("/members/:lang/:id", get(get_member));
 
     let admin_routes = Router::new().merge(member_routes);
 

@@ -149,6 +149,7 @@ impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
 
 #[derive(Debug)]
 pub struct SqlxMemberUnitOfWork<'tx> {
+    pool: &'tx PgPool,
     tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
     member_repository: Option<SqlxMemberRepository<'tx>>,
     content_repository: Option<SqlxContentRepository<'tx>>,
@@ -156,11 +157,12 @@ pub struct SqlxMemberUnitOfWork<'tx> {
 }
 
 impl<'tx> SqlxMemberUnitOfWork<'tx> {
-    pub async fn new(pool: &PgPool) -> anyhow::Result<Self> {
+    pub async fn new(pool: &'tx PgPool) -> anyhow::Result<Self> {
         let tx = pool.begin().await?;
         let tx = Arc::new(Mutex::new(tx));
 
         Ok(Self {
+            pool,
             tx,
             member_repository: None,
             content_repository: None,
@@ -207,7 +209,26 @@ impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
         member_id: &'id MemberID,
         language: &'lang Language,
     ) -> anyhow::Result<Option<Member>> {
-        todo!()
+        let query = r#"
+select member.id as member_id, content.data as content, avatar.data as avatar_data
+from member,
+     content,
+     avatar
+where member.id = content.id
+  and member.id = avatar.id
+  and content.language = $2
+  and member.id = $1;
+        "#;
+
+        let res = sqlx::query_as::<_, Member>(query)
+            .bind(member_id.as_str())
+            .bind(language.as_str())
+            .fetch_optional(self.pool)
+            .await;
+
+        println!("{:?}", res);
+
+        Ok(None)
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {

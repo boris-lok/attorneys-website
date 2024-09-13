@@ -12,6 +12,8 @@ pub enum ApiError {
     InternalServerError(String),
     #[error("Bad Request")]
     BadRequest,
+    #[error("Not found")]
+    NotFound,
 }
 
 impl IntoResponse for ApiError {
@@ -23,6 +25,7 @@ impl IntoResponse for ApiError {
             ),
             ApiError::InternalServerError(reason) => (StatusCode::INTERNAL_SERVER_ERROR, reason),
             ApiError::BadRequest => (StatusCode::BAD_REQUEST, self.to_string()),
+            ApiError::NotFound => (StatusCode::NOT_FOUND, self.to_string()),
         };
 
         let payload = json!({

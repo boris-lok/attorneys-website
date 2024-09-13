@@ -133,7 +133,7 @@ impl AvatarJson {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, sqlx::FromRow)]
 pub struct Member {
     pub member_id: String,
     pub content: serde_json::Value,

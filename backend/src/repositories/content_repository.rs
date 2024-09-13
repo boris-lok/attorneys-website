@@ -1,4 +1,4 @@
-use crate::domain::entities::{ContentData, ContentID, Language};
+use crate::domain::entities::{ContentData, ContentID, Language, MemberData};
 use anyhow::anyhow;
 use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;
@@ -56,6 +56,24 @@ impl InMemoryContentRepository {
         let key = format!("{}_{}", id.as_str(), language.as_str());
 
         Ok(lock.get(&key).cloned())
+    }
+
+    pub async fn list(&self, language: &Language) -> anyhow::Result<Vec<(String, String)>> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let lock = self.content.lock().await;
+        let values = lock
+            .iter()
+            .filter(|(key, _)| key.ends_with(language.as_str()))
+            .map(|(key, value)| {
+                let obj: MemberData = serde_json::from_value(value.0.clone()).unwrap();
+                (key.clone(), obj.name.clone())
+            })
+            .collect::<Vec<_>>();
+
+        Ok(values)
     }
 }
 

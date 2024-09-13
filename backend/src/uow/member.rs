@@ -1,4 +1,4 @@
-use crate::domain::entities::{ContentID, Language, Member, MemberID};
+use crate::domain::entities::{ContentID, Language, Member, MemberID, SimpleMember};
 use crate::repositories::avatar_repository::{
     IAvatarRepository, InMemoryAvatarRepository, SqlxAvatarRepository,
 };
@@ -25,6 +25,12 @@ pub trait IMemberUnitOfWork {
         member_id: &'id MemberID,
         language: &'lang Language,
     ) -> anyhow::Result<Option<Member>>;
+
+    // Get all members for a specific language
+    async fn get_all_members_by_language(
+        &mut self,
+        language: &Language,
+    ) -> anyhow::Result<Vec<SimpleMember>>;
 
     async fn commit(mut self) -> anyhow::Result<()>;
     #[allow(dead_code)]
@@ -141,6 +147,27 @@ impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
         }
     }
 
+    async fn get_all_members_by_language(
+        &mut self,
+        language: &Language,
+    ) -> anyhow::Result<Vec<SimpleMember>> {
+        let res = self
+            .content_repository
+            .as_mut()
+            .unwrap()
+            .list(language)
+            .await?
+            .iter()
+            .map(|(id, name)| SimpleMember {
+                member_id: id.clone(),
+                name: name.clone(),
+                avatar: None,
+            })
+            .collect::<Vec<_>>();
+
+        Ok(res)
+    }
+
     async fn commit(self) -> anyhow::Result<()> {
         Ok(())
     }
@@ -232,6 +259,13 @@ where member.id = content.id
         println!("{:?}", res);
 
         Ok(None)
+    }
+
+    async fn get_all_members_by_language(
+        &mut self,
+        language: &Language,
+    ) -> anyhow::Result<Vec<SimpleMember>> {
+        todo!()
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {

@@ -144,3 +144,10 @@ pub struct Member {
     pub content: serde_json::Value,
     pub avatar_data: Option<serde_json::Value>,
 }
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct SimpleMember {
+    pub member_id: String,
+    pub name: String,
+    pub avatar: Option<String>,
+}

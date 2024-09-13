@@ -136,6 +136,18 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
     }
 
     async fn delete(&self, member_id: MemberID) -> anyhow::Result<bool> {
-        todo!()
+        let query = "UPDATE \"member\" SET deleted_at = now() WHERE id = $1";
+
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        let res = sqlx::query(query)
+            .bind(member_id.as_str())
+            .execute(conn)
+            .await
+            .map(|r| r.rows_affected() > 0)?;
+
+        Ok(res)
     }
 }

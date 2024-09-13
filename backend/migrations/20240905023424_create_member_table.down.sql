@@ -1,6 +1,6 @@
 -- Add down migration script here
-delete
-table members;
+drop table member;
+drop table content;
+drop table avatar;
 
-delete
-table content;
+

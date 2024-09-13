@@ -36,7 +36,6 @@ fn resize_image(data: &[u8], size: Size) -> anyhow::Result<DynamicImage> {
 #[derive(Debug)]
 pub struct FakeImageUtil {
     save_file_error: bool,
-    resize_error: bool,
     files: Mutex<Vec<String>>,
 }
 
@@ -45,7 +44,6 @@ impl FakeImageUtil {
     pub fn new() -> Self {
         Self {
             save_file_error: false,
-            resize_error: false,
             files: Mutex::new(Vec::new()),
         }
     }
@@ -53,13 +51,6 @@ impl FakeImageUtil {
     pub fn with_save_file_error(self) -> Self {
         Self {
             save_file_error: true,
-            ..self
-        }
-    }
-
-    pub fn with_resize_error(self) -> Self {
-        Self {
-            resize_error: true,
             ..self
         }
     }
@@ -77,9 +68,6 @@ impl IImage for FakeImageUtil {
     }
 
     fn resize(&self, data: &[u8], size: Size) -> anyhow::Result<DynamicImage> {
-        if self.resize_error {
-            return Err(anyhow::anyhow!("Failed to resize image"));
-        }
         resize_image(data, size)
     }
 }

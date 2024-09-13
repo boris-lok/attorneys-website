@@ -101,7 +101,7 @@ mod test {
     use crate::utils::image::FakeImageUtil;
     use tokio::fs;
     use tokio::fs::File;
-    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    use tokio::io::AsyncReadExt;
     use ulid::Ulid;
 
     async fn read_tests_file(filename: &str) -> Result<Vec<u8>, std::io::Error> {
@@ -109,7 +109,9 @@ mod test {
         let mut file = File::open(&path).await.expect("get the test file");
         let metadata = fs::metadata(&path).await.expect("get the file metadata");
         let mut buffer = vec![0; metadata.len() as usize];
-        file.read(&mut buffer).await.expect("read the test file");
+        file.read_exact(&mut buffer)
+            .await
+            .expect("read the test file");
 
         Ok(buffer)
     }

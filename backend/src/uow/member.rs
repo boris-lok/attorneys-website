@@ -105,20 +105,20 @@ impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
             .member_repository
             .as_mut()
             .unwrap()
-            .get(&member_id)
+            .get(member_id)
             .await?;
         let content_id = ContentID::try_from(member_id.clone()).unwrap();
         let content = self
             .content_repository
             .as_mut()
             .unwrap()
-            .get(&content_id, &language)
+            .get(&content_id, language)
             .await?;
         let avatar = self
             .avatar_repository
             .as_mut()
             .unwrap()
-            .get(&member_id)
+            .get(member_id)
             .await?;
 
         match (member, content, avatar) {

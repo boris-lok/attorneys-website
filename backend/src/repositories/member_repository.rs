@@ -8,6 +8,7 @@ use tokio::sync::Mutex;
 pub trait IMemberRepository {
     async fn insert(&self, member_id: MemberID) -> anyhow::Result<MemberID>;
     async fn contains(&self, member_id: &MemberID) -> anyhow::Result<bool>;
+    async fn delete(&self, member_id: MemberID) -> anyhow::Result<bool>;
 }
 
 #[derive(Debug)]
@@ -71,6 +72,22 @@ impl IMemberRepository for InMemoryMemberRepository {
         let lock = self.members.lock().await;
         Ok(lock.iter().any(|id| id == m_id))
     }
+
+    async fn delete(&self, member_id: MemberID) -> anyhow::Result<bool> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let mut lock = self.members.lock().await;
+        let removed = lock.iter().position(|id| id == member_id.as_str());
+        match removed {
+            Some(index) => {
+                lock.remove(index);
+                Ok(true)
+            }
+            None => Ok(false),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -116,5 +133,9 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
             })?;
 
         Ok(res)
+    }
+
+    async fn delete(&self, member_id: MemberID) -> anyhow::Result<bool> {
+        todo!()
     }
 }

@@ -4,6 +4,7 @@ create table member
 (
     id         varchar(32) not null,
     created_at timestamptz not null,
+    deleted_at timestamptz not null,
     primary key (id)
 );
 

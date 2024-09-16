@@ -7,6 +7,7 @@ pub use member::update::update_member;
 pub use member::upload_avatar::upload_member_image;
 
 pub use service::create::create_service;
+pub use service::list::list_services;
 pub use service::retrieve::retrieve_service;
 pub use service::update::update_service;
 mod api_error;

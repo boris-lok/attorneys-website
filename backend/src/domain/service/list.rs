@@ -4,8 +4,8 @@ use crate::uow::service::IServiceUnitOfWork;
 use tokio::sync::Mutex;
 
 pub(crate) struct Request {
-    language: String,
-    default_language: Language,
+    pub(crate) language: String,
+    pub(crate) default_language: Language,
 }
 
 pub(crate) enum Error {

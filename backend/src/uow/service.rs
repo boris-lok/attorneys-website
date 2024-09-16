@@ -1,3 +1,5 @@
+use crate::domain::member::entities::{ContentData, ContentID, Language, Member};
+use crate::domain::service::entities::{Service, ServiceData, ServiceID};
 use crate::repositories::content_repository::{
     IContentRepository, InMemoryContentRepository, SqlxContentRepository,
 };
@@ -13,6 +15,12 @@ use tokio::sync::Mutex;
 pub trait IServiceUnitOfWork {
     fn service_repository(&mut self) -> &mut impl IServiceRepository;
     fn content_repository(&mut self) -> &mut impl IContentRepository;
+
+    async fn get_service<'id, 'lang>(
+        &mut self,
+        service_id: &'id ServiceID,
+        language: &'lang Language,
+    ) -> anyhow::Result<Option<Service>>;
 
     async fn commit(mut self) -> anyhow::Result<()>;
     #[allow(dead_code)]
@@ -71,6 +79,40 @@ impl IServiceUnitOfWork for InMemoryServiceUnitOfWork {
         self.content_repository.as_mut().unwrap()
     }
 
+    async fn get_service<'id, 'lang>(
+        &mut self,
+        service_id: &'id ServiceID,
+        language: &'lang Language,
+    ) -> anyhow::Result<Option<Service>> {
+        let service = self
+            .service_repository
+            .as_mut()
+            .unwrap()
+            .get(service_id)
+            .await?;
+
+        let content_id = ContentID::try_from(service_id.clone()).unwrap();
+        let content = self
+            .content_repository
+            .as_mut()
+            .unwrap()
+            .get(&content_id, language)
+            .await?;
+
+        match (service, content) {
+            (None, None) => Ok(None),
+            (Some(s), None) => Ok(None),
+            (None, Some(c)) => Ok(None),
+            (Some(s), Some(c)) => {
+                let data: ServiceData = serde_json::value::from_value(c.0)?;
+                Ok(Some(Service {
+                    service_id: s,
+                    content: data.data,
+                }))
+            }
+        }
+    }
+
     async fn commit(self) -> anyhow::Result<()> {
         Ok(())
     }
@@ -125,6 +167,29 @@ impl<'tx> IServiceUnitOfWork for SqlxServiceUnitOfWork<'tx> {
             self.content_repository = Some(content_repo);
         }
         self.content_repository.as_mut().unwrap()
+    }
+
+    async fn get_service<'id, 'lang>(
+        &mut self,
+        service_id: &'id ServiceID,
+        language: &'lang Language,
+    ) -> anyhow::Result<Option<Service>> {
+        let query = r#"
+select service.id as service_id, content.data->>'data' as content
+from service,
+     content
+where service.id = content.id
+  and content.language = $2
+  and service.id = $1;
+        "#;
+
+        let res = sqlx::query_as::<_, Service>(query)
+            .bind(service_id.as_str())
+            .bind(language.as_str())
+            .fetch_optional(self.pool)
+            .await?;
+
+        Ok(res)
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {

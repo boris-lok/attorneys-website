@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
@@ -26,7 +26,7 @@ impl ServiceID {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ServiceData {
     pub(crate) data: String,
 }
@@ -40,4 +40,10 @@ impl TryFrom<String> for ServiceData {
             false => Ok(ServiceData { data: value }),
         }
     }
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct Service {
+    pub service_id: String,
+    pub content: String,
 }

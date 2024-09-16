@@ -64,7 +64,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::member::entities::AvatarData;
     use crate::domain::test_helper::{create_fake_member_helper, create_fake_service_helper};
     use ulid::Ulid;
 

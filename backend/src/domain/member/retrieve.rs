@@ -140,7 +140,7 @@ mod tests {
             create_fake_member_helper(member_id.clone(), None, None, Language::EN, false).await;
 
         let req = Request {
-            member_id: member_id.as_str().to_string(),
+            member_id: "not_found_id".to_string(),
             language: "en".to_string(),
             default_language: Language::EN,
         };

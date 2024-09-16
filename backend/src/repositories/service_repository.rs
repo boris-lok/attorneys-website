@@ -1,12 +1,13 @@
 use crate::domain::service::entities::ServiceID;
 use anyhow::anyhow;
-use sqlx::{Acquire, Postgres, Transaction};
+use sqlx::{Acquire, Postgres, Row, Transaction};
 use std::sync::Weak;
 use tokio::sync::Mutex;
 
 #[async_trait::async_trait]
 pub trait IServiceRepository {
     async fn insert(&self, service_id: ServiceID) -> anyhow::Result<ServiceID>;
+    async fn contains(&self, service_id: &ServiceID) -> anyhow::Result<bool>;
 }
 
 #[derive(Debug)]
@@ -60,6 +61,15 @@ impl IServiceRepository for InMemoryServiceRepository {
         lock.push(service_id.to_string());
         Ok(service_id)
     }
+
+    async fn contains(&self, service_id: &ServiceID) -> anyhow::Result<bool> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let lock = self.services.lock().await;
+        Ok(lock.iter().any(|id| id.as_str() == service_id.as_str()))
+    }
 }
 
 #[derive(Debug)]
@@ -86,5 +96,24 @@ impl<'tx> IServiceRepository for SqlxServiceRepository<'tx> {
             .await?;
 
         Ok(service_id)
+    }
+
+    async fn contains(&self, service_id: &ServiceID) -> anyhow::Result<bool> {
+        let query = "SELECT id FROM \"service\" WHERE id = $1 limit 1";
+
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        let res = sqlx::query(query)
+            .bind(service_id.as_str())
+            .fetch_optional(conn)
+            .await
+            .map(|row| match row {
+                None => false,
+                Some(row) => row.len() > 0,
+            })?;
+
+        Ok(res)
     }
 }

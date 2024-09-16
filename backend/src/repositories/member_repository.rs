@@ -68,9 +68,8 @@ impl IMemberRepository for InMemoryMemberRepository {
             return Err(anyhow!("Internal Server Error"));
         }
 
-        let m_id = &member_id.as_str();
         let lock = self.members.lock().await;
-        Ok(lock.iter().any(|id| id == m_id))
+        Ok(lock.iter().any(|id| id.as_str() == member_id.as_str()))
     }
 
     async fn delete(&self, member_id: MemberID) -> anyhow::Result<bool> {

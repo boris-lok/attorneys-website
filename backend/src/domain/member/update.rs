@@ -103,7 +103,9 @@ mod tests {
         let res = execute(Mutex::new(uow), req).await;
 
         match res {
-            Ok(_) => {}
+            Ok(_) => {
+                // TODO: check the data is updated
+            }
             Err(_) => unreachable!(),
         }
     }

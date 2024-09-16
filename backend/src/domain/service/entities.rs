@@ -28,7 +28,7 @@ impl ServiceID {
 
 #[derive(Debug, Serialize)]
 pub struct ServiceData {
-    data: String,
+    pub(crate) data: String,
 }
 
 impl TryFrom<String> for ServiceData {

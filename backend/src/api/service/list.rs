@@ -5,9 +5,11 @@ use crate::startup::AppState;
 use crate::uow::service::SqlxServiceUnitOfWork;
 use axum::extract::{Path, State};
 use axum::Json;
+use serde::Serialize;
 use std::collections::HashMap;
 use tokio::sync::Mutex;
 
+#[derive(Debug, Serialize)]
 pub(crate) struct ListServicesResponse {
     services: Vec<Service>,
 }

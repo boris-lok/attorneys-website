@@ -41,16 +41,16 @@ where
         let data = ContentData::try_from(data)
             .map_err(|_| Error::Unknown("Can't parse data to json".to_string()))?;
 
-        let content_id = match lock
+        
+
+        match lock
             .content_repository()
             .insert(content_id, data, language)
             .await
         {
             Ok(id) => Ok(id),
             Err(e) => return Err(Error::Unknown(e.to_string())),
-        }?;
-
-        content_id
+        }?
     };
 
     uow.into_inner()

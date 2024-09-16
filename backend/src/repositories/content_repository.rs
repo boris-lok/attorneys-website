@@ -1,5 +1,6 @@
-use crate::domain::member::entities::{ContentData, ContentID, Language, MemberData};
+use crate::domain::member::entities::{ContentData, ContentID, Language};
 use anyhow::anyhow;
+use serde::de::DeserializeOwned;
 use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;
 use std::sync::Weak;
@@ -58,7 +59,10 @@ impl InMemoryContentRepository {
         Ok(lock.get(&key).cloned())
     }
 
-    pub async fn list(&self, language: &Language) -> anyhow::Result<Vec<(String, String)>> {
+    pub async fn list<T: DeserializeOwned + Clone>(
+        &self,
+        language: &Language,
+    ) -> anyhow::Result<Vec<(String, T)>> {
         if self.error {
             return Err(anyhow!("Internal Server Error"));
         }
@@ -68,8 +72,8 @@ impl InMemoryContentRepository {
             .iter()
             .filter(|(key, _)| key.ends_with(language.as_str()))
             .map(|(key, value)| {
-                let obj: MemberData = serde_json::from_value(value.0.clone()).unwrap();
-                (key.clone(), obj.name.clone())
+                let obj: T = serde_json::from_value(value.0.clone()).unwrap();
+                (key.clone(), obj.clone())
             })
             .collect::<Vec<_>>();
 

@@ -16,11 +16,18 @@ pub trait IServiceUnitOfWork {
     fn service_repository(&mut self) -> &mut impl IServiceRepository;
     fn content_repository(&mut self) -> &mut impl IContentRepository;
 
+    // Get a service by language with full details
     async fn get_service<'id, 'lang>(
         &mut self,
         service_id: &'id ServiceID,
         language: &'lang Language,
     ) -> anyhow::Result<Option<Service>>;
+
+    // Get all services for a specific language
+    async fn get_all_services_by_language(
+        &mut self,
+        language: &Language,
+    ) -> anyhow::Result<Vec<Service>>;
 
     async fn commit(mut self) -> anyhow::Result<()>;
     #[allow(dead_code)]
@@ -113,6 +120,26 @@ impl IServiceUnitOfWork for InMemoryServiceUnitOfWork {
         }
     }
 
+    async fn get_all_services_by_language(
+        &mut self,
+        language: &Language,
+    ) -> anyhow::Result<Vec<Service>> {
+        let res = self
+            .content_repository
+            .as_mut()
+            .unwrap()
+            .list::<ServiceData>(language)
+            .await?
+            .iter()
+            .map(|(id, content)| Service {
+                service_id: id.to_string(),
+                content: content.data.to_string(),
+            })
+            .collect::<Vec<_>>();
+
+        Ok(res)
+    }
+
     async fn commit(self) -> anyhow::Result<()> {
         Ok(())
     }
@@ -187,6 +214,27 @@ where service.id = content.id
             .bind(service_id.as_str())
             .bind(language.as_str())
             .fetch_optional(self.pool)
+            .await?;
+
+        Ok(res)
+    }
+
+    async fn get_all_services_by_language(
+        &mut self,
+        language: &Language,
+    ) -> anyhow::Result<Vec<Service>> {
+        let query = r#"select service.id as service_id,
+content.data->>'data' as content
+from service,
+     content
+where service.id = content.id
+and content.language = $1
+order by seq;
+        "#;
+
+        let res = sqlx::query_as::<_, Service>(query)
+            .bind(language.as_str())
+            .fetch_all(self.pool)
             .await?;
 
         Ok(res)

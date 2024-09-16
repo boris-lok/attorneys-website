@@ -26,7 +26,7 @@ impl ServiceID {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceData {
     pub(crate) data: String,
 }

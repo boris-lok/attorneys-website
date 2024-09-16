@@ -1,4 +1,6 @@
-use crate::domain::member::entities::{ContentID, Language, Member, MemberID, SimpleMember};
+use crate::domain::member::entities::{
+    ContentID, Language, Member, MemberData, MemberID, SimpleMember,
+};
 use crate::repositories::avatar_repository::{
     IAvatarRepository, InMemoryAvatarRepository, SqlxAvatarRepository,
 };
@@ -155,12 +157,12 @@ impl IMemberUnitOfWork for InMemoryMemberUnitOfWork {
             .content_repository
             .as_mut()
             .unwrap()
-            .list(language)
+            .list::<MemberData>(language)
             .await?
             .iter()
-            .map(|(id, name)| SimpleMember {
+            .map(|(id, data)| SimpleMember {
                 member_id: id.clone(),
-                name: name.clone(),
+                name: data.name.to_string(),
                 avatar: None,
             })
             .collect::<Vec<_>>();

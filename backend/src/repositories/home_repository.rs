@@ -68,7 +68,7 @@ impl IHomeRepository for InMemoryHomeRepository {
         }
 
         let lock = self.home.lock().await;
-        Ok(lock.iter().any(|id| id.as_str() == id.as_str()))
+        Ok(lock.iter().any(|hid| hid.as_str() == id.as_str()))
     }
 }
 

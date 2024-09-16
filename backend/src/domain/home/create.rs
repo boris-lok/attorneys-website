@@ -41,8 +41,6 @@ where
         let data = ContentData::try_from(data)
             .map_err(|_| Error::Unknown("Can't parse data to json".to_string()))?;
 
-        
-
         match lock
             .content_repository()
             .insert(content_id, data, language)

@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-pub async fn upload_member_image(
+pub async fn upload_member_avatar(
     State(state): State<AppState>,
     Extension(image_util): Extension<Arc<ImageUtil>>,
     Path(params): Path<HashMap<String, String>>,

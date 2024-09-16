@@ -1,6 +1,6 @@
 use crate::api::{
     create_member, create_service, delete_member, health_check, list_members, list_services,
-    retrieve_member, retrieve_service, update_member, update_service, upload_member_image,
+    retrieve_member, retrieve_service, update_member, update_service, upload_member_avatar,
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
@@ -24,7 +24,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let image_util = ImageUtil {};
     let member_routes = Router::new()
         .route("/members", post(create_member))
-        .route("/members/:id/avatar", post(upload_member_image))
+        .route("/members/:id/avatar", post(upload_member_avatar))
         .route("/members/:id", delete(delete_member))
         .route("/members", put(update_member))
         .route("/members/:lang", get(list_members))

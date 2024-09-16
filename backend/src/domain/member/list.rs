@@ -1,10 +1,10 @@
-use crate::domain::entities::{Language, SimpleMember};
 use crate::domain::member::entities::{Language, SimpleMember};
 use crate::uow::member::IMemberUnitOfWork;
 use tokio::sync::Mutex;
 
 pub(crate) struct Request {
-    language: String,
+    pub(crate) language: String,
+    pub(crate) default_language: Language,
 }
 
 pub(crate) enum Error {
@@ -26,7 +26,19 @@ where
     let res = lock.get_all_members_by_language(&language).await;
 
     match res {
-        Ok(members) => Ok(members),
+        Ok(members) => {
+            if members.is_empty() {
+                match lock
+                    .get_all_members_by_language(&req.default_language)
+                    .await
+                {
+                    Ok(members) => Ok(members),
+                    Err(e) => Err(Error::Unknown(e.to_string())),
+                }
+            } else {
+                Ok(members)
+            }
+        }
         Err(e) => Err(Error::Unknown(e.to_string())),
     }
 }
@@ -34,7 +46,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::entities::{AvatarData, MemberData, MemberID};
+    use crate::domain::member::entities::{AvatarData, MemberData, MemberID};
     use crate::domain::test_helper::create_fake_member_helper;
     use ulid::Ulid;
 
@@ -45,6 +57,7 @@ mod tests {
 
         let req = Request {
             language: "en".to_string(),
+            default_language: Language::ZH,
         };
 
         let res = execute(Mutex::new(uow), req).await;
@@ -79,6 +92,42 @@ mod tests {
 
         let req = Request {
             language: "en".to_string(),
+            default_language: Language::ZH,
+        };
+
+        let res = execute(Mutex::new(uow), req).await;
+
+        match res {
+            Ok(list) => {
+                assert_eq!(list.len(), 1);
+            }
+            Err(_) => unreachable!(),
+        };
+    }
+
+    #[tokio::test]
+    async fn it_should_return_a_members_list_with_default_language_otherwise() {
+        let member_id = MemberID::try_from(Ulid::new().to_string()).unwrap();
+        let content = MemberData {
+            name: "Boris".to_string(),
+            description: "Boris is a engineer".to_string(),
+        };
+        let avatar = AvatarData {
+            large_image: "large".to_string(),
+            small_image: "small".to_string(),
+        };
+        let uow = create_fake_member_helper(
+            member_id.clone(),
+            Some(content.clone()),
+            Some(avatar.clone()),
+            Language::ZH,
+            false,
+        )
+        .await;
+
+        let req = Request {
+            language: "en".to_string(),
+            default_language: Language::ZH,
         };
 
         let res = execute(Mutex::new(uow), req).await;

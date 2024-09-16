@@ -1,4 +1,4 @@
-use crate::domain::member::entities::{ContentData, ContentID, Language, Member};
+use crate::domain::member::entities::{ContentID, Language};
 use crate::domain::service::entities::{Service, ServiceData, ServiceID};
 use crate::repositories::content_repository::{
     IContentRepository, InMemoryContentRepository, SqlxContentRepository,
@@ -101,8 +101,8 @@ impl IServiceUnitOfWork for InMemoryServiceUnitOfWork {
 
         match (service, content) {
             (None, None) => Ok(None),
-            (Some(s), None) => Ok(None),
-            (None, Some(c)) => Ok(None),
+            (Some(_), None) => Ok(None),
+            (None, Some(_)) => Ok(None),
             (Some(s), Some(c)) => {
                 let data: ServiceData = serde_json::value::from_value(c.0)?;
                 Ok(Some(Service {

@@ -79,12 +79,9 @@ pub async fn create_fake_service_helper(
         .expect("Failed to insert a fake member");
     if content.is_some() {
         let content_id = ContentID::try_from(service_id.clone()).unwrap();
+
         uow.content_repository()
-            .insert(
-                content_id,
-                ContentData::try_from(content.unwrap()).unwrap(),
-                language,
-            )
+            .insert(content_id, content.unwrap(), language)
             .await
             .expect("Failed to insert a fake content");
     } else {

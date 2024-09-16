@@ -1,6 +1,5 @@
 use crate::domain::member::entities::Language;
 use crate::domain::service::entities::{Service, ServiceID};
-use crate::uow::member::IMemberUnitOfWork;
 use crate::uow::service::IServiceUnitOfWork;
 use tokio::sync::Mutex;
 
@@ -52,9 +51,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::member::entities::{AvatarData, ContentData, MemberData};
+    use crate::domain::member::entities::ContentData;
     use crate::domain::service::entities::ServiceData;
-    use crate::domain::test_helper::{create_fake_member_helper, create_fake_service_helper};
+    use crate::domain::test_helper::create_fake_service_helper;
     use ulid::Ulid;
 
     #[tokio::test]

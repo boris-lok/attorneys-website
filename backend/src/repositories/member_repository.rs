@@ -108,7 +108,7 @@ impl<'tx> IMemberRepository for SqlxMemberRepository<'tx> {
         let mut lock = conn_ptr.lock().await;
         let conn = lock.acquire().await?;
 
-        sqlx::query("INSERT INTO \"member\" (id, created_at) VALUES ($1, now());")
+        sqlx::query("INSERT INTO \"member\" (id, created_at, seq) VALUES ($1, now(), 32767 );")
             .bind(member_id.as_str())
             .execute(conn)
             .await?;

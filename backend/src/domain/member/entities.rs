@@ -1,3 +1,4 @@
+use crate::domain::service::entities::{ServiceData, ServiceID};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
@@ -84,6 +85,14 @@ impl TryFrom<MemberID> for ContentID {
     }
 }
 
+impl TryFrom<ServiceID> for ContentID {
+    type Error = ();
+
+    fn try_from(value: ServiceID) -> Result<Self, Self::Error> {
+        Ok(ContentID(value.as_str().to_string()))
+    }
+}
+
 impl Display for ContentID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0.clone())
@@ -109,6 +118,15 @@ impl TryFrom<MemberData> for ContentData {
     type Error = anyhow::Error;
 
     fn try_from(value: MemberData) -> anyhow::Result<Self> {
+        let data = serde_json::value::to_value(&value)?;
+        Ok(ContentData(data))
+    }
+}
+
+impl TryFrom<ServiceData> for ContentData {
+    type Error = anyhow::Error;
+
+    fn try_from(value: ServiceData) -> anyhow::Result<Self> {
         let data = serde_json::value::to_value(&value)?;
         Ok(ContentData(data))
     }

@@ -1,4 +1,5 @@
 use crate::domain::entities::{Language, SimpleMember};
+use crate::domain::member::entities::{Language, SimpleMember};
 use crate::uow::member::IMemberUnitOfWork;
 use tokio::sync::Mutex;
 

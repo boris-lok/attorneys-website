@@ -246,8 +246,7 @@ from member,
          left join avatar on avatar.id = content.id
 where member.id = content.id
   and content.language = $2
-  and member.id = $1
-order by member.seq;
+  and member.id = $1;
         "#;
 
         let res = sqlx::query_as::<_, Member>(query)
@@ -263,7 +262,23 @@ order by member.seq;
         &mut self,
         language: &Language,
     ) -> anyhow::Result<Vec<SimpleMember>> {
-        todo!()
+        let query = r#"select member.id as member_id,
+content.data->>'name' as name,
+avatar.data->>'small_image' as avatar
+from member,
+     content
+left join avatar on content.id = avatar.id
+where member.id = content.id
+and content.language = $1
+order by seq;
+        "#;
+
+        let res = sqlx::query_as::<_, SimpleMember>(query)
+            .bind(language.as_str())
+            .fetch_all(self.pool)
+            .await?;
+
+        Ok(res)
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {

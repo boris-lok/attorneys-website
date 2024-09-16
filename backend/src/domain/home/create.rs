@@ -2,9 +2,7 @@ use crate::domain::home::entities::{HomeData, HomeID};
 use crate::domain::member::entities::{ContentData, ContentID, Language};
 use crate::repositories::content_repository::IContentRepository;
 use crate::repositories::home_repository::IHomeRepository;
-use crate::repositories::service_repository::IServiceRepository;
 use crate::uow::home::IHomeUnitOfWork;
-use crate::uow::service::IServiceUnitOfWork;
 use tokio::sync::Mutex;
 
 pub(crate) struct Request {

@@ -6,7 +6,7 @@ use crate::uow::service::IServiceUnitOfWork;
 use tokio::sync::Mutex;
 
 pub(crate) struct Request {
-    pub(crate) service_id: String,
+    pub(crate) home_id: String,
     pub(crate) data: String,
     pub(crate) language: String,
 }
@@ -24,7 +24,7 @@ where
     {
         let mut lock = uow.lock().await;
         let (service_id, data, language) = match (
-            ServiceID::try_from(req.service_id),
+            ServiceID::try_from(req.home_id),
             ServiceData::try_from(req.data),
             Language::try_from(req.language),
         ) {
@@ -78,7 +78,7 @@ mod tests {
             create_fake_service_helper(service_id.clone(), Some(data), Language::EN, false).await;
 
         let req = Request {
-            service_id: service_id.to_string(),
+            home_id: service_id.to_string(),
             data: "new data".to_string(),
             language: "en".to_string(),
         };
@@ -107,7 +107,7 @@ mod tests {
         let not_exists_id = Ulid::new().to_string();
 
         let req = Request {
-            service_id: not_exists_id,
+            home_id: not_exists_id,
             data: "new data".to_string(),
             language: "en".to_string(),
         };
@@ -132,7 +132,7 @@ mod tests {
             create_fake_service_helper(service_id.clone(), Some(data), Language::EN, true).await;
 
         let req = Request {
-            service_id: service_id.to_string(),
+            home_id: service_id.to_string(),
             data: "new data".to_string(),
             language: "en".to_string(),
         };

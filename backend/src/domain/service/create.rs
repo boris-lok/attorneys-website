@@ -61,7 +61,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::member::entities::Data;
     use ulid::Ulid;
 
     #[tokio::test]

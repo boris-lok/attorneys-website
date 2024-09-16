@@ -10,14 +10,14 @@ use std::collections::HashMap;
 use tokio::sync::Mutex;
 
 #[derive(Serialize)]
-pub(crate) struct GetServiceResponse {
+pub(crate) struct RetrieveServiceResponse {
     service: Service,
 }
 
 pub async fn retrieve_service(
     State(state): State<AppState>,
     Path(params): Path<HashMap<String, String>>,
-) -> Result<Json<GetServiceResponse>, ApiError> {
+) -> Result<Json<RetrieveServiceResponse>, ApiError> {
     let uow = SqlxServiceUnitOfWork::new(&state.pool)
         .await
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
@@ -34,7 +34,7 @@ pub async fn retrieve_service(
     match crate::domain::service::retrieve::execute(uow, req).await {
         Ok(service) => match service {
             None => Err(ApiError::NotFound),
-            Some(s) => Ok(Json(GetServiceResponse { service: s })),
+            Some(s) => Ok(Json(RetrieveServiceResponse { service: s })),
         },
         Err(crate::domain::service::retrieve::Error::BadRequest) => Err(ApiError::BadRequest),
         Err(crate::domain::service::retrieve::Error::ServiceNotFound) => Err(ApiError::NotFound),

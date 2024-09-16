@@ -14,7 +14,7 @@ pub(crate) struct GetMemberResponse {
     member: Member,
 }
 
-pub async fn get_member(
+pub async fn retrieve_member(
     State(state): State<AppState>,
     Path(params): Path<HashMap<String, String>>,
 ) -> Result<Json<GetMemberResponse>, ApiError> {

@@ -1,6 +1,6 @@
 use crate::api::api_error::ApiError;
-use crate::domain::entities::{Language, Member};
-use crate::domain::get_member::Error;
+use crate::domain::member::entities::{Language, Member};
+use crate::domain::member::retrieve::Error;
 use crate::startup::AppState;
 use crate::uow::member::SqlxMemberUnitOfWork;
 use axum::extract::{Path, State};
@@ -25,13 +25,13 @@ pub async fn get_member(
     let member_id = params.get("id").ok_or(ApiError::BadRequest)?;
     let lang = params.get("lang").ok_or(ApiError::BadRequest)?;
 
-    let req = crate::domain::get_member::Request {
+    let req = crate::domain::member::retrieve::Request {
         member_id: member_id.to_string(),
         language: lang.to_string(),
         default_language: Language::ZH,
     };
 
-    match crate::domain::get_member::execute(uow, req).await {
+    match crate::domain::member::retrieve::execute(uow, req).await {
         Ok(member) => match member {
             None => Err(ApiError::NotFound),
             Some(member) => Ok(Json(GetMemberResponse { member })),

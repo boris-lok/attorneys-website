@@ -1,4 +1,4 @@
-use crate::domain::entities::MemberID;
+use crate::domain::member::entities::MemberID;
 use anyhow::anyhow;
 use sqlx::{Acquire, Postgres, Row, Transaction};
 use std::sync::Weak;

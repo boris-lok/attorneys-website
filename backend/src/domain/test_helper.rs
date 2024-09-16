@@ -1,5 +1,5 @@
 #[cfg(test)]
-use crate::domain::entities::{
+use crate::domain::member::entities::{
     AvatarData, AvatarJson, ContentData, ContentID, Language, MemberData, MemberID,
 };
 #[cfg(test)]

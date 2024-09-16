@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::domain::upload_avatar::{execute, Error, Request};
+use crate::domain::member::upload_avatar::{execute, Error, Request};
 use crate::startup::AppState;
 use crate::uow::member::SqlxMemberUnitOfWork;
 use crate::utils::image::ImageUtil;

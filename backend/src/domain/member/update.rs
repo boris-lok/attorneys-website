@@ -1,4 +1,6 @@
-use crate::domain::entities::{ContentData, ContentID, Data, Language, MemberData, MemberID};
+use crate::domain::member::entities::{
+    ContentData, ContentID, Data, Language, MemberData, MemberID,
+};
 use crate::repositories::content_repository::IContentRepository;
 use crate::repositories::member_repository::IMemberRepository;
 use crate::uow::member::IMemberUnitOfWork;
@@ -63,7 +65,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::entities::AvatarData;
+    use crate::domain::member::entities::AvatarData;
     use crate::domain::test_helper::create_fake_member_helper;
     use ulid::Ulid;
 

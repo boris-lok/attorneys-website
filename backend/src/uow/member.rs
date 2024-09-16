@@ -1,4 +1,4 @@
-use crate::domain::entities::{ContentID, Language, Member, MemberID, SimpleMember};
+use crate::domain::member::entities::{ContentID, Language, Member, MemberID, SimpleMember};
 use crate::repositories::avatar_repository::{
     IAvatarRepository, InMemoryAvatarRepository, SqlxAvatarRepository,
 };

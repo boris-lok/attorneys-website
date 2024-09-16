@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
-use crate::domain::create_member;
-use crate::domain::create_member::{execute, Request};
-use crate::domain::entities::Data;
+use crate::domain::member::create;
+use crate::domain::member::create::{execute, Request};
+use crate::domain::member::entities::Data;
 use crate::startup::AppState;
 use crate::uow::member::SqlxMemberUnitOfWork;
 use axum::extract::State;
@@ -47,7 +47,7 @@ pub async fn create_member(
 
     match execute(uow, request).await {
         Ok(id) => Ok(Json(CreateMemberResponse { member_id: id })),
-        Err(create_member::Error::BadRequest) => Err(ApiError::BadRequest),
-        Err(create_member::Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
+        Err(create::Error::BadRequest) => Err(ApiError::BadRequest),
+        Err(create::Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
     }
 }

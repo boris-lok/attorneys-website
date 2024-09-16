@@ -1,4 +1,4 @@
-use crate::domain::entities::MemberID;
+use crate::domain::member::entities::MemberID;
 use crate::repositories::member_repository::IMemberRepository;
 use crate::uow::member::IMemberUnitOfWork;
 use tokio::sync::Mutex;
@@ -41,7 +41,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::entities::{AvatarData, Language, MemberData, MemberID};
+    use crate::domain::member::entities::{AvatarData, Language, MemberData, MemberID};
     use crate::domain::test_helper::create_fake_member_helper;
     use ulid::Ulid;
 

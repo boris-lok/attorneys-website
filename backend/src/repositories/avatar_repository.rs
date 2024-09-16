@@ -1,4 +1,4 @@
-use crate::domain::entities::{AvatarJson, MemberID};
+use crate::domain::member::entities::{AvatarJson, MemberID};
 use anyhow::anyhow;
 use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;

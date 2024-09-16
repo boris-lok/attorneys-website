@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::domain::delete_member::Error;
+use crate::domain::member::delete::Error;
 use crate::startup::AppState;
 use crate::uow::member::SqlxMemberUnitOfWork;
 use axum::extract::{Path, State};
@@ -17,11 +17,11 @@ pub async fn delete_member(
     let uow = Mutex::new(uow);
     let member_id = params.get("id").ok_or(ApiError::BadRequest)?;
 
-    let req = crate::domain::delete_member::Request {
+    let req = crate::domain::member::delete::Request {
         member_id: member_id.to_string(),
     };
 
-    match crate::domain::delete_member::execute(uow, req).await {
+    match crate::domain::member::delete::execute(uow, req).await {
         Ok(_) => Ok(StatusCode::OK),
         Err(Error::BadRequest) => Err(ApiError::BadRequest),
         Err(Error::MemberNotFound) => Err(ApiError::NotFound),

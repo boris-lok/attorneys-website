@@ -1,4 +1,4 @@
-use crate::domain::entities::{AvatarData, AvatarJson, MemberID};
+use crate::domain::member::entities::{AvatarData, AvatarJson, MemberID};
 use crate::repositories::avatar_repository::IAvatarRepository;
 use crate::repositories::member_repository::IMemberRepository;
 use crate::uow::member::IMemberUnitOfWork;

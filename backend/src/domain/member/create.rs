@@ -1,4 +1,6 @@
-use crate::domain::entities::{ContentData, ContentID, Data, Language, MemberData, MemberID};
+use crate::domain::member::entities::{
+    ContentData, ContentID, Data, Language, MemberData, MemberID,
+};
 use crate::repositories::content_repository::IContentRepository;
 use crate::repositories::member_repository::IMemberRepository;
 use crate::uow::member::IMemberUnitOfWork;

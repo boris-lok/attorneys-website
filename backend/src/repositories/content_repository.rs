@@ -1,4 +1,4 @@
-use crate::domain::entities::{ContentData, ContentID, Language, MemberData};
+use crate::domain::member::entities::{ContentData, ContentID, Language, MemberData};
 use anyhow::anyhow;
 use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;

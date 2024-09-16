@@ -14,6 +14,7 @@ create table content
     id         varchar(32) not null,
     data       jsonb       not null,
     created_at timestamptz not null,
+    updated_at timestamptz,
     language   char(4)     not null,
     primary key (id, language)
 );

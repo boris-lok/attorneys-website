@@ -165,6 +165,19 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         data: ContentData,
         language: Language,
     ) -> anyhow::Result<()> {
-        todo!()
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        sqlx::query(
+            "UPDATE \"content\" SET data = $1, updated_at = now() WHERE id = $2 AND language = $3;",
+        )
+        .bind(data.0)
+        .bind(content_id.as_str())
+        .bind(language.as_str())
+        .execute(conn)
+        .await?;
+
+        Ok(())
     }
 }

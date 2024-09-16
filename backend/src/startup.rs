@@ -1,7 +1,9 @@
-use crate::api::{create_member, delete_member, get_member, health_check, upload_member_image};
+use crate::api::{
+    create_member, delete_member, get_member, health_check, update_member, upload_member_image,
+};
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
-use axum::routing::{delete, get, post};
+use axum::routing::{delete, get, post, put};
 use axum::{Extension, Router};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -23,7 +25,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/members", post(create_member))
         .route("/members/:id/avatar", post(upload_member_image))
         .route("/members/:lang/:id", get(get_member))
-        .route("/members/:id", delete(delete_member));
+        .route("/members/:id", delete(delete_member))
+        .route("/members", put(update_member));
 
     let admin_routes = Router::new().merge(member_routes);
 

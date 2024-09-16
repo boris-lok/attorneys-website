@@ -242,23 +242,21 @@ impl<'tx> IMemberUnitOfWork for SqlxMemberUnitOfWork<'tx> {
         let query = r#"
 select member.id as member_id, content.data as content, avatar.data as avatar_data
 from member,
-     content,
-     avatar
+     content
+         left join avatar on avatar.id = content.id
 where member.id = content.id
-  and member.id = avatar.id
   and content.language = $2
-  and member.id = $1;
+  and member.id = $1
+order by member.seq;
         "#;
 
         let res = sqlx::query_as::<_, Member>(query)
             .bind(member_id.as_str())
             .bind(language.as_str())
             .fetch_optional(self.pool)
-            .await;
+            .await?;
 
-        println!("{:?}", res);
-
-        Ok(None)
+        Ok(res)
     }
 
     async fn get_all_members_by_language(

@@ -88,7 +88,7 @@
       &.active {
         height: calc(100vh - 90px);
         overflow-y: hidden;
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(1rem);
       }
 
       a {

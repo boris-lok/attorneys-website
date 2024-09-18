@@ -118,6 +118,7 @@
       overflow: clip;
       transition: all 0.5s cubic-bezier(.77, 0, .18, 1);
       z-index: $layout-nav-index;
+      display: flex;
 
       &.active {
         height: calc(100vh - 90px);
@@ -130,7 +131,8 @@
         flex-direction: row;
         align-items: center;
         gap: 0.5rem;
-        margin: 0.75rem 0;
+        margin-top: 2rem;
+        margin-left: 0.5rem;
         position: relative;
         padding: 0 1.25rem;
 

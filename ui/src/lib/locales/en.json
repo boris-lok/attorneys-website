@@ -11,5 +11,9 @@
   "members": "Members",
   "about_us": "About Us",
   "about_us.content": "We are a company",
-  "contact_us": "Contact Us"
+  "contact_us": "Contact Us",
+  "navbar.home": "Home",
+  "navbar.services": "Services",
+  "navbar.members": "Members",
+  "navbar.contact_us": "Contact Us"
 }

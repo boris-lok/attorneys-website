@@ -6,7 +6,7 @@
     import UploadImage from "$lib/components/UploadImage.svelte";
     import type {MemberPreview} from "$lib/models/Member";
     import Member from "$lib/components/Member.svelte";
-    import {finalize, from, tap} from "rxjs";
+    import {finalize} from "rxjs";
     import {Members} from "$lib/services";
     import {startWithTap} from "$lib/utils";
 
@@ -95,11 +95,11 @@
                 <Input label={$t('create.members.name')} name="name" on:input={onNameChanged}/>
                 <TextArea label={$t('create.members.description')} on:input={onDescriptionChanged}/>
                 <div class="btn-container">
-                    <LoadingButton text={$t('create.members.create_btn')} classname="primary-blue"
-                                   on:click={onCreateBtnClicked}/>
-                    <LoadingButton text={$t('create.members.preview_btn')} classname="primary-orange"
-                                   on:click={onPreviewBtnClicked}/>
-                    <LoadingButton text={$t('create.members.cancel_btn')} classname="primary-red"/>
+                    <LoadingButton classname="primary-blue" on:click={onCreateBtnClicked}
+                                   text={$t('create.members.create_btn')}/>
+                    <LoadingButton classname="primary-orange" on:click={onPreviewBtnClicked}
+                                   text={$t('create.members.preview_btn')}/>
+                    <LoadingButton classname="primary-red" text={$t('create.members.cancel_btn')}/>
                 </div>
             </div>
         </div>

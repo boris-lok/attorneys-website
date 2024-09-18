@@ -11,5 +11,9 @@
   "members": "專業團隊",
   "about_us": "關於我們",
   "about_us.content": "描述",
-  "contact_us": "聯絡我們"
+  "contact_us": "聯絡我們",
+  "navbar.home": "首頁",
+  "navbar.services": "服務項目",
+  "navbar.members": "專業團隊",
+  "navbar.contact_us": "聯絡我們"
 }

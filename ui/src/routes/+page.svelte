@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {t, locale} from 'svelte-i18n';
+    import {locale, t} from 'svelte-i18n';
 
     // Optionally, you can set the locale manually
     // $locale = 'en'; // For English

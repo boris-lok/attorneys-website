@@ -8,87 +8,145 @@
     }
 </script>
 
-<nav>
-    <div class="brand">
-        <span>{$t('brand')}</span>
-    </div>
+<header class="header">
+    <a class="logo" href="#">Logo</a>
 
-    <i class="material-icons menu-icon" on:click={toggleMenu}>
-        {isMenuOpen ? 'close' : 'menu'}
-    </i>
+    <label class="icons" for="">
+        <button class="material-icon hidden" class:active={!isMenuOpen} on:click={toggleMenu}>menu</button>
+        <button class="material-icon hidden" class:active={isMenuOpen} on:click={toggleMenu}>close</button>
+    </label>
 
-    <div class="nav-links" class:active={isMenuOpen}>
-        <a href="/admin/members/create">{$t('members')}</a>
-    </div>
-</nav>
+    <nav class="navbar" class:active={isMenuOpen}>
+        <a href="#">
+            <span class="material-icon">home</span>
+            <span>{$t('navbar.home')}</span>
+        </a>
+        <a href="#">
+            <span class="material-icon">event_note</span>
+            <span>{$t('navbar.services')}</span>
+        </a>
+        <a href="#">
+            <span class="material-icon">group</span>
+            <span>{$t('navbar.members')}</span>
+        </a>
+        <a href="#">
+            <span class="material-icon">contacts</span>
+            <span>{$t('navbar.contact_us')}</span>
+        </a>
+    </nav>
+</header>
 
 <style lang="scss">
-  nav {
+  header {
+    position: relative;
     display: flex;
+    padding: 1.25rem 5%;
     justify-content: space-between;
     align-items: center;
-    padding: .75rem 1.5rem;
-    background-image: linear-gradient($deep-blue, $regular-blue);
-    color: $white;
+    box-shadow: 0 0 0.25rem 0 $deep-grey;
 
-    .brand {
-      display: flex;
-      align-items: center;
-      font-size: 1.5rem;
+    .logo {
+      font-size: 2rem;
       font-weight: bold;
-      line-height: 36px;
     }
 
-    .menu-icon {
-      cursor: pointer;
+    a {
+      color: $black;
+      text-decoration: none;
     }
 
-    .nav-links {
-      display: flex;
-      flex-direction: column;
+    .icons {
+      .hidden {
+        display: none;
+      }
+
+      .active {
+        display: inline-block;
+      }
+
+      button {
+        font-size: 2rem;
+        cursor: pointer;
+        background-color: transparent;
+        border: none;
+        outline: none;
+      }
+    }
+
+    .navbar {
       position: absolute;
-      top: 60px;
+      top: 100%;
       left: 0;
       right: 0;
-      background-image: linear-gradient($regular-blue, $light-blue);
-      gap: 1.5rem;
-      z-index: $layout-nav-index;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height .5s cubic-bezier(.86,0,.07,1) ;
+      flex-direction: column;
+      height: 0;
+      background-color: rgba(248, 250, 252, 0.1);
+      overflow: clip;
+      transition: all 0.5s cubic-bezier(.77, 0, .18, 1);
 
       &.active {
-        max-height: 100vh;
+        height: 20rem;
+        overflow-y: scroll;
+        backdrop-filter: blur(8px);
       }
 
       a {
-        text-decoration: none;
-        color: $white;
-        font-weight: 500;
-        transition: color 0.2s;
-        padding: 1rem 1.5rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.75rem 0;
+        position: relative;
+        padding: 0 1.25rem;
 
-        &:hover {
-          color: $deep-orange;
+        span:nth-child(1) {
+          font-size: 1.5rem;
+          position: absolute;
+          top: 0.5rem;
+        }
+
+        span:nth-child(2) {
+          font-size: 1.5rem;
+          font-weight: 500;
+          display: inline-block;
+          margin-left: 2rem;
         }
       }
     }
   }
 
-  @media (min-width: 758px) {
-    nav {
-      background-image: linear-gradient(to right, $deep-blue, $regular-blue);
+  @media (min-width: 768px) {
+    .header {
+      padding: 1.25rem 10%;
 
-      .nav-links {
-        flex-direction: row;
-        position: relative;
-        max-height: 60px;
-        top: 0;
-        background-image: unset;
+      .icons {
+        display: none;
       }
 
-      .menu-icon {
-        display: none;
+      .navbar {
+        position: relative;
+        height: fit-content;
+        display: flex;
+        flex-direction: row;
+
+        a {
+          transition: color 0.3s ease-in-out;
+
+          &:hover {
+            color: $deep-blue;
+          }
+
+          span:nth-child(1) {
+            position: relative;
+            top: 0;
+          }
+
+          span:nth-child(2) {
+            font-size: 1rem;
+            margin-left: 0.25rem;
+            white-space: nowrap;
+          }
+        }
       }
     }
   }

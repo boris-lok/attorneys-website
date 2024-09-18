@@ -28,7 +28,7 @@
 <div class="member-wrapper">
     <section>
         <div class="avatar-wrapper">
-            <img bind:this={image} alt="{member.name}" src="" width="128" height="128" class:show={hasImage}/>
+            <img alt="{member.name}" bind:this={image} class:show={hasImage} height="128" src="" width="128"/>
             <span class="material-icon" class:show={!hasImage}>account_circle</span>
             <p>{member.name}&nbsp;{$t('member.attorney.suffix')}</p>
         </div>

@@ -22,15 +22,15 @@
   .home-wrapper {
     display: flex;
     flex-direction: column;
-    margin: 1.5rem 5%;
+    margin: 15rem 5%;
   }
 
   @media (min-width: 768px) {
     .home-wrapper {
-      margin: 3rem 10%;
+      margin: 10rem 10%;
       padding: 3rem;
       border-radius: 1rem;
-      box-shadow: 0 0 1rem 0 $grey;
+      background-color: white;
     }
   }
 </style>

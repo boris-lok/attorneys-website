@@ -1,58 +1,93 @@
 <script lang="ts">
     import {t} from "svelte-i18n";
+    import bgImage from "$lib/assets/justice_1280.jpg";
 
     let isMenuOpen = false;
+    let width: number;
 
     function toggleMenu() {
         isMenuOpen = !isMenuOpen;
     }
+
+    $: if (width > 768) {
+        isMenuOpen = false;
+    }
 </script>
 
+<svelte:window bind:innerWidth={width} on:wheel|nonpassive={e => {
+    if (isMenuOpen) {e.preventDefault();}
+}}/>
 <header class="header">
-    <a class="logo" href="#">Logo</a>
+    <div class="top-bar">
+        <a class="logo" href="#">Logo</a>
+        <label class="icons" for="">
+            <button class="material-icon hidden" class:active={!isMenuOpen} on:click={toggleMenu}>menu</button>
+            <button class="material-icon hidden" class:active={isMenuOpen} on:click={toggleMenu}>close</button>
+        </label>
 
-    <label class="icons" for="">
-        <button class="material-icon hidden" class:active={!isMenuOpen} on:click={toggleMenu}>menu</button>
-        <button class="material-icon hidden" class:active={isMenuOpen} on:click={toggleMenu}>close</button>
-    </label>
+        <nav class="navbar" class:active={isMenuOpen}>
+            <a href="#">
+                <span class="material-icon">home</span>
+                <span>{$t('navbar.home')}</span>
+            </a>
+            <a href="#">
+                <span class="material-icon">event_note</span>
+                <span>{$t('navbar.services')}</span>
+            </a>
+            <a href="#">
+                <span class="material-icon">group</span>
+                <span>{$t('navbar.members')}</span>
+            </a>
+            <a href="#">
+                <span class="material-icon">contacts</span>
+                <span>{$t('navbar.contact_us')}</span>
+            </a>
+        </nav>
+    </div>
 
-    <nav class="navbar" class:active={isMenuOpen}>
-        <a href="#">
-            <span class="material-icon">home</span>
-            <span>{$t('navbar.home')}</span>
-        </a>
-        <a href="#">
-            <span class="material-icon">event_note</span>
-            <span>{$t('navbar.services')}</span>
-        </a>
-        <a href="#">
-            <span class="material-icon">group</span>
-            <span>{$t('navbar.members')}</span>
-        </a>
-        <a href="#">
-            <span class="material-icon">contacts</span>
-            <span>{$t('navbar.contact_us')}</span>
-        </a>
-    </nav>
+    <section class="bg">
+        <img alt="bg-image" src={bgImage}>
+    </section>
+
 </header>
 
 <style lang="scss">
   header {
     position: relative;
     display: flex;
-    padding: 1.25rem 5%;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 0 0.25rem 0 $deep-grey;
 
-    .logo {
-      font-size: 2rem;
-      font-weight: bold;
+    .bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: -1;
+      overflow-clip: clip;
+      width: 100%;
+
+      img {
+        width: 100%;
+        height: 320px;
+      }
     }
 
-    a {
-      color: $black;
-      text-decoration: none;
+    .top-bar {
+      display: flex;
+      flex-direction: row;
+      padding: 1.25rem 5%;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background-color: rgba(248, 250, 252, 0.6);
+      backdrop-filter: blur(.25rem);
+
+      .logo {
+        font-size: 2rem;
+        font-weight: bold;
+      }
     }
 
     .icons {
@@ -80,7 +115,6 @@
       right: 0;
       flex-direction: column;
       height: 0;
-      background-color: rgba(248, 250, 252, 0.1);
       overflow: clip;
       transition: all 0.5s cubic-bezier(.77, 0, .18, 1);
       z-index: $layout-nav-index;
@@ -116,10 +150,13 @@
     }
   }
 
+  a {
+    color: $black;
+    text-decoration: none;
+  }
+
   @media (min-width: 768px) {
     .header {
-      padding: 1.25rem 8%;
-
       .icons {
         display: none;
       }

@@ -2,7 +2,7 @@ body {
   border: none;
   width: 100%;
 
-  font-family: "Noto Serif TC", "Noto", monospace, sans-serif;
+  font-family: "Noto Sans TC", "Noto", monospace, sans-serif;
   font-weight: 400;
   font-style: normal;
   font-synthesis: none;
@@ -32,32 +32,55 @@ body {
 }
 
 h1 {
-  font-size: 2rem;
-  line-height: 4rem;
+  font-size: 1.75rem;
+  line-height: 3.5rem;
   padding: 1rem 0;
   font-weight: 700;
 }
 
 h2 {
-  font-size: 1.75rem;
-  line-height: 3.5rem;
+  font-size: 1.5rem;
+  line-height: 3rem;
   padding: 0.75rem 0;
   font-weight: 600;
 }
 
 h3 {
-  font-size: 1.5rem;
-  line-height: 3rem;
+  font-size: 1.25rem;
+  line-height: 2.5rem;
   padding: 0.5rem 0;
   font-weight: 500;
 }
 
 p {
-  font-size: 1.25rem;
-  line-height: 2.5rem;
+  font-size: 1rem;
+  line-height: 2rem;
   font-weight: 400;
   padding: 0.5rem 0;
 }
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 2rem;
+    line-height: 4rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    line-height: 3.5rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    line-height: 3rem;
+  }
+
+  p {
+    font-size: 1.25rem;
+    line-height: 2.5rem;
+  }
+}
+
 
 /* TODO: Just a workaround to adjust the Markdown component style. */
 .services-wrapper {

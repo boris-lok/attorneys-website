@@ -26,9 +26,9 @@
   .contact-us-section {
     display: flex;
     flex-direction: column;
-    gap: 4rem;
+    gap: 2rem;
     align-items: center;
-    margin: 2rem 5%;
+    margin: 16rem 5% 5rem 5%;
 
     .title {
       font-size: 2rem;
@@ -37,7 +37,6 @@
       height: 4rem;
       line-height: 4rem;
       text-align: center;
-      background: linear-gradient(90deg, rgba(203, 223, 249, 0.1) 20%, rgba(147, 197, 253, 0.5) 50%, rgba(203, 223, 249, 0.1) 80%);
     }
 
     .wrapper {
@@ -52,7 +51,7 @@
       }
 
       span {
-        font-size: 1.5rem;
+        font-size: 1rem;
         display: flex;
         justify-content: center;
         padding: 2.5rem 10%;
@@ -82,22 +81,22 @@
 
   @media (min-width: 768px) {
     .contact-us-section {
-      gap: 1rem;
-      margin: 8rem 10%;
+      gap: 0;
+      margin: 9.5rem 10%;
       box-shadow: 0 0 1.5rem 0 $grey;
       border-radius: 0.75rem;
       padding-bottom: 2.5rem;
       overflow: clip;
+      backdrop-filter: blur(.25rem);
 
       .title {
         width: 100%;
         height: 5rem;
         text-align: center;
-        background-color: $light-blue;
         font-size: 2rem;
         font-weight: bold;
         line-height: 5rem;
-
+        color: $white;
       }
 
       .wrapper {

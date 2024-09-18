@@ -83,10 +83,11 @@
       background-color: rgba(248, 250, 252, 0.1);
       overflow: clip;
       transition: all 0.5s cubic-bezier(.77, 0, .18, 1);
+      z-index: $layout-nav-index;
 
       &.active {
-        height: 20rem;
-        overflow-y: scroll;
+        height: calc(100vh - 90px);
+        overflow-y: hidden;
         backdrop-filter: blur(8px);
       }
 
@@ -117,7 +118,7 @@
 
   @media (min-width: 768px) {
     .header {
-      padding: 1.25rem 10%;
+      padding: 1.25rem 8%;
 
       .icons {
         display: none;
@@ -128,6 +129,10 @@
         height: fit-content;
         display: flex;
         flex-direction: row;
+
+        &.active {
+          height: fit-content;
+        }
 
         a {
           transition: color 0.3s ease-in-out;

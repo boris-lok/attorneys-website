@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {t} from "svelte-i18n";
+    import {locale, t} from "svelte-i18n";
     import bgSmall from "$lib/assets/justice_480.png";
     import bgLarge from "$lib/assets/justice_1280.png";
 
@@ -9,6 +9,9 @@
     function toggleMenu() {
         isMenuOpen = !isMenuOpen;
     }
+
+    // TODO: support multiple languages
+    $locale = 'zh';
 
     $: if (width > 768) {
         isMenuOpen = false;
@@ -48,7 +51,7 @@
 
     <section class="bg">
         <picture>
-            <source srcset={bgLarge} media="(min-width: 768px)">
+            <source media="(min-width: 768px)" srcset={bgLarge}>
             <img alt="bg-image" src={bgSmall}>
         </picture>
     </section>

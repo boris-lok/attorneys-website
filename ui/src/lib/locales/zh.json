@@ -15,5 +15,6 @@
   "navbar.home": "首頁",
   "navbar.services": "服務項目",
   "navbar.members": "專業團隊",
-  "navbar.contact_us": "聯絡我們"
+  "navbar.contact_us": "聯絡我們",
+  "loading": "讀取中"
 }

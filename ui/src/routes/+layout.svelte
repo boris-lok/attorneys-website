@@ -8,4 +8,10 @@
 <main>
     <slot/>
 </main>
-<Footer />
+<Footer/>
+
+<style lang="scss">
+  main {
+    min-height: 67vh
+  }
+</style>

@@ -15,5 +15,6 @@
   "navbar.home": "Home",
   "navbar.services": "Services",
   "navbar.members": "Members",
-  "navbar.contact_us": "Contact Us"
+  "navbar.contact_us": "Contact Us",
+  "loading": "Loading"
 }

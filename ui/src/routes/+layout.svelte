@@ -13,7 +13,7 @@
 <style lang="scss">
   main {
     min-height: 67vh;
-    margin: 15rem 5% 10rem 5%;
+    margin: 15rem 5% 2.5rem 5%;
   }
 
   @media (min-width: 768px) {

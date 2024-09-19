@@ -18,7 +18,7 @@
 
   @media (min-width: 768px) {
     main {
-      margin: 20rem 10% 5rem 10%;
+      margin: 22rem 10% 5rem 10%;
     }
   }
 </style>

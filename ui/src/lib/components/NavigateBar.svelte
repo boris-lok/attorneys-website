@@ -44,19 +44,19 @@
         </div>
 
         <nav class="navbar" class:active={isMenuOpen}>
-            <a href="/" class:active={path === '/'}>
+            <a class:active={path === '/'} href="/">
                 <span class="material-icon">home</span>
                 <span>{$t('navbar.home')}</span>
             </a>
-            <a href="/services" class:active={path === '/services'}>
+            <a class:active={path === '/services'} href="/services">
                 <span class="material-icon">event_note</span>
                 <span>{$t('navbar.services')}</span>
             </a>
-            <a href="#" class:active={path === '/members'}>
+            <a class:active={path === '/members'} href="#">
                 <span class="material-icon">group</span>
                 <span>{$t('navbar.members')}</span>
             </a>
-            <a href="/contact" class:active={path==='/contact'}>
+            <a class:active={path==='/contact'} href="/contact">
                 <span class="material-icon">contacts</span>
                 <span>{$t('navbar.contact_us')}</span>
             </a>
@@ -222,7 +222,8 @@
 
     .bg {
       img {
-        height: 480px;
+        height: 40vh;
+        object-fit: cover;
       }
     }
   }

@@ -2,20 +2,34 @@
     import {locale, t} from "svelte-i18n";
     import bgSmall from "$lib/assets/justice_480.png";
     import bgLarge from "$lib/assets/justice_1920.png";
+    import {page} from "$app/stores";
 
     let isMenuOpen = false;
     let width: number;
+    let path = "/";
 
+    // handles the menu/close icon clicked
     function toggleMenu() {
         isMenuOpen = !isMenuOpen;
+    }
+
+    // handles the path changed
+    function onPathChanged(newPath: string) {
+        isMenuOpen = false;
+        console.log(`new path: ${newPath}`);
+        path = newPath
     }
 
     // TODO: support multiple languages
     $locale = 'zh';
 
+    // listen the window's width changed
     $: if (width > 768) {
         isMenuOpen = false;
     }
+
+    // listen the path changed
+    $: onPathChanged($page.url.pathname)
 </script>
 
 <svelte:window bind:innerWidth={width} on:wheel|nonpassive={e => {
@@ -24,25 +38,25 @@
 <header class="header">
     <div class="top-bar">
         <a class="logo" href="/">Logo</a>
-        <label class="icons" for="">
+        <div class="icons">
             <button class="material-icon hidden" class:active={!isMenuOpen} on:click={toggleMenu}>menu</button>
             <button class="material-icon hidden" class:active={isMenuOpen} on:click={toggleMenu}>close</button>
-        </label>
+        </div>
 
         <nav class="navbar" class:active={isMenuOpen}>
-            <a href="/">
+            <a href="/" class:active={path === '/'}>
                 <span class="material-icon">home</span>
                 <span>{$t('navbar.home')}</span>
             </a>
-            <a href="/services">
+            <a href="/services" class:active={path === '/services'}>
                 <span class="material-icon">event_note</span>
                 <span>{$t('navbar.services')}</span>
             </a>
-            <a href="#">
+            <a href="#" class:active={path === '/members'}>
                 <span class="material-icon">group</span>
                 <span>{$t('navbar.members')}</span>
             </a>
-            <a href="contact">
+            <a href="/contact" class:active={path==='/contact'}>
                 <span class="material-icon">contacts</span>
                 <span>{$t('navbar.contact_us')}</span>
             </a>
@@ -126,6 +140,12 @@
         margin-left: 0.5rem;
         position: relative;
         padding: 0 1.25rem;
+
+        &.active {
+          color: $deep-orange;
+          cursor: default;
+          pointer-events: none;
+        }
 
         span:nth-child(1) {
           font-size: 1.5rem;

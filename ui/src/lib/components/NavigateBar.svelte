@@ -23,18 +23,18 @@
 }}/>
 <header class="header">
     <div class="top-bar">
-        <a class="logo" href="#">Logo</a>
+        <a class="logo" href="/">Logo</a>
         <label class="icons" for="">
             <button class="material-icon hidden" class:active={!isMenuOpen} on:click={toggleMenu}>menu</button>
             <button class="material-icon hidden" class:active={isMenuOpen} on:click={toggleMenu}>close</button>
         </label>
 
         <nav class="navbar" class:active={isMenuOpen}>
-            <a href="#">
+            <a href="/">
                 <span class="material-icon">home</span>
                 <span>{$t('navbar.home')}</span>
             </a>
-            <a href="#">
+            <a href="/services">
                 <span class="material-icon">event_note</span>
                 <span>{$t('navbar.services')}</span>
             </a>
@@ -42,21 +42,19 @@
                 <span class="material-icon">group</span>
                 <span>{$t('navbar.members')}</span>
             </a>
-            <a href="#">
+            <a href="contact">
                 <span class="material-icon">contacts</span>
                 <span>{$t('navbar.contact_us')}</span>
             </a>
         </nav>
     </div>
-
-    <section class="bg">
-        <picture>
-            <source media="(min-width: 768px)" srcset={bgLarge}>
-            <img alt="bg-image" src={bgSmall}>
-        </picture>
-    </section>
-
 </header>
+<section class="bg">
+    <picture>
+        <source media="(min-width: 768px)" srcset={bgLarge}>
+        <img alt="" src={bgSmall}>
+    </picture>
+</section>
 
 <style lang="scss">
   header {
@@ -65,21 +63,8 @@
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 0 0.25rem 0 $deep-grey;
+    z-index: $layout-nav-index;
 
-    .bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: -1;
-      overflow-clip: clip;
-      width: 100%;
-
-      img {
-        width: 100%;
-        height: 320px;
-      }
-    }
 
     .top-bar {
       display: flex;
@@ -124,7 +109,6 @@
       height: 0;
       overflow: clip;
       transition: all 0.5s cubic-bezier(.77, 0, .18, 1);
-      z-index: $layout-nav-index;
       display: flex;
 
       &.active {
@@ -156,6 +140,21 @@
           margin-left: 2rem;
         }
       }
+    }
+  }
+
+  .bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    overflow-clip: clip;
+    width: 100%;
+
+    img {
+      width: 100%;
+      height: 320px;
     }
   }
 
@@ -198,6 +197,12 @@
             white-space: nowrap;
           }
         }
+      }
+    }
+
+    .bg {
+      img {
+        height: 480px;
       }
     }
   }

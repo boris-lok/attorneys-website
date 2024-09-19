@@ -1,6 +1,7 @@
 import type {Member} from "$lib/models/Member";
 import type {Language} from "$lib/models/Language";
 import {from, of} from "rxjs";
+import type {Service} from "$lib/models/Services";
 
 const BASE_URL = "http://localhost:1234/api/v1";
 const ADMIN_URL = `${BASE_URL}/admin`;
@@ -58,7 +59,7 @@ export const Home = {
 
 export const Services = {
     list: () => {
-        const data = [{
+        const data: Service[] = [{
             title: "訴訟及爭端處理",
             content: `- 民事、刑事訴訟
 - 行政訴訟 / 國家賠償

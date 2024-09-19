@@ -1,6 +1,7 @@
 <script lang="ts">
     import {t} from "svelte-i18n";
-    import bgImage from "$lib/assets/justice_1280.jpg";
+    import bgSmall from "$lib/assets/justice_480.png";
+    import bgLarge from "$lib/assets/justice_1280.png";
 
     let isMenuOpen = false;
     let width: number;
@@ -46,7 +47,10 @@
     </div>
 
     <section class="bg">
-        <img alt="bg-image" src={bgImage}>
+        <picture>
+            <source srcset={bgLarge} media="(min-width: 768px)">
+            <img alt="bg-image" src={bgSmall}>
+        </picture>
     </section>
 
 </header>

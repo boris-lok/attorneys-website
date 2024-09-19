@@ -1,7 +1,7 @@
 <script lang="ts">
     import {locale, t} from "svelte-i18n";
     import bgSmall from "$lib/assets/justice_480.png";
-    import bgLarge from "$lib/assets/justice_1280.png";
+    import bgLarge from "$lib/assets/justice_1920.png";
 
     let isMenuOpen = false;
     let width: number;

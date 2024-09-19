@@ -34,12 +34,10 @@
   .home-wrapper {
     display: flex;
     flex-direction: column;
-    margin: 15rem 5%;
   }
 
   @media (min-width: 768px) {
     .home-wrapper {
-      margin: 10rem 10%;
       padding: 3rem;
       border-radius: 1rem;
       background-color: white;

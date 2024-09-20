@@ -58,7 +58,7 @@
   .member-card {
     border-radius: 0.25rem;
     box-shadow: 0 0 1rem 0 $grey;
-    padding: 1.25rem 0;
+    padding: 1.25rem;
     position: relative;
 
     .bg {
@@ -69,7 +69,7 @@
       height: 100%;
       background: linear-gradient(90deg, rgba(234, 88, 12, 0.5) 0%, rgba(232, 232, 232, 0) 100%);;
       z-index: -1;
-      transition: width 1s linear;
+      transition: width .5s linear;
     }
 
     &:hover {
@@ -99,6 +99,40 @@
 
         h3 {
           font-weight: 700;
+        }
+      }
+    }
+  }
+
+  @media (min-width: 768px) {
+    .members-list-section {
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 1.5rem 0;
+      gap: 1rem;
+
+      .member-card {
+        min-width: 18rem;
+
+        a {
+          flex-direction: row;
+          gap: 1rem;
+
+          span.material-icon {
+            margin-bottom: 0;
+          }
+
+          span.name {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            gap: 0.5rem;
+            justify-content: center;
+
+            h3 {
+              font-weight: 700;
+            }
+          }
         }
       }
     }

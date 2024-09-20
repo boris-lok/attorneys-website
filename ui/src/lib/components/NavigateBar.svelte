@@ -225,7 +225,7 @@
 
     .bg {
       img {
-        height: 40vh;
+        height: 20rem;
         object-fit: cover;
       }
     }

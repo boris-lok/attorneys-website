@@ -48,6 +48,7 @@ ui/dist-ssr
 ui/*.local
 ui/.svelte-kit
 ui/static/avatar
+ui/build
 
 
 # Editor directories and files

@@ -6,3 +6,9 @@ export type Member = {
 type FileImage = { file?: File };
 
 export type MemberPreview = Member & FileImage;
+
+export type SimpleMember = {
+	member_id: string;
+	name: string;
+	avatar?: string;
+}

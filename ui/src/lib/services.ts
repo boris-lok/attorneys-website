@@ -1,4 +1,4 @@
-import type { Member } from '$lib/models/Member';
+import type { Member, SimpleMember } from '$lib/models/Member';
 import type { Language } from '$lib/models/Language';
 import { from, of } from 'rxjs';
 import type { Service } from '$lib/models/Services';
@@ -41,6 +41,22 @@ export const Members = {
 		);
 
 		return from(request);
+	},
+	list: () => {
+		const data: SimpleMember[] = [
+			{
+				member_id: '1',
+				name: '蕭嘉豪'
+			}, {
+				member_id: '2',
+				name: '陳致璇'
+			}, {
+				member_id: '3',
+				name: '王筱雯'
+			}
+		];
+
+		return of(data);
 	}
 };
 

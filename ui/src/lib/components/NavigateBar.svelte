@@ -32,10 +32,10 @@
 	$: onPathChanged($page.url.pathname);
 </script>
 
-<svelte:window bind:innerWidth={width} on:wheel|nonpassive={e => {
-    if (isMenuOpen) {e.preventDefault();}
-}} on:touchmove|nonpassive={e => {
+<svelte:window bind:innerWidth={width} on:touchmove|nonpassive={e => {
 	if (isMenuOpen) {e.preventDefault();}
+}} on:wheel|nonpassive={e => {
+    if (isMenuOpen) {e.preventDefault();}
 }} />
 <header class="header">
 	<div class="top-bar">
@@ -54,7 +54,7 @@
 				<span class="material-icon">event_note</span>
 				<span>{$t('navbar.services')}</span>
 			</a>
-			<a class:active={path === '/members'} href="#">
+			<a class:active={path === '/members'} href="/members">
 				<span class="material-icon">group</span>
 				<span>{$t('navbar.members')}</span>
 			</a>
@@ -113,7 +113,7 @@
         background-color: transparent;
         border: none;
         outline: none;
-				color: $black;
+        color: $black;
       }
     }
 

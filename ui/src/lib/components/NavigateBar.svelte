@@ -34,6 +34,8 @@
 
 <svelte:window bind:innerWidth={width} on:wheel|nonpassive={e => {
     if (isMenuOpen) {e.preventDefault();}
+}} on:touchmove|nonpassive={e => {
+	if (isMenuOpen) {e.preventDefault();}
 }} />
 <header class="header">
 	<div class="top-bar">
@@ -111,6 +113,7 @@
         background-color: transparent;
         border: none;
         outline: none;
+				color: $black;
       }
     }
 

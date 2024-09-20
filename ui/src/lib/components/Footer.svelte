@@ -1,16 +1,16 @@
 <script lang="ts">
-    import {t} from "svelte-i18n";
+	import { t } from 'svelte-i18n';
 
-    let address = "100506臺北市中正區忠孝西路一段50號20樓之32（亞洲廣場大樓）";
-    let phone = "02-23707088";
+	let address = '100506臺北市中正區忠孝西路一段50號20樓之32（亞洲廣場大樓）';
+	let phone = '02-23707088';
 </script>
 
 <footer>
-    <div class="contact-us-wrapper">
-        <h3>{$t('contact_us')}</h3>
-        <span><a href="tel:{phone}">{phone}</a></span>
-        <span class="content">{address}</span>
-    </div>
+	<div class="contact-us-wrapper">
+		<h3>{$t('contact_us')}</h3>
+		<span><a href="tel:{phone}">{phone}</a></span>
+		<span class="content">{address}</span>
+	</div>
 </footer>
 
 <style lang="scss">

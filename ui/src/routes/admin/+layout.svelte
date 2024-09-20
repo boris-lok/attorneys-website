@@ -1,11 +1,11 @@
 <script lang="ts">
-    import '../../styles/global.scss';
-    import NavigateBar from "$lib/components/NavigateBar.svelte";
-    import Footer from "$lib/components/Footer.svelte";
+	import '../../styles/global.scss';
+	import NavigateBar from '$lib/components/NavigateBar.svelte';
+	import Footer from '$lib/components/Footer.svelte';
 </script>
 
-<NavigateBar/>
+<NavigateBar />
 <main>
-    <slot/>
+	<slot />
 </main>
-<Footer/>
+<Footer />

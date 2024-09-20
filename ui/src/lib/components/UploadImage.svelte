@@ -1,102 +1,102 @@
 <script lang="ts">
-    import {t} from 'svelte-i18n';
-    import iterate from 'iterare';
-    import {createEventDispatcher, onMount} from "svelte";
-    import {BehaviorSubject} from "rxjs";
+	import { t } from 'svelte-i18n';
+	import iterate from 'iterare';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import { BehaviorSubject } from 'rxjs';
 
-    let isDragging = false;
-    let image: HTMLElement;
-    const dispatch = createEventDispatcher();
-    let hasImage = false;
-    let file = new BehaviorSubject<File | undefined>(undefined);
+	let isDragging = false;
+	let image: HTMLElement;
+	const dispatch = createEventDispatcher();
+	let hasImage = false;
+	let file = new BehaviorSubject<File | undefined>(undefined);
 
-    onMount(() => {
-        const disposer = file.subscribe({
-            next: (f) => {
-                hasImage = !!f;
-                console.log(`change`);
-                dispatch("change", {
-                    file: f
-                });
-            }
-        })
+	onMount(() => {
+		const disposer = file.subscribe({
+			next: (f) => {
+				hasImage = !!f;
+				console.log(`change`);
+				dispatch('change', {
+					file: f
+				});
+			}
+		});
 
-        return () => {
-            disposer.unsubscribe();
-        }
-    })
+		return () => {
+			disposer.unsubscribe();
+		};
+	});
 
-    // Handle file drop
-    function handleDrop(e: DragEvent) {
-        e.preventDefault();
-        isDragging = false;
+	// Handle file drop
+	function handleDrop(e: DragEvent) {
+		e.preventDefault();
+		isDragging = false;
 
-        // Extract files from event
-        const files = e.dataTransfer?.files ?? ([] as File[]);
+		// Extract files from event
+		const files = e.dataTransfer?.files ?? ([] as File[]);
 
-        handleInputFiles(files);
-    }
+		handleInputFiles(files);
+	}
 
-    // Prevent default behavior for dragover and dragenter
-    function handleDragOver(e: DragEvent) {
-        e.preventDefault();
-        isDragging = true;
-    }
+	// Prevent default behavior for dragover and dragenter
+	function handleDragOver(e: DragEvent) {
+		e.preventDefault();
+		isDragging = true;
+	}
 
-    function handleDragLeave(e: DragEvent) {
-        e.preventDefault();
-        isDragging = false;
-    }
+	function handleDragLeave(e: DragEvent) {
+		e.preventDefault();
+		isDragging = false;
+	}
 
-    function generatePreview(file: File) {
-        const reader = new FileReader();
-        reader.onload = function (event: ProgressEvent) {
-            if (typeof reader.result === "string") {
-                image.setAttribute('src', reader.result);
-            }
-        };
-        reader.readAsDataURL(file);
-    }
+	function generatePreview(file: File) {
+		const reader = new FileReader();
+		reader.onload = function(event: ProgressEvent) {
+			if (typeof reader.result === 'string') {
+				image.setAttribute('src', reader.result);
+			}
+		};
+		reader.readAsDataURL(file);
+	}
 
-    function onInputChanged(e: Event) {
-        const files = (e.target as HTMLInputElement)?.files ?? ([] as File[]);
-        handleInputFiles(files);
-    }
+	function onInputChanged(e: Event) {
+		const files = (e.target as HTMLInputElement)?.files ?? ([] as File[]);
+		handleInputFiles(files);
+	}
 
-    function handleInputFiles(files: File[] | FileList) {
-        let newFile = undefined;
-        if (files.length > 0) {
-            newFile = iterate(files)
-                .find(e => e.type.startsWith("image/"));
-            if (newFile) {
-                generatePreview(newFile);
-            }
-        }
-        file.next(newFile);
-    }
+	function handleInputFiles(files: File[] | FileList) {
+		let newFile = undefined;
+		if (files.length > 0) {
+			newFile = iterate(files)
+				.find(e => e.type.startsWith('image/'));
+			if (newFile) {
+				generatePreview(newFile);
+			}
+		}
+		file.next(newFile);
+	}
 
-    function onDeleteClicked() {
-        file.next(undefined);
-    }
+	function onDeleteClicked() {
+		file.next(undefined);
+	}
 </script>
 
 <div class="image-wrapper">
-    {#if !hasImage}
-        <div class="dropzone-wrapper" on:drop={handleDrop} on:dragover={handleDragOver} on:dragleave={handleDragLeave}
-             class:is-dragging={isDragging}>
-            <div class="dropzone-desc">
-                <p>{$t('upload_image_hint')}</p>
-            </div>
-            <input type="file" name="image" class="dropzone" on:change={onInputChanged}/>
+	{#if !hasImage}
+		<div class="dropzone-wrapper" on:drop={handleDrop} on:dragover={handleDragOver} on:dragleave={handleDragLeave}
+				 class:is-dragging={isDragging}>
+			<div class="dropzone-desc">
+				<p>{$t('upload_image_hint')}</p>
+			</div>
+			<input type="file" name="image" class="dropzone" on:change={onInputChanged} />
 
-        </div>
-    {/if}
-    {#if hasImage}
-        <div class="preview-zone-wrapper">
-            <img src="" bind:this={image} alt="Preview" width="128" height="128">
-            <i class="material-icon" on:click={onDeleteClicked}>delete</i>
-        </div>
-    {/if}
+		</div>
+	{/if}
+	{#if hasImage}
+		<div class="preview-zone-wrapper">
+			<img src="" bind:this={image} alt="Preview" width="128" height="128">
+			<i class="material-icon" on:click={onDeleteClicked}>delete</i>
+		</div>
+	{/if}
 </div>
 
 

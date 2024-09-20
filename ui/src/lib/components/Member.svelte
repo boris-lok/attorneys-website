@@ -1,43 +1,43 @@
 <script lang="ts">
-    import type {MemberPreview} from "$lib/models/Member";
-    import SvelteMarkdown from "svelte-markdown";
-    import {t} from "svelte-i18n";
+	import type { MemberPreview } from '$lib/models/Member';
+	import SvelteMarkdown from 'svelte-markdown';
+	import { t } from 'svelte-i18n';
 
-    export let member: MemberPreview;
-    let image: HTMLElement;
+	export let member: MemberPreview;
+	let image: HTMLElement;
 
-    let hasImage = false;
+	let hasImage = false;
 
-    function handleMemberChanged(member: MemberPreview) {
-        hasImage = false;
-        if ('file' in member && member.file) {
-            hasImage = true;
-            const reader = new FileReader();
-            reader.onload = () => {
-                if (typeof reader.result === "string") {
-                    image.setAttribute('src', reader.result);
-                }
-            }
-            reader.readAsDataURL(member.file);
-        }
-    }
+	function handleMemberChanged(member: MemberPreview) {
+		hasImage = false;
+		if ('file' in member && member.file) {
+			hasImage = true;
+			const reader = new FileReader();
+			reader.onload = () => {
+				if (typeof reader.result === 'string') {
+					image.setAttribute('src', reader.result);
+				}
+			};
+			reader.readAsDataURL(member.file);
+		}
+	}
 
-    $: handleMemberChanged(member);
+	$: handleMemberChanged(member);
 </script>
 
 <div class="member-wrapper">
-    <section>
-        <div class="avatar-wrapper">
-            <img alt="{member.name}" bind:this={image} class:show={hasImage} height="128" src="" width="128"/>
-            <span class="material-icon" class:show={!hasImage}>account_circle</span>
-            <p>{member.name}&nbsp;{$t('member.attorney.suffix')}</p>
-        </div>
-    </section>
-    <section>
-        <div class="description-wrapper">
-            <SvelteMarkdown source={member.description}/>
-        </div>
-    </section>
+	<section>
+		<div class="avatar-wrapper">
+			<img alt="{member.name}" bind:this={image} class:show={hasImage} height="128" src="" width="128" />
+			<span class="material-icon" class:show={!hasImage}>account_circle</span>
+			<p>{member.name}&nbsp;{$t('member.attorney.suffix')}</p>
+		</div>
+	</section>
+	<section>
+		<div class="description-wrapper">
+			<SvelteMarkdown source={member.description} />
+		</div>
+	</section>
 </div>
 
 <style lang="scss">

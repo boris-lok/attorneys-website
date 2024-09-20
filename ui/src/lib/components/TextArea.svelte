@@ -1,10 +1,10 @@
 <script lang="ts">
-    export let label = "";
+	export let label = '';
 </script>
 
 <div class="textarea-wrapper">
-    <label>{label}</label>
-    <textarea on:input rows="20"></textarea>
+	<label>{label}</label>
+	<textarea on:input rows="20"></textarea>
 </div>
 
 <style lang="scss">

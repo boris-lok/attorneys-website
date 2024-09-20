@@ -1,73 +1,73 @@
 <script lang="ts">
-    import {locale, t} from "svelte-i18n";
-    import bgSmall from "$lib/assets/justice_480.png";
-    import bgLarge from "$lib/assets/justice_1920.png";
-    import {page} from "$app/stores";
+	import { locale, t } from 'svelte-i18n';
+	import bgSmall from '$lib/assets/justice_480.png';
+	import bgLarge from '$lib/assets/justice_1920.png';
+	import { page } from '$app/stores';
 
-    let isMenuOpen = false;
-    let width: number;
-    let path = "/";
+	let isMenuOpen = false;
+	let width: number;
+	let path = '/';
 
-    // handles the menu/close icon clicked
-    function toggleMenu() {
-        isMenuOpen = !isMenuOpen;
-    }
+	// handles the menu/close icon clicked
+	function toggleMenu() {
+		isMenuOpen = !isMenuOpen;
+	}
 
-    // handles the path changed
-    function onPathChanged(newPath: string) {
-        isMenuOpen = false;
-        console.log(`new path: ${newPath}`);
-        path = newPath
-    }
+	// handles the path changed
+	function onPathChanged(newPath: string) {
+		isMenuOpen = false;
+		console.log(`new path: ${newPath}`);
+		path = newPath;
+	}
 
-    // TODO: support multiple languages
-    $locale = 'zh';
+	// TODO: support multiple languages
+	$locale = 'zh';
 
-    // listen the window's width changed
-    $: if (width > 768) {
-        isMenuOpen = false;
-    }
+	// listen the window's width changed
+	$: if (width > 768) {
+		isMenuOpen = false;
+	}
 
-    // listen the path changed
-    $: onPathChanged($page.url.pathname)
+	// listen the path changed
+	$: onPathChanged($page.url.pathname);
 </script>
 
 <svelte:window bind:innerWidth={width} on:wheel|nonpassive={e => {
     if (isMenuOpen) {e.preventDefault();}
-}}/>
+}} />
 <header class="header">
-    <div class="top-bar">
-        <a class="logo" href="/">Logo</a>
-        <div class="icons">
-            <button class="material-icon hidden" class:active={!isMenuOpen} on:click={toggleMenu}>menu</button>
-            <button class="material-icon hidden" class:active={isMenuOpen} on:click={toggleMenu}>close</button>
-        </div>
+	<div class="top-bar">
+		<a class="logo" href="/">Logo</a>
+		<div class="icons">
+			<button class="material-icon hidden" class:active={!isMenuOpen} on:click={toggleMenu}>menu</button>
+			<button class="material-icon hidden" class:active={isMenuOpen} on:click={toggleMenu}>close</button>
+		</div>
 
-        <nav class="navbar" class:active={isMenuOpen}>
-            <a class:active={path === '/'} href="/">
-                <span class="material-icon">home</span>
-                <span>{$t('navbar.home')}</span>
-            </a>
-            <a class:active={path === '/services'} href="/services">
-                <span class="material-icon">event_note</span>
-                <span>{$t('navbar.services')}</span>
-            </a>
-            <a class:active={path === '/members'} href="#">
-                <span class="material-icon">group</span>
-                <span>{$t('navbar.members')}</span>
-            </a>
-            <a class:active={path==='/contact'} href="/contact">
-                <span class="material-icon">contacts</span>
-                <span>{$t('navbar.contact_us')}</span>
-            </a>
-        </nav>
-    </div>
+		<nav class="navbar" class:active={isMenuOpen}>
+			<a class:active={path === '/'} href="/">
+				<span class="material-icon">home</span>
+				<span>{$t('navbar.home')}</span>
+			</a>
+			<a class:active={path === '/services'} href="/services">
+				<span class="material-icon">event_note</span>
+				<span>{$t('navbar.services')}</span>
+			</a>
+			<a class:active={path === '/members'} href="#">
+				<span class="material-icon">group</span>
+				<span>{$t('navbar.members')}</span>
+			</a>
+			<a class:active={path==='/contact'} href="/contact">
+				<span class="material-icon">contacts</span>
+				<span>{$t('navbar.contact_us')}</span>
+			</a>
+		</nav>
+	</div>
 </header>
 <section class="bg">
-    <picture>
-        <source media="(min-width: 768px)" srcset={bgLarge}>
-        <img alt="" src={bgSmall}>
-    </picture>
+	<picture>
+		<source media="(min-width: 768px)" srcset={bgLarge}>
+		<img alt="" src={bgSmall}>
+	</picture>
 </section>
 
 <style lang="scss">

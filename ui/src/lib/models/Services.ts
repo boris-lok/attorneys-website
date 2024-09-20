@@ -1,4 +1,4 @@
 export type Service = {
-    title: string;
-    content: string;
+	title: string;
+	content: string;
 }

@@ -1,33 +1,33 @@
 <script lang="ts">
-    import {onMount} from "svelte";
-    import {Home} from "$lib/services";
-    import {startWithTap} from "$lib/utils";
-    import {finalize, tap} from "rxjs";
-    import SvelteMarkdown from "svelte-markdown";
-    import Loading from "$lib/components/Loading.svelte";
+	import { onMount } from 'svelte';
+	import { Home } from '$lib/services';
+	import { startWithTap } from '$lib/utils';
+	import { finalize, tap } from 'rxjs';
+	import SvelteMarkdown from 'svelte-markdown';
+	import Loading from '$lib/components/Loading.svelte';
 
-    let isLoading = false;
-    let content = '';
+	let isLoading = false;
+	let content = '';
 
-    onMount(async () => {
-        Home.list()
-            .pipe(
-                startWithTap(() => isLoading = true),
-                finalize(() => isLoading = false),
-                tap(e => {
-                    content = e
-                })
-            )
-            .subscribe()
-    })
+	onMount(async () => {
+		Home.list()
+			.pipe(
+				startWithTap(() => isLoading = true),
+				finalize(() => isLoading = false),
+				tap(e => {
+					content = e;
+				})
+			)
+			.subscribe();
+	});
 </script>
 
 {#if isLoading}
-    <Loading/>
+	<Loading />
 {:else}
-    <section class="home-wrapper">
-        <SvelteMarkdown source={content}/>
-    </section>
+	<section class="home-wrapper">
+		<SvelteMarkdown source={content} />
+	</section>
 {/if}
 
 <style lang="scss">

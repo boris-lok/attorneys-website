@@ -1,14 +1,14 @@
 <script lang="ts">
-    import type {ButtonClass} from "$lib/models/HtmlTag";
+	import type { ButtonClass } from '$lib/models/HtmlTag';
 
-    export let text = "";
-    export let loading = false;
-    export let classname: ButtonClass = "primary-blue";
+	export let text = '';
+	export let loading = false;
+	export let classname: ButtonClass = 'primary-blue';
 </script>
 
 {#if loading}
 {:else}
-    <button type="button" on:click class="{classname}">{text}</button>
+	<button type="button" on:click class="{classname}">{text}</button>
 {/if}
 
 <style lang="scss">

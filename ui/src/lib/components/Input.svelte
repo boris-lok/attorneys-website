@@ -1,35 +1,35 @@
 <script lang="ts">
-    import type {InputBoxType} from "$lib/models/HtmlTag";
+	import type { InputBoxType } from '$lib/models/HtmlTag';
 
-    export let value = "";
-    export let has_error = false;
-    export let name = "";
-    export let type: InputBoxType = 'text';
-    export let label = "";
+	export let value = '';
+	export let has_error = false;
+	export let name = '';
+	export let type: InputBoxType = 'text';
+	export let label = '';
 
-    export const reset = () => (ref.value = "");
+	export const reset = () => (ref.value = '');
 
-    let ref: HTMLInputElement;
+	let ref: HTMLInputElement;
 
-    const type_action = (node: HTMLInputElement) => {
-        node.type = type;
-    };
+	const type_action = (node: HTMLInputElement) => {
+		node.type = type;
+	};
 </script>
 
 <div class="input-box-container">
-    <input
-            bind:this={ref}
-            class:error={has_error}
-            {name}
-            on:blur
-            on:input
-            on:keypress
-            placeholder=" "
-            type="text"
-            use:type_action
-            {value}
-    />
-    <span>{label}</span>
+	<input
+		bind:this={ref}
+		class:error={has_error}
+		{name}
+		on:blur
+		on:input
+		on:keypress
+		placeholder=" "
+		type="text"
+		use:type_action
+		{value}
+	/>
+	<span>{label}</span>
 </div>
 
 <style lang="scss">

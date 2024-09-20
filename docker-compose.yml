@@ -1,8 +1,0 @@
-services:
-  frontend:
-    container_name: attorneys-Dockerfile.frontend
-    build:
-      context: .
-      dockerfile: dockerfiles/Dockerfile.frontend
-    ports:
-      - "8080:80"

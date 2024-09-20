@@ -1,0 +1,8 @@
+from nginx:alpine
+
+run rm /etc/nginx/conf.d/*
+copy ../config/nginx.dev.conf /etc/nginx/conf.d/default.conf
+
+expose 80
+
+cmd ["nginx", "-g", "daemon off;"]

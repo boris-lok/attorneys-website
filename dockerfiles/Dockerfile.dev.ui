@@ -1,0 +1,24 @@
+# Step 1: Build the Svelte application
+# Create a builder
+from node:22 as builder
+
+# Setup the working directory
+workdir /app
+
+# Copy the package.json and install dependencies
+copy ../ui/package.json /
+run npm install
+
+## Copy the rest of the application code
+copy ../ui/ .
+
+## Delete the node_modules and previous build files
+run rm -rf /app/node_modules
+run rm -rf /app/.svelte-kit
+
+run npm run build
+
+expose 3000
+
+## Run command
+cmd ["node", "build"]

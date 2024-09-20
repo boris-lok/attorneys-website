@@ -1,0 +1,20 @@
+services:
+  ui:
+    restart: always
+    container_name: ui
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.dev.ui
+    ports:
+      - "8080:3000"
+
+#  nginx:
+#    restart: always
+#    container_name: nginx
+#    build:
+#      context: .
+#      dockerfile: dockerfiles/Dockerfile.dev.nginx
+#    ports:
+#      - "80:80"
+#    depends_on:
+#      - ui

@@ -55,6 +55,10 @@
     padding: 1.25rem 5%;
   }
 
+  h1 {
+    text-align: center;
+  }
+
   .member-card {
     border-radius: 0.25rem;
     box-shadow: 0 0 1rem 0 $grey;
@@ -105,6 +109,12 @@
   }
 
   @media (min-width: 768px) {
+    .members-section {
+      padding: 0 5%;
+      margin: 0 auto;
+      max-width: 1280px;
+    }
+
     .members-list-section {
       flex-direction: row;
       flex-wrap: wrap;

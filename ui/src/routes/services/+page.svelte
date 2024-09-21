@@ -52,6 +52,10 @@
 {/if}
 
 <style lang="scss">
+  .services-wrapper {
+    padding: 1rem 5%;
+  }
+
   .service-section {
     position: relative;
 
@@ -70,6 +74,9 @@
       display: flex;
       flex-direction: column;
       gap: 2rem;
+      padding: 0;
+      max-width: 1024px;
+      margin: 0 auto;
     }
 
     .service-section {

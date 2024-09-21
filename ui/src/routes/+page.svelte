@@ -25,15 +25,16 @@
 {#if isLoading}
 	<Loading />
 {:else}
-	<section class="home-wrapper">
+	<div class="home-wrapper">
 		<SvelteMarkdown source={content} />
-	</section>
+	</div>
 {/if}
 
 <style lang="scss">
   .home-wrapper {
     display: flex;
     flex-direction: column;
+    padding: 1rem 5%;
   }
 
   @media (min-width: 768px) {
@@ -41,6 +42,8 @@
       padding: 3rem;
       border-radius: 1rem;
       background-color: white;
+      max-width: 768px;
+      margin: 0 auto;
     }
   }
 </style>

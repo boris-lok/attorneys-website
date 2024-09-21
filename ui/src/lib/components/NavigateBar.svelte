@@ -54,6 +54,10 @@
 				<span class="material-icon">event_note</span>
 				<span>{$t('navbar.services')}</span>
 			</a>
+			<a class:active={path === '/articles'} href="/articles">
+				<span class="material-icon">menu_book</span>
+				<span>{$t('navbar.articles')}</span>
+			</a>
 			<a class:active={path === '/members'} href="/members">
 				<span class="material-icon">group</span>
 				<span>{$t('navbar.members')}</span>

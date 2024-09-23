@@ -160,5 +160,13 @@ export const Articles = {
 		];
 
 		return of(data);
+	},
+	get: (id: string) => {
+		const article = {
+			'id': 'ART012',
+			'title': 'Exploring the Role of Renewable Energy in Modern Cities',
+			'content': 'Renewable energy is rapidly transforming the landscape of urban environments. As cities grow and the demand for energy increases, reliance on sustainable energy sources like solar, wind, and hydropower is becoming critical. Modern cities are adopting renewable energy not only to meet the growing energy demand but also to reduce their carbon footprint and combat climate change.\n\n## Solar Power: Lighting Up the Future\nSolar panels are increasingly seen on rooftops and integrated into the infrastructure of buildings. With advancements in solar technology, cities are now able to harness more energy from the sun than ever before. In fact, many cities are aiming for **net-zero** energy consumption, where the amount of energy consumed is offset by the amount generated from renewable sources.\n\n## Wind Energy: Powering City Grids\nWind turbines are no longer limited to rural areas and offshore locations. Urban wind farms are emerging as a viable option for generating energy in cities. These turbines can be installed in open spaces, along coastlines, or even integrated into the architectural design of buildings. Wind energy, in combination with other renewable sources, plays a significant role in reducing the reliance on fossil fuels.\n\n## Challenges and Future Outlook\nWhile the shift to renewable energy is promising, it is not without its challenges. **Storage** and **distribution** remain two of the most significant hurdles. Innovations in battery technology and smart grids are helping to address these issues, but widespread adoption will take time. Despite these challenges, the future of renewable energy in cities is bright, with ongoing advancements pushing the boundaries of what’s possible.\n\nIn conclusion, renewable energy will be a cornerstone of urban development in the coming decades. Cities that invest in sustainable energy infrastructure today will reap the benefits of a cleaner, more sustainable tomorrow.'
+		};
+		return of(article);
 	}
 };

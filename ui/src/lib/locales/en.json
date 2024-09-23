@@ -18,5 +18,6 @@
   "navbar.contact_us": "Contact Us",
   "navbar.articles": "Articles",
   "articles": "Articles",
+  "no_article_message": "Can't find the article",
   "loading": "Loading"
 }

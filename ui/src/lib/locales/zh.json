@@ -18,5 +18,6 @@
   "navbar.contact_us": "聯絡我們",
   "navbar.articles": "文章",
   "articles": "文章",
+  "no_article_message": "找不到文章",
   "loading": "讀取中"
 }

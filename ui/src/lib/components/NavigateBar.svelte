@@ -50,19 +50,19 @@
 				<span class="material-icon">home</span>
 				<span>{$t('navbar.home')}</span>
 			</a>
-			<a class:active={path === '/services'} href="/services">
+			<a class:active={path.startsWith('/services')} href="/services">
 				<span class="material-icon">event_note</span>
 				<span>{$t('navbar.services')}</span>
 			</a>
-			<a class:active={path === '/articles'} href="/articles">
+			<a class:active={path.startsWith('/articles')} href="/articles">
 				<span class="material-icon">menu_book</span>
 				<span>{$t('navbar.articles')}</span>
 			</a>
-			<a class:active={path === '/members'} href="/members">
+			<a class:active={path.startsWith('/members')} href="/members">
 				<span class="material-icon">group</span>
 				<span>{$t('navbar.members')}</span>
 			</a>
-			<a class:active={path==='/contact'} href="/contact">
+			<a class:active={path.startsWith('/contact')} href="/contact">
 				<span class="material-icon">contacts</span>
 				<span>{$t('navbar.contact_us')}</span>
 			</a>

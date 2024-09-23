@@ -19,5 +19,6 @@
   "navbar.articles": "Articles",
   "articles": "Articles",
   "no_article_message": "Can't find the article",
+  "no_member_message": "Can't find the member",
   "loading": "Loading"
 }

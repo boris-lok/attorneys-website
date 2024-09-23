@@ -12,3 +12,7 @@ export type SimpleMember = {
 	name: string;
 	avatar?: string;
 }
+
+export type MemberDetail = SimpleMember & {
+	content: string;
+};

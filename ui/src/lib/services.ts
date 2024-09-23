@@ -1,4 +1,4 @@
-import type { Member, SimpleMember } from '$lib/models/Member';
+import type { Member, MemberDetail, SimpleMember } from '$lib/models/Member';
 import type { Language } from '$lib/models/Language';
 import { from, of } from 'rxjs';
 import type { Service } from '$lib/models/Services';
@@ -56,6 +56,65 @@ export const Members = {
 				name: '王筱雯'
 			}
 		];
+
+		return of(data);
+	},
+	get: (memberId: string) => {
+		const data: MemberDetail = {
+			member_id: '1',
+			name: 'Johnathan Doe',
+			content: `
+**Specialization**: Corporate Law  
+**Years of Experience**: 12  
+**Firm**: Doe & Associates  
+
+## Contact Information
+- **Email**: [johnathan.doe@example.com](mailto:johnathan.doe@example.com)
+- **Phone**: +1-555-123-4567
+- **Address**:  
+  123 Legal Lane,  
+  New York, NY 10001
+
+## Education
+- **Juris Doctor (JD)**  
+  Harvard Law School, 2010
+- **Bachelor of Arts in Political Science**  
+  Yale University, 2006
+
+## Bar Admissions
+- **New York**: 2011
+- **California**: 2013
+
+## Practice Areas
+- Mergers & Acquisitions
+- Corporate Governance
+- Securities Law
+- Contract Negotiation
+
+## Professional Affiliations
+- American Bar Association
+- New York State Bar Association
+- Corporate Law Society
+
+## Notable Cases
+- **Acme Corp vs Global Tech (2018)**  
+  Represented Acme Corp in a high-profile merger case, securing a favorable settlement.
+  
+- **Smith Industries Acquisition (2020)**  
+  Led legal efforts in Smith Industries' acquisition by a major multinational corporation.
+
+## Awards
+- **Top Corporate Lawyer (2019)**  
+  Awarded by Law Journal.
+  
+- **Rising Star in M&A Law (2016)**  
+  Recognized by Legal 500.
+
+## Languages Spoken
+- English
+- Spanish	
+			`
+		};
 
 		return of(data);
 	}

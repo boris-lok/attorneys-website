@@ -2,6 +2,7 @@ import type { Member, SimpleMember } from '$lib/models/Member';
 import type { Language } from '$lib/models/Language';
 import { from, of } from 'rxjs';
 import type { Service } from '$lib/models/Services';
+import type { SimpleArticle } from '$lib/models/Articles';
 
 const BASE_URL = 'http://localhost:1234/api/v1';
 const ADMIN_URL = `${BASE_URL}/admin`;
@@ -106,6 +107,55 @@ export const Services = {
 - 稅務案件
 - 不動產／營建案件
 - 勞資糾紛`
+			}
+		];
+
+		return of(data);
+	}
+};
+
+export const Articles = {
+	list: () => {
+		const data: SimpleArticle[] = [
+			{
+				'id': 'ART001',
+				'title': 'The Future of Quantum Computing: Breaking Boundaries'
+			},
+			{
+				'id': 'ART002',
+				'title': '5 Unexpected Ways AI is Changing Healthcare'
+			},
+			{
+				'id': 'ART003',
+				'title': 'From Zero to Hero: How Startups are Disrupting Industries'
+			},
+			{
+				'id': 'ART004',
+				'title': 'Sustainable Tech: Innovations to Save the Planet'
+			},
+			{
+				'id': 'ART005',
+				'title': 'The Rise of Electric Vehicles: A New Era of Transportation'
+			},
+			{
+				'id': 'ART006',
+				'title': 'Mastering Remote Work: Productivity Tips for the Digital Nomad'
+			},
+			{
+				'id': 'ART007',
+				'title': 'Blockchain Beyond Cryptocurrency: Revolutionizing Supply Chains'
+			},
+			{
+				'id': 'ART008',
+				'title': 'Space Tourism: Exploring the Final Frontier in Luxury'
+			},
+			{
+				'id': 'ART009',
+				'title': 'The Ultimate Guide to Cybersecurity in 2024'
+			},
+			{
+				'id': 'ART010',
+				'title': 'How 5G Will Change the Way We Live and Work'
 			}
 		];
 

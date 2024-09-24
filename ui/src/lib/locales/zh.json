@@ -20,5 +20,8 @@
   "articles": "文章",
   "no_article_message": "找不到文章",
   "no_member_message": "找不到團隊成員",
+  "address": "地址",
+  "phone": "電話",
+  "email": "郵件",
   "loading": "讀取中"
 }

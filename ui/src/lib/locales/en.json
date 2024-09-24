@@ -20,5 +20,8 @@
   "articles": "Articles",
   "no_article_message": "Can't find the article",
   "no_member_message": "Can't find the member",
+  "address": "Address",
+  "phone": "Phone",
+  "email": "Email",
   "loading": "Loading"
 }

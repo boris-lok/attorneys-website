@@ -11,6 +11,8 @@ run npm install
 
 ## Copy the rest of the application code
 copy ../ui/ .
+## Replace the .env to production environment
+copy ../ui/.env.prod ./.env
 
 ## Delete the node_modules and previous build files
 run rm -rf /app/node_modules

@@ -49,6 +49,7 @@ ui/*.local
 ui/.svelte-kit
 ui/static/avatar
 ui/build
+ui/.env.prod
 
 
 # Editor directories and files

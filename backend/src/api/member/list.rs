@@ -3,10 +3,10 @@ use crate::domain::member::entities::{Language, SimpleMember};
 use crate::domain::member::list::Error;
 use crate::startup::AppState;
 use crate::uow::member::SqlxMemberUnitOfWork;
-use axum::extract::{Path, State};
+use axum::extract::State;
+use axum::http::HeaderMap;
 use axum::Json;
 use serde::Serialize;
-use std::collections::HashMap;
 use tokio::sync::Mutex;
 
 #[derive(Debug, Serialize)]
@@ -15,14 +15,18 @@ pub(crate) struct ListMembersResponse {
 }
 pub async fn list_members(
     State(state): State<AppState>,
-    Path(params): Path<HashMap<String, String>>,
+    headers: HeaderMap,
 ) -> Result<Json<ListMembersResponse>, ApiError> {
     let uow = SqlxMemberUnitOfWork::new(&state.pool)
         .await
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
     let uow = Mutex::new(uow);
 
-    let lang = params.get("lang").ok_or(ApiError::BadRequest)?;
+    let lang = headers
+        .get("Accept-Language")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("zh");
+
     let req = crate::domain::member::list::Request {
         language: lang.to_string(),
         default_language: Language::ZH,

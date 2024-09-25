@@ -1,12 +1,22 @@
 services:
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.backend
+    networks:
+      - app-network
+
   ui:
     restart: always
+    depends_on:
+      - backend
     container_name: ui
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.ui
-    ports:
-      - "8080:3000"
+    networks:
+      - app-network
 
   nginx:
     restart: always
@@ -18,3 +28,9 @@ services:
       - "80:80"
     depends_on:
       - ui
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

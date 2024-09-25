@@ -1,0 +1,46 @@
+# Use the official Rust Image as the base image for building the application
+from rust:1.81.0-bullseye as builder
+
+# Set the working directory
+workdir /app
+
+# Copy the Cargo.toml and Cargo.lock files to the container
+copy ../backend/Cargo.toml ../backend/Cargo.lock ./
+
+# Fetch the dependencies
+run cargo fetch
+
+# Copy the source code to the container
+copy ./backend/src ./src
+
+# Build the Rust application in release mode
+run cargo build --release
+
+# The final stage: create a small image containing only compiled binary
+# Runtime stage
+from debian:bullseye-slim
+
+# Install OpenSSL - it is dynamically linked by some of our dependencies
+# Install ca-certificates - it is needed to verify TLS certificates
+# when establishing HTTPS connections
+run apt-get update -y \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    # Clean up
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* \
+
+# Set the working directory
+workdir /app
+
+# Copy the compiled binary from the build stage to the container
+copy --from=builder /app/target/release/backend .
+copy ./backend/src/configuration ./src/configuration
+
+# env APP_ENVIRONMENT production
+
+# Expose the port on which your application will run
+expose 1234
+
+# Set the entry point to the complied binary
+cmd ["./backend"]

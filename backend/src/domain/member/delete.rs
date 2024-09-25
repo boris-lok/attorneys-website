@@ -63,7 +63,7 @@ mod tests {
             Language::EN,
             false,
         )
-        .await;
+            .await;
 
         let req = Request {
             member_id: member_id.to_string(),
@@ -94,7 +94,7 @@ mod tests {
             Language::EN,
             false,
         )
-        .await;
+            .await;
 
         let not_exists_id = Ulid::new().to_string();
 
@@ -128,7 +128,7 @@ mod tests {
             Language::EN,
             true,
         )
-        .await;
+            .await;
 
         let req = Request {
             member_id: member_id.to_string(),

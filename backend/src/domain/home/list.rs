@@ -79,7 +79,7 @@ mod tests {
             Language::EN,
             false,
         )
-        .await;
+            .await;
 
         let req = Request {
             language: "en".to_string(),
@@ -108,7 +108,7 @@ mod tests {
             Language::ZH,
             false,
         )
-        .await;
+            .await;
 
         let req = Request {
             language: "en".to_string(),

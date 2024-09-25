@@ -60,7 +60,7 @@ where
         out,
         member_id.as_str(),
     )
-    .await?;
+        .await?;
 
     let small_image_path = resize_image_and_save_it(
         image_util.clone(),
@@ -69,7 +69,7 @@ where
         out,
         member_id.as_str(),
     )
-    .await?;
+        .await?;
 
     let avatar_data = AvatarData {
         large_image: large_image_path,

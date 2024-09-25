@@ -154,11 +154,11 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         sqlx::query(
             "INSERT INTO \"content\" (id, data, language, created_at) VALUES ($1, $2, $3, now());",
         )
-        .bind(content_id.as_str())
-        .bind(content.0)
-        .bind(language.as_str())
-        .execute(conn)
-        .await?;
+            .bind(content_id.as_str())
+            .bind(content.0)
+            .bind(language.as_str())
+            .execute(conn)
+            .await?;
 
         Ok(content_id)
     }
@@ -176,11 +176,11 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         sqlx::query(
             "UPDATE \"content\" SET data = $1, updated_at = now() WHERE id = $2 AND language = $3;",
         )
-        .bind(data.0)
-        .bind(content_id.as_str())
-        .bind(language.as_str())
-        .execute(conn)
-        .await?;
+            .bind(data.0)
+            .bind(content_id.as_str())
+            .bind(language.as_str())
+            .execute(conn)
+            .await?;
 
         Ok(())
     }

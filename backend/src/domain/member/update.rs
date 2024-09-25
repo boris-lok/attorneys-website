@@ -87,7 +87,7 @@ mod tests {
             Language::EN,
             false,
         )
-        .await;
+            .await;
 
         let new_data = Data {
             name: "Boris updated".to_string(),
@@ -128,7 +128,7 @@ mod tests {
             Language::EN,
             false,
         )
-        .await;
+            .await;
 
         let new_data = Data {
             name: "Boris updated".to_string(),
@@ -169,7 +169,7 @@ mod tests {
             Language::EN,
             true,
         )
-        .await;
+            .await;
 
         let new_data = Data {
             name: "Boris updated".to_string(),

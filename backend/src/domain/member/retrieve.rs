@@ -73,7 +73,7 @@ mod tests {
             Language::EN,
             false,
         )
-        .await;
+            .await;
 
         let req = Request {
             member_id: member_id.as_str().to_string(),
@@ -112,7 +112,7 @@ mod tests {
             Language::EN,
             false,
         )
-        .await;
+            .await;
 
         let req = Request {
             member_id: member_id.as_str().to_string(),

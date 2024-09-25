@@ -14,6 +14,7 @@ pub struct DatabaseSettings {
     pub host: String,
     pub database_name: String,
     pub require_ssl: bool,
+    pub timeout: u64
 }
 
 impl DatabaseSettings {

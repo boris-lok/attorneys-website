@@ -66,6 +66,6 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
 
 pub async fn get_database_connection(config: &DatabaseSettings) -> PgPool {
     PgPoolOptions::new()
-        .acquire_timeout(std::time::Duration::from_secs(2))
+        .acquire_timeout(std::time::Duration::from_secs(config.timeout))
         .connect_lazy_with(config.with_db())
 }

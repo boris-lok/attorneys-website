@@ -1,0 +1,3 @@
+database:
+  host: db
+  timeout: 30

@@ -1,6 +1,22 @@
 services:
+  db:
+    image: postgres:16
+    restart: always
+    container_name: db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yeework
+      POSTGRES_DB: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
   backend:
     container_name: backend
+    depends_on:
+      - db
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.backend
@@ -34,3 +50,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres_data:

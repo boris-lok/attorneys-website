@@ -1,6 +1,6 @@
-use crate::repositories::IAvatarRepository;
-use crate::repositories::IContentRepository;
 use crate::repositories::IResourceRepository;
+use crate::repositories::{IAvatarRepository, InMemoryAvatarRepository, InMemoryContentRepository};
+use crate::repositories::{IContentRepository, InMemoryResourceRepository};
 
 /** Define a unit of work to organize all related repositories.
 *
@@ -8,6 +8,7 @@ use crate::repositories::IResourceRepository;
 * - content repository
 * - avatar repository
 */
+#[async_trait::async_trait]
 pub trait IResourceUnitOfWork {
     /** Resource repository stores the data by different types (e.g. members, services, home, etc.) */
     fn resource_repository(&mut self) -> &mut impl IResourceRepository;
@@ -19,7 +20,79 @@ pub trait IResourceUnitOfWork {
     fn avatar_repository(&mut self) -> &mut impl IAvatarRepository;
 
     /** Commit the transaction */
-    async fn commit(self) -> anyhow::Result<()>;
+    async fn commit(mut self) -> anyhow::Result<()>;
     /** Rollback the transaction */
-    async fn rollback(self) -> anyhow::Result<()>;
+    async fn rollback(mut self) -> anyhow::Result<()>;
+}
+
+pub struct InMemoryResource {
+    error: bool,
+    resource_repository: Option<InMemoryResourceRepository>,
+    content_repository: Option<InMemoryContentRepository>,
+    avatar_repository: Option<InMemoryAvatarRepository>,
+}
+
+impl InMemoryResource {
+    pub fn new() -> Self {
+        Self {
+            error: false,
+            resource_repository: None,
+            content_repository: None,
+            avatar_repository: None,
+        }
+    }
+
+    pub fn with_error(mut self) -> Self {
+        Self {
+            error: true,
+            ..self
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl IResourceUnitOfWork for InMemoryResource {
+    fn resource_repository(&mut self) -> &mut impl IResourceRepository {
+        if self.resource_repository.is_none() {
+            let resource_repo = if self.error {
+                InMemoryResourceRepository::new().with_error()
+            } else {
+                InMemoryResourceRepository::new()
+            };
+            self.resource_repository = Some(resource_repo);
+        }
+        self.resource_repository.as_mut().unwrap()
+    }
+
+    fn content_repository(&mut self) -> &mut impl IContentRepository {
+        if self.content_repository.is_none() {
+            let content_repo = if self.error {
+                InMemoryContentRepository::new().with_error()
+            } else {
+                InMemoryContentRepository::new()
+            };
+            self.content_repository = Some(content_repo);
+        }
+        self.content_repository.as_mut().unwrap()
+    }
+
+    fn avatar_repository(&mut self) -> &mut impl IAvatarRepository {
+        if self.avatar_repository.is_none() {
+            let avatar_repo = if self.error {
+                InMemoryAvatarRepository::new().with_error()
+            } else {
+                InMemoryAvatarRepository::new()
+            };
+            self.avatar_repository = Some(avatar_repo);
+        }
+        self.avatar_repository.as_mut().unwrap()
+    }
+
+    async fn commit(mut self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    async fn rollback(mut self) -> anyhow::Result<()> {
+        Ok(())
+    }
 }

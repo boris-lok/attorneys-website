@@ -1,4 +1,6 @@
+use serde::Serialize;
 use std::fmt::Formatter;
+use validator::Validate;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ResourceID(String);
@@ -87,9 +89,112 @@ impl ContentData {
     }
 }
 
+impl TryFrom<Resource> for ContentData {
+    type Error = ();
+
+    fn try_from(resource: Resource) -> Result<Self, Self::Error> {
+        match resource {
+            Resource::Member(m) => try_parse_to_value(m),
+            Resource::Service(s) => try_parse_to_value(s),
+            Resource::Home(h) => try_parse_to_value(h),
+            Resource::Contact(c) => try_parse_to_value(c),
+        }
+    }
+}
+
+fn try_parse_to_value<T>(value: T) -> Result<ContentData, ()>
+where
+    T: Validate + Serialize,
+{
+    match value.validate() {
+        Ok(_) => match serde_json::value::to_value(value) {
+            Ok(v) => Ok(ContentData(v)),
+            Err(_) => Err(()),
+        },
+        Err(_) => Err(()),
+    }
+}
+
+#[derive(Debug, Serialize, Validate)]
+pub struct MemberData {
+    #[validate(length(min = 1))]
+    pub name: String,
+    #[validate(length(min = 1))]
+    pub description: String,
+}
+
+impl MemberData {
+    pub fn new(name: String, description: String) -> Self {
+        Self {
+            name: name.trim().to_string(),
+            description: description.trim().to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Validate)]
+pub struct ServiceData {
+    #[validate(length(min = 1))]
+    pub title: String,
+    #[validate(length(min = 1))]
+    pub data: String,
+}
+
+impl ServiceData {
+    pub fn new(title: String, data: String) -> Self {
+        Self {
+            title: title.trim().to_string(),
+            data: data.trim().to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Validate)]
+pub struct HomeData {
+    #[validate(length(min = 1))]
+    pub data: String,
+}
+
+impl HomeData {
+    pub fn new(data: String) -> Self {
+        Self {
+            data: data.trim().to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Validate)]
+pub struct ContactData {
+    #[validate(length(min = 1))]
+    pub address: String,
+    #[validate(length(min = 1))]
+    pub phone: String,
+    #[validate(email)]
+    pub email: String,
+}
+
+impl ContactData {
+    pub fn new(address: String, phone: String, email: String) -> Self {
+        Self {
+            address: address.trim().to_string(),
+            phone: phone.trim().to_string(),
+            email: email.trim().to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
 pub enum ResourceType {
     Member,
     Service,
     Home,
     Contact,
+}
+
+#[derive(Debug)]
+pub enum Resource {
+    Member(MemberData),
+    Service(ServiceData),
+    Home(HomeData),
+    Contact(ContactData),
 }

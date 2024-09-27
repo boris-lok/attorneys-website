@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fmt::Formatter;
 use validator::Validate;
 
@@ -115,7 +115,7 @@ where
     }
 }
 
-#[derive(Debug, Serialize, Validate)]
+#[derive(Debug, Serialize, Validate, Deserialize)]
 pub struct MemberData {
     #[validate(length(min = 1))]
     pub name: String,

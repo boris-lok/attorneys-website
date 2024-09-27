@@ -1,6 +1,8 @@
+use crate::domain::entities::{ContentID, Language, ResourceID};
 use crate::repositories::IResourceRepository;
 use crate::repositories::{IAvatarRepository, InMemoryAvatarRepository, InMemoryContentRepository};
 use crate::repositories::{IContentRepository, InMemoryResourceRepository};
+use serde::de::DeserializeOwned;
 
 /** Define a unit of work to organize all related repositories.
 *
@@ -18,6 +20,11 @@ pub trait IResourceUnitOfWork {
 
     /** Avatar repository stores all avatars associated with the members. */
     fn avatar_repository(&mut self) -> &mut impl IAvatarRepository;
+
+    /** Get a resource by ID and language */
+    async fn get_resource<T>(&self, id: &ResourceID, lang: &Language) -> anyhow::Result<Option<T>>
+    where
+        T: DeserializeOwned;
 
     /** Commit the transaction */
     async fn commit(mut self) -> anyhow::Result<()>;
@@ -86,6 +93,28 @@ impl IResourceUnitOfWork for InMemoryResource {
             self.avatar_repository = Some(avatar_repo);
         }
         self.avatar_repository.as_mut().unwrap()
+    }
+
+    async fn get_resource<T>(&self, id: &ResourceID, lang: &Language) -> anyhow::Result<Option<T>>
+    where
+        T: DeserializeOwned,
+    {
+        let content_id = ContentID::from(id.clone());
+        let data = self
+            .content_repository
+            .as_ref()
+            .unwrap()
+            .get(&content_id, &lang)
+            .await;
+
+        match data {
+            Ok(Some(data)) => {
+                let obj = serde_json::from_value::<T>(data.clone().to_json())?;
+                Ok(Some(obj))
+            }
+            Err(e) => Err(e),
+            Ok(None) => Ok(None),
+        }
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {

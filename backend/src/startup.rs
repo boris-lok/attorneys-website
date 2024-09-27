@@ -1,11 +1,7 @@
-use crate::api::{
-    create_home, create_member, create_service, delete_member, health_check, list_home,
-    list_members, list_services, retrieve_home, retrieve_member, retrieve_service, update_home,
-    update_member, update_service, upload_member_avatar,
-};
+use crate::api::health_check;
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
-use axum::routing::{delete, get, post};
+use axum::routing::get;
 use axum::{Extension, Router};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -25,38 +21,38 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let image_util = ImageUtil {};
 
     // Config the routes
-    let admin_member_routes = Router::new()
-        .route("/members", post(create_member).put(update_member))
-        .route("/members/:id", delete(delete_member))
-        .route("/members/:id/avatar", post(upload_member_avatar));
-    let member_routes = Router::new()
-        .route("/members/:id", get(retrieve_member))
-        .route("/members", get(list_members));
-
-    let admin_service_routes =
-        Router::new().route("/services", post(create_service).put(update_service));
-    let service_routes = Router::new()
-        .route("/services/:id", get(retrieve_service))
-        .route("/services", get(list_services));
-
-    let admin_home_routes = Router::new().route("/home", post(create_home).put(update_home));
-    let home_routes = Router::new()
-        .route("/home/:id", get(retrieve_home))
-        .route("/home", get(list_home));
-
-    let admin_routes = Router::new()
-        .merge(admin_member_routes)
-        .merge(admin_service_routes)
-        .merge(admin_home_routes);
-    let routes = Router::new()
-        .merge(member_routes)
-        .merge(service_routes)
-        .merge(home_routes);
+    // let admin_member_routes = Router::new()
+    //     .route("/members", post(create_member).put(update_member))
+    //     .route("/members/:id", delete(delete_member))
+    //     .route("/members/:id/avatar", post(upload_member_avatar));
+    // let member_routes = Router::new()
+    //     .route("/members/:id", get(retrieve_member))
+    //     .route("/members", get(list_members));
+    //
+    // let admin_service_routes =
+    //     Router::new().route("/services", post(create_service).put(update_service));
+    // let service_routes = Router::new()
+    //     .route("/services/:id", get(retrieve_service))
+    //     .route("/services", get(list_services));
+    //
+    // let admin_home_routes = Router::new().route("/home", post(create_home).put(update_home));
+    // let home_routes = Router::new()
+    //     .route("/home/:id", get(retrieve_home))
+    //     .route("/home", get(list_home));
+    //
+    // let admin_routes = Router::new()
+    //     .merge(admin_member_routes)
+    //     .merge(admin_service_routes)
+    //     .merge(admin_home_routes);
+    // let routes = Router::new()
+    //     .merge(member_routes)
+    //     .merge(service_routes)
+    //     .merge(home_routes);
 
     let app = Router::new()
         .route("/health", get(health_check))
-        .nest("/api/:version/admin", admin_routes)
-        .nest("/api/:version/", routes)
+        // .nest("/api/:version/admin", admin_routes)
+        // .nest("/api/:version/", routes)
         .layer(CorsLayer::permissive())
         .layer(Extension(Arc::new(image_util)))
         .with_state(state);

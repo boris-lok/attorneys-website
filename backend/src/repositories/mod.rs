@@ -1,5 +1,8 @@
-pub mod avatar_repository;
-pub mod content_repository;
-pub mod home_repository;
-pub mod member_repository;
-pub mod service_repository;
+pub use avatar_repository::IAvatarRepository;
+pub use content_repository::IContentRepository;
+pub use resource_repository::IResourceRepository;
+
+mod avatar_repository;
+mod content_repository;
+
+mod resource_repository;

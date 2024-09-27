@@ -1,4 +1,4 @@
-use crate::domain::member::entities::{ContentData, ContentID, Language};
+use crate::domain::entities::{ContentData, ContentID, Language};
 use anyhow::anyhow;
 use serde::de::DeserializeOwned;
 use sqlx::{Acquire, Postgres, Transaction};
@@ -10,14 +10,14 @@ use tokio::sync::Mutex;
 pub trait IContentRepository {
     async fn insert(
         &self,
-        content_id: ContentID,
+        id: ContentID,
         content: ContentData,
         language: Language,
     ) -> anyhow::Result<ContentID>;
 
     async fn update(
         &self,
-        content_id: &ContentID,
+        id: &ContentID,
         data: ContentData,
         language: Language,
     ) -> anyhow::Result<()>;
@@ -72,7 +72,7 @@ impl InMemoryContentRepository {
             .iter()
             .filter(|(key, _)| key.ends_with(language.as_str()))
             .map(|(key, value)| {
-                let obj: T = serde_json::from_value(value.0.clone()).unwrap();
+                let obj: T = serde_json::from_value(value.clone().to_json()).unwrap();
                 (key.clone(), obj.clone())
             })
             .collect::<Vec<_>>();
@@ -85,7 +85,7 @@ impl InMemoryContentRepository {
 impl IContentRepository for InMemoryContentRepository {
     async fn insert(
         &self,
-        content_id: ContentID,
+        id: ContentID,
         content: ContentData,
         language: Language,
     ) -> anyhow::Result<ContentID> {
@@ -95,19 +95,19 @@ impl IContentRepository for InMemoryContentRepository {
 
         let mut lock = self.content.lock().await;
 
-        let key = format!("{}_{}", content_id.as_str(), language.as_str());
+        let key = format!("{}_{}", id.as_str(), language.as_str());
         if lock.contains_key(&key) {
-            return Err(anyhow!("{} already exists", content_id.as_str()));
+            return Err(anyhow!("{} already exists", id.as_str()));
         }
 
         lock.insert(key, content);
 
-        Ok(content_id)
+        Ok(id)
     }
 
     async fn update(
         &self,
-        content_id: &ContentID,
+        id: &ContentID,
         data: ContentData,
         language: Language,
     ) -> anyhow::Result<()> {
@@ -117,9 +117,9 @@ impl IContentRepository for InMemoryContentRepository {
 
         let mut lock = self.content.lock().await;
 
-        let key = format!("{}_{}", content_id.as_str(), language.as_str());
+        let key = format!("{}_{}", id.as_str(), language.as_str());
         if !lock.contains_key(&key) {
-            return Err(anyhow!("{} doesn't exists", content_id.as_str()));
+            return Err(anyhow!("{} doesn't exists", id.as_str()));
         }
 
         lock.entry(key).and_modify(|e| *e = data);
@@ -143,7 +143,7 @@ impl<'tx> SqlxContentRepository<'tx> {
 impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
     async fn insert(
         &self,
-        content_id: ContentID,
+        id: ContentID,
         content: ContentData,
         language: Language,
     ) -> anyhow::Result<ContentID> {
@@ -154,18 +154,18 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         sqlx::query(
             "INSERT INTO \"content\" (id, data, language, created_at) VALUES ($1, $2, $3, now());",
         )
-            .bind(content_id.as_str())
-            .bind(content.0)
-            .bind(language.as_str())
-            .execute(conn)
-            .await?;
+        .bind(id.as_str())
+        .bind(content.as_json())
+        .bind(language.as_str())
+        .execute(conn)
+        .await?;
 
-        Ok(content_id)
+        Ok(id)
     }
 
     async fn update(
         &self,
-        content_id: &ContentID,
+        id: &ContentID,
         data: ContentData,
         language: Language,
     ) -> anyhow::Result<()> {
@@ -176,11 +176,11 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         sqlx::query(
             "UPDATE \"content\" SET data = $1, updated_at = now() WHERE id = $2 AND language = $3;",
         )
-            .bind(data.0)
-            .bind(content_id.as_str())
-            .bind(language.as_str())
-            .execute(conn)
-            .await?;
+        .bind(data.as_json())
+        .bind(id.as_str())
+        .bind(language.as_str())
+        .execute(conn)
+        .await?;
 
         Ok(())
     }

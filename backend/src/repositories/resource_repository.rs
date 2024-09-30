@@ -1,5 +1,7 @@
 use crate::domain::entities::{ResourceID, ResourceType};
 use anyhow::anyhow;
+use sqlx::{Postgres, Transaction};
+use std::sync::Weak;
 use tokio::sync::Mutex;
 
 #[async_trait::async_trait]
@@ -56,5 +58,27 @@ impl IResourceRepository for InMemoryResourceRepository {
         lock.push((id.clone(), resource_type));
 
         Ok(id)
+    }
+}
+
+#[derive(Debug)]
+pub struct SqlxResourceRepository<'tx> {
+    tx: Weak<Mutex<Transaction<'tx, Postgres>>>,
+}
+
+impl<'tx> SqlxResourceRepository<'tx> {
+    pub fn new(tx: Weak<Mutex<Transaction<'tx, Postgres>>>) -> Self {
+        Self { tx }
+    }
+}
+
+#[async_trait::async_trait]
+impl<'tx> IResourceRepository for SqlxResourceRepository<'tx> {
+    async fn insert(
+        &self,
+        id: ResourceID,
+        resource_type: ResourceType,
+    ) -> anyhow::Result<ResourceID> {
+        todo!()
     }
 }

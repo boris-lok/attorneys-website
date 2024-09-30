@@ -2,9 +2,15 @@ use crate::domain::entities::{
     ContactData, ContentID, HomeData, Language, MemberData, Resource, ResourceID, ResourceRecord,
     ResourceType, ServiceData,
 };
-use crate::repositories::IResourceRepository;
-use crate::repositories::{IAvatarRepository, InMemoryAvatarRepository, InMemoryContentRepository};
+use crate::repositories::{
+    IAvatarRepository, InMemoryAvatarRepository, InMemoryContentRepository, SqlxResourceRepository,
+};
 use crate::repositories::{IContentRepository, InMemoryResourceRepository};
+use crate::repositories::{IResourceRepository, SqlxAvatarRepository, SqlxContentRepository};
+use anyhow::anyhow;
+use sqlx::{PgPool, Postgres, Transaction};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 /** Define a unit of work to organize all related repositories.
 *
@@ -169,5 +175,95 @@ impl IResourceUnitOfWork for InMemoryResource {
 
     async fn rollback(mut self) -> anyhow::Result<()> {
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct SqlxResource<'tx> {
+    pool: &'tx PgPool,
+    tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
+    resource_repository: Option<SqlxResourceRepository<'tx>>,
+    content_repository: Option<SqlxContentRepository<'tx>>,
+    avatar_repository: Option<SqlxAvatarRepository<'tx>>,
+}
+
+impl<'tx> SqlxResource<'tx> {
+    pub async fn new(pool: &'tx PgPool) -> anyhow::Result<Self> {
+        let tx = pool.begin().await?;
+        let tx = Arc::new(Mutex::new(tx));
+
+        Ok(Self {
+            pool,
+            tx,
+            content_repository: None,
+            avatar_repository: None,
+            resource_repository: None,
+        })
+    }
+}
+
+#[async_trait::async_trait]
+impl<'tx> IResourceUnitOfWork for SqlxResource<'tx> {
+    fn resource_repository(&mut self) -> &mut impl IResourceRepository {
+        if self.resource_repository.is_none() {
+            let resource_repo = SqlxResourceRepository::new(Arc::downgrade(&self.tx));
+            self.resource_repository = Some(resource_repo);
+        }
+        self.resource_repository.as_mut().unwrap()
+    }
+
+    fn content_repository(&mut self) -> &mut impl IContentRepository {
+        if self.content_repository.is_none() {
+            // Use Arc::downgrade to obtain a weak reference to the transaction
+            // if we don't do this, when we call the commit/rollback method will fail.
+            // It can't `try_unwrap` because there are at least two strong references, preventing
+            // the use of `try_unwrap`.
+            //
+            // If we want to use strong references, then we need to drop the repository
+            // when we try to call commit/rollback methods.
+            let content_repo = SqlxContentRepository::new(Arc::downgrade(&self.tx));
+            self.content_repository = Some(content_repo);
+        }
+        self.content_repository.as_mut().unwrap()
+    }
+
+    fn avatar_repository(&mut self) -> &mut impl IAvatarRepository {
+        if self.avatar_repository.is_none() {
+            let avatar_repo = SqlxAvatarRepository::new(Arc::downgrade(&self.tx));
+            self.avatar_repository = Some(avatar_repo);
+        }
+        self.avatar_repository.as_mut().unwrap()
+    }
+
+    async fn get_resource(
+        &self,
+        id: &ResourceID,
+        lang: &Language,
+        resource_type: &ResourceType,
+    ) -> anyhow::Result<Option<ResourceRecord>> {
+        let query = r#"
+
+        "#;
+        todo!()
+    }
+
+    async fn commit(self) -> anyhow::Result<()> {
+        match Arc::try_unwrap(self.tx) {
+            Ok(lock) => {
+                lock.into_inner().commit().await?;
+                Ok(())
+            }
+            Err(_) => Err(anyhow!("can't commit transaction")),
+        }
+    }
+
+    async fn rollback(self) -> anyhow::Result<()> {
+        match Arc::try_unwrap(self.tx) {
+            Ok(lock) => {
+                lock.into_inner().rollback().await?;
+                Ok(())
+            }
+            Err(_) => Err(anyhow!("can't rollback transaction")),
+        }
     }
 }

@@ -28,7 +28,7 @@ impl ResourceID {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub enum Language {
     ZH,
     EN,
@@ -115,7 +115,7 @@ where
     }
 }
 
-#[derive(Debug, Serialize, Validate, Deserialize)]
+#[derive(Debug, Serialize, Validate, Deserialize, Clone, Eq, PartialEq)]
 pub struct MemberData {
     #[validate(length(min = 1))]
     pub name: String,
@@ -132,7 +132,7 @@ impl MemberData {
     }
 }
 
-#[derive(Debug, Serialize, Validate)]
+#[derive(Debug, Serialize, Validate, Deserialize, Clone, Eq, PartialEq)]
 pub struct ServiceData {
     #[validate(length(min = 1))]
     pub title: String,
@@ -149,7 +149,7 @@ impl ServiceData {
     }
 }
 
-#[derive(Debug, Serialize, Validate)]
+#[derive(Debug, Serialize, Validate, Deserialize, Clone, Eq, PartialEq)]
 pub struct HomeData {
     #[validate(length(min = 1))]
     pub data: String,
@@ -163,7 +163,7 @@ impl HomeData {
     }
 }
 
-#[derive(Debug, Serialize, Validate)]
+#[derive(Debug, Serialize, Validate, Deserialize, Clone, Eq, PartialEq)]
 pub struct ContactData {
     #[validate(length(min = 1))]
     pub address: String,
@@ -183,7 +183,7 @@ impl ContactData {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub enum ResourceType {
     Member,
     Service,
@@ -191,10 +191,34 @@ pub enum ResourceType {
     Contact,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Resource {
     Member(MemberData),
     Service(ServiceData),
     Home(HomeData),
     Contact(ContactData),
+}
+
+#[derive(Debug)]
+pub struct ResourceRecord {
+    pub id: ResourceID,
+    pub language: Language,
+    pub resource_type: ResourceType,
+    pub resource: Resource,
+}
+
+impl ResourceRecord {
+    pub fn new(
+        id: ResourceID,
+        language: Language,
+        resource_type: ResourceType,
+        resource: Resource,
+    ) -> Self {
+        Self {
+            id,
+            language,
+            resource_type,
+            resource,
+        }
+    }
 }

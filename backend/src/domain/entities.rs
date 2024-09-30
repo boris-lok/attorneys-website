@@ -191,7 +191,7 @@ pub enum ResourceType {
     Contact,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Resource {
     Member(MemberData),
     Service(ServiceData),

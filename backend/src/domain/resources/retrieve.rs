@@ -82,8 +82,7 @@ mod tests {
     use crate::uow::InMemoryResource;
     use ulid::Ulid;
 
-    #[tokio::test]
-    async fn it_should_return_a_resource_otherwise() {
+    fn create_testcases() -> Vec<(String, ResourceType, Resource)> {
         let member = MemberData::new("boris".to_string(), "description".to_string());
         let service = ServiceData::new("title".to_string(), "data".to_string());
         let home = HomeData::new("home".to_string());
@@ -92,7 +91,7 @@ mod tests {
             "1234".to_string(),
             "info@example.com".to_string(),
         );
-        let testcases = vec![
+        vec![
             (
                 Ulid::new().to_string(),
                 ResourceType::Member,
@@ -113,20 +112,36 @@ mod tests {
                 ResourceType::Contact,
                 Resource::Contact(contact.clone()),
             ),
-        ];
+        ]
+    }
+
+    async fn create_a_fake_resource_and_return_the_unit_of_work(
+        id: String,
+        resource: Resource,
+    ) -> InMemoryResource {
+        let content_data = ContentData::try_from(resource).unwrap();
+        let resource_id = ResourceID::try_from(id.clone()).unwrap();
+        let content_id = ContentID::from(resource_id);
+
+        let mut uow = InMemoryResource::new();
+
+        let repo = uow
+            .content_repository()
+            .insert(content_id.clone(), content_data, Language::ZH)
+            .await
+            .unwrap();
+
+        uow
+    }
+
+    #[tokio::test]
+    async fn it_should_return_a_resource_otherwise() {
+        let testcases = create_testcases();
 
         for (id, resource_type, resource) in testcases {
-            let content_data = ContentData::try_from(resource.clone()).unwrap();
-            let resource_id = ResourceID::try_from(id.clone()).unwrap();
-            let content_id = ContentID::from(resource_id);
-
-            let mut uow = InMemoryResource::new();
-
-            let repo = uow
-                .content_repository()
-                .insert(content_id.clone(), content_data, Language::ZH)
-                .await
-                .unwrap();
+            let uow =
+                create_a_fake_resource_and_return_the_unit_of_work(id.clone(), resource.clone())
+                    .await;
 
             let req = Request {
                 id: id.clone(),
@@ -138,13 +153,36 @@ mod tests {
             let res = execute(Mutex::new(uow), req).await;
 
             match res {
-                Ok(record) => match (record.resource, resource_type) {
-                    (Resource::Member(m), ResourceType::Member) => assert_eq!(m, member),
-                    (Resource::Service(s), ResourceType::Service) => assert_eq!(s, service),
-                    (Resource::Home(h), ResourceType::Home) => assert_eq!(h, home),
-                    (Resource::Contact(c), ResourceType::Contact) => assert_eq!(c, contact),
-                    _ => unreachable!(),
-                },
+                Ok(record) => {
+                    assert_eq!(record.resource, resource);
+                }
+                _ => unreachable!(),
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn it_should_return_a_resource_with_default_language_otherwise() {
+        let testcases = create_testcases();
+
+        for (id, resource_type, resource) in testcases {
+            let uow =
+                create_a_fake_resource_and_return_the_unit_of_work(id.clone(), resource.clone())
+                    .await;
+
+            let req = Request {
+                id: id.clone(),
+                resource_type: resource_type.clone(),
+                language: "en".to_string(),
+                default_language: Language::ZH,
+            };
+
+            let res = execute(Mutex::new(uow), req).await;
+
+            match res {
+                Ok(record) => {
+                    assert_eq!(record.resource, resource);
+                }
                 _ => unreachable!(),
             }
         }

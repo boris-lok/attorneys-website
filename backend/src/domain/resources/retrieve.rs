@@ -187,4 +187,30 @@ mod tests {
             }
         }
     }
+
+    #[tokio::test]
+    async fn it_should_return_an_error_when_unexpected_error_encountered() {
+        let testcases = create_testcases();
+
+        for (id, resource_type, resource) in testcases {
+            let uow =
+                create_a_fake_resource_and_return_the_unit_of_work(id.clone(), resource.clone())
+                    .await
+                    .with_error();
+
+            let req = Request {
+                id: id.clone(),
+                resource_type: resource_type.clone(),
+                language: "zh".to_string(),
+                default_language: Language::ZH,
+            };
+
+            let res = execute(Mutex::new(uow), req).await;
+
+            match res {
+                Err(Error::Unknown(_)) => {}
+                _ => unreachable!(),
+            }
+        }
+    }
 }

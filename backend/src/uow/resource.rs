@@ -57,7 +57,9 @@ impl InMemoryResource {
     pub fn with_error(mut self) -> Self {
         Self {
             error: true,
-            ..self
+            resource_repository: self.resource_repository.map(|repo| repo.with_error()),
+            content_repository: self.content_repository.map(|repo| repo.with_error()),
+            avatar_repository: self.avatar_repository.map(|repo| repo.with_error()),
         }
     }
 }

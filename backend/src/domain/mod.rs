@@ -6,4 +6,5 @@ pub mod service;
 pub mod home;
 
 pub mod entities;
-mod resources;
+
+pub mod resources;

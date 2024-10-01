@@ -152,7 +152,7 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         let conn = lock.acquire().await?;
 
         sqlx::query(
-            "INSERT INTO \"content\" (id, data, language, created_at) VALUES ($1, $2, $3, now());",
+            "INSERT INTO \"content\" (id, data, language, created_at, updated_at) VALUES ($1, $2, $3, now(), now());",
         )
         .bind(id.as_str())
         .bind(content.as_json())

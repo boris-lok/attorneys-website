@@ -193,6 +193,17 @@ pub enum ResourceType {
     Contact,
 }
 
+impl ResourceType {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Member => "member",
+            Self::Service => "service",
+            Self::Home => "home",
+            Self::Contact => "contact",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Resource {
     Member(MemberData),

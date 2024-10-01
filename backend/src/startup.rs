@@ -1,7 +1,7 @@
-use crate::api::health_check;
+use crate::api::{create_member, health_check};
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::{Extension, Router};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -21,8 +21,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let image_util = ImageUtil {};
 
     // Config the routes
-    // let admin_member_routes = Router::new()
-    //     .route("/members", post(create_member).put(update_member))
+    let admin_member_routes = Router::new().route("/members", post(create_member));
     //     .route("/members/:id", delete(delete_member))
     //     .route("/members/:id/avatar", post(upload_member_avatar));
     // let member_routes = Router::new()
@@ -40,8 +39,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     //     .route("/home/:id", get(retrieve_home))
     //     .route("/home", get(list_home));
     //
-    // let admin_routes = Router::new()
-    //     .merge(admin_member_routes)
+    let admin_routes = Router::new().merge(admin_member_routes);
     //     .merge(admin_service_routes)
     //     .merge(admin_home_routes);
     // let routes = Router::new()
@@ -51,7 +49,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
 
     let app = Router::new()
         .route("/health", get(health_check))
-        // .nest("/api/:version/admin", admin_routes)
+        .nest("/api/:version/admin", admin_routes)
         // .nest("/api/:version/", routes)
         .layer(CorsLayer::permissive())
         .layer(Extension(Arc::new(image_util)))

@@ -1,6 +1,6 @@
 use crate::domain::entities::{ResourceID, ResourceType};
 use anyhow::anyhow;
-use sqlx::{Postgres, Transaction};
+use sqlx::{Acquire, Postgres, Transaction};
 use std::sync::Weak;
 use tokio::sync::Mutex;
 
@@ -79,6 +79,16 @@ impl<'tx> IResourceRepository for SqlxResourceRepository<'tx> {
         id: ResourceID,
         resource_type: ResourceType,
     ) -> anyhow::Result<ResourceID> {
-        todo!()
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        sqlx::query("INSERT INTO \"resource\" (id, created_at, resource_type, seq) VALUES ($1, now(), $2, 32767 );")
+            .bind(id.as_str())
+            .bind(resource_type.as_str())
+            .execute(conn)
+            .await?;
+
+        Ok(id)
     }
 }

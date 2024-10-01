@@ -1,5 +1,5 @@
 pub use health::health_check;
-// pub use member::create::create_member;
+pub use member::create::create_member;
 // pub use member::delete::delete_member;
 // pub use member::list::list_members;
 // pub use member::retrieve::retrieve_member;
@@ -19,5 +19,5 @@ mod api_error;
 mod health;
 //
 // mod home;
-// mod member;
+mod member;
 // mod service;

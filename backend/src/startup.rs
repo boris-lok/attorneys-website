@@ -1,4 +1,4 @@
-use crate::api::{create_member, health_check};
+use crate::api::{create_member, health_check, retrieve_member};
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
 use axum::routing::{get, post};
@@ -24,8 +24,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let admin_member_routes = Router::new().route("/members", post(create_member));
     //     .route("/members/:id", delete(delete_member))
     //     .route("/members/:id/avatar", post(upload_member_avatar));
-    // let member_routes = Router::new()
-    //     .route("/members/:id", get(retrieve_member))
+    let member_routes = Router::new().route("/members/:id", get(retrieve_member));
     //     .route("/members", get(list_members));
     //
     // let admin_service_routes =
@@ -42,15 +41,14 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let admin_routes = Router::new().merge(admin_member_routes);
     //     .merge(admin_service_routes)
     //     .merge(admin_home_routes);
-    // let routes = Router::new()
-    //     .merge(member_routes)
+    let routes = Router::new().merge(member_routes);
     //     .merge(service_routes)
     //     .merge(home_routes);
 
     let app = Router::new()
         .route("/health", get(health_check))
         .nest("/api/:version/admin", admin_routes)
-        // .nest("/api/:version/", routes)
+        .nest("/api/:version/", routes)
         .layer(CorsLayer::permissive())
         .layer(Extension(Arc::new(image_util)))
         .with_state(state);

@@ -6,6 +6,7 @@ use std::fmt::Formatter;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
+#[derive(Debug)]
 pub(crate) struct Request {
     pub(crate) id: String,
     pub(crate) resource_type: ResourceType,

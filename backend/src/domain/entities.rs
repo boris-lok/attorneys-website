@@ -242,8 +242,8 @@ pub struct MemberEntityFromSQLx {
 impl From<MemberEntityFromSQLx> for MemberEntity {
     fn from(value: MemberEntityFromSQLx) -> Self {
         Self {
-            id: value.id,
-            language: value.language,
+            id: value.id.trim().to_owned(),
+            language: value.language.trim().to_owned(),
             data: value.data.0,
             avatar: value.avatar.map(|a| a.0),
         }
@@ -273,8 +273,8 @@ pub struct ServiceEntityFromSQLx {
 impl From<ServiceEntityFromSQLx> for ServiceEntity {
     fn from(value: ServiceEntityFromSQLx) -> Self {
         Self {
-            id: value.id,
-            language: value.language,
+            id: value.id.trim().to_owned(),
+            language: value.language.trim().to_owned(),
             data: value.data.0,
         }
     }
@@ -303,8 +303,8 @@ pub struct HomeEntityFromSQLx {
 impl From<HomeEntityFromSQLx> for HomeEntity {
     fn from(value: HomeEntityFromSQLx) -> Self {
         Self {
-            id: value.id,
-            language: value.language,
+            id: value.id.trim().to_owned(),
+            language: value.language.trim().to_owned(),
             data: value.data.0,
         }
     }
@@ -333,8 +333,8 @@ pub struct ContactEntityFromSQLx {
 impl From<ContactEntityFromSQLx> for ContactEntity {
     fn from(value: ContactEntityFromSQLx) -> Self {
         Self {
-            id: value.id,
-            language: value.language,
+            id: value.id.trim().to_owned(),
+            language: value.language.trim().to_owned(),
             data: value.data.0,
         }
     }

@@ -1,6 +1,7 @@
 use crate::domain::entities::{
-    ContactData, ContactEntity, ContentID, HomeData, HomeEntity, Language, MemberData,
-    MemberEntity, MemberEntityFromSQLx, ResourceID, ResourceType, ServiceData, ServiceEntity,
+    ContactData, ContactEntity, ContactEntityFromSQLx, ContentID, HomeData, HomeEntity,
+    HomeEntityFromSQLx, Language, MemberData, MemberEntity, MemberEntityFromSQLx, ResourceID,
+    ResourceType, ServiceData, ServiceEntity, ServiceEntityFromSQLx,
 };
 use crate::domain::member::entities::AvatarData;
 use crate::repositories::{
@@ -8,7 +9,7 @@ use crate::repositories::{
 };
 use crate::repositories::{IContentRepository, InMemoryResourceRepository};
 use crate::repositories::{IResourceRepository, SqlxAvatarRepository, SqlxContentRepository};
-use anyhow::{anyhow, Context};
+use anyhow::anyhow;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use sqlx::{PgPool, Postgres, Transaction};
@@ -269,29 +270,61 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
     where
         T: DeserializeOwned + Serialize,
     {
+        let query = r#"
+                select resource.id as id,
+                    content.data as data,
+                    content.language as language
+                from resource,
+                     content
+                where resource.id = content.id
+                  and content.language = $2
+                  and resource.id = $1;
+                        "#;
+
         let res = match resource_type {
             ResourceType::Member => {
                 let query = r#"
-select resource.id as id,
-    content.data as data,
-    avatar.data as avatar,
-    content.language as language
-from resource,
-     content
-         left join avatar on avatar.id = content.id
-where member.id = content.id
-  and content.language = $2
-  and member.id = $1;
-        "#;
+                select resource.id as id,
+                    content.data as data,
+                    avatar.data as avatar,
+                    content.language as language
+                from resource,
+                     content
+                         left join avatar on avatar.id = content.id
+                where resource.id = content.id
+                  and content.language = $2
+                  and resource.id = $1;
+                        "#;
+
                 sqlx::query_as::<_, MemberEntityFromSQLx>(query)
                     .bind(id.as_str())
                     .bind(lang.as_str())
                     .fetch_optional(self.pool)
                     .await?
-                    .and_then(|e| MemberEntity::try_from(e).ok())
+                    .map(|e| MemberEntity::from(e))
                     .and_then(|e| serde_json::value::to_value(e).ok())
             }
-            _ => unimplemented!(),
+            ResourceType::Service => sqlx::query_as::<_, ServiceEntityFromSQLx>(query)
+                .bind(id.as_str())
+                .bind(lang.as_str())
+                .fetch_optional(self.pool)
+                .await?
+                .map(|e| ServiceEntity::from(e))
+                .and_then(|e| serde_json::value::to_value(e).ok()),
+            ResourceType::Home => sqlx::query_as::<_, HomeEntityFromSQLx>(query)
+                .bind(id.as_str())
+                .bind(lang.as_str())
+                .fetch_optional(self.pool)
+                .await?
+                .map(|e| HomeEntity::from(e))
+                .and_then(|e| serde_json::value::to_value(e).ok()),
+            ResourceType::Contact => sqlx::query_as::<_, ContactEntityFromSQLx>(query)
+                .bind(id.as_str())
+                .bind(lang.as_str())
+                .fetch_optional(self.pool)
+                .await?
+                .map(|e| ContactEntity::from(e))
+                .and_then(|e| serde_json::value::to_value(e).ok()),
         };
 
         match res {

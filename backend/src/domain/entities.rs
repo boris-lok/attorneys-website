@@ -209,14 +209,6 @@ pub struct MemberEntity {
     pub avatar: Option<AvatarData>,
 }
 
-#[derive(Debug, FromRow)]
-pub struct MemberEntityFromSQLx {
-    pub id: String,
-    pub language: String,
-    pub data: sqlx::types::Json<MemberData>,
-    pub avatar: Option<sqlx::types::Json<AvatarData>>,
-}
-
 impl MemberEntity {
     pub fn new(id: String, language: String, data: MemberData, avatar: Option<AvatarData>) -> Self {
         Self {
@@ -228,16 +220,22 @@ impl MemberEntity {
     }
 }
 
-impl TryFrom<MemberEntityFromSQLx> for MemberEntity {
-    type Error = ();
+#[derive(Debug, FromRow)]
+pub struct MemberEntityFromSQLx {
+    pub id: String,
+    pub language: String,
+    pub data: sqlx::types::Json<MemberData>,
+    pub avatar: Option<sqlx::types::Json<AvatarData>>,
+}
 
-    fn try_from(value: MemberEntityFromSQLx) -> Result<Self, Self::Error> {
-        Ok(Self {
+impl From<MemberEntityFromSQLx> for MemberEntity {
+    fn from(value: MemberEntityFromSQLx) -> Self {
+        Self {
             id: value.id,
             language: value.language,
             data: value.data.0,
             avatar: value.avatar.map(|a| a.0),
-        })
+        }
     }
 }
 
@@ -254,6 +252,23 @@ impl ServiceEntity {
     }
 }
 
+#[derive(Debug, FromRow)]
+pub struct ServiceEntityFromSQLx {
+    pub id: String,
+    pub language: String,
+    pub data: sqlx::types::Json<ServiceData>,
+}
+
+impl From<ServiceEntityFromSQLx> for ServiceEntity {
+    fn from(value: ServiceEntityFromSQLx) -> Self {
+        Self {
+            id: value.id,
+            language: value.language,
+            data: value.data.0,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HomeEntity {
     pub id: String,
@@ -267,6 +282,23 @@ impl HomeEntity {
     }
 }
 
+#[derive(Debug, FromRow)]
+pub struct HomeEntityFromSQLx {
+    pub id: String,
+    pub language: String,
+    pub data: sqlx::types::Json<HomeData>,
+}
+
+impl From<HomeEntityFromSQLx> for HomeEntity {
+    fn from(value: HomeEntityFromSQLx) -> Self {
+        Self {
+            id: value.id,
+            language: value.language,
+            data: value.data.0,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ContactEntity {
     pub id: String,
@@ -277,5 +309,22 @@ pub struct ContactEntity {
 impl ContactEntity {
     pub fn new(id: String, language: String, data: ContactData) -> Self {
         Self { id, language, data }
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct ContactEntityFromSQLx {
+    pub id: String,
+    pub language: String,
+    pub data: sqlx::types::Json<ContactData>,
+}
+
+impl From<ContactEntityFromSQLx> for ContactEntity {
+    fn from(value: ContactEntityFromSQLx) -> Self {
+        Self {
+            id: value.id,
+            language: value.language,
+            data: value.data.0,
+        }
     }
 }

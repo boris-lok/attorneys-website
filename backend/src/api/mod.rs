@@ -4,7 +4,7 @@ pub use member::create::create_member;
 // pub use member::list::list_members;
 pub use member::retrieve::retrieve_member;
 // pub use member::update::update_member;
-// pub use member::upload_avatar::upload_member_avatar;
+pub use member::upload_avatar::upload_member_avatar;
 //
 pub use service::create::create_service;
 // pub use service::list::list_services;

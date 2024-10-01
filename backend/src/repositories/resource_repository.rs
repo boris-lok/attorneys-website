@@ -1,6 +1,6 @@
 use crate::domain::entities::{ResourceID, ResourceType};
 use anyhow::anyhow;
-use sqlx::{Acquire, Postgres, Transaction};
+use sqlx::{Acquire, Postgres, Row, Transaction};
 use std::sync::Weak;
 use tokio::sync::Mutex;
 
@@ -11,6 +11,10 @@ pub trait IResourceRepository {
         id: ResourceID,
         resource_type: ResourceType,
     ) -> anyhow::Result<ResourceID>;
+
+    // check if the resource is already in the repository
+    async fn contains(&self, id: &ResourceID, resource_type: &ResourceType)
+        -> anyhow::Result<bool>;
 }
 
 #[derive(Debug)]
@@ -59,6 +63,22 @@ impl IResourceRepository for InMemoryResourceRepository {
 
         Ok(id)
     }
+
+    async fn contains(
+        &self,
+        id: &ResourceID,
+        resource_type: &ResourceType,
+    ) -> anyhow::Result<bool> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let lock = self.resources.lock().await;
+
+        Ok(lock
+            .iter()
+            .any(|(res_id, kind)| res_id == id && kind == resource_type))
+    }
 }
 
 #[derive(Debug)]
@@ -90,5 +110,29 @@ impl<'tx> IResourceRepository for SqlxResourceRepository<'tx> {
             .await?;
 
         Ok(id)
+    }
+
+    async fn contains(
+        &self,
+        id: &ResourceID,
+        resource_type: &ResourceType,
+    ) -> anyhow::Result<bool> {
+        let query = "SELECT id FROM \"resource\" WHERE id = $1 and resource_type = $2 limit 1";
+
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        let res = sqlx::query(query)
+            .bind(id.as_str())
+            .bind(resource_type.as_str())
+            .fetch_optional(conn)
+            .await
+            .map(|row| match row {
+                None => false,
+                Some(row) => row.len() > 0,
+            })?;
+
+        Ok(res)
     }
 }

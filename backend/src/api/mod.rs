@@ -13,7 +13,7 @@ pub use member::retrieve::retrieve_member;
 //
 pub use home::create::create_home;
 // pub use home::list::list_home;
-// pub use home::retrieve::retrieve_home;
+pub use home::retrieve::retrieve_home;
 // pub use home::update::update_home;
 mod api_error;
 mod health;

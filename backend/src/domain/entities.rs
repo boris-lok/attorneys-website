@@ -1,4 +1,6 @@
+use crate::domain::member::entities::AvatarData;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use std::fmt::Formatter;
 use validator::Validate;
 
@@ -204,16 +206,76 @@ pub struct MemberEntity {
     pub id: String,
     pub language: String,
     pub data: MemberData,
-    pub avatar: Option<String>,
+    pub avatar: Option<AvatarData>,
+}
+
+#[derive(Debug, FromRow)]
+pub struct MemberEntityFromSQLx {
+    pub id: String,
+    pub language: String,
+    pub data: sqlx::types::Json<MemberData>,
+    pub avatar: Option<sqlx::types::Json<AvatarData>>,
 }
 
 impl MemberEntity {
-    pub fn new(id: String, language: String, data: MemberData, avatar: Option<String>) -> Self {
+    pub fn new(id: String, language: String, data: MemberData, avatar: Option<AvatarData>) -> Self {
         Self {
             id,
             language,
             data,
             avatar,
         }
+    }
+}
+
+impl TryFrom<MemberEntityFromSQLx> for MemberEntity {
+    type Error = ();
+
+    fn try_from(value: MemberEntityFromSQLx) -> Result<Self, Self::Error> {
+        Ok(Self {
+            id: value.id,
+            language: value.language,
+            data: value.data.0,
+            avatar: value.avatar.map(|a| a.0),
+        })
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ServiceEntity {
+    pub id: String,
+    pub language: String,
+    pub data: ServiceData,
+}
+
+impl ServiceEntity {
+    pub fn new(id: String, language: String, data: ServiceData) -> Self {
+        Self { id, language, data }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct HomeEntity {
+    pub id: String,
+    pub language: String,
+    pub data: HomeData,
+}
+
+impl HomeEntity {
+    pub fn new(id: String, language: String, data: HomeData) -> Self {
+        Self { id, language, data }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContactEntity {
+    pub id: String,
+    pub language: String,
+    pub data: ContactData,
+}
+
+impl ContactEntity {
+    pub fn new(id: String, language: String, data: ContactData) -> Self {
+        Self { id, language, data }
     }
 }

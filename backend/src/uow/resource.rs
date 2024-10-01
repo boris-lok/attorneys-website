@@ -1,5 +1,6 @@
 use crate::domain::entities::{
-    ContentID, Language, MemberData, MemberEntity, ResourceID, ResourceType,
+    ContactData, ContactEntity, ContentID, HomeData, HomeEntity, Language, MemberData,
+    MemberEntity, MemberEntityFromSQLx, ResourceID, ResourceType, ServiceData, ServiceEntity,
 };
 use crate::domain::member::entities::AvatarData;
 use crate::repositories::{
@@ -7,7 +8,7 @@ use crate::repositories::{
 };
 use crate::repositories::{IContentRepository, InMemoryResourceRepository};
 use crate::repositories::{IResourceRepository, SqlxAvatarRepository, SqlxContentRepository};
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use sqlx::{PgPool, Postgres, Transaction};
@@ -126,30 +127,61 @@ impl IResourceUnitOfWork for InMemory {
             .content_repository
             .as_ref()
             .unwrap()
-            .get(&content_id, &lang)
+            .get(&content_id, lang)
             .await;
 
         match data {
-            Ok(Some(data)) => match resource_type {
-                ResourceType::Member => {
-                    let avatar = self.avatar_repository.as_ref().unwrap().get(&id).await?;
-                    let avatar = avatar
-                        .map(|json| serde_json::value::from_value::<AvatarData>(json.get()).ok())
-                        .flatten()
-                        .map(|e| e.large_image);
-                    let json = serde_json::from_value::<MemberData>(data.clone().to_json())?;
-                    let member = MemberEntity::new(
-                        id.clone().to_string(),
-                        lang.as_str().to_string(),
-                        json,
-                        avatar,
-                    );
-                    let json = serde_json::value::to_value(member)?;
-                    let res = from_resource::<T>(json)?;
-                    Ok(Some(res))
-                }
-                _ => unreachable!(),
-            },
+            Ok(Some(data)) => {
+                let json = match resource_type {
+                    ResourceType::Member => {
+                        let avatar = self.avatar_repository.as_ref().unwrap().get(id).await?;
+                        let avatar = avatar.and_then(|json| {
+                            serde_json::value::from_value::<AvatarData>(json.get()).ok()
+                        });
+                        let json = serde_json::from_value::<MemberData>(data.clone().to_json())?;
+                        let member = MemberEntity::new(
+                            id.clone().to_string(),
+                            lang.as_str().to_string(),
+                            json,
+                            avatar,
+                        );
+                        serde_json::value::to_value(member)?
+                    }
+                    ResourceType::Service => {
+                        let json = serde_json::from_value::<ServiceData>(data.clone().to_json())?;
+                        let service = ServiceEntity::new(
+                            id.clone().to_string(),
+                            lang.as_str().to_string(),
+                            json,
+                        );
+
+                        serde_json::value::to_value(service)?
+                    }
+                    ResourceType::Home => {
+                        let json = serde_json::from_value::<HomeData>(data.clone().to_json())?;
+                        let home = HomeEntity::new(
+                            id.clone().to_string(),
+                            lang.as_str().to_string(),
+                            json,
+                        );
+
+                        serde_json::value::to_value(home)?
+                    }
+                    ResourceType::Contact => {
+                        let json = serde_json::from_value::<ContactData>(data.clone().to_json())?;
+                        let contact = ContactEntity::new(
+                            id.clone().to_string(),
+                            lang.as_str().to_string(),
+                            json,
+                        );
+
+                        serde_json::value::to_value(contact)?
+                    }
+                };
+
+                let res = from_resource::<T>(json)?;
+                Ok(Some(res))
+            }
             Err(e) => Err(e),
             Ok(None) => Ok(None),
         }
@@ -237,10 +269,38 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
     where
         T: DeserializeOwned + Serialize,
     {
-        let query = r#"
-
+        let res = match resource_type {
+            ResourceType::Member => {
+                let query = r#"
+select resource.id as id,
+    content.data as data,
+    avatar.data as avatar,
+    content.language as language
+from resource,
+     content
+         left join avatar on avatar.id = content.id
+where member.id = content.id
+  and content.language = $2
+  and member.id = $1;
         "#;
-        todo!()
+                sqlx::query_as::<_, MemberEntityFromSQLx>(query)
+                    .bind(id.as_str())
+                    .bind(lang.as_str())
+                    .fetch_optional(self.pool)
+                    .await?
+                    .and_then(|e| MemberEntity::try_from(e).ok())
+                    .and_then(|e| serde_json::value::to_value(e).ok())
+            }
+            _ => unimplemented!(),
+        };
+
+        match res {
+            None => Ok(None),
+            Some(value) => {
+                let r = from_resource::<T>(value)?;
+                Ok(Some(r))
+            }
+        }
     }
 
     async fn commit(self) -> anyhow::Result<()> {

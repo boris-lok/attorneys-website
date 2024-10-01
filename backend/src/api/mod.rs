@@ -11,13 +11,13 @@ pub use member::retrieve::retrieve_member;
 // pub use service::retrieve::retrieve_service;
 // pub use service::update::update_service;
 //
-// pub use home::create::create_home;
+pub use home::create::create_home;
 // pub use home::list::list_home;
 // pub use home::retrieve::retrieve_home;
 // pub use home::update::update_home;
 mod api_error;
 mod health;
-//
-// mod home;
+
+mod home;
 mod member;
-// mod service;
+mod service;

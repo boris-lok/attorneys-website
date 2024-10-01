@@ -1,4 +1,4 @@
-use crate::api::{create_member, health_check, retrieve_member};
+use crate::api::{create_home, create_member, health_check, retrieve_member};
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
 use axum::routing::{get, post};
@@ -33,14 +33,15 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     //     .route("/services/:id", get(retrieve_service))
     //     .route("/services", get(list_services));
     //
-    // let admin_home_routes = Router::new().route("/home", post(create_home).put(update_home));
+    let admin_home_routes = Router::new().route("/home", post(create_home));
     // let home_routes = Router::new()
     //     .route("/home/:id", get(retrieve_home))
     //     .route("/home", get(list_home));
     //
-    let admin_routes = Router::new().merge(admin_member_routes);
+    let admin_routes = Router::new()
+        .merge(admin_member_routes)
+        .merge(admin_home_routes);
     //     .merge(admin_service_routes)
-    //     .merge(admin_home_routes);
     let routes = Router::new().merge(member_routes);
     //     .merge(service_routes)
     //     .merge(home_routes);

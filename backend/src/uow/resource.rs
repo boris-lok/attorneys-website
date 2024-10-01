@@ -1,13 +1,15 @@
 use crate::domain::entities::{
-    ContactData, ContentID, HomeData, Language, MemberData, Resource, ResourceID, ResourceRecord,
-    ResourceType, ServiceData,
+    ContentID, Language, MemberData, MemberEntity, ResourceID, ResourceType,
 };
+use crate::domain::member::entities::AvatarData;
 use crate::repositories::{
     IAvatarRepository, InMemoryAvatarRepository, InMemoryContentRepository, SqlxResourceRepository,
 };
 use crate::repositories::{IContentRepository, InMemoryResourceRepository};
 use crate::repositories::{IResourceRepository, SqlxAvatarRepository, SqlxContentRepository};
 use anyhow::anyhow;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -30,12 +32,14 @@ pub trait IResourceUnitOfWork {
     fn avatar_repository(&mut self) -> &mut impl IAvatarRepository;
 
     /** Get a resource by ID and language */
-    async fn get_resource(
+    async fn get_resource<T>(
         &self,
         id: &ResourceID,
         lang: &Language,
         resource_type: &ResourceType,
-    ) -> anyhow::Result<Option<ResourceRecord>>;
+    ) -> anyhow::Result<Option<T>>
+    where
+        T: DeserializeOwned + Serialize;
 
     /** Commit the transaction */
     async fn commit(mut self) -> anyhow::Result<()>;
@@ -108,12 +112,15 @@ impl IResourceUnitOfWork for InMemory {
         self.avatar_repository.as_mut().unwrap()
     }
 
-    async fn get_resource(
+    async fn get_resource<T>(
         &self,
         id: &ResourceID,
         lang: &Language,
         resource_type: &ResourceType,
-    ) -> anyhow::Result<Option<ResourceRecord>> {
+    ) -> anyhow::Result<Option<T>>
+    where
+        T: DeserializeOwned + Serialize,
+    {
         let content_id = ContentID::from(id.clone());
         let data = self
             .content_repository
@@ -123,47 +130,26 @@ impl IResourceUnitOfWork for InMemory {
             .await;
 
         match data {
-            Ok(Some(data)) => {
-                let record = match resource_type {
-                    ResourceType::Member => {
-                        let json = serde_json::from_value::<MemberData>(data.clone().to_json())?;
-                        ResourceRecord::new(
-                            id.clone(),
-                            lang.clone(),
-                            resource_type.clone(),
-                            Resource::Member(json),
-                        )
-                    }
-                    ResourceType::Service => {
-                        let json = serde_json::from_value::<ServiceData>(data.clone().to_json())?;
-                        ResourceRecord::new(
-                            id.clone(),
-                            lang.clone(),
-                            resource_type.clone(),
-                            Resource::Service(json),
-                        )
-                    }
-                    ResourceType::Home => {
-                        let json = serde_json::from_value::<HomeData>(data.clone().to_json())?;
-                        ResourceRecord::new(
-                            id.clone(),
-                            lang.clone(),
-                            resource_type.clone(),
-                            Resource::Home(json),
-                        )
-                    }
-                    ResourceType::Contact => {
-                        let json = serde_json::from_value::<ContactData>(data.clone().to_json())?;
-                        ResourceRecord::new(
-                            id.clone(),
-                            lang.clone(),
-                            resource_type.clone(),
-                            Resource::Contact(json),
-                        )
-                    }
-                };
-                Ok(Some(record))
-            }
+            Ok(Some(data)) => match resource_type {
+                ResourceType::Member => {
+                    let avatar = self.avatar_repository.as_ref().unwrap().get(&id).await?;
+                    let avatar = avatar
+                        .map(|json| serde_json::value::from_value::<AvatarData>(json.get()).ok())
+                        .flatten()
+                        .map(|e| e.large_image);
+                    let json = serde_json::from_value::<MemberData>(data.clone().to_json())?;
+                    let member = MemberEntity::new(
+                        id.clone().to_string(),
+                        lang.as_str().to_string(),
+                        json,
+                        avatar,
+                    );
+                    let json = serde_json::value::to_value(member)?;
+                    let res = from_resource::<T>(json)?;
+                    Ok(Some(res))
+                }
+                _ => unreachable!(),
+            },
             Err(e) => Err(e),
             Ok(None) => Ok(None),
         }
@@ -176,6 +162,13 @@ impl IResourceUnitOfWork for InMemory {
     async fn rollback(mut self) -> anyhow::Result<()> {
         Ok(())
     }
+}
+
+fn from_resource<T>(resource: serde_json::value::Value) -> Result<T, serde_json::error::Error>
+where
+    T: DeserializeOwned + Serialize,
+{
+    serde_json::value::from_value::<T>(resource)
 }
 
 #[derive(Debug)]
@@ -235,12 +228,15 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
         self.avatar_repository.as_mut().unwrap()
     }
 
-    async fn get_resource(
+    async fn get_resource<T>(
         &self,
         id: &ResourceID,
         lang: &Language,
         resource_type: &ResourceType,
-    ) -> anyhow::Result<Option<ResourceRecord>> {
+    ) -> anyhow::Result<Option<T>>
+    where
+        T: DeserializeOwned + Serialize,
+    {
         let query = r#"
 
         "#;

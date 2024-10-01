@@ -199,26 +199,21 @@ pub enum Resource {
     Contact(ContactData),
 }
 
-#[derive(Debug)]
-pub struct ResourceRecord {
-    pub id: ResourceID,
-    pub language: Language,
-    pub resource_type: ResourceType,
-    pub resource: Resource,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MemberEntity {
+    pub id: String,
+    pub language: String,
+    pub data: MemberData,
+    pub avatar: Option<String>,
 }
 
-impl ResourceRecord {
-    pub fn new(
-        id: ResourceID,
-        language: Language,
-        resource_type: ResourceType,
-        resource: Resource,
-    ) -> Self {
+impl MemberEntity {
+    pub fn new(id: String, language: String, data: MemberData, avatar: Option<String>) -> Self {
         Self {
             id,
             language,
-            resource_type,
-            resource,
+            data,
+            avatar,
         }
     }
 }

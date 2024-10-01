@@ -79,7 +79,7 @@ mod tests {
         ContactData, ContentData, ContentID, HomeData, MemberData, Resource, ServiceData,
     };
     use crate::repositories::IContentRepository;
-    use crate::uow::InMemoryResource;
+    use crate::uow::InMemory;
     use ulid::Ulid;
 
     fn create_testcases() -> Vec<(String, ResourceType, Resource)> {
@@ -118,12 +118,12 @@ mod tests {
     async fn create_a_fake_resource_and_return_the_unit_of_work(
         id: String,
         resource: Resource,
-    ) -> InMemoryResource {
+    ) -> InMemory {
         let content_data = ContentData::try_from(resource).unwrap();
         let resource_id = ResourceID::try_from(id.clone()).unwrap();
         let content_id = ContentID::from(resource_id);
 
-        let mut uow = InMemoryResource::new();
+        let mut uow = InMemory::new();
 
         let repo = uow
             .content_repository()

@@ -83,7 +83,7 @@ where
 mod tests {
     use super::*;
     use crate::domain::entities::{ContactData, HomeData, MemberData, ServiceData};
-    use crate::uow::InMemoryResource;
+    use crate::uow::InMemory;
     use ulid::Ulid;
 
     #[tokio::test]
@@ -105,7 +105,7 @@ mod tests {
         ];
 
         for d in different_data {
-            let uow = InMemoryResource::new();
+            let uow = InMemory::new();
             let id = Ulid::new().to_string();
 
             let req = Request {
@@ -193,7 +193,7 @@ mod tests {
         ];
 
         for d in missing_or_invalid_data {
-            let uow = InMemoryResource::new();
+            let uow = InMemory::new();
             let id = Ulid::new().to_string();
 
             let req = Request {
@@ -217,7 +217,7 @@ mod tests {
             "boris".to_string(),
             "description".to_string(),
         ));
-        let uow = InMemoryResource::new().with_error();
+        let uow = InMemory::new().with_error();
         let id = Ulid::new().to_string();
 
         let req = Request {

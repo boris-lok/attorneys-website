@@ -43,14 +43,14 @@ pub trait IResourceUnitOfWork {
     async fn rollback(mut self) -> anyhow::Result<()>;
 }
 
-pub struct InMemoryResource {
+pub struct InMemory {
     error: bool,
     resource_repository: Option<InMemoryResourceRepository>,
     content_repository: Option<InMemoryContentRepository>,
     avatar_repository: Option<InMemoryAvatarRepository>,
 }
 
-impl InMemoryResource {
+impl InMemory {
     pub fn new() -> Self {
         Self {
             error: false,
@@ -71,7 +71,7 @@ impl InMemoryResource {
 }
 
 #[async_trait::async_trait]
-impl IResourceUnitOfWork for InMemoryResource {
+impl IResourceUnitOfWork for InMemory {
     fn resource_repository(&mut self) -> &mut impl IResourceRepository {
         if self.resource_repository.is_none() {
             let resource_repo = if self.error {
@@ -179,7 +179,7 @@ impl IResourceUnitOfWork for InMemoryResource {
 }
 
 #[derive(Debug)]
-pub struct SqlxResource<'tx> {
+pub struct InDatabase<'tx> {
     pool: &'tx PgPool,
     tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
     resource_repository: Option<SqlxResourceRepository<'tx>>,
@@ -187,7 +187,7 @@ pub struct SqlxResource<'tx> {
     avatar_repository: Option<SqlxAvatarRepository<'tx>>,
 }
 
-impl<'tx> SqlxResource<'tx> {
+impl<'tx> InDatabase<'tx> {
     pub async fn new(pool: &'tx PgPool) -> anyhow::Result<Self> {
         let tx = pool.begin().await?;
         let tx = Arc::new(Mutex::new(tx));
@@ -203,7 +203,7 @@ impl<'tx> SqlxResource<'tx> {
 }
 
 #[async_trait::async_trait]
-impl<'tx> IResourceUnitOfWork for SqlxResource<'tx> {
+impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
     fn resource_repository(&mut self) -> &mut impl IResourceRepository {
         if self.resource_repository.is_none() {
             let resource_repo = SqlxResourceRepository::new(Arc::downgrade(&self.tx));

@@ -404,6 +404,23 @@ impl SimpleMemberEntity {
     }
 }
 
+#[derive(Debug, FromRow)]
+pub struct SimpleMemberEntityFromSQLx {
+    pub id: String,
+    pub name: String,
+    pub avatar: Option<String>,
+}
+
+impl From<SimpleMemberEntityFromSQLx> for SimpleMemberEntity {
+    fn from(value: SimpleMemberEntityFromSQLx) -> Self {
+        Self {
+            id: value.id.to_owned(),
+            name: value.name.to_owned(),
+            avatar: value.avatar,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum Pagination {
     All,

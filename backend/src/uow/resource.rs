@@ -3,6 +3,7 @@ use crate::domain::entities::{
     ContactEntityFromSQLx, ContentID, HomeData, HomeEntity, HomeEntityFromSQLx, Language,
     MemberData, MemberEntity, MemberEntityFromSQLx, Pagination, ResourceID, ResourceType,
     ServiceData, ServiceEntity, ServiceEntityFromSQLx, SimpleMemberEntity,
+    SimpleMemberEntityFromSQLx,
 };
 use crate::domain::member::entities::AvatarData;
 use crate::repositories::{
@@ -16,6 +17,7 @@ use serde::Serialize;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use validator::ValidateRequired;
 
 /** Define a unit of work to organize all related repositories.
 *
@@ -442,7 +444,45 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
     where
         T: DeserializeOwned + Serialize,
     {
-        todo!()
+        let offset = match page {
+            Pagination::All => ";".to_string(),
+            Pagination::Single => "limit 1;".to_string(),
+            Pagination::Page(page) => {
+                let offset = page.page * page.size;
+                format!("offset {} limit {};", offset, page.size)
+            }
+        };
+
+        let res = match resource_type {
+            ResourceType::Member => {
+                let query = r"select resource.id as id,
+                content.data->>'name' as name,
+                avatar.data->>'small_image' as avatar
+                from resource,
+                     content
+                left join avatar on content.id = avatar.id
+                where resource.id = content.id
+                and content.language = $1
+                order by seq";
+                let query = format!("{}{}", query, offset);
+
+                sqlx::query_as::<_, SimpleMemberEntityFromSQLx>(query.as_str())
+                    .bind(language.as_str())
+                    .fetch_all(self.pool)
+                    .await?
+                    .into_iter()
+                    .map(SimpleMemberEntity::from)
+                    .filter_map(|e| serde_json::value::to_value(e).ok())
+                    .collect::<Vec<_>>()
+            }
+            _ => unimplemented!(),
+        };
+
+        Ok(res
+            .into_iter()
+            .map(from_resource::<T>)
+            .filter_map(|e| e.ok())
+            .collect::<Vec<_>>())
     }
 
     async fn commit(self) -> anyhow::Result<()> {

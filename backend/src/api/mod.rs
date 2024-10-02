@@ -15,9 +15,14 @@ pub use home::create::create_home;
 // pub use home::list::list_home;
 pub use home::retrieve::retrieve_home;
 // pub use home::update::update_home;
+
+pub use contact::create::create_contact;
+
 mod api_error;
 mod health;
 
 mod home;
 mod member;
 mod service;
+
+mod contact;

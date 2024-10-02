@@ -42,6 +42,10 @@ where
                 let data = ContentData::try_from(req.data).map_err(|_| Error::BadRequest)?;
                 (ResourceType::Contact, data)
             }
+            Resource::Article(_) => {
+                let data = ContentData::try_from(req.data).map_err(|_| Error::BadRequest)?;
+                (ResourceType::Article, data)
+            }
         };
 
         // parse the given id and language to the specified type for type safety
@@ -82,7 +86,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::entities::{ContactData, HomeData, MemberData, ServiceData};
+    use crate::domain::entities::{ArticleData, ContactData, HomeData, MemberData, ServiceData};
     use crate::uow::InMemory;
     use ulid::Ulid;
 
@@ -96,12 +100,14 @@ mod tests {
             "1234".to_string(),
             "info@example.com".to_string(),
         );
+        let article_data = ArticleData::new("title".to_string(), "data".to_string());
 
         let different_data = vec![
             Resource::Member(member_data),
             Resource::Service(service_data),
             Resource::Home(home_data),
             Resource::Contact(contact_data),
+            Resource::Article(article_data),
         ];
 
         for d in different_data {
@@ -190,6 +196,14 @@ mod tests {
                 "123".to_string(),
                 "email".to_string(),
             )),
+            // title is missing
+            Resource::Article(ArticleData::new("".to_string(), "data".to_string())),
+            // data is missing
+            Resource::Article(ArticleData::new("title".to_string(), "".to_string())),
+            // The title is conducted by spaces
+            Resource::Article(ArticleData::new("  ".to_string(), "data".to_string())),
+            // The data is conducted by spaces
+            Resource::Article(ArticleData::new("title".to_string(), " ".to_string())),
         ];
 
         for d in missing_or_invalid_data {

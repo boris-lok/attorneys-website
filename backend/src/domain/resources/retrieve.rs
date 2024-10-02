@@ -52,7 +52,7 @@ where
         IUnitOfWork: IResourceUnitOfWork,
         T: DeserializeOwned + Serialize,
     {
-        let mut lock = uow.lock().await;
+        let lock = uow.lock().await;
         match lock.get_resource(id, lang, resource_type).await {
             Ok(Some(res)) => Ok(res),
             Ok(None) => Err(Error::NotFound),
@@ -78,8 +78,8 @@ where
 mod tests {
     use super::*;
     use crate::domain::entities::{
-        ContactData, ContactEntity, ContentData, ContentID, HomeData, HomeEntity, MemberData,
-        MemberEntity, Resource, ServiceData, ServiceEntity,
+        ArticleData, ArticleEntity, ContactData, ContactEntity, ContentData, ContentID, HomeData,
+        HomeEntity, MemberData, MemberEntity, Resource, ServiceData, ServiceEntity,
     };
     use crate::domain::member::entities::{AvatarData, AvatarJson};
     use crate::repositories::IAvatarRepository;
@@ -100,6 +100,7 @@ mod tests {
             large_image: "large".to_string(),
             small_image: "small".to_string(),
         };
+        let article = ArticleData::new("title".to_string(), "data".to_string());
         vec![
             (
                 Ulid::new().to_string(),
@@ -131,6 +132,12 @@ mod tests {
                 Resource::Contact(contact.clone()),
                 None,
             ),
+            (
+                Ulid::new().to_string(),
+                ResourceType::Article,
+                Resource::Article(article.clone()),
+                None,
+            ),
         ]
     }
 
@@ -145,7 +152,7 @@ mod tests {
 
         let mut uow = InMemory::new();
 
-        let repo = uow
+        let _ = uow
             .content_repository()
             .insert(content_id.clone(), content_data, Language::ZH)
             .await
@@ -202,6 +209,12 @@ mod tests {
                     .await
                     .expect("should execute successfully");
                 assert_eq!(res.data, c)
+            }
+            Resource::Article(a) => {
+                let res: ArticleEntity = execute(Mutex::new(uow), req)
+                    .await
+                    .expect("should execute successfully");
+                assert_eq!(res.data, a)
             }
         }
     }
@@ -273,21 +286,25 @@ mod tests {
             };
 
             match resource {
-                Resource::Member(m) => {
+                Resource::Member(_) => {
                     let res: Result<MemberEntity, Error> = execute(Mutex::new(uow), req).await;
 
                     assert!(res.is_err());
                 }
-                Resource::Service(s) => {
+                Resource::Service(_) => {
                     let res: Result<ServiceEntity, Error> = execute(Mutex::new(uow), req).await;
                     assert!(res.is_err());
                 }
-                Resource::Home(h) => {
+                Resource::Home(_) => {
                     let res: Result<HomeEntity, Error> = execute(Mutex::new(uow), req).await;
                     assert!(res.is_err());
                 }
-                Resource::Contact(c) => {
+                Resource::Contact(_) => {
                     let res: Result<ContactEntity, Error> = execute(Mutex::new(uow), req).await;
+                    assert!(res.is_err());
+                }
+                Resource::Article(_) => {
+                    let res: Result<ArticleEntity, Error> = execute(Mutex::new(uow), req).await;
                     assert!(res.is_err());
                 }
             }

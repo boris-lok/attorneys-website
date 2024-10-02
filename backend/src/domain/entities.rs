@@ -100,6 +100,7 @@ impl TryFrom<Resource> for ContentData {
             Resource::Service(s) => try_parse_to_value(s),
             Resource::Home(h) => try_parse_to_value(h),
             Resource::Contact(c) => try_parse_to_value(c),
+            Resource::Article(a) => try_parse_to_value(a),
         }
     }
 }
@@ -185,12 +186,30 @@ impl ContactData {
     }
 }
 
+#[derive(Debug, Serialize, Validate, Deserialize, Clone, Eq, PartialEq)]
+pub struct ArticleData {
+    #[validate(length(min = 1))]
+    pub title: String,
+    #[validate(length(min = 1))]
+    pub content: String,
+}
+
+impl ArticleData {
+    pub fn new(title: String, content: String) -> Self {
+        Self {
+            title: title.trim().to_string(),
+            content: content.trim().to_string(),
+        }
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub enum ResourceType {
     Member,
     Service,
     Home,
     Contact,
+    Article,
 }
 
 impl ResourceType {
@@ -200,6 +219,7 @@ impl ResourceType {
             Self::Service => "service",
             Self::Home => "home",
             Self::Contact => "contact",
+            Self::Article => "article",
         }
     }
 }
@@ -210,6 +230,7 @@ pub enum Resource {
     Service(ServiceData),
     Home(HomeData),
     Contact(ContactData),
+    Article(ArticleData),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -332,6 +353,36 @@ pub struct ContactEntityFromSQLx {
 
 impl From<ContactEntityFromSQLx> for ContactEntity {
     fn from(value: ContactEntityFromSQLx) -> Self {
+        Self {
+            id: value.id.trim().to_owned(),
+            language: value.language.trim().to_owned(),
+            data: value.data.0,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ArticleEntity {
+    pub id: String,
+    pub language: String,
+    pub data: ArticleData,
+}
+
+impl ArticleEntity {
+    pub fn new(id: String, language: String, data: ArticleData) -> Self {
+        Self { id, language, data }
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct ArticleEntityFromSQLx {
+    pub id: String,
+    pub language: String,
+    pub data: sqlx::types::Json<ArticleData>,
+}
+
+impl From<ArticleEntityFromSQLx> for ArticleEntity {
+    fn from(value: ArticleEntityFromSQLx) -> Self {
         Self {
             id: value.id.trim().to_owned(),
             language: value.language.trim().to_owned(),

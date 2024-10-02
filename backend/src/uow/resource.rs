@@ -1,7 +1,8 @@
 use crate::domain::entities::{
-    ContactData, ContactEntity, ContactEntityFromSQLx, ContentID, HomeData, HomeEntity,
-    HomeEntityFromSQLx, Language, MemberData, MemberEntity, MemberEntityFromSQLx, ResourceID,
-    ResourceType, ServiceData, ServiceEntity, ServiceEntityFromSQLx,
+    ArticleData, ArticleEntity, ArticleEntityFromSQLx, ContactData, ContactEntity,
+    ContactEntityFromSQLx, ContentID, HomeData, HomeEntity, HomeEntityFromSQLx, Language,
+    MemberData, MemberEntity, MemberEntityFromSQLx, ResourceID, ResourceType, ServiceData,
+    ServiceEntity, ServiceEntityFromSQLx,
 };
 use crate::domain::member::entities::AvatarData;
 use crate::repositories::{
@@ -178,6 +179,16 @@ impl IResourceUnitOfWork for InMemory {
 
                         serde_json::value::to_value(contact)?
                     }
+                    ResourceType::Article => {
+                        let json = serde_json::from_value::<ArticleData>(data.clone().to_json())?;
+                        let article = ArticleEntity::new(
+                            id.clone().to_string(),
+                            lang.as_str().to_string(),
+                            json,
+                        );
+
+                        serde_json::value::to_value(article)?
+                    }
                 };
 
                 let res = from_resource::<T>(json)?;
@@ -301,7 +312,7 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                     .bind(lang.as_str())
                     .fetch_optional(self.pool)
                     .await?
-                    .map(|e| MemberEntity::from(e))
+                    .map(MemberEntity::from)
                     .and_then(|e| serde_json::value::to_value(e).ok())
             }
             ResourceType::Service => sqlx::query_as::<_, ServiceEntityFromSQLx>(query)
@@ -309,21 +320,28 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 .bind(lang.as_str())
                 .fetch_optional(self.pool)
                 .await?
-                .map(|e| ServiceEntity::from(e))
+                .map(ServiceEntity::from)
                 .and_then(|e| serde_json::value::to_value(e).ok()),
             ResourceType::Home => sqlx::query_as::<_, HomeEntityFromSQLx>(query)
                 .bind(id.as_str())
                 .bind(lang.as_str())
                 .fetch_optional(self.pool)
                 .await?
-                .map(|e| HomeEntity::from(e))
+                .map(HomeEntity::from)
                 .and_then(|e| serde_json::value::to_value(e).ok()),
             ResourceType::Contact => sqlx::query_as::<_, ContactEntityFromSQLx>(query)
                 .bind(id.as_str())
                 .bind(lang.as_str())
                 .fetch_optional(self.pool)
                 .await?
-                .map(|e| ContactEntity::from(e))
+                .map(ContactEntity::from)
+                .and_then(|e| serde_json::value::to_value(e).ok()),
+            ResourceType::Article => sqlx::query_as::<_, ArticleEntityFromSQLx>(query)
+                .bind(id.as_str())
+                .bind(lang.as_str())
+                .fetch_optional(self.pool)
+                .await?
+                .map(ArticleEntity::from)
                 .and_then(|e| serde_json::value::to_value(e).ok()),
         };
 

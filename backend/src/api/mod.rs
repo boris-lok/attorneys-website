@@ -19,6 +19,9 @@ pub use home::retrieve::retrieve_home;
 pub use contact::create::create_contact;
 pub use contact::retrieve::retrieve_contact;
 
+pub use article::create::create_article;
+pub use article::retrieve::retrieve_article;
+
 mod api_error;
 mod health;
 
@@ -26,4 +29,5 @@ mod home;
 mod member;
 mod service;
 
+mod article;
 mod contact;

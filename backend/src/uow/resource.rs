@@ -463,11 +463,13 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 left join avatar on content.id = avatar.id
                 where resource.id = content.id
                 and content.language = $1
+                and resource.resource_type = $2
                 order by seq";
                 let query = format!("{}{}", query, offset);
 
                 sqlx::query_as::<_, SimpleMemberEntityFromSQLx>(query.as_str())
                     .bind(language.as_str())
+                    .bind(resource_type.as_str())
                     .fetch_all(self.pool)
                     .await?
                     .into_iter()

@@ -390,3 +390,29 @@ impl From<ArticleEntityFromSQLx> for ArticleEntity {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SimpleMemberEntity {
+    pub id: String,
+    pub name: String,
+    pub avatar: Option<String>,
+}
+
+impl SimpleMemberEntity {
+    pub fn new(id: String, name: String, avatar: Option<String>) -> Self {
+        Self { id, name, avatar }
+    }
+}
+
+#[derive(Debug)]
+pub enum Pagination {
+    All,
+    Single,
+    Page(Page),
+}
+
+#[derive(Debug)]
+pub struct Page {
+    pub page: u32,
+    pub size: u32,
+}

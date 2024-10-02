@@ -1,8 +1,8 @@
 use crate::domain::entities::{
     ArticleData, ArticleEntity, ArticleEntityFromSQLx, ContactData, ContactEntity,
     ContactEntityFromSQLx, ContentID, HomeData, HomeEntity, HomeEntityFromSQLx, Language,
-    MemberData, MemberEntity, MemberEntityFromSQLx, ResourceID, ResourceType, ServiceData,
-    ServiceEntity, ServiceEntityFromSQLx,
+    MemberData, MemberEntity, MemberEntityFromSQLx, Pagination, ResourceID, ResourceType,
+    ServiceData, ServiceEntity, ServiceEntityFromSQLx, SimpleMemberEntity,
 };
 use crate::domain::member::entities::AvatarData;
 use crate::repositories::{
@@ -44,6 +44,15 @@ pub trait IResourceUnitOfWork {
     where
         T: DeserializeOwned + Serialize;
 
+    async fn list_resources<T>(
+        &self,
+        language: &Language,
+        resource_type: &ResourceType,
+        page: &Pagination,
+    ) -> anyhow::Result<Vec<T>>
+    where
+        T: DeserializeOwned + Serialize;
+
     /** Commit the transaction */
     async fn commit(mut self) -> anyhow::Result<()>;
     /** Rollback the transaction */
@@ -67,7 +76,7 @@ impl InMemory {
         }
     }
 
-    pub fn with_error(mut self) -> Self {
+    pub fn with_error(self) -> Self {
         Self {
             error: true,
             resource_repository: self.resource_repository.map(|repo| repo.with_error()),
@@ -197,6 +206,76 @@ impl IResourceUnitOfWork for InMemory {
             Err(e) => Err(e),
             Ok(None) => Ok(None),
         }
+    }
+
+    async fn list_resources<T>(
+        &self,
+        language: &Language,
+        resource_type: &ResourceType,
+        page: &Pagination,
+    ) -> anyhow::Result<Vec<T>>
+    where
+        T: DeserializeOwned + Serialize,
+    {
+        let contents = self
+            .content_repository
+            .as_ref()
+            .unwrap()
+            .list(language)
+            .await?;
+
+        let mut res = vec![];
+
+        for content in contents {
+            let id = ResourceID::try_from(content.0.clone()).unwrap();
+            let exist = self
+                .resource_repository
+                .as_ref()
+                .unwrap()
+                .contains(&id, resource_type)
+                .await?;
+
+            let entity = match resource_type {
+                ResourceType::Member => {
+                    if exist {
+                        let data =
+                            serde_json::value::from_value::<MemberData>(content.1.to_json())?;
+                        Some(serde_json::value::to_value(SimpleMemberEntity::new(
+                            content.0, data.name, None,
+                        ))?)
+                    } else {
+                        None
+                    }
+                }
+                ResourceType::Service => {
+                    if exist {
+                        let data =
+                            serde_json::value::from_value::<ServiceData>(content.1.to_json())?;
+                        Some(serde_json::value::to_value(ServiceEntity::new(
+                            content.0,
+                            language.as_str().to_string(),
+                            data,
+                        ))?)
+                    } else {
+                        None
+                    }
+                }
+                _ => unimplemented!(),
+            };
+
+            res.push(entity);
+        }
+
+        let res = res
+            .into_iter()
+            .filter(|e| e.is_some())
+            .map(|e| {
+                let json = e.unwrap();
+                from_resource(json).unwrap()
+            })
+            .collect::<Vec<_>>();
+
+        Ok(res)
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {
@@ -352,6 +431,18 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 Ok(Some(r))
             }
         }
+    }
+
+    async fn list_resources<T>(
+        &self,
+        language: &Language,
+        resource_type: &ResourceType,
+        page: &Pagination,
+    ) -> anyhow::Result<Vec<T>>
+    where
+        T: DeserializeOwned + Serialize,
+    {
+        todo!()
     }
 
     async fn commit(self) -> anyhow::Result<()> {

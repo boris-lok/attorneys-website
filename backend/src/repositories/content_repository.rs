@@ -59,10 +59,7 @@ impl InMemoryContentRepository {
         Ok(lock.get(&key).cloned())
     }
 
-    pub async fn list<T: DeserializeOwned + Clone>(
-        &self,
-        language: &Language,
-    ) -> anyhow::Result<Vec<(String, T)>> {
+    pub async fn list(&self, language: &Language) -> anyhow::Result<Vec<(String, ContentData)>> {
         if self.error {
             return Err(anyhow!("Internal Server Error"));
         }
@@ -72,8 +69,8 @@ impl InMemoryContentRepository {
             .iter()
             .filter(|(key, _)| key.ends_with(language.as_str()))
             .map(|(key, value)| {
-                let obj: T = serde_json::from_value(value.clone().to_json()).unwrap();
-                (key.clone(), obj.clone())
+                let id = key.split("_").next().unwrap().to_string();
+                (id, value.clone())
             })
             .collect::<Vec<_>>();
 

@@ -70,7 +70,7 @@ where
         Err(Error::NotFound) => {
             inner_execute(uow.clone(), &id, &req.default_language, &req.resource_type).await
         }
-        Err(e) => Err(Error::Unknown(e.to_string())),
+        Err(e) => Err(e),
     }
 }
 

@@ -21,6 +21,7 @@ pub use contact::list::list_contact;
 pub use contact::retrieve::retrieve_contact;
 
 pub use article::create::create_article;
+pub use article::delete::delete_article;
 pub use article::list::list_articles;
 pub use article::retrieve::retrieve_article;
 

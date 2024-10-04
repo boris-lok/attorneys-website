@@ -68,91 +68,15 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::entities::{
-        ArticleData, ContactData, ContentData, ContentID, HomeData, MemberData, Resource,
-        ResourceID, ServiceData, SimpleMemberEntity,
+    use crate::domain::entities::SimpleMemberEntity;
+    use crate::domain::resources::test_helpers::tests::{
+        create_resources, create_some_fake_data_and_return_uow,
     };
-    use crate::repositories::IContentRepository;
-    use crate::repositories::IResourceRepository;
     use crate::uow::InMemory;
-
-    fn create_a_resource() -> Vec<Resource> {
-        let member = MemberData::new("boris".to_string(), "description".to_string());
-        let service = ServiceData::new("title".to_string(), "data".to_string());
-        let home = HomeData::new("home".to_string());
-        let contact = ContactData::new(
-            "address".to_string(),
-            "1234".to_string(),
-            "info@example.com".to_string(),
-        );
-        let article = ArticleData::new("title".to_string(), "data".to_string());
-
-        vec![
-            Resource::Article(article),
-            Resource::Service(service),
-            Resource::Home(home),
-            Resource::Member(member),
-            Resource::Contact(contact),
-        ]
-    }
-    async fn create_some_fake_data_and_return_uow() -> InMemory {
-        let resources = create_a_resource();
-
-        let mut uow = InMemory::new();
-
-        for resource in resources {
-            let id = ulid::Ulid::new().to_string();
-            let resource_id = ResourceID::try_from(id.clone()).unwrap();
-            let content_id = ContentID::from(resource_id.clone());
-            let content_data = ContentData::try_from(resource.clone()).unwrap();
-
-            match resource {
-                Resource::Member(_) => {
-                    uow.resource_repository()
-                        .insert(resource_id, ResourceType::Member)
-                        .await
-                        .unwrap();
-                }
-                Resource::Service(_) => {
-                    uow.resource_repository()
-                        .insert(resource_id, ResourceType::Service)
-                        .await
-                        .unwrap();
-                }
-                Resource::Home(_) => {
-                    uow.resource_repository()
-                        .insert(resource_id, ResourceType::Home)
-                        .await
-                        .unwrap();
-                }
-                Resource::Contact(_) => {
-                    uow.resource_repository()
-                        .insert(resource_id, ResourceType::Contact)
-                        .await
-                        .unwrap();
-                }
-                Resource::Article(_) => {
-                    uow.resource_repository()
-                        .insert(resource_id, ResourceType::Article)
-                        .await
-                        .unwrap();
-                }
-            };
-
-            uow.content_repository()
-                .insert(content_id.clone(), content_data, Language::ZH)
-                .await
-                .unwrap();
-        }
-
-        let _ = uow.avatar_repository();
-
-        uow
-    }
 
     #[tokio::test]
     async fn it_should_list_resource_otherwise() {
-        let uow = create_some_fake_data_and_return_uow().await;
+        let (uow, _) = create_some_fake_data_and_return_uow(create_resources()).await;
 
         let req = Request {
             resource_type: ResourceType::Member,
@@ -172,7 +96,7 @@ mod tests {
     }
     #[tokio::test]
     async fn it_should_list_default_language_resource_otherwise() {
-        let uow = create_some_fake_data_and_return_uow().await;
+        let (uow, _) = create_some_fake_data_and_return_uow(create_resources()).await;
 
         let req = Request {
             resource_type: ResourceType::Member,

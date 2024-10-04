@@ -15,6 +15,9 @@ pub trait IResourceRepository {
     // check if the resource is already in the repository
     async fn contains(&self, id: &ResourceID, resource_type: &ResourceType)
         -> anyhow::Result<bool>;
+
+    // delete the resource from the repository
+    async fn delete(&self, id: &ResourceID, resource_type: &ResourceType) -> anyhow::Result<()>;
 }
 
 #[derive(Debug)]
@@ -79,6 +82,25 @@ impl IResourceRepository for InMemoryResourceRepository {
             .iter()
             .any(|(res_id, kind)| res_id == id && kind == resource_type))
     }
+
+    async fn delete(&self, id: &ResourceID, resource_type: &ResourceType) -> anyhow::Result<()> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let mut lock = self.resources.lock().await;
+
+        let removed = lock
+            .iter()
+            .position(|(res_id, kind)| res_id == id && kind == resource_type);
+        match removed {
+            Some(index) => {
+                lock.remove(index);
+                Ok(())
+            }
+            None => Err(anyhow!("{} not found", id)),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -134,5 +156,9 @@ impl<'tx> IResourceRepository for SqlxResourceRepository<'tx> {
             })?;
 
         Ok(res)
+    }
+
+    async fn delete(&self, id: &ResourceID, resource_type: &ResourceType) -> anyhow::Result<()> {
+        todo!()
     }
 }

@@ -1,6 +1,6 @@
 use crate::api::{
     create_article, create_contact, create_home, create_member, create_service, health_check,
-    list_members, list_services, retrieve_article, retrieve_contact, retrieve_home,
+    list_home, list_members, list_services, retrieve_article, retrieve_contact, retrieve_home,
     retrieve_member, retrieve_service, upload_member_avatar,
 };
 use crate::configuration::{DatabaseSettings, Settings};
@@ -32,16 +32,16 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let member_routes = Router::new()
         .route("/members/:id", get(retrieve_member))
         .route("/members", get(list_members));
-    //
+
     let admin_service_routes = Router::new().route("/services", post(create_service));
     let service_routes = Router::new()
         .route("/services/:id", get(retrieve_service))
         .route("/services", get(list_services));
-    //
+
     let admin_home_routes = Router::new().route("/home", post(create_home));
-    let home_routes = Router::new().route("/home/:id", get(retrieve_home));
-    //     .route("/home", get(list_home));
-    //
+    let home_routes = Router::new()
+        .route("/home/:id", get(retrieve_home))
+        .route("/home", get(list_home));
 
     let admin_contact_routes = Router::new().route("/contact", post(create_contact));
     let contact_routes = Router::new().route("/contact/:id", get(retrieve_contact));

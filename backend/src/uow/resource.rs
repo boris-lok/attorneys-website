@@ -453,6 +453,17 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
             }
         };
 
+        let query = r#"select resource.id as id,
+                content.data as data,
+                content.language as language
+                from resource,
+                    content
+                where resource.id = content.id
+                and content.language = $1
+                and resource.resource_type = $2
+                order by seq
+                "#;
+
         let res = match resource_type {
             ResourceType::Member => {
                 let query = r"select resource.id as id,
@@ -478,16 +489,6 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                     .collect::<Vec<_>>()
             }
             ResourceType::Service => {
-                let query = r#"select resource.id as id,
-                content.data as data,
-                content.language as language
-                from resource,
-                    content
-                where resource.id = content.id
-                and content.language = $1
-                and resource.resource_type = $2
-                order by seq
-                "#;
                 let query = format!("{}{}", query, offset);
 
                 sqlx::query_as::<_, ServiceEntityFromSQLx>(query.as_str())
@@ -497,6 +498,19 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                     .await?
                     .into_iter()
                     .map(ServiceEntity::from)
+                    .filter_map(|e| serde_json::value::to_value(e).ok())
+                    .collect::<Vec<_>>()
+            }
+            ResourceType::Home => {
+                let query = format!("{}{}", query, offset);
+
+                sqlx::query_as::<_, HomeEntityFromSQLx>(query.as_str())
+                    .bind(language.as_str())
+                    .bind(resource_type.as_str())
+                    .fetch_all(self.pool)
+                    .await?
+                    .into_iter()
+                    .map(HomeEntity::from)
                     .filter_map(|e| serde_json::value::to_value(e).ok())
                     .collect::<Vec<_>>()
             }

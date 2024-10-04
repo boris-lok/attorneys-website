@@ -370,7 +370,8 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                      content
                 where resource.id = content.id
                   and content.language = $2
-                  and resource.id = $1;
+                  and resource.id = $1
+                  and resource.deleted_at is null;
                         "#;
 
         let res = match resource_type {
@@ -385,7 +386,8 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                          left join avatar on avatar.id = content.id
                 where resource.id = content.id
                   and content.language = $2
-                  and resource.id = $1;
+                  and resource.id = $1
+                  and resource.deleted_at is null;
                         "#;
 
                 sqlx::query_as::<_, MemberEntityFromSQLx>(query)
@@ -461,6 +463,7 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 where resource.id = content.id
                 and content.language = $1
                 and resource.resource_type = $2
+                and resource.deleted_at is null
                 order by seq
                 "#;
 
@@ -475,6 +478,7 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 where resource.id = content.id
                 and content.language = $1
                 and resource.resource_type = $2
+                and resource.deleted_at is null
                 order by seq";
                 let query = format!("{}{}", query, offset);
 

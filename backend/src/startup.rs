@@ -1,11 +1,12 @@
 use crate::api::{
-    create_article, create_contact, create_home, create_member, create_service, health_check,
-    list_articles, list_contact, list_home, list_members, list_services, retrieve_article,
-    retrieve_contact, retrieve_home, retrieve_member, retrieve_service, upload_member_avatar,
+    create_article, create_contact, create_home, create_member, create_service, delete_member,
+    health_check, list_articles, list_contact, list_home, list_members, list_services,
+    retrieve_article, retrieve_contact, retrieve_home, retrieve_member, retrieve_service,
+    upload_member_avatar,
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
-use axum::routing::{get, post};
+use axum::routing::{delete, get, post};
 use axum::{Extension, Router};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -27,7 +28,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     // Config the routes
     let admin_member_routes = Router::new()
         .route("/members", post(create_member))
-        //     .route("/members/:id", delete(delete_member))
+        .route("/members/:id", delete(delete_member))
         .route("/members/:id/avatar", post(upload_member_avatar));
     let member_routes = Router::new()
         .route("/members/:id", get(retrieve_member))

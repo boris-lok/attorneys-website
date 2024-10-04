@@ -159,6 +159,19 @@ impl<'tx> IResourceRepository for SqlxResourceRepository<'tx> {
     }
 
     async fn delete(&self, id: &ResourceID, resource_type: &ResourceType) -> anyhow::Result<()> {
-        todo!()
+        let query =
+            "UPDATE \"resource\" SET deleted_at = now() WHERE id = $1 and resource_type = $2";
+
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        sqlx::query(query)
+            .bind(id.as_str())
+            .bind(resource_type.as_str())
+            .execute(conn)
+            .await?;
+
+        Ok(())
     }
 }

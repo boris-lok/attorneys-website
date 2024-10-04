@@ -514,6 +514,19 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                     .filter_map(|e| serde_json::value::to_value(e).ok())
                     .collect::<Vec<_>>()
             }
+            ResourceType::Article => {
+                let query = format!("{}{}", query, offset);
+
+                sqlx::query_as::<_, ArticleEntityFromSQLx>(query.as_str())
+                    .bind(language.as_str())
+                    .bind(resource_type.as_str())
+                    .fetch_all(self.pool)
+                    .await?
+                    .into_iter()
+                    .map(ArticleEntity::from)
+                    .filter_map(|e| serde_json::value::to_value(e).ok())
+                    .collect::<Vec<_>>()
+            }
             _ => unimplemented!(),
         };
 

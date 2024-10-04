@@ -17,6 +17,7 @@ pub use service::retrieve::retrieve_service;
 // pub use home::update::update_home;
 
 pub use contact::create::create_contact;
+pub use contact::list::list_contact;
 pub use contact::retrieve::retrieve_contact;
 
 pub use article::create::create_article;

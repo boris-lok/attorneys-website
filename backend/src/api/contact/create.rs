@@ -12,9 +12,9 @@ use ulid::Ulid;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateContactRequest {
-    pub address: String,
-    pub phone: String,
-    pub email: String,
+    address: String,
+    phone: String,
+    email: String,
     language: String,
 }
 

@@ -12,6 +12,7 @@ pub use member::retrieve::retrieve_member;
 pub use member::upload_avatar::upload_member_avatar;
 //
 pub use service::create::create_service;
+pub use service::delete::delete_service;
 pub use service::list::list_services;
 pub use service::retrieve::retrieve_service;
 // pub use home::update::update_home;

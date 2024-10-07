@@ -1,8 +1,8 @@
 use crate::api::{
     create_article, create_contact, create_home, create_member, create_service, delete_article,
-    delete_member, health_check, list_articles, list_contact, list_home, list_members,
-    list_services, retrieve_article, retrieve_contact, retrieve_home, retrieve_member,
-    retrieve_service, upload_member_avatar,
+    delete_member, delete_service, health_check, list_articles, list_contact, list_home,
+    list_members, list_services, retrieve_article, retrieve_contact, retrieve_home,
+    retrieve_member, retrieve_service, upload_member_avatar,
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
@@ -34,7 +34,9 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/members/:id", get(retrieve_member))
         .route("/members", get(list_members));
 
-    let admin_service_routes = Router::new().route("/services", post(create_service));
+    let admin_service_routes = Router::new()
+        .route("/services", post(create_service))
+        .route("/services/:id", delete(delete_service));
     let service_routes = Router::new()
         .route("/services/:id", get(retrieve_service))
         .route("/services", get(list_services));

@@ -23,6 +23,7 @@ pub use service::update::update_service;
 pub use contact::create::create_contact;
 pub use contact::list::list_contact;
 pub use contact::retrieve::retrieve_contact;
+pub use contact::update::update_contact;
 
 use crate::api::api_error::ApiError;
 use crate::uow::IResourceUnitOfWork;

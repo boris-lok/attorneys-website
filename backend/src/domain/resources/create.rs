@@ -1,6 +1,4 @@
-use crate::domain::entities::{
-    ContentData, ContentID, Language, Resource, ResourceID, ResourceType,
-};
+use crate::domain::entities::{ContentID, Language, Resource, ResourceID};
 use crate::repositories::IContentRepository;
 use crate::repositories::IResourceRepository;
 use crate::uow::IResourceUnitOfWork;
@@ -25,28 +23,10 @@ where
         let mut lock = uow.lock().await;
 
         // extract the resource and convert it to a resource type
-        let (kind, data) = match &req.data {
-            Resource::Member(_) => {
-                let data = ContentData::try_from(req.data).map_err(|_| Error::BadRequest)?;
-                (ResourceType::Member, data)
-            }
-            Resource::Service(_) => {
-                let data = ContentData::try_from(req.data).map_err(|_| Error::BadRequest)?;
-                (ResourceType::Service, data)
-            }
-            Resource::Home(_) => {
-                let data = ContentData::try_from(req.data).map_err(|_| Error::BadRequest)?;
-                (ResourceType::Home, data)
-            }
-            Resource::Contact(_) => {
-                let data = ContentData::try_from(req.data).map_err(|_| Error::BadRequest)?;
-                (ResourceType::Contact, data)
-            }
-            Resource::Article(_) => {
-                let data = ContentData::try_from(req.data).map_err(|_| Error::BadRequest)?;
-                (ResourceType::Article, data)
-            }
-        };
+        let (kind, data) = req
+            .data
+            .to_resource_type_and_content_data()
+            .map_err(|_| Error::BadRequest)?;
 
         // parse the given id and language to the specified type for type safety
         let (id, language) = match (

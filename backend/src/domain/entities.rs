@@ -233,6 +233,19 @@ pub enum Resource {
     Article(ArticleData),
 }
 
+impl Resource {
+    /// Convert a Resource to resource type and content data
+    pub fn to_resource_type_and_content_data(self) -> Result<(ResourceType, ContentData), ()> {
+        match self {
+            Resource::Member(_) => Ok((ResourceType::Member, ContentData::try_from(self)?)),
+            Resource::Service(_) => Ok((ResourceType::Service, ContentData::try_from(self)?)),
+            Resource::Home(_) => Ok((ResourceType::Home, ContentData::try_from(self)?)),
+            Resource::Contact(_) => Ok((ResourceType::Contact, ContentData::try_from(self)?)),
+            Resource::Article(_) => Ok((ResourceType::Article, ContentData::try_from(self)?)),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MemberEntity {
     pub id: String,

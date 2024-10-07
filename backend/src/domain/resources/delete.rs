@@ -93,7 +93,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn it_should_return_a_not_found_error_when_resource_is_not_exist() {
+    async fn it_should_return_a_not_found_error_when_resource_does_not_exist() {
         let resources = create_resources();
 
         for resource in resources.clone() {

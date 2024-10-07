@@ -3,7 +3,7 @@ pub use health::health_check;
 pub use home::create::create_home;
 pub use home::list::list_home;
 pub use home::retrieve::retrieve_home;
-// pub use home::update::update_home;
+pub use home::update::update_home;
 
 pub use member::create::create_member;
 pub use member::delete::delete_member;

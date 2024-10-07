@@ -1,6 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::api::update_resource_handler;
-use crate::domain::entities::{MemberData, Resource};
+use crate::domain::entities::{ArticleData, Resource};
 use crate::startup::AppState;
 use crate::uow::InDatabase;
 use axum::extract::State;
@@ -11,20 +11,20 @@ use serde::Deserialize;
 use tokio::sync::Mutex;
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct UpdateMemberRequest {
+pub struct UpdateArticleRequest {
     id: String,
-    name: String,
-    description: String,
+    title: String,
+    content: String,
     language: String,
 }
 
-pub async fn update_member(
+pub async fn update_article(
     State(state): State<AppState>,
-    WithRejection(Json(req), _): WithRejection<Json<UpdateMemberRequest>, ApiError>,
+    WithRejection(Json(req), _): WithRejection<Json<UpdateArticleRequest>, ApiError>,
 ) -> Result<StatusCode, ApiError> {
     let req = crate::domain::resources::update::Request {
         id: req.id,
-        data: Resource::Member(MemberData::new(req.name, req.description)),
+        data: Resource::Article(ArticleData::new(req.title, req.content)),
         language: req.language,
     };
 

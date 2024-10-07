@@ -1,4 +1,5 @@
 use crate::api::api_error::ApiError;
+use crate::api::update_resource_handler;
 use crate::domain::entities::{Resource, ServiceData};
 use crate::startup::AppState;
 use crate::uow::InDatabase;
@@ -32,12 +33,5 @@ pub async fn update_service(
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
     let uow = Mutex::new(uow);
 
-    match crate::domain::resources::update::execute(uow, req).await {
-        Ok(_) => Ok(StatusCode::OK),
-        Err(crate::domain::resources::update::Error::NotFound) => Err(ApiError::NotFound),
-        Err(crate::domain::resources::update::Error::BadRequest) => Err(ApiError::BadRequest),
-        Err(crate::domain::resources::update::Error::Unknown(e)) => {
-            Err(ApiError::InternalServerError(e.to_string()))
-        }
-    }
+    update_resource_handler(uow, req).await
 }

@@ -5,3 +5,5 @@ pub mod retrieve;
 pub mod list;
 
 pub mod delete;
+
+pub mod update;

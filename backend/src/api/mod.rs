@@ -1,4 +1,6 @@
+use axum::http::StatusCode;
 pub use health::health_check;
+use tokio::sync::Mutex;
 
 pub use home::create::create_home;
 pub use home::list::list_home;
@@ -22,10 +24,13 @@ pub use contact::create::create_contact;
 pub use contact::list::list_contact;
 pub use contact::retrieve::retrieve_contact;
 
+use crate::api::api_error::ApiError;
+use crate::uow::IResourceUnitOfWork;
 pub use article::create::create_article;
 pub use article::delete::delete_article;
 pub use article::list::list_articles;
 pub use article::retrieve::retrieve_article;
+pub use article::update::update_article;
 
 mod api_error;
 
@@ -40,3 +45,18 @@ mod service;
 mod article;
 
 mod contact;
+
+/// A handler for updating the resource
+async fn update_resource_handler(
+    uow: Mutex<impl IResourceUnitOfWork>,
+    req: crate::domain::resources::update::Request,
+) -> Result<StatusCode, ApiError> {
+    match crate::domain::resources::update::execute(uow, req).await {
+        Ok(_) => Ok(StatusCode::OK),
+        Err(crate::domain::resources::update::Error::NotFound) => Err(ApiError::NotFound),
+        Err(crate::domain::resources::update::Error::BadRequest) => Err(ApiError::BadRequest),
+        Err(crate::domain::resources::update::Error::Unknown(e)) => {
+            Err(ApiError::InternalServerError(e.to_string()))
+        }
+    }
+}

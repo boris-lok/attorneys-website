@@ -46,23 +46,23 @@
 		</div>
 
 		<nav class="navbar" class:active={isMenuOpen}>
-			<a class:active={path === '/'} href="/">
+			<a class:active={path === '/app'} href="/app">
 				<span class="material-icon">home</span>
 				<span>{$t('navbar.home')}</span>
 			</a>
-			<a class:active={path.startsWith('/services')} href="/services">
+			<a class:active={path.startsWith('/app/services')} href="/app/services">
 				<span class="material-icon">event_note</span>
 				<span>{$t('navbar.services')}</span>
 			</a>
-			<a class:active={path.startsWith('/articles')} href="/articles">
+			<a class:active={path.startsWith('/app/articles')} href="/app/articles">
 				<span class="material-icon">menu_book</span>
 				<span>{$t('navbar.articles')}</span>
 			</a>
-			<a class:active={path.startsWith('/members')} href="/members">
+			<a class:active={path.startsWith('/app/members')} href="/app/members">
 				<span class="material-icon">group</span>
 				<span>{$t('navbar.members')}</span>
 			</a>
-			<a class:active={path.startsWith('/contact')} href="/contact">
+			<a class:active={path.startsWith('/app/contact')} href="/app/contact">
 				<span class="material-icon">contacts</span>
 				<span>{$t('navbar.contact_us')}</span>
 			</a>
@@ -150,8 +150,6 @@
 
         &.active {
           color: $deep-orange;
-          cursor: default;
-          pointer-events: none;
         }
 
         span:nth-child(1) {
@@ -209,7 +207,7 @@
         a {
           transition: color 0.3s ease-in-out;
 
-          &:hover {
+          &:hover:not(.active) {
             color: $deep-blue;
           }
 

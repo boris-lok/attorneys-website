@@ -1,1 +1,5 @@
-<h1>Dashboard</h1>
+<script>
+	import Home from '$lib/components/dashboard/Home.svelte';
+</script>
+
+<Home />

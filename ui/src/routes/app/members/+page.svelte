@@ -30,7 +30,7 @@
 			{#each members as member}
 				<div class="member-card">
 					<div class="bg"></div>
-					<a href="/members/{member.member_id}">
+					<a href="/app/members/{member.member_id}">
 						{#if member.avatar}
 						{:else}
 							<span class="material-icon">account_circle</span>

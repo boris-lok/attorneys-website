@@ -17,7 +17,6 @@ use serde::Serialize;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use validator::ValidateRequired;
 
 /** Define a unit of work to organize all related repositories.
 *
@@ -68,6 +67,7 @@ pub struct InMemory {
     avatar_repository: Option<InMemoryAvatarRepository>,
 }
 
+#[cfg(test)]
 impl InMemory {
     pub fn new() -> Self {
         Self {
@@ -214,7 +214,7 @@ impl IResourceUnitOfWork for InMemory {
         &self,
         language: &Language,
         resource_type: &ResourceType,
-        page: &Pagination,
+        _: &Pagination,
     ) -> anyhow::Result<Vec<T>>
     where
         T: DeserializeOwned + Serialize,

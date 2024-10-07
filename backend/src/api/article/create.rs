@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::domain::entities::{ArticleData, HomeData, Resource};
+use crate::domain::entities::{ArticleData, Resource};
 use crate::startup::AppState;
 use crate::uow::InDatabase;
 use axum::extract::State;

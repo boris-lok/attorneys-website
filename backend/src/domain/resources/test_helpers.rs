@@ -1,3 +1,4 @@
+#[cfg(test)]
 pub(crate) mod tests {
     use crate::domain::entities::{
         ArticleData, ContactData, ContentData, ContentID, HomeData, Language, MemberData, Resource,

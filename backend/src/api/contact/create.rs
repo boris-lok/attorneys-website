@@ -1,6 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::api::home::create::CreateHomeResponse;
-use crate::domain::entities::{ContactData, HomeData, Resource};
+use crate::domain::entities::{ContactData, Resource};
 use crate::startup::AppState;
 use crate::uow::InDatabase;
 use axum::extract::State;

@@ -1,6 +1,5 @@
 use crate::domain::entities::{ContentData, ContentID, Language};
 use anyhow::anyhow;
-use serde::de::DeserializeOwned;
 use sqlx::{Acquire, Postgres, Transaction};
 use std::collections::HashMap;
 use std::sync::Weak;

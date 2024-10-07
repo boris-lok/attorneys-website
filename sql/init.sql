@@ -1,11 +1,12 @@
 -- Add up migration script here
 
-create table member
+create table resource
 (
-    id         varchar(32) not null,
-    created_at timestamptz not null,
-    deleted_at timestamptz,
-    seq        smallint    not null,
+    id            varchar(32) not null,
+    created_at    timestamptz not null,
+    deleted_at    timestamptz,
+    resource_type varchar(32) not null,
+    seq           smallint    not null,
     primary key (id)
 );
 
@@ -15,7 +16,7 @@ create table content
     data       jsonb       not null,
     created_at timestamptz not null,
     updated_at timestamptz,
-    language   char(4)     not null,
+    language   varchar(8)  not null,
     primary key (id, language)
 );
 
@@ -23,23 +24,5 @@ create table avatar
 (
     id   varchar(32) not null,
     data jsonb       not null,
-    primary key (id)
-);
-
-create table service
-(
-    id         varchar(32) not null,
-    created_at timestamptz not null,
-    deleted_at timestamptz,
-    seq        smallint    not null,
-    primary key (id)
-);
-
-create table home
-(
-    id         varchar(32) not null,
-    created_at timestamptz not null,
-    deleted_at timestamptz,
-    seq        smallint    not null,
     primary key (id)
 );

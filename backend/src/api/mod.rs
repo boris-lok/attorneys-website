@@ -16,7 +16,7 @@ pub use service::create::create_service;
 pub use service::delete::delete_service;
 pub use service::list::list_services;
 pub use service::retrieve::retrieve_service;
-// pub use service::update::update_service;
+pub use service::update::update_service;
 
 pub use contact::create::create_contact;
 pub use contact::list::list_contact;

@@ -82,8 +82,8 @@ impl std::fmt::Display for ContentID {
 pub struct ContentData(serde_json::Value);
 
 impl ContentData {
-    pub fn to_json(self) -> serde_json::Value {
-        self.0
+    pub fn to_json(&self) -> serde_json::Value {
+        self.0.clone()
     }
 
     pub fn as_json(&self) -> &serde_json::Value {
@@ -235,13 +235,19 @@ pub enum Resource {
 
 impl Resource {
     /// Convert a Resource to resource type and content data
-    pub fn to_resource_type_and_content_data(self) -> Result<(ResourceType, ContentData), ()> {
+    pub fn to_resource_type_and_content_data(&self) -> Result<(ResourceType, ContentData), ()> {
         match self {
-            Resource::Member(_) => Ok((ResourceType::Member, ContentData::try_from(self)?)),
-            Resource::Service(_) => Ok((ResourceType::Service, ContentData::try_from(self)?)),
-            Resource::Home(_) => Ok((ResourceType::Home, ContentData::try_from(self)?)),
-            Resource::Contact(_) => Ok((ResourceType::Contact, ContentData::try_from(self)?)),
-            Resource::Article(_) => Ok((ResourceType::Article, ContentData::try_from(self)?)),
+            Resource::Member(_) => Ok((ResourceType::Member, ContentData::try_from(self.clone())?)),
+            Resource::Service(_) => {
+                Ok((ResourceType::Service, ContentData::try_from(self.clone())?))
+            }
+            Resource::Home(_) => Ok((ResourceType::Home, ContentData::try_from(self.clone())?)),
+            Resource::Contact(_) => {
+                Ok((ResourceType::Contact, ContentData::try_from(self.clone())?))
+            }
+            Resource::Article(_) => {
+                Ok((ResourceType::Article, ContentData::try_from(self.clone())?))
+            }
         }
     }
 }

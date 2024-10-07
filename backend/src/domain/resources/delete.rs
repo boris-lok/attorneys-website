@@ -99,7 +99,7 @@ mod tests {
         for resource in resources.clone() {
             let (uow, r) = create_some_fake_data_and_return_uow(vec![resource]).await;
 
-            let (id, resource) = r[0].clone();
+            let (_, resource) = r[0].clone();
 
             let req = Request {
                 id: Ulid::new().to_string(),

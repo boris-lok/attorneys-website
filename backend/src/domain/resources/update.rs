@@ -77,7 +77,7 @@ mod tests {
                 title: "new title".to_string(),
                 ..s
             }),
-            Resource::Home(h) => Resource::Home(HomeData {
+            Resource::Home(_) => Resource::Home(HomeData {
                 data: "new data".to_string(),
             }),
             Resource::Contact(c) => Resource::Contact(ContactData {
@@ -121,7 +121,7 @@ mod tests {
         for resource in resources.clone() {
             let (uow, r) = create_some_fake_data_and_return_uow(vec![resource]).await;
 
-            let (id, resource) = r[0].clone();
+            let (_, resource) = r[0].clone();
 
             let updated_resource = update_resource(resource);
 

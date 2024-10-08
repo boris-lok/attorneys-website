@@ -6,12 +6,14 @@
 	import { Home } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
 	import { finalize } from 'rxjs';
+	import { browser } from '$app/environment';
 
 	export let id = '';
 	export let content = '';
 
 	let language: Language = 'zh';
 	let isLoading = false;
+	let backPathname = '';
 
 	// An event handler handles the textarea changed event
 	//
@@ -21,7 +23,8 @@
 		content = target.value;
 	}
 
-	function onSubmitClicked() {
+	// An event handler handles `create/update` home resource
+	function onSubmitButtonClicked() {
 		if (isLoading) {
 			return;
 		}
@@ -39,6 +42,13 @@
 			)
 			.subscribe();
 	}
+
+	// An event handler handles `back` button click
+	function onBackButtonClicked() {
+		if (browser) {
+			window.history.back();
+		}
+	}
 </script>
 
 <div class="create-edit-home-wrapper">
@@ -46,7 +56,8 @@
 		<TextArea data={content} label={$t('home')} on:input={onContentChanged} />
 	</div>
 	<div class="btn-container">
-		<button disabled={isLoading} on:click={onSubmitClicked} type="button">{$t('save')}</button>
+		<button class="btn submit" disabled={isLoading} on:click={onSubmitButtonClicked} type="button">{$t('save')}</button>
+		<button class="btn back" disabled={isLoading} on:click={onBackButtonClicked} type="button">back</button>
 	</div>
 	<div class="preview-section">
 		<SvelteMarkdown source={content} />
@@ -55,9 +66,40 @@
 
 <style lang="scss">
   .create-edit-home-wrapper {
+    display: grid;
+    grid-template:
+		'edit-section'
+		'btn-container'
+		'preview-section';
+    row-gap: 1rem;
+    padding: 1.25rem 0.75rem;
+
+    .edit-section {
+      grid-area: edit-section;
+    }
+
+    .btn-container {
+      grid-area: btn-container;
+      text-align: center;
+
+      .btn {
+        width: 7.5rem;
+        height: 2.5rem;
+        cursor: pointer;
+        margin: 0 0.25rem;
+
+        &.submit {
+          border: 1px solid $deep-blue;
+        }
+
+        &.back {
+          border: 1px solid $deep-red;
+        }
+      }
+    }
+
     .preview-section {
-      padding: 1rem;
-      margin-top: 1rem;
+      grid-area: preview-section;
     }
   }
 </style>

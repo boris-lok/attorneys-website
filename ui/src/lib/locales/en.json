@@ -24,5 +24,7 @@
   "phone": "Phone",
   "email": "Email",
   "loading": "Loading",
-  "home": "Home"
+  "home": "Home",
+  "edit": "Edit",
+  "save": "Save"
 }

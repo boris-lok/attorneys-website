@@ -1,10 +1,13 @@
 <script lang="ts">
 	export let label = '';
+	export let data = '';
 </script>
 
 <div class="textarea-wrapper">
-	<label>{label}</label>
-	<textarea on:input rows="20"></textarea>
+	{#if label !== ''}
+		<h3>{label}</h3>
+	{/if}
+	<textarea on:input rows="20">{data}</textarea>
 </div>
 
 <style lang="scss">
@@ -13,18 +16,10 @@
     display: flex;
     flex-direction: column;
 
-    label {
-      pointer-events: none;
-      font-size: 1em;
-      padding: 0 0 4px 4px;
-    }
-
     textarea {
       width: 100%;
       outline: none;
       resize: none;
-      border: 1px solid $black;
-      border-radius: 4px;
       padding: 10px 16px;
       box-sizing: border-box;
 

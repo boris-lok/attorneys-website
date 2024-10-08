@@ -1,5 +1,5 @@
 import type { Member, MemberDetail, SimpleMember } from '$lib/models/Member';
-import type { HomeData } from '$lib/models/Home';
+import type { CreateHomeRequest, HomeData, UpdateHomeRequest } from '$lib/models/Home';
 import type { Language } from '$lib/models/Language';
 import { from, of } from 'rxjs';
 import type { Service } from '$lib/models/Services';
@@ -141,6 +141,40 @@ export const Home = {
 				}
 				return data[0];
 			});
+
+		return from(request);
+	},
+	retrieve: (id: string, language: Language) => {
+		const request = fetch(`${BASE_URL}/home/${id}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept-Language': language
+			},
+			signal: AbortSignal.timeout(TIMEOUT)
+		})
+			.then(res => res.json())
+			.then(res => 'home' in res ? res.home as HomeData : null);
+
+		return from(request);
+	},
+	save: (req: CreateHomeRequest | UpdateHomeRequest) => {
+		let method = 'POST';
+		if ('id' in req) {
+			method = 'PUT';
+		}
+
+		const request = fetch(
+			`${ADMIN_URL}/home`,
+			{
+				method: method,
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(req),
+				signal: AbortSignal.timeout(TIMEOUT)
+			}
+		);
 
 		return from(request);
 	}

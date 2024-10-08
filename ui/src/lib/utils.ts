@@ -25,3 +25,11 @@ export function shuffle<T>(array: T[]): T[] {
 
 	return array;
 }
+
+export function text_overflow(text: string, limit: number) {
+	const threeDots = '...';
+	if (text.length > limit) {
+		return text.substring(0, limit - threeDots.length) + threeDots;
+	}
+	return text;
+}

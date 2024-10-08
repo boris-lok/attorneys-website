@@ -7,3 +7,10 @@ export type HomeData = {
 		data: string;
 	}
 }
+
+export type CreateHomeRequest = {
+	data: string;
+	language: Language;
+}
+
+export type UpdateHomeRequest = { id: string } & CreateHomeRequest;

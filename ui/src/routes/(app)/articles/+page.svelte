@@ -28,7 +28,7 @@
 		<h1>{$t('articles')}</h1>
 		{#each articles as article}
 			<div class="article-wrapper">
-				<a href="/app/articles/{article.id}">
+				<a href="/articles/{article.id}">
 					<h3>{article.title}</h3>
 				</a>
 			</div>

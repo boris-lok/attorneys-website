@@ -1,7 +1,7 @@
 <script>
-	import '../../styles/global.scss';
 	import NavigateBar from '$lib/components/NavigateBar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import '../../styles/global.scss';
 </script>
 
 <NavigateBar />

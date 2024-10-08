@@ -1,5 +1,5 @@
 <script>
-	import Home from '$lib/components/dashboard/Home.svelte';
+	import HomeManager from '$lib/components/dashboard/HomeManager.svelte';
 </script>
 
-<Home />
+<HomeManager />

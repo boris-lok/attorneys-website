@@ -46,23 +46,23 @@
 		</div>
 
 		<nav class="navbar" class:active={isMenuOpen}>
-			<a class:active={path === '/app'} href="/app">
+			<a class:active={path === '/'} href="/">
 				<span class="material-icon">home</span>
 				<span>{$t('navbar.home')}</span>
 			</a>
-			<a class:active={path.startsWith('/app/services')} href="/app/services">
+			<a class:active={path.startsWith('/services')} href="/services">
 				<span class="material-icon">event_note</span>
 				<span>{$t('navbar.services')}</span>
 			</a>
-			<a class:active={path.startsWith('/app/articles')} href="/app/articles">
+			<a class:active={path.startsWith('/articles')} href="/articles">
 				<span class="material-icon">menu_book</span>
 				<span>{$t('navbar.articles')}</span>
 			</a>
-			<a class:active={path.startsWith('/app/members')} href="/app/members">
+			<a class:active={path.startsWith('/members')} href="/members">
 				<span class="material-icon">group</span>
 				<span>{$t('navbar.members')}</span>
 			</a>
-			<a class:active={path.startsWith('/app/contact')} href="/app/contact">
+			<a class:active={path.startsWith('/contact')} href="/contact">
 				<span class="material-icon">contacts</span>
 				<span>{$t('navbar.contact_us')}</span>
 			</a>

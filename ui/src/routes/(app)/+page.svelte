@@ -10,12 +10,12 @@
 	let content = '';
 
 	onMount(async () => {
-		Home.list()
+		Home.list('zh')
 			.pipe(
 				startWithTap(() => isLoading = true),
 				finalize(() => isLoading = false),
 				tap(e => {
-					content = e;
+					content = e?.data.data ?? '';
 				})
 			)
 			.subscribe();

@@ -23,5 +23,6 @@
   "address": "Address",
   "phone": "Phone",
   "email": "Email",
-  "loading": "Loading"
+  "loading": "Loading",
+  "home": "Home"
 }

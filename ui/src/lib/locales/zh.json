@@ -23,5 +23,6 @@
   "address": "地址",
   "phone": "電話",
   "email": "郵件",
-  "loading": "讀取中"
+  "loading": "讀取中",
+  "home": "首頁"
 }

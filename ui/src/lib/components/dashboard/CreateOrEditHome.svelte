@@ -13,7 +13,6 @@
 
 	let language: Language = 'zh';
 	let isLoading = false;
-	let backPathname = '';
 
 	// An event handler handles the textarea changed event
 	//
@@ -108,11 +107,11 @@
       grid-template:
 		  'edit-section preview-section'
 			'btn-container btn-container';
-			width: 100%;
+      width: 100%;
 
       .edit-section {
-				width: calc(50vw - 2rem);
-				margin: 0 1rem;
+        width: calc(50vw - 2rem);
+        margin: 0 1rem;
       }
 
       .preview-section {

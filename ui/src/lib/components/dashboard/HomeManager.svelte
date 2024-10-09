@@ -101,7 +101,7 @@
   @media (min-width: 768px) {
     .home-wrapper {
       .function-tools-wrapper {
-				padding: 0.5rem 1.25rem;
+        padding: 0.5rem 1.25rem;
 
         .btn {
           span:nth-child(2) {

@@ -1,10 +1,4 @@
 {
-  "create.members.name": "Name",
-  "create.members.preview_btn": "Preview",
-  "create.members.create_btn": "Create",
-  "create.members.cancel_btn": "Cancel",
-  "create.members.back_btn": "Back",
-  "create.members.description": "Description",
   "upload_image_hint": "Choose an image file ot drag it here",
   "member.attorney.suffix": "Attorney",
   "brand": "義修法律事務所",
@@ -26,5 +20,7 @@
   "loading": "Loading",
   "home": "Home",
   "edit": "Edit",
-  "save": "Save"
+  "save": "Save",
+  "no_data_available": "No data available",
+  "create": "Create"
 }

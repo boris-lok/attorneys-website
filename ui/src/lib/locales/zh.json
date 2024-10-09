@@ -1,10 +1,4 @@
 {
-  "create.members.name": "名字",
-  "create.members.create_btn": "新增",
-  "create.members.preview_btn": "預覧",
-  "create.members.cancel_btn": "返回",
-  "create.members.back_btn": "返回",
-  "create.members.description": "簡介",
   "upload_image_hint": "選擇頭像",
   "member.attorney.suffix": "律師",
   "brand": "義修法律事務所",
@@ -25,5 +19,8 @@
   "email": "郵件",
   "loading": "讀取中",
   "home": "首頁",
-  "edit": "編輯"
+  "edit": "編輯",
+  "save": "保存",
+  "no_data_available": "沒有任何資料，請新增資料。",
+  "create": "新增"
 }

@@ -102,4 +102,22 @@
       grid-area: preview-section;
     }
   }
+
+  @media (min-width: 768px) {
+    .create-edit-home-wrapper {
+      grid-template:
+		  'edit-section preview-section'
+			'btn-container btn-container';
+			width: 100%;
+
+      .edit-section {
+				width: calc(50vw - 2rem);
+				margin: 0 1rem;
+      }
+
+      .preview-section {
+        margin: 0 1rem;
+      }
+    }
+  }
 </style>

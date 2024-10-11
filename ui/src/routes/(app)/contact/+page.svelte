@@ -82,9 +82,9 @@
       border: none;
     }
 
-		.contact-info {
-			width: 100%;
-		}
+    .contact-info {
+      width: 100%;
+    }
 
     .block {
       margin: 1rem 0;

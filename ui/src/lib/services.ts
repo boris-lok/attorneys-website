@@ -2,7 +2,7 @@ import type { Member, MemberDetail, SimpleMember } from '$lib/models/Member';
 import type { CreateHomeRequest, HomeData, UpdateHomeRequest } from '$lib/models/Home';
 import type { Language } from '$lib/models/Language';
 import { from, of } from 'rxjs';
-import type { Service } from '$lib/models/Services';
+import type { CreateServiceRequest, ServiceData, UpdateServiceRequest } from '$lib/models/Services';
 import type { SimpleArticle } from '$lib/models/Articles';
 import type { ContactData, CreateContactRequest, UpdateContactRequest } from '$lib/models/ContactUs';
 
@@ -182,42 +182,58 @@ export const Home = {
 };
 
 export const Services = {
-	list: () => {
-		const data: Service[] = [{
-			title: '訴訟及爭端處理',
-			content: `- 民事、刑事訴訟
-- 行政訴訟 / 國家賠償
-- 促參、政府採購訴訟/調解
-- 強制執行`
-		}, {
-			title: '非訟事件',
-			content: `- 盡職調查Due Diligent
-- 各式合約撰寫／翻譯
-- 見證服務
-- 公司設立登記
-            `
-		}, {
-			title: '智慧財產權保護',
-			content: `- 商標申請、商標異議、陳述意見及相關訴訟
-- 著作權維權、
-- 公平交易案件
-- 國際網域名稱保護
-- 個人資料保護案件
-- 專利檢索、專利申請、專利侵害分析報告、公司智財輔導`
-		}
-			, {
-				title: '公司及投資',
-				content: `- 證券及資本市場、保險法
-- 促參案件、工程及政府採購（含軍事採購）
-- 銀行與融資
-- 企業合併及股權收購
-- 稅務案件
-- 不動產／營建案件
-- 勞資糾紛`
+	list: (language: Language) => {
+		const request = fetch(
+			`${BASE_URL}/services`,
+			{
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'Accept-Language': language
+				},
+				signal: AbortSignal.timeout(TIMEOUT)
 			}
-		];
+		).then((res) => res.json())
+			.then((json: Object) => {
+				const data = 'services' in json ? json.services as ServiceData[] : [];
+				return data;
+			});
 
-		return of(data);
+		return from(request);
+	},
+	retrieve: (id: string, language: Language) => {
+		const request = fetch(`${BASE_URL}/services/${id}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept-Language': language
+			},
+			signal: AbortSignal.timeout(TIMEOUT)
+		})
+			.then(res => res.json())
+			.then(res => 'service' in res ? res.service as ServiceData : null);
+
+		return from(request);
+	},
+	save: (req: CreateServiceRequest | UpdateServiceRequest) => {
+		let method = 'POST';
+		if ('id' in req) {
+			method = 'PUT';
+		}
+
+		const request = fetch(
+			`${ADMIN_URL}/services`,
+			{
+				method: method,
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(req),
+				signal: AbortSignal.timeout(TIMEOUT)
+			}
+		);
+
+		return from(request);
 	}
 };
 

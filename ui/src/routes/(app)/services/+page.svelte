@@ -45,7 +45,7 @@
 			<div class="service-section" class:even={i % 2 === 0}>
 				<h3>{service.title}</h3>
 				<img src={imgs[i]} alt="{service.title}" />
-				<SvelteMarkdown source={service.content} />
+				<SvelteMarkdown source={service.data} />
 			</div>
 		{/each}
 	</div>

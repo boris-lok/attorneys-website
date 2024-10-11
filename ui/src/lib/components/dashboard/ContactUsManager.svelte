@@ -50,6 +50,17 @@
 		{#if isLoading}
 			<p>{$t('loading')}...</p>
 		{:else if data}
+			<div class="contact-info">
+				<div class="block">
+					<p><strong>{$t('address')}:</strong>&nbsp;{data.data.address}</p>
+				</div>
+				<div class="block">
+					<p><strong>{$t('phone')}:</strong>&nbsp;{data.data.phone}</p>
+				</div>
+				<div class="block">
+					<p><strong>{$t('email')}:</strong>&nbsp;{data.data.email}</p>
+				</div>
+			</div>
 		{:else}
 			<p class="no-data">{$t('no_data_available')}</p>
 		{/if}

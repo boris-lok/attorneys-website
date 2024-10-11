@@ -9,3 +9,12 @@ export type ContactData = {
 		email: string;
 	}
 }
+
+export type CreateContactRequest = {
+	address: string;
+	phone: string;
+	email: string;
+	language: Language;
+}
+
+export type UpdateContactRequest = { id: string } & CreateContactRequest;

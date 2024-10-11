@@ -4,7 +4,7 @@ import type { Language } from '$lib/models/Language';
 import { from, of } from 'rxjs';
 import type { Service } from '$lib/models/Services';
 import type { SimpleArticle } from '$lib/models/Articles';
-import type { ContactData } from '$lib/models/ContactUs';
+import type { ContactData, CreateContactRequest, UpdateContactRequest } from '$lib/models/ContactUs';
 
 const BASE_URL = 'http://localhost:1234/api/v1';
 const ADMIN_URL = `${BASE_URL}/admin`;
@@ -298,6 +298,40 @@ export const Contacts = {
 				}
 				return data[0];
 			});
+
+		return from(request);
+	},
+	retrieve: (id: string, language: Language) => {
+		const request = fetch(`${BASE_URL}/contact/${id}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept-Language': language
+			},
+			signal: AbortSignal.timeout(TIMEOUT)
+		})
+			.then(res => res.json())
+			.then(res => 'contact' in res ? res.contact as ContactData : null);
+
+		return from(request);
+	},
+	save: (req: CreateContactRequest | UpdateContactRequest) => {
+		let method = 'POST';
+		if ('id' in req) {
+			method = 'PUT';
+		}
+
+		const request = fetch(
+			`${ADMIN_URL}/contact`,
+			{
+				method: method,
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(req),
+				signal: AbortSignal.timeout(TIMEOUT)
+			}
+		);
 
 		return from(request);
 	}

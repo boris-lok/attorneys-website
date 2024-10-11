@@ -22,6 +22,10 @@
 		content = target.value;
 	}
 
+	function validate() {
+		return content !== '';
+	}
+
 	// An event handler handles `create/update` home resource
 	function onSubmitButtonClicked() {
 		if (isLoading) {
@@ -56,7 +60,7 @@
 	</div>
 	<div class="btn-container">
 		<button class="btn submit" disabled={isLoading} on:click={onSubmitButtonClicked} type="button">{$t('save')}</button>
-		<button class="btn back" disabled={isLoading} on:click={onBackButtonClicked} type="button">back</button>
+		<button class="btn back" disabled={isLoading} on:click={onBackButtonClicked} type="button">{$t('back')}</button>
 	</div>
 	<div class="preview-section">
 		<SvelteMarkdown source={content} />

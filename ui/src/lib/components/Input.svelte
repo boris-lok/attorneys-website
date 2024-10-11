@@ -49,8 +49,8 @@
       &:focus ~ span,
       &:not(:placeholder-shown) ~ span {
         color: $deep-blue;
-        transform: translateX(10px) translateY(-8px);
-        font-size: 0.65em;
+        transform: translateX(8px) translateY(-12px);
+        font-size: 0.75em;
         padding: 0 16px;
         background-color: $white;
         border-radius: 4px;

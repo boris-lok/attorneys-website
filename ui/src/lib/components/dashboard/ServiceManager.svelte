@@ -43,7 +43,9 @@
 			{#each data as service, i}
 				<div class="content-section">
 					<h3>{service.data.title}</h3>
-					<SvelteMarkdown source={text_overflow(service.data.data, 50)} />
+					<div class="add-margin-to-listview">
+						<SvelteMarkdown source={text_overflow(service.data.data, 50)} />
+					</div>
 					<a class="btn blue" href="/admin/services/edit/{service.id}">
 						<span class="material-icon">edit_document</span>
 						<span>{$t('edit')}</span>
@@ -102,9 +104,13 @@
       .content-section {
         position: relative;
 
+				h3 {
+					width: calc(100% - 40px);
+				}
+
         .btn {
           position: absolute;
-          top: 50%;
+          top: 1.25rem;
           right: 1rem;
           text-decoration: none;
           gap: 0.25rem;
@@ -147,7 +153,6 @@
         overflow-x: scroll;
 
         .content-section {
-          padding: 0 4rem 0 1rem;
           min-width: 350px;
         }
       }

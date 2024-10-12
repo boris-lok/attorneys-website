@@ -48,23 +48,23 @@
 		<nav class="navbar" class:active={isMenuOpen}>
 			<a class:active={path === '/'} href="/">
 				<span class="material-icon">home</span>
-				<span>{$t('navbar.home')}</span>
+				<span>{$t('home')}</span>
 			</a>
 			<a class:active={path.startsWith('/services')} href="/services">
 				<span class="material-icon">event_note</span>
-				<span>{$t('navbar.services')}</span>
+				<span>{$t('services')}</span>
 			</a>
 			<a class:active={path.startsWith('/articles')} href="/articles">
 				<span class="material-icon">menu_book</span>
-				<span>{$t('navbar.articles')}</span>
+				<span>{$t('articles')}</span>
 			</a>
 			<a class:active={path.startsWith('/members')} href="/members">
 				<span class="material-icon">group</span>
-				<span>{$t('navbar.members')}</span>
+				<span>{$t('members')}</span>
 			</a>
 			<a class:active={path.startsWith('/contact')} href="/contact">
 				<span class="material-icon">contacts</span>
-				<span>{$t('navbar.contact_us')}</span>
+				<span>{$t('contact_us')}</span>
 			</a>
 		</nav>
 	</div>

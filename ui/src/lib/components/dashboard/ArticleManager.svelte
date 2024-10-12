@@ -1,21 +1,20 @@
 <script lang="ts">
 	import { t } from 'svelte-i18n';
-	import type { ServiceData } from '$lib/models/Services';
 	import { onMount } from 'svelte';
-	import { Services } from '$lib/services';
+	import { Articles } from '$lib/services';
 	import type { Language } from '$lib/models/Language';
-	import { startWithTap, text_overflow } from '$lib/utils';
+	import { startWithTap } from '$lib/utils';
 	import { finalize, tap } from 'rxjs';
-	import SvelteMarkdown from 'svelte-markdown';
+	import type { ArticleData } from '$lib/models/Articles';
 
 	// isLoading is a flag that indicates we are loading a resource from API.
 	let isLoading = false;
 	// All Services data
-	let data: ServiceData[] = [];
+	let data: ArticleData[] = [];
 	let language: Language = 'zh';
 
 	onMount(() => {
-		Services.list(language)
+		Articles.list(language)
 			.pipe(
 				startWithTap(() => isLoading = true),
 				finalize(() => isLoading = false),
@@ -29,9 +28,9 @@
 </script>
 
 <div class="wrapper">
-	<h2 class="title">{$t('services')}</h2>
+	<h2 class="title">{$t('articles')}</h2>
 	<div class="function-tools-wrapper">
-		<a class="btn green" href="/admin/services/create">
+		<a class="btn green" href="/admin/articles/create">
 			<span class="material-icon">add_circle</span>
 			<span>{$t('create')}</span>
 		</a>
@@ -40,13 +39,10 @@
 		<p>{$t('loading')}...</p>
 	{:else if data.length > 0}
 		<div class="list-section">
-			{#each data as service, i}
+			{#each data as article, i}
 				<div class="content-section">
-					<h3>{service.data.title}</h3>
-					<div class="add-margin-to-listview">
-						<SvelteMarkdown source={text_overflow(service.data.data, 50)} />
-					</div>
-					<a class="btn blue" href="/admin/services/edit/{service.id}">
+					<p class="content-title">{article.data.title}</p>
+					<a class="btn blue" href="/admin/articles/edit/{article.id}">
 						<span class="material-icon">edit_document</span>
 						<span>{$t('edit')}</span>
 					</a>
@@ -100,14 +96,15 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      height: 300px;
-      overflow: scroll;
 
       .content-section {
         position: relative;
+        height: 200px;
 
-        h3 {
+        .content-title {
           width: calc(100% - 40px);
+          font-size: 1rem;
+          font-weight: bold;
         }
 
         .btn {
@@ -150,13 +147,11 @@
       }
 
       .list-section {
-        flex-direction: row;
-        width: 100%;
-        overflow-x: scroll;
-        height: fit-content;
+        flex-direction: column;
+        height: 10rem;
+        overflow-y: scroll;
 
         .content-section {
-          min-width: 350px;
         }
       }
     }

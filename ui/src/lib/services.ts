@@ -3,7 +3,7 @@ import type { CreateHomeRequest, HomeData, UpdateHomeRequest } from '$lib/models
 import type { Language } from '$lib/models/Language';
 import { from, of } from 'rxjs';
 import type { CreateServiceRequest, ServiceData, UpdateServiceRequest } from '$lib/models/Services';
-import type { SimpleArticle } from '$lib/models/Articles';
+import type { ArticleData, CreateArticleRequest, UpdateArticleRequest } from '$lib/models/Articles';
 import type { ContactData, CreateContactRequest, UpdateContactRequest } from '$lib/models/ContactUs';
 
 const BASE_URL = 'http://localhost:1234/api/v1';
@@ -238,59 +238,58 @@ export const Services = {
 };
 
 export const Articles = {
-	list: () => {
-		const data: SimpleArticle[] = [
+	list: (language: Language) => {
+		const request = fetch(
+			`${BASE_URL}/articles`,
 			{
-				'id': 'ART001',
-				'title': 'The Future of Quantum Computing: Breaking Boundaries'
-			},
-			{
-				'id': 'ART002',
-				'title': '5 Unexpected Ways AI is Changing Healthcare'
-			},
-			{
-				'id': 'ART003',
-				'title': 'From Zero to Hero: How Startups are Disrupting Industries'
-			},
-			{
-				'id': 'ART004',
-				'title': 'Sustainable Tech: Innovations to Save the Planet'
-			},
-			{
-				'id': 'ART005',
-				'title': 'The Rise of Electric Vehicles: A New Era of Transportation'
-			},
-			{
-				'id': 'ART006',
-				'title': 'Mastering Remote Work: Productivity Tips for the Digital Nomad'
-			},
-			{
-				'id': 'ART007',
-				'title': 'Blockchain Beyond Cryptocurrency: Revolutionizing Supply Chains'
-			},
-			{
-				'id': 'ART008',
-				'title': 'Space Tourism: Exploring the Final Frontier in Luxury'
-			},
-			{
-				'id': 'ART009',
-				'title': 'The Ultimate Guide to Cybersecurity in 2024'
-			},
-			{
-				'id': 'ART010',
-				'title': 'How 5G Will Change the Way We Live and Work'
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'Accept-Language': language
+				},
+				signal: AbortSignal.timeout(TIMEOUT)
 			}
-		];
+		).then((res) => res.json())
+			.then((json: Object) => {
+				const data = 'articles' in json ? json.articles as ArticleData[] : [];
+				return data;
+			});
 
-		return of(data);
+		return from(request);
 	},
-	get: (id: string) => {
-		const article = {
-			'id': 'ART012',
-			'title': 'Exploring the Role of Renewable Energy in Modern Cities',
-			'content': 'Renewable energy is rapidly transforming the landscape of urban environments. As cities grow and the demand for energy increases, reliance on sustainable energy sources like solar, wind, and hydropower is becoming critical. Modern cities are adopting renewable energy not only to meet the growing energy demand but also to reduce their carbon footprint and combat climate change.\n\n## Solar Power: Lighting Up the Future\nSolar panels are increasingly seen on rooftops and integrated into the infrastructure of buildings. With advancements in solar technology, cities are now able to harness more energy from the sun than ever before. In fact, many cities are aiming for **net-zero** energy consumption, where the amount of energy consumed is offset by the amount generated from renewable sources.\n\n## Wind Energy: Powering City Grids\nWind turbines are no longer limited to rural areas and offshore locations. Urban wind farms are emerging as a viable option for generating energy in cities. These turbines can be installed in open spaces, along coastlines, or even integrated into the architectural design of buildings. Wind energy, in combination with other renewable sources, plays a significant role in reducing the reliance on fossil fuels.\n\n## Challenges and Future Outlook\nWhile the shift to renewable energy is promising, it is not without its challenges. **Storage** and **distribution** remain two of the most significant hurdles. Innovations in battery technology and smart grids are helping to address these issues, but widespread adoption will take time. Despite these challenges, the future of renewable energy in cities is bright, with ongoing advancements pushing the boundaries of what’s possible.\n\nIn conclusion, renewable energy will be a cornerstone of urban development in the coming decades. Cities that invest in sustainable energy infrastructure today will reap the benefits of a cleaner, more sustainable tomorrow.'
-		};
-		return of(article);
+	retrieve: (id: string, language: Language) => {
+		const request = fetch(`${BASE_URL}/articles/${id}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept-Language': language
+			},
+			signal: AbortSignal.timeout(TIMEOUT)
+		})
+			.then(res => res.json())
+			.then(res => 'article' in res ? res.article as ArticleData : null);
+
+		return from(request);
+	},
+	save: (req: CreateArticleRequest | UpdateArticleRequest) => {
+		let method = 'POST';
+		if ('id' in req) {
+			method = 'PUT';
+		}
+
+		const request = fetch(
+			`${ADMIN_URL}/articles`,
+			{
+				method: method,
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(req),
+				signal: AbortSignal.timeout(TIMEOUT)
+			}
+		);
+
+		return from(request);
 	}
 };
 

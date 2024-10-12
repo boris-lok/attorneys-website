@@ -15,7 +15,7 @@
 
 	onMount(() => {
 		Articles
-			.get(article_id)
+			.retrieve(article_id)
 			.pipe(
 				startWithTap(() => isLoading = true),
 				finalize(() => isLoading = false),

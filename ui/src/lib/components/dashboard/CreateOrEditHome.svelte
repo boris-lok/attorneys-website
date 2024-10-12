@@ -32,6 +32,10 @@
 			return;
 		}
 
+		if (!validate()) {
+			return;
+		}
+
 		let json = {
 			...id !== '' ? { id: id } : {},
 			data: content,
@@ -62,7 +66,7 @@
 		<button class="btn submit" disabled={isLoading} on:click={onSubmitButtonClicked} type="button">{$t('save')}</button>
 		<button class="btn back" disabled={isLoading} on:click={onBackButtonClicked} type="button">{$t('back')}</button>
 	</div>
-	<div class="preview-section">
+	<div class="preview-section add-margin-to-listview">
 		<SvelteMarkdown source={content} />
 	</div>
 </div>

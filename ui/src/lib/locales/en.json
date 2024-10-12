@@ -20,5 +20,7 @@
   "no_data_available": "No data available",
   "create": "Create",
   "service.title": "Title",
-  "service.data": "Service data"
+  "service.data": "Service data",
+  "article.title": "Title",
+  "article.data": "Article"
 }

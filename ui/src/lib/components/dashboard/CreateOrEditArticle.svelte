@@ -6,7 +6,7 @@
 	import { t } from 'svelte-i18n';
 	import TextArea from '$lib/components/TextArea.svelte';
 	import SvelteMarkdown from 'svelte-markdown';
-	import { Services } from '$lib/services';
+	import { Articles } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
 	import { finalize } from 'rxjs';
 
@@ -16,7 +16,7 @@
 	// The title of the service
 	export let title = '';
 	// The description of the service
-	export let data = '';
+	export let content = '';
 
 	let language: Language = 'zh';
 	let isLoading = false;
@@ -28,8 +28,8 @@
 	}
 
 	// An event handler handles the data changed
-	function onDataChanged(e: Event) {
-		data = (e.target as HTMLInputElement).value;
+	function onContentChanged(e: Event) {
+		content = (e.target as HTMLInputElement).value;
 	}
 
 	// An event handler handles `back` button click
@@ -41,7 +41,7 @@
 
 	// validate the service data
 	function validate() {
-		return title.trim() !== '' && data.trim() !== '';
+		return title.trim() !== '' && content.trim() !== '';
 	}
 
 	// An event handler handles `save` button click
@@ -57,11 +57,11 @@
 		let json = {
 			...id !== '' ? { id: id } : {},
 			title: title,
-			data: data,
+			content: content,
 			language: language
 		};
 
-		Services.save(json).pipe(
+		Articles.save(json).pipe(
 			startWithTap(() => isLoading = true),
 			finalize(() => isLoading = false)
 		)
@@ -71,8 +71,8 @@
 
 <div class="form-wrapper">
 	<div class="edit-section">
-		<Input label={$t('service.title')} name="name" on:input={onTitleChanged} value={title} />
-		<TextArea data={data} label={$t('service.data')} on:input={onDataChanged} />
+		<Input label={$t('article.title')} name="name" on:input={onTitleChanged} value={title} />
+		<TextArea data={content} label={$t('article.data')} on:input={onContentChanged} />
 	</div>
 
 	<div class="btn-container">
@@ -81,7 +81,7 @@
 	</div>
 
 	<div class="preview-section add-margin-to-listview">
-		<SvelteMarkdown source={data} />
+		<SvelteMarkdown source={content} />
 	</div>
 </div>
 

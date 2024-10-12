@@ -20,5 +20,7 @@
   "no_data_available": "沒有任何資料，請新增資料。",
   "create": "新增",
   "service.title": "標題",
-  "service.data": "服務範圍"
+  "service.data": "服務範圍",
+  "article.title": "標題",
+  "article.data": "文章內容"
 }

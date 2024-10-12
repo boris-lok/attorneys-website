@@ -2,20 +2,22 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { Articles } from '$lib/services';
-	import type { Article } from '$lib/models/Articles';
+	import type { ArticleData } from '$lib/models/Articles';
 	import { startWithTap } from '$lib/utils';
 	import { finalize, tap } from 'rxjs';
 	import Loading from '$lib/components/Loading.svelte';
 	import { t } from 'svelte-i18n';
 	import SvelteMarkdown from 'svelte-markdown';
+	import type { Language } from '$lib/models/Language';
 
-	let article_id = $page.params.slug;
+	let id = $page.params.slug;
 	let isLoading = false;
-	let article: Article;
+	let article: ArticleData | null = null;
+	let language: Language = 'zh';
 
 	onMount(() => {
 		Articles
-			.retrieve(article_id)
+			.retrieve(id, language)
 			.pipe(
 				startWithTap(() => isLoading = true),
 				finalize(() => isLoading = false),
@@ -28,15 +30,17 @@
 
 {#if isLoading}
 	<Loading />
-{:else}
+{:else if article}
 	<div class="article-section">
 		{#if article}
-			<h1>{article.title}</h1>
-			<SvelteMarkdown source={article.content} />
+			<h1>{article.data.title}</h1>
+			<SvelteMarkdown source={article.data.content} />
 		{:else}
 			<p>{$t('no_article_message')}</p>
 		{/if}
 	</div>
+{:else}
+	<p>{$t('no_data_available')}</p>
 {/if}
 
 <style lang="scss">

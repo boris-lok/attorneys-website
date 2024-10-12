@@ -3,15 +3,17 @@
 	import { Articles } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
 	import { finalize, tap } from 'rxjs';
-	import type { SimpleArticle } from '$lib/models/Articles';
 	import Loading from '$lib/components/Loading.svelte';
 	import { t } from 'svelte-i18n';
+	import type { Language } from '$lib/models/Language';
+	import type { ArticleData } from '$lib/models/Articles';
 
 	let isLoading = false;
-	let articles: SimpleArticle[] = [];
+	let articles: ArticleData[] = [];
+	let language: Language = 'zh';
 
 	onMount(() => {
-		Articles.list()
+		Articles.list(language)
 			.pipe(
 				startWithTap(() => isLoading = true),
 				finalize(() => isLoading = false),
@@ -29,7 +31,7 @@
 		{#each articles as article}
 			<div class="article-wrapper">
 				<a href="/articles/{article.id}">
-					<h3>{article.title}</h3>
+					<h3>{article.data.title}</h3>
 				</a>
 			</div>
 		{/each}
@@ -74,8 +76,8 @@
       align-items: center;
       padding: 0 10%;
       max-width: 1024px;
-      width: 1024px;
       overflow: clip;
+			margin: 0 auto;
 
       h1 {
         padding: 0 0 1rem 0;

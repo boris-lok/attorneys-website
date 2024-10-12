@@ -4,8 +4,9 @@
 	import { onMount } from 'svelte';
 	import { Services } from '$lib/services';
 	import type { Language } from '$lib/models/Language';
-	import { startWithTap } from '$lib/utils';
+	import { startWithTap, text_overflow } from '$lib/utils';
 	import { finalize, tap } from 'rxjs';
+	import SvelteMarkdown from 'svelte-markdown';
 
 	// isLoading is a flag that indicates we are loading a resource from API.
 	let isLoading = false;
@@ -27,10 +28,10 @@
 
 </script>
 
-<div class="services-wrapper">
-	<h2 class="title">{$t('service')}</h2>
+<div class="wrapper">
+	<h2 class="title">{$t('services')}</h2>
 	<div class="function-tools-wrapper">
-		<a class="btn" href="/admin/services/create">
+		<a class="btn green" href="/admin/services/create">
 			<span class="material-icon">add_circle</span>
 			<span>{$t('create')}</span>
 		</a>
@@ -38,10 +39,15 @@
 	{#if isLoading}
 		<p>{$t('loading')}...</p>
 	{:else if data.length > 0}
-		<div class="services-section">
+		<div class="list-section">
 			{#each data as service, i}
-				<div class="service-section">
+				<div class="content-section">
 					<h3>{service.data.title}</h3>
+					<SvelteMarkdown source={text_overflow(service.data.data, 50)} />
+					<a class="btn blue" href="/admin/services/edit/{service.id}">
+						<span class="material-icon">edit_document</span>
+						<span>{$t('edit')}</span>
+					</a>
 				</div>
 			{/each}
 		</div>
@@ -51,47 +57,100 @@
 </div>
 
 <style lang="scss">
-  .title {
-    font-size: 2rem;
-    text-align: center;
-    margin: 0;
-    border-bottom: 1px solid $black;
-  }
+  .wrapper {
+    width: 100%;
+    position: relative;
+    padding: 1rem 5%;
 
-  .function-tools-wrapper {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    padding: 0.5rem 0.5rem;
+    .title {
+      font-size: 2rem;
+      text-align: center;
+      margin: 0;
+      border-bottom: 1px solid $black;
+    }
 
-    .btn {
-      text-decoration: none;
-      gap: 0.25rem;
+    .function-tools-wrapper {
       display: flex;
       flex-direction: row;
-      color: $deep-orange;
+      justify-content: flex-end;
+      padding: 0.5rem 0.5rem;
+      position: absolute;
+      right: 0;
+      top: 3rem;
 
-      span:nth-child(2) {
-        display: none;
+      .btn {
+        text-decoration: none;
+        gap: 0.25rem;
+        display: flex;
+        flex-direction: row;
+
+        &.green {
+          color: $deep-green;
+        }
+
+        span:nth-child(2) {
+          display: none;
+        }
       }
+    }
+
+    .list-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      .content-section {
+        position: relative;
+
+        .btn {
+          position: absolute;
+          top: 50%;
+          right: 1rem;
+          text-decoration: none;
+          gap: 0.25rem;
+          display: flex;
+          flex-direction: row;
+
+          &.blue {
+            color: $deep-blue;
+          }
+
+          span:nth-child(2) {
+            display: none;
+          }
+        }
+      }
+    }
+
+    .no-data {
+      text-align: center;
+      font-size: 1.25rem;
     }
   }
 
-  .no-data {
-    text-align: center;
-    font-size: 1.25rem;
-  }
-
   @media (min-width: 768px) {
-    .function-tools-wrapper {
-      padding: 0.5rem 1.25rem;
+    .wrapper {
+      .function-tools-wrapper {
+        padding: 0.5rem 1.25rem;
+        right: 1.25rem;
 
-      .btn {
-        span:nth-child(2) {
-          display: block;
+        .btn {
+          span:nth-child(2) {
+            display: block;
+          }
+        }
+      }
+
+      .list-section {
+        flex-direction: row;
+        width: 100%;
+        overflow-x: scroll;
+
+        .content-section {
+          padding: 0 4rem 0 1rem;
+          min-width: 350px;
         }
       }
     }
   }
-
 </style>

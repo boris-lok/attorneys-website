@@ -1,36 +1,42 @@
 <script lang="ts">
-	import type { Service } from '$lib/models/Services';
 	import { onMount } from 'svelte';
 	import { Services } from '$lib/services';
 	import { shuffle, startWithTap } from '$lib/utils';
 	import { finalize, tap } from 'rxjs';
 	import Loading from '$lib/components/Loading.svelte';
 	import SvelteMarkdown from 'svelte-markdown';
+	import type { Language } from '$lib/models/Language';
+	import type { ServiceData } from '$lib/models/Services';
 
+	// isLoading is a flag that indicates we are loading a resource from API.
 	let loading = false;
-	let data: Service[] = [];
-	let imgs: string[] = [];
+	// language is the language that we want to load
+	let language: Language = 'zh';
+	// The resource data
+	let data: ServiceData[] = [];
+	// The images that we want to display
+	let images: string[] = [];
 
 
 	onMount(() => {
-		const images = import.meta.glob('$lib/assets/*_480.png', { eager: true });
-		for (let key in Object.keys(images)) {
-			let value = Object.values(images)[key];
+		const imported = import.meta.glob('$lib/assets/*_480.png', { eager: true });
+		for (let key in Object.keys(imported)) {
+			let value = Object.values(imported)[key];
 			if (typeof value === 'object' && value != null && 'default' in value && typeof value.default == 'string') {
-				imgs.push(value.default);
+				images.push(value.default);
 			}
 		}
 
-		Services.list()
+		Services.list(language)
 			.pipe(
 				startWithTap(() => loading = true),
 				finalize(() => loading = false),
 				tap(services => {
 					data = services;
-					while (data.length > imgs.length) {
-						imgs = [...imgs, ...imgs];
+					while (data.length > images.length) {
+						images = [...images, ...images];
 					}
-					imgs = shuffle(imgs);
+					images = shuffle(images);
 				})
 			)
 			.subscribe();
@@ -43,9 +49,11 @@
 	<div class="services-wrapper">
 		{#each data as service, i}
 			<div class="service-section" class:even={i % 2 === 0}>
-				<h3>{service.title}</h3>
-				<img src={imgs[i]} alt="{service.title}" />
-				<SvelteMarkdown source={service.data} />
+				<h3>{service.data.title}</h3>
+				<img src={images[i]} alt="{service.data.title}" />
+				<div class="add-margin-to-listview">
+					<SvelteMarkdown source={service.data.data} />
+				</div>
 			</div>
 		{/each}
 	</div>

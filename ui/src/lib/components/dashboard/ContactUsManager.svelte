@@ -31,85 +31,100 @@
 	});
 </script>
 
-<div class="contact-us-wrapper">
+<div class="wrapper">
 	<h2 class="title">{$t('contact_us')}</h2>
-	<div class="content-wrapper">
-		<div class="function-tools-wrapper">
-			{#if hasData && data}
-				<a href="/admin/contact/edit/{data.id}" class="btn">
-					<span class="material-icon">edit_document</span>
-					<span>{$t('edit')}</span>
-				</a>
-			{:else}
-				<a href="/admin/contact/create" class="btn">
-					<span class="material-icon">add_circle</span>
-					<span>{$t('create')}</span>
-				</a>
-			{/if}
-		</div>
-		{#if isLoading}
-			<p>{$t('loading')}...</p>
-		{:else if data}
-			<div class="contact-info">
-				<div class="block">
-					<p><strong>{$t('address')}:</strong>&nbsp;{data.data.address}</p>
-				</div>
-				<div class="block">
-					<p><strong>{$t('phone')}:</strong>&nbsp;{data.data.phone}</p>
-				</div>
-				<div class="block">
-					<p><strong>{$t('email')}:</strong>&nbsp;{data.data.email}</p>
-				</div>
-			</div>
+	<div class="function-tools-wrapper">
+		{#if hasData && data}
+			<a href="/admin/contact/edit/{data.id}" class="btn blue">
+				<span class="material-icon">edit_document</span>
+				<span>{$t('edit')}</span>
+			</a>
 		{:else}
-			<p class="no-data">{$t('no_data_available')}</p>
+			<a href="/admin/contact/create" class="btn green">
+				<span class="material-icon">add_circle</span>
+				<span>{$t('create')}</span>
+			</a>
 		{/if}
-
 	</div>
+	{#if isLoading}
+		<p>{$t('loading')}...</p>
+	{:else if data}
+		<div class="contact-info">
+			<div class="block">
+				<p><strong>{$t('address')}:</strong>&nbsp;{data.data.address}</p>
+			</div>
+			<div class="block">
+				<p><strong>{$t('phone')}:</strong>&nbsp;{data.data.phone}</p>
+			</div>
+			<div class="block">
+				<p><strong>{$t('email')}:</strong>&nbsp;{data.data.email}</p>
+			</div>
+		</div>
+	{:else}
+		<p class="no-data">{$t('no_data_available')}</p>
+	{/if}
 </div>
 
 <style lang="scss">
-  .title {
-    font-size: 2rem;
-    text-align: center;
-    margin: 0;
-    border-bottom: 1px solid $black;
-  }
+  .wrapper {
+    width: 100%;
+    position: relative;
+    padding: 1rem 5%;
 
-  .function-tools-wrapper {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    padding: 0.5rem 0.5rem;
+    .title {
+      font-size: 2rem;
+      text-align: center;
+      margin: 0;
+      border-bottom: 1px solid $black;
+    }
 
-    .btn {
-      text-decoration: none;
-      gap: 0.25rem;
+    .function-tools-wrapper {
       display: flex;
       flex-direction: row;
-      color: $deep-orange;
+      justify-content: flex-end;
+      padding: 0.5rem 0.5rem;
+      position: absolute;
+      right: 0;
+      top: 3rem;
 
-      span:nth-child(2) {
-        display: none;
+      .btn {
+        text-decoration: none;
+        gap: 0.25rem;
+        display: flex;
+        flex-direction: row;
+
+        &.green {
+          color: $deep-green;
+        }
+
+        &.blue {
+          color: $deep-blue;
+        }
+
+        span:nth-child(2) {
+          display: none;
+        }
       }
+    }
+
+    .no-data {
+      text-align: center;
+      font-size: 1.25rem;
     }
   }
 
-  .no-data {
-    text-align: center;
-    font-size: 1.25rem;
-  }
-
   @media (min-width: 768px) {
-    .function-tools-wrapper {
-      padding: 0.5rem 1.25rem;
+    .wrapper {
+      .function-tools-wrapper {
+        padding: 0.5rem 1.25rem;
+        right: 1.25rem;
 
-      .btn {
-        span:nth-child(2) {
-          display: block;
+        .btn {
+          span:nth-child(2) {
+            display: block;
+          }
         }
       }
     }
   }
-
 </style>

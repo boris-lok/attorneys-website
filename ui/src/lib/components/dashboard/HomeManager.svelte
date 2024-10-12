@@ -32,34 +32,36 @@
 	});
 </script>
 
-<div class="home-wrapper">
+<div class="wrapper">
 	<h2 class="title">{$t('home')}</h2>
-	<div class="home-content-wrapper">
-		<div class="function-tools-wrapper">
-			{#if hasData}
-				<a href="/admin/home/edit/{id}" class="btn">
-					<span class="material-icon">edit_document</span>
-					<span>{$t('edit')}</span>
-				</a>
-			{:else}
-				<a href="/admin/home/create" class="btn">
-					<span class="material-icon">add_circle</span>
-					<span>{$t('create')}</span>
-				</a>
-			{/if}
-		</div>
-		{#if isLoading}
-			<p>{$t('loading')}...</p>
-		{:else if content.length > 0}
-			<SvelteMarkdown source={content} />
+	<div class="function-tools-wrapper">
+		{#if hasData}
+			<a href="/admin/home/edit/{id}" class="btn blue">
+				<span class="material-icon">edit_document</span>
+				<span>{$t('edit')}</span>
+			</a>
 		{:else}
-			<p class="no-data">{$t('no_data_available')}</p>
+			<a href="/admin/home/create" class="btn green">
+				<span class="material-icon">add_circle</span>
+				<span>{$t('create')}</span>
+			</a>
 		{/if}
 	</div>
+	{#if isLoading}
+		<p>{$t('loading')}...</p>
+	{:else if content.length > 0}
+		<SvelteMarkdown source={content} />
+	{:else}
+		<p class="no-data">{$t('no_data_available')}</p>
+	{/if}
 </div>
 
 <style lang="scss">
-  .home-wrapper {
+  .wrapper {
+    width: 100%;
+    position: relative;
+    padding: 1rem 5%;
+
     .title {
       font-size: 2rem;
       text-align: center;
@@ -67,24 +69,28 @@
       border-bottom: 1px solid $black;
     }
 
-    .home-content-wrapper {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-    }
-
     .function-tools-wrapper {
       display: flex;
       flex-direction: row;
       justify-content: flex-end;
       padding: 0.5rem 0.5rem;
+      position: absolute;
+      right: 0;
+      top: 3rem;
 
       .btn {
         text-decoration: none;
         gap: 0.25rem;
         display: flex;
         flex-direction: row;
-        color: $deep-orange;
+
+        &.green {
+          color: $deep-green;
+        }
+
+        &.blue {
+          color: $deep-blue;
+        }
 
         span:nth-child(2) {
           display: none;
@@ -99,9 +105,10 @@
   }
 
   @media (min-width: 768px) {
-    .home-wrapper {
+    .wrapper {
       .function-tools-wrapper {
         padding: 0.5rem 1.25rem;
+        right: 1.25rem;
 
         .btn {
           span:nth-child(2) {

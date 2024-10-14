@@ -100,7 +100,7 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      height: 300px;
+      max-height: 300px;
       overflow: scroll;
 
       .content-section {

@@ -22,5 +22,7 @@
   "service.title": "Title",
   "service.data": "Service data",
   "article.title": "Title",
-  "article.data": "Article"
+  "article.data": "Article",
+  "member.name": "Name",
+  "member.description": "Description"
 }

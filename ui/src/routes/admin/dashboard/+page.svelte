@@ -3,6 +3,7 @@
 	import ContactUsManager from '$lib/components/dashboard/ContactUsManager.svelte';
 	import ServiceManager from '$lib/components/dashboard/ServiceManager.svelte';
 	import ArticleManager from '$lib/components/dashboard/ArticleManager.svelte';
+	import MemberManager from '$lib/components/dashboard/MemberManager.svelte';
 </script>
 
 <div>
@@ -13,6 +14,9 @@
 </div>
 <div>
 	<ServiceManager />
+</div>
+<div>
+	<MemberManager />
 </div>
 <div>
 	<ArticleManager />

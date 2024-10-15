@@ -22,5 +22,7 @@
   "service.title": "標題",
   "service.data": "服務範圍",
   "article.title": "標題",
-  "article.data": "文章內容"
+  "article.data": "文章內容",
+  "member.name": "名字",
+  "member.description": "經歷"
 }

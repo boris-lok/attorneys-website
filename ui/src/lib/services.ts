@@ -1,7 +1,7 @@
-import type { Member, MemberDetail, SimpleMember } from '$lib/models/Member';
+import type { CreateMemberRequest, SimpleMember, UpdateMemberRequest } from '$lib/models/Member';
 import type { CreateHomeRequest, HomeData, UpdateHomeRequest } from '$lib/models/Home';
 import type { Language } from '$lib/models/Language';
-import { from, of } from 'rxjs';
+import { from } from 'rxjs';
 import type { CreateServiceRequest, ServiceData, UpdateServiceRequest } from '$lib/models/Services';
 import type { ArticleData, CreateArticleRequest, UpdateArticleRequest } from '$lib/models/Articles';
 import type { ContactData, CreateContactRequest, UpdateContactRequest } from '$lib/models/ContactUs';
@@ -11,32 +11,12 @@ const ADMIN_URL = `${BASE_URL}/admin`;
 const TIMEOUT = 5000;
 
 export const Members = {
-	create: (member: Member, lang: Language) => {
-		let data = JSON.stringify({
-			...member,
-			language: lang
-		});
-
-		const request: Promise<{ member_id: string }> = fetch(
-			`${ADMIN_URL}/members`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: data,
-				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		).then((res) => res.json());
-
-		return from(request);
-	},
-	uploadAvatar: (memberId: string, file: File) => {
+	uploadAvatar: (id: string, file: File) => {
 		const formData = new FormData();
 		formData.append('avatar', file);
 
 		const request: Promise<Response> = fetch(
-			`${ADMIN_URL}/members/${memberId}/avatar`,
+			`${ADMIN_URL}/members/${id}/avatar`,
 			{
 				method: 'POST',
 				body: formData
@@ -45,80 +25,52 @@ export const Members = {
 
 		return from(request);
 	},
-	list: () => {
-		const data: SimpleMember[] = [
+	list: (language: Language) => {
+		const request = fetch(
+			`${BASE_URL}/members`,
 			{
-				member_id: '1',
-				name: '蕭嘉豪'
-			}, {
-				member_id: '2',
-				name: '陳致璇'
-			}, {
-				member_id: '3',
-				name: '王筱雯'
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'Accept-Language': language
+				},
+				signal: AbortSignal.timeout(TIMEOUT)
 			}
-		];
+		).then((res) => res.json())
+			.then((json: Object) => {
+				const data = 'members' in json ? json.members as SimpleMember[] : [];
+				return data;
+			});
 
-		return of(data);
+		return from(request);
 	},
-	get: (memberId: string) => {
-		const data: MemberDetail = {
-			member_id: '1',
-			name: 'Johnathan Doe',
-			content: `
-**Specialization**: Corporate Law  
-**Years of Experience**: 12  
-**Firm**: Doe & Associates  
+	save: (req: CreateMemberRequest | UpdateMemberRequest) => {
+		let method = 'POST';
+		if ('id' in req) {
+			method = 'PUT';
+		}
 
-## Contact Information
-- **Email**: [johnathan.doe@example.com](mailto:johnathan.doe@example.com)
-- **Phone**: +1-555-123-4567
-- **Address**:  
-  123 Legal Lane,  
-  New York, NY 10001
+		const request = fetch(
+			`${ADMIN_URL}/members`,
+			{
+				method: method,
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(req),
+				signal: AbortSignal.timeout(TIMEOUT)
+			}
+		).then(res => res.json())
+			.then((json: Object) => {
+				if ('id' in req) {
+					return req.id;
+				} else if ('id' in json) {
+					return json.id as string;
+				}
+				return null;
+			});
 
-## Education
-- **Juris Doctor (JD)**  
-  Harvard Law School, 2010
-- **Bachelor of Arts in Political Science**  
-  Yale University, 2006
-
-## Bar Admissions
-- **New York**: 2011
-- **California**: 2013
-
-## Practice Areas
-- Mergers & Acquisitions
-- Corporate Governance
-- Securities Law
-- Contract Negotiation
-
-## Professional Affiliations
-- American Bar Association
-- New York State Bar Association
-- Corporate Law Society
-
-## Notable Cases
-- **Acme Corp vs Global Tech (2018)**  
-  Represented Acme Corp in a high-profile merger case, securing a favorable settlement.
-  
-- **Smith Industries Acquisition (2020)**  
-  Led legal efforts in Smith Industries' acquisition by a major multinational corporation.
-
-## Awards
-- **Top Corporate Lawyer (2019)**  
-  Awarded by Law Journal.
-  
-- **Rising Star in M&A Law (2016)**  
-  Recognized by Legal 500.
-
-## Languages Spoken
-- English
-- Spanish	
-			`
-		};
-
-		return of(data);
+		return from(request);
 	}
 };
 

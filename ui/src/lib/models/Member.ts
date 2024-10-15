@@ -1,18 +1,15 @@
-export type Member = {
-	name: string;
-	description: string;
-};
-
-type FileImage = { file?: File };
-
-export type MemberPreview = Member & FileImage;
+import type { Language } from '$lib/models/Language';
 
 export type SimpleMember = {
-	member_id: string;
+	id: string;
 	name: string;
 	avatar?: string;
 }
 
-export type MemberDetail = SimpleMember & {
-	content: string;
-};
+export type CreateMemberRequest = {
+	name: string;
+	description: string;
+	language: Language;
+}
+
+export type UpdateMemberRequest = { id: string } & CreateMemberRequest;

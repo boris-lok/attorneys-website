@@ -1,37 +1,37 @@
 <script lang="ts">
-	import { t } from 'svelte-i18n';
-	import type { ServiceData } from '$lib/models/Services';
-	import { onMount } from 'svelte';
-	import { Services } from '$lib/services';
 	import type { Language } from '$lib/models/Language';
-	import { startWithTap, text_overflow } from '$lib/utils';
+	import { onMount } from 'svelte';
+	import { Members } from '$lib/services';
+	import { startWithTap } from '$lib/utils';
 	import { finalize, tap } from 'rxjs';
-	import SvelteMarkdown from 'svelte-markdown';
+	import type { SimpleMember } from '$lib/models/Member';
+	import { t } from 'svelte-i18n';
 
 	// isLoading is a flag that indicates we are loading a resource from API.
 	let isLoading = false;
-	// All Services data
-	let data: ServiceData[] = [];
+	// The language that we want to fetch the resources from API
 	let language: Language = 'zh';
+	// The data that we want to display
+	let data: SimpleMember[] = [];
 
 	onMount(() => {
-		Services.list(language)
+		Members.list(language)
 			.pipe(
 				startWithTap(() => isLoading = true),
 				finalize(() => isLoading = false),
 				tap(e => {
+					console.log(e);
 					data = e;
 				})
 			)
 			.subscribe();
 	});
-
 </script>
 
 <div class="wrapper">
-	<h2 class="title">{$t('services')}</h2>
+	<h2 class="title">{$t('members')}</h2>
 	<div class="function-tools-wrapper">
-		<a class="btn green" href="/admin/services/create">
+		<a class="btn green" href="/admin/members/create">
 			<span class="material-icon">add_circle</span>
 			<span>{$t('create')}</span>
 		</a>
@@ -40,13 +40,10 @@
 		<p>{$t('loading')}...</p>
 	{:else if data.length > 0}
 		<div class="list-section">
-			{#each data as service, i}
+			{#each data as member}
 				<div class="content-section">
-					<h3>{service.data.title}</h3>
-					<div class="add-margin-to-listview">
-						<SvelteMarkdown source={text_overflow(service.data.data, 50)} />
-					</div>
-					<a class="btn blue" href="/admin/services/edit/{service.id}">
+					<p class="content-title">{member.name}</p>
+					<a class="btn blue" href="/admin/members/edit/{member.id}">
 						<span class="material-icon">edit_document</span>
 						<span>{$t('edit')}</span>
 					</a>
@@ -100,24 +97,26 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      max-height: 300px;
-      overflow: scroll;
+			max-height: 12rem;;
+			overflow: auto;
 
       .content-section {
         position: relative;
-        margin: 0.5rem 0.5rem;
-        border-radius: 4px;
-        box-shadow: 0 0 4px 0 $deep-grey;
-        padding: 0.5rem 1rem;
+				padding: 0.5rem 1rem;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin: 0.5rem 0.5rem;
+				border-radius: 4px;
+				box-shadow: 0 0 4px 0 $deep-grey;
 
-        h3 {
+        .content-title {
           width: calc(100% - 40px);
+          font-size: 1rem;
+          font-weight: bold;
         }
 
         .btn {
-          position: absolute;
-          top: 1.25rem;
-          right: 1rem;
           text-decoration: none;
           gap: 0.25rem;
           display: flex;
@@ -155,12 +154,10 @@
 
       .list-section {
         flex-direction: row;
-        width: 100%;
-        overflow-x: scroll;
-        height: fit-content;
+        overflow-y: scroll;
 
         .content-section {
-          min-width: 350px;
+					min-width: 350px;
         }
       }
     }

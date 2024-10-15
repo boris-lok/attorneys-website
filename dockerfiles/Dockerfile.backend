@@ -20,8 +20,6 @@ run cargo build --release
 # Runtime stage
 from debian:bullseye-slim
 
-# Install OpenSSL - it is dynamically linked by some of our dependencies
-# Install ca-certificates - it is needed to verify TLS certificates
 # when establishing HTTPS connections
 run apt-get update -y \
     && apt-get install -y --no-install-recommends openssl ca-certificates \
@@ -37,10 +35,18 @@ workdir /app
 copy --from=builder /app/target/release/backend .
 copy ./backend/src/configuration ./src/configuration
 
-# env APP_ENVIRONMENT production
+env APP_ENVIRONMENT production
+
+# create a upload directory
+run mkdir /usr/local/uploads
+run mkdir /usr/local/uploads/images
+
+# change the upload directory permissions
+run chmod 0777 /usr/local/uploads/
+run chmod 0777 /usr/local/uploads/images
 
 # Expose the port on which your application will run
-expose 1234
+expose 8081
 
 # Set the entry point to the complied binary
 cmd ["./backend"]

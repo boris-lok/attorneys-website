@@ -38,7 +38,7 @@ pub async fn upload_member_avatar(
                 data,
             };
 
-            match execute(uow, image_util, req).await {
+            match execute(uow, state.upload_folder.clone(), image_util, req).await {
                 Ok(_) => {}
                 Err(Error::NotFound) => return Err(ApiError::NotFound),
                 Err(Error::BadRequest) => return Err(ApiError::BadRequest),

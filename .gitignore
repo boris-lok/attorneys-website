@@ -51,6 +51,8 @@ ui/static/avatar
 ui/build
 ui/.env.prod
 
+upload/*
+
 
 # Editor directories and files
 **/.DS_Store

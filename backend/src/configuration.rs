@@ -4,6 +4,7 @@ use sqlx::postgres::{PgConnectOptions, PgSslMode};
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,
+    pub application: Application,
 }
 
 #[derive(Debug, Deserialize)]
@@ -63,6 +64,13 @@ impl TryFrom<String> for Environment {
             )),
         }
     }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Application {
+    pub host: String,
+    pub port: u16,
+    pub upload_folder: String,
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {

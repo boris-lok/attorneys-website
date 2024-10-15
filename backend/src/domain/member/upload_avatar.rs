@@ -37,6 +37,7 @@ async fn resize_image_and_save_it(
 }
 pub async fn execute<IUnitOfWork>(
     uow: Mutex<IUnitOfWork>,
+    out: Arc<String>,
     image_util: Arc<dyn IImage + Sync + Send>,
     req: Request,
 ) -> Result<String, Error>
@@ -56,14 +57,11 @@ where
         Ok(_) => {}
     };
 
-    // TODO: set up the output folder in config
-    let out = "/Users/boris/Documents/workspace/projects/attorneys-website/ui/static/avatar";
-
     let large_image_path = resize_image_and_save_it(
         image_util.clone(),
         &req.data,
         Size::new(128, 128),
-        out,
+        out.as_ref(),
         member_id.as_str(),
     )
     .await?;
@@ -72,7 +70,7 @@ where
         image_util.clone(),
         &req.data,
         Size::new(48, 48),
-        out,
+        out.as_ref(),
         member_id.as_str(),
     )
     .await?;
@@ -144,7 +142,9 @@ mod test {
             data: buffer,
         };
 
-        let res = execute(Mutex::new(uow), Arc::new(util), req).await;
+        let out = Arc::new("".to_string());
+
+        let res = execute(Mutex::new(uow), out, Arc::new(util), req).await;
 
         match res {
             Ok(id) => assert_eq!(id, id.as_str()),
@@ -170,7 +170,9 @@ mod test {
             data: vec![1, 2, 3, 4],
         };
 
-        let res = execute(Mutex::new(uow), Arc::new(util), req).await;
+        let out = Arc::new("".to_string());
+
+        let res = execute(Mutex::new(uow), out, Arc::new(util), req).await;
 
         match res {
             Err(Error::ImageProcess) => {}
@@ -200,7 +202,9 @@ mod test {
             data: buffer,
         };
 
-        let res = execute(Mutex::new(uow), Arc::new(util), req).await;
+        let out = Arc::new("".to_string());
+
+        let res = execute(Mutex::new(uow), out, Arc::new(util), req).await;
 
         match res {
             Err(Error::CreateImage) => {}
@@ -225,7 +229,9 @@ mod test {
             data: buffer,
         };
 
-        let res = execute(Mutex::new(uow), Arc::new(util), req).await;
+        let out = Arc::new("".to_string());
+
+        let res = execute(Mutex::new(uow), out, Arc::new(util), req).await;
 
         match res {
             Err(Error::NotFound) => {}

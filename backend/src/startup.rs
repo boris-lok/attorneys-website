@@ -18,11 +18,13 @@ use tower_http::cors::CorsLayer;
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub pool: PgPool,
+    pub upload_folder: Arc<String>,
 }
 
 pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io::Error> {
     let state = AppState {
         pool: get_database_connection(&config.database).await,
+        upload_folder: Arc::new(config.application.upload_folder),
     };
     let image_util = ImageUtil {};
 

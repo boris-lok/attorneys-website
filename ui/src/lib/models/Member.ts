@@ -12,4 +12,17 @@ export type CreateMemberRequest = {
 	language: Language;
 }
 
+export type MemberData = {
+	id: string;
+	language: Language,
+	data: {
+		name: string;
+		description: string;
+	}
+	avatar?: {
+		large_image: string;
+		small_image: string;
+	}
+}
+
 export type UpdateMemberRequest = { id: string } & CreateMemberRequest;

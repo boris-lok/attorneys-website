@@ -90,7 +90,7 @@
 </script>
 
 <div class="wrapper">
-	<UploadImage on:change={onImageChanged} />
+	<UploadImage on:change={onImageChanged} avatarUrl={avatarUrl} />
 	<div class="form-wrapper">
 		<div class="edit-section">
 			<Input label={$t('member.name')} name="name" on:input={onNameChanged} value={name} />

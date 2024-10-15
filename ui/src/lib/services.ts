@@ -1,4 +1,4 @@
-import type { CreateMemberRequest, SimpleMember, UpdateMemberRequest } from '$lib/models/Member';
+import type { CreateMemberRequest, MemberData, SimpleMember, UpdateMemberRequest } from '$lib/models/Member';
 import type { CreateHomeRequest, HomeData, UpdateHomeRequest } from '$lib/models/Home';
 import type { Language } from '$lib/models/Language';
 import { from } from 'rxjs';
@@ -6,7 +6,7 @@ import type { CreateServiceRequest, ServiceData, UpdateServiceRequest } from '$l
 import type { ArticleData, CreateArticleRequest, UpdateArticleRequest } from '$lib/models/Articles';
 import type { ContactData, CreateContactRequest, UpdateContactRequest } from '$lib/models/ContactUs';
 
-const BASE_URL = 'http://localhost:1234/api/v1';
+const BASE_URL = 'http://localhost:8081/api/v1';
 const ADMIN_URL = `${BASE_URL}/admin`;
 const TIMEOUT = 5000;
 
@@ -60,15 +60,42 @@ export const Members = {
 				body: JSON.stringify(req),
 				signal: AbortSignal.timeout(TIMEOUT)
 			}
-		).then(res => res.json())
-			.then((json: Object) => {
-				if ('id' in req) {
+		).then(res => {
+			if (method === 'POST') {
+				let id = res.json()
+					.then(json => {
+						if ('id' in json) {
+							return json.id as string;
+						}
+
+						return null;
+					});
+				return id;
+			}
+		})
+			.then(e => {
+				if (method === 'PUT' && 'id' in req) {
 					return req.id;
-				} else if ('id' in json) {
-					return json.id as string;
+				} else if (e) {
+					return e;
+				} else {
+					return null;
 				}
-				return null;
 			});
+
+		return from(request);
+	},
+	retrieve: (id: string, language: Language) => {
+		const request = fetch(`${BASE_URL}/members/${id}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept-Language': language
+			},
+			signal: AbortSignal.timeout(TIMEOUT)
+		})
+			.then(res => res.json())
+			.then(res => 'member' in res ? res.member as MemberData : null);
 
 		return from(request);
 	}

@@ -20,7 +20,6 @@
 				startWithTap(() => isLoading = true),
 				finalize(() => isLoading = false),
 				tap(e => {
-					console.log(e);
 					data = e;
 				})
 			)

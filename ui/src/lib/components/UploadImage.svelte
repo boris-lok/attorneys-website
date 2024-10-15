@@ -4,23 +4,35 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { BehaviorSubject } from 'rxjs';
 
+	// The avatarUrl that displays the avatar
+	export let avatarUrl = '';
+	// The flag is used to indicate that user is dragging
 	let isDragging = false;
+	// The image is used to display
 	let image: HTMLElement;
+	// The event dispatcher to let parent component handle the event
 	const dispatch = createEventDispatcher();
-	let hasImage = false;
+	// The flag is used to indicate that user has selected an image
+	let hasImage = avatarUrl !== '';
+	// The file selected by the user
 	let file = new BehaviorSubject<File | undefined>(undefined);
 
 	onMount(() => {
+		// listen to file has been changed
 		const disposer = file.subscribe({
 			next: (f) => {
 				hasImage = !!f;
-				console.log(`change`);
 				dispatch('change', {
 					file: f
 				});
 			}
 		});
 
+		if (avatarUrl !== '') {
+			image.setAttribute('src', `/images/${avatarUrl}`);
+		}
+
+		// disposer is responsible for the component has been removed
 		return () => {
 			disposer.unsubscribe();
 		};
@@ -43,6 +55,7 @@
 		isDragging = true;
 	}
 
+	// Handle file drag leave event
 	function handleDragLeave(e: DragEvent) {
 		e.preventDefault();
 		isDragging = false;

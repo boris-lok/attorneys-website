@@ -38,7 +38,7 @@
 					<div class="bg"></div>
 					<a href="/members/{member.id}">
 						{#if member.avatar}
-							<Avatar avatar={member.avatar} />
+							<Avatar avatar={member.avatar} regularSize={64} />
 						{:else}
 							<span class="material-icon">account_circle</span>
 						{/if}
@@ -129,7 +129,7 @@
       gap: 1rem;
 
       .member-card {
-        min-width: 18rem;
+        min-width: 22rem;
 
         a {
           flex-direction: row;

@@ -77,7 +77,7 @@
       padding: 0 10%;
       max-width: 1024px;
       overflow: clip;
-			margin: 0 auto;
+      margin: 0 auto;
 
       h1 {
         padding: 0 0 1rem 0;

@@ -2,6 +2,7 @@
 	import type { AvatarData } from '$lib/models/Member';
 
 	export let avatar: AvatarData | string;
+	export let regularSize = 96;
 
 	const debug = import.meta.env.VITE_DEBUG === 'true';
 
@@ -19,16 +20,17 @@
 		{#if typeof avatar !== 'string'}
 			<source media="(min-width: 768px)" srcset={largeImage} width="256" height="256">
 		{/if}
-		<img alt="" src={smallImage} width="64" height="64">
+		<img alt="" height={regularSize > 96 ? 96 : regularSize} src={smallImage}
+				 width={regularSize > 96 ? 96: regularSize}>
 	</picture>
 </div>
 
 <style lang="scss">
-	.avatar {
-		overflow: clip;
+  .avatar {
+    overflow: clip;
 
-		img {
-			border-radius: 50%;
-		}
-	}
+    img {
+      border-radius: 50%;
+    }
+  }
 </style>

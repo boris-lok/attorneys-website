@@ -96,18 +96,18 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-			max-height: 12rem;;
-			overflow: auto;
+      max-height: 12rem;;
+      overflow: auto;
 
       .content-section {
         position: relative;
-				padding: 0.5rem 1rem;
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				margin: 0.5rem 0.5rem;
-				border-radius: 4px;
-				box-shadow: 0 0 4px 0 $deep-grey;
+        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0.5rem 0.5rem;
+        border-radius: 4px;
+        box-shadow: 0 0 4px 0 $deep-grey;
 
         .content-title {
           width: calc(100% - 40px);
@@ -156,7 +156,7 @@
         overflow-y: scroll;
 
         .content-section {
-					min-width: 350px;
+          min-width: 350px;
         }
       }
     }

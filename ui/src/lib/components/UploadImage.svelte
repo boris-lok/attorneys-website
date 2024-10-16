@@ -3,9 +3,11 @@
 	import iterate from 'iterare';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { BehaviorSubject } from 'rxjs';
+	import type { AvatarData } from '$lib/models/Member';
+	import Avatar from '$lib/components/Avatar.svelte';
 
 	// The avatarUrl that displays the avatar
-	export let avatarUrl = '';
+	export let avatarData: AvatarData | null = null;
 	// The flag is used to indicate that user is dragging
 	let isDragging = false;
 	// The image is used to display
@@ -13,7 +15,7 @@
 	// The event dispatcher to let parent component handle the event
 	const dispatch = createEventDispatcher();
 	// The flag is used to indicate that user has selected an image
-	let hasImage = avatarUrl !== '';
+	let hasImage = false;
 	// The file selected by the user
 	let file = new BehaviorSubject<File | undefined>(undefined);
 
@@ -27,10 +29,6 @@
 				});
 			}
 		});
-
-		if (avatarUrl !== '') {
-			image.setAttribute('src', `/images/${avatarUrl}`);
-		}
 
 		// disposer is responsible for the component has been removed
 		return () => {
@@ -73,6 +71,7 @@
 
 	function onInputChanged(e: Event) {
 		const files = (e.target as HTMLInputElement)?.files ?? ([] as File[]);
+		avatarData = null;
 		handleInputFiles(files);
 	}
 
@@ -88,13 +87,19 @@
 		file.next(newFile);
 	}
 
+	// delete the image that user has selected
 	function onDeleteClicked() {
 		file.next(undefined);
+	}
+
+	// delete the avatar data
+	function onAvatarDeleteButtonClicked() {
+		avatarData = null;
 	}
 </script>
 
 <div class="image-wrapper">
-	{#if !hasImage}
+	{#if !hasImage && avatarData === null}
 		<div class="dropzone-wrapper" on:drop={handleDrop} on:dragover={handleDragOver} on:dragleave={handleDragLeave}
 				 class:is-dragging={isDragging}>
 			<div class="dropzone-desc">
@@ -104,9 +109,15 @@
 
 		</div>
 	{/if}
+	{#if avatarData}
+		<div class="avatar-section">
+			<Avatar avatar={avatarData} />
+			<i class="material-icon" on:click={onAvatarDeleteButtonClicked}>delete</i>
+		</div>
+	{/if}
 	{#if hasImage}
 		<div class="preview-zone-wrapper">
-			<img src="" bind:this={image} alt="Preview" width="128" height="128">
+			<img src="" bind:this={image} alt="avatarPreview" width="128" height="128">
 			<i class="material-icon" on:click={onDeleteClicked}>delete</i>
 		</div>
 	{/if}
@@ -122,6 +133,21 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    .avatar-section {
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    i {
+      border-radius: 50%;
+      cursor: pointer;
+      color: $deep-red;
+      box-shadow: 0 0 4px 1px $grey;
+      padding: 6px;
+    }
 
     .dropzone-wrapper {
       border: 2px dashed $grey;
@@ -167,11 +193,6 @@
         position: absolute;
         top: calc(50% - 24px + 3px);
         right: -64px;
-        padding: 6px;
-        border-radius: 50%;
-        cursor: pointer;
-        color: $deep-red;
-        box-shadow: 0 0 4px 1px $grey;
       }
     }
   }

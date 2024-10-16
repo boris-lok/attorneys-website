@@ -9,6 +9,7 @@
 	import type { Language } from '$lib/models/Language';
 	import { startWithTap } from '$lib/utils';
 	import { finalize, mergeMap, of } from 'rxjs';
+	import type { AvatarData } from '$lib/models/Member';
 
 	// If id is not empty, we update the member resource by id.
 	// Otherwise, we create a new member
@@ -18,7 +19,7 @@
 	// The description of the staff member
 	export let description = '';
 	// The avatar URL of the staff member
-	export let avatarUrl = '';
+	export let avatarData: AvatarData | null;
 	// The updated avatar of the staff member
 	let avatar: File | null = null;
 	// isLoading is a flag that indicates we are loading a resource from API.
@@ -90,7 +91,7 @@
 </script>
 
 <div class="wrapper">
-	<UploadImage on:change={onImageChanged} avatarUrl={avatarUrl} />
+	<UploadImage on:change={onImageChanged} avatarData={avatarData} />
 	<div class="form-wrapper">
 		<div class="edit-section">
 			<Input label={$t('member.name')} name="name" on:input={onNameChanged} value={name} />

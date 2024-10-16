@@ -39,7 +39,7 @@
 	<Loading />
 {:else if data}
 	<CreateOrEditMember id={data.id} name={data.data.name} description={data.data.description}
-											avatarUrl={data.avatar?.small_image ?? ""} />
+											avatarData={data.avatar ?? null} />
 {:else}
 	<p>{$t('no_data_available')}</p>
 {/if}

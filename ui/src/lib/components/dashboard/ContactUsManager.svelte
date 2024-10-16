@@ -6,6 +6,7 @@
 	import { startWithTap } from '$lib/utils';
 	import { finalize, tap } from 'rxjs';
 	import { t } from 'svelte-i18n';
+	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
 	let language: Language = 'zh';
 
@@ -32,7 +33,9 @@
 </script>
 
 <div class="wrapper">
+
 	<h2 class="title">{$t('contact_us')}</h2>
+
 	<div class="function-tools-wrapper">
 		{#if hasData && data}
 			<a href="/admin/contact/edit/{data.id}" class="btn blue">
@@ -46,9 +49,12 @@
 			</a>
 		{/if}
 	</div>
-	{#if isLoading}
-		<p>{$t('loading')}...</p>
-	{:else if data}
+
+	<div class="loading-wrapper">
+		<SpinningLoading isLoading={isLoading} />
+	</div>
+
+	{#if data}
 		<div class="contact-info">
 			<div class="block">
 				<p><strong>{$t('address')}:</strong>&nbsp;{data.data.address}</p>
@@ -76,6 +82,11 @@
       text-align: center;
       margin: 0;
       border-bottom: 1px solid $black;
+    }
+
+    .loading-wrapper {
+      display: flex;
+      justify-content: center;
     }
 
     .function-tools-wrapper {

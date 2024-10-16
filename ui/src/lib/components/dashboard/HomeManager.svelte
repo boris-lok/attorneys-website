@@ -5,6 +5,7 @@
 	import { finalize, tap } from 'rxjs';
 	import { t } from 'svelte-i18n';
 	import SvelteMarkdown from 'svelte-markdown';
+	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
 	// isLoading is a flag that indicates we are loading a resource from API.
 	let isLoading = false;
@@ -33,7 +34,9 @@
 </script>
 
 <div class="wrapper">
+
 	<h2 class="title">{$t('home')}</h2>
+
 	<div class="function-tools-wrapper">
 		{#if hasData}
 			<a href="/admin/home/edit/{id}" class="btn blue">
@@ -47,9 +50,12 @@
 			</a>
 		{/if}
 	</div>
-	{#if isLoading}
-		<p>{$t('loading')}...</p>
-	{:else if content.length > 0}
+
+	<div class="loading-wrapper">
+		<SpinningLoading isLoading={isLoading} />
+	</div>
+
+	{#if content.length > 0}
 		<SvelteMarkdown source={content} />
 	{:else}
 		<p class="no-data">{$t('no_data_available')}</p>
@@ -67,6 +73,11 @@
       text-align: center;
       margin: 0;
       border-bottom: 1px solid $black;
+    }
+
+    .loading-wrapper {
+      display: flex;
+      justify-content: center;
     }
 
     .function-tools-wrapper {

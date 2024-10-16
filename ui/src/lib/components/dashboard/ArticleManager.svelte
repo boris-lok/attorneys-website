@@ -6,6 +6,7 @@
 	import { startWithTap } from '$lib/utils';
 	import { finalize, tap } from 'rxjs';
 	import type { ArticleData } from '$lib/models/Articles';
+	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
 	// isLoading is a flag that indicates we are loading a resource from API.
 	let isLoading = false;
@@ -28,16 +29,21 @@
 </script>
 
 <div class="wrapper">
+
 	<h2 class="title">{$t('articles')}</h2>
+
 	<div class="function-tools-wrapper">
 		<a class="btn green" href="/admin/articles/create">
 			<span class="material-icon">add_circle</span>
 			<span>{$t('create')}</span>
 		</a>
 	</div>
-	{#if isLoading}
-		<p>{$t('loading')}...</p>
-	{:else if data.length > 0}
+
+	<div class="loading-wrapper">
+		<SpinningLoading isLoading={isLoading} />
+	</div>
+
+	{#if data.length > 0}
 		<div class="list-section">
 			{#each data as article, i}
 				<div class="content-section">
@@ -65,6 +71,11 @@
       text-align: center;
       margin: 0;
       border-bottom: 1px solid $black;
+    }
+
+    .loading-wrapper {
+      display: flex;
+      justify-content: center;
     }
 
     .function-tools-wrapper {

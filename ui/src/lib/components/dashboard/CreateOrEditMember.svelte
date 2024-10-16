@@ -10,6 +10,7 @@
 	import { startWithTap } from '$lib/utils';
 	import { finalize, mergeMap, of } from 'rxjs';
 	import type { AvatarData } from '$lib/models/Member';
+	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
 	// If id is not empty, we update the member resource by id.
 	// Otherwise, we create a new member
@@ -91,6 +92,10 @@
 </script>
 
 <div class="wrapper">
+	<div class="full-page-loading-wrapper" class:active={isLoading}>
+		<SpinningLoading isLoading={isLoading} />
+	</div>
+
 	<UploadImage avatarData={avatarData} on:change={onImageChanged} />
 	<div class="form-wrapper">
 		<div class="edit-section">

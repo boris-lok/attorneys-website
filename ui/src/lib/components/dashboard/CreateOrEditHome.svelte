@@ -7,6 +7,7 @@
 	import { startWithTap } from '$lib/utils';
 	import { finalize } from 'rxjs';
 	import { browser } from '$app/environment';
+	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
 	export let id = '';
 	export let content = '';
@@ -59,6 +60,11 @@
 </script>
 
 <div class="create-edit-home-wrapper">
+
+	<div class="full-page-loading-wrapper" class:active={isLoading}>
+		<SpinningLoading isLoading={isLoading} />
+	</div>
+
 	<div class="edit-section">
 		<TextArea data={content} label={$t('home')} on:input={onContentChanged} />
 	</div>

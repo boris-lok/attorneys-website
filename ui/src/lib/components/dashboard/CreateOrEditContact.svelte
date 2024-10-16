@@ -6,6 +6,7 @@
 	import { Contacts } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
 	import { finalize } from 'rxjs';
+	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
 	// If id is not empty, we update the contact resource by id.
 	// Otherwise, we create a new contact information
@@ -87,6 +88,11 @@
 </script>
 
 <div class="contact-form">
+
+	<div class="full-page-loading-wrapper" class:active={isLoading}>
+		<SpinningLoading isLoading={isLoading} />
+	</div>
+
 	<Input label={$t('address')} name="name" on:input={onAddressChanged} value={address} />
 	<Input label={$t('phone')} name="name" on:input={onPhoneChanged} value={phone} />
 	<Input label={$t('email')} name="name" on:input={onEmailChanged} value={email} />

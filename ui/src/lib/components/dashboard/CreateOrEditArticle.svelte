@@ -9,6 +9,7 @@
 	import { Articles } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
 	import { finalize } from 'rxjs';
+	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
 	// If id is not empty, we update the contact resource by id.
 	// Otherwise, we create a new service
@@ -70,6 +71,11 @@
 </script>
 
 <div class="form-wrapper">
+
+	<div class="full-page-loading-wrapper" class:active={isLoading}>
+		<SpinningLoading isLoading={isLoading} />
+	</div>
+
 	<div class="edit-section">
 		<Input label={$t('article.title')} name="name" on:input={onTitleChanged} value={title} />
 		<TextArea data={content} label={$t('article.data')} on:input={onContentChanged} />

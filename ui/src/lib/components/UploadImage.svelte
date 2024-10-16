@@ -127,7 +127,6 @@
 <style lang="scss">
   .image-wrapper {
     width: 100%;
-    height: 144px;
     overflow: clip;
     position: relative;
     display: flex;

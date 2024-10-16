@@ -94,6 +94,23 @@ p {
   }
 }
 
+.full-page-loading-wrapper {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  z-index: $layout-loading-index;
+  position: fixed;
+  background-color: rgba(0, 0, 0, .025);
+  backdrop-filter: blur(.2rem);
+
+  &.active {
+    display: flex;
+  }
+}
+
 
 /* TODO: Just a workaround to adjust the Markdown component style. */
 .add-margin-to-listview {

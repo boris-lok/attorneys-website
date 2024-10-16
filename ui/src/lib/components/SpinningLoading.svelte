@@ -11,12 +11,12 @@
 
 <style lang="scss">
   .lds-ring {
-		position: relative;
-		width: 80px;
-		height: 80px;
-		display: none;
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: none;
 
-		&.active {
+    &.active {
       display: block;
     }
   }

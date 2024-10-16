@@ -61,7 +61,7 @@ where
     let large_image_path = resize_image_and_save_it(
         image_util.clone(),
         &req.data,
-        Size::new(128, 128),
+        Size::new(256, 256),
         out.as_ref(),
         member_id.as_str(),
     )
@@ -70,7 +70,7 @@ where
     let small_image_path = resize_image_and_save_it(
         image_util.clone(),
         &req.data,
-        Size::new(48, 48),
+        Size::new(96, 96),
         out.as_ref(),
         member_id.as_str(),
     )

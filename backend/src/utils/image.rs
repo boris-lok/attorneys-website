@@ -30,7 +30,7 @@ fn resize_image(data: &[u8], size: Size) -> anyhow::Result<DynamicImage> {
     if w <= size.width && h <= size.height {
         return Ok(img);
     }
-    Ok(img.resize(size.width, size.height, FilterType::CatmullRom))
+    Ok(img.resize_exact(size.width, size.height, FilterType::CatmullRom))
 }
 
 #[derive(Debug)]

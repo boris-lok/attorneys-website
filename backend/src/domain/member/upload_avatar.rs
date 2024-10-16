@@ -58,12 +58,14 @@ where
         Ok(_) => {}
     };
 
+    let image_id = uuid::Uuid::new_v4().to_string();
+
     let large_image_path = resize_image_and_save_it(
         image_util.clone(),
         &req.data,
         Size::new(256, 256),
         out.as_ref(),
-        member_id.as_str(),
+        image_id.as_str(),
     )
     .await?;
 
@@ -72,7 +74,7 @@ where
         &req.data,
         Size::new(96, 96),
         out.as_ref(),
-        member_id.as_str(),
+        image_id.as_str(),
     )
     .await?;
 

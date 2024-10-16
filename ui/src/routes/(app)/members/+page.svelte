@@ -6,12 +6,18 @@
 	import { finalize, tap } from 'rxjs';
 	import Loading from '$lib/components/Loading.svelte';
 	import { t } from 'svelte-i18n';
+	import type { Language } from '$lib/models/Language';
+	import Avatar from '$lib/components/Avatar.svelte';
 
+	// The members data
 	let members: SimpleMember[] = [];
+	// The flag that indicates the page is loading
 	let isLoading = false;
+	// The language that we want to fetch
+	let language: Language = 'zh';
 
 	onMount(() => {
-		Members.list()
+		Members.list(language)
 			.pipe(
 				startWithTap(() => isLoading = true),
 				finalize(() => isLoading = false),
@@ -30,8 +36,9 @@
 			{#each members as member}
 				<div class="member-card">
 					<div class="bg"></div>
-					<a href="/members/{member.member_id}">
+					<a href="/members/{member.id}">
 						{#if member.avatar}
+							<Avatar avatar={member.avatar} />
 						{:else}
 							<span class="material-icon">account_circle</span>
 						{/if}

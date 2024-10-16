@@ -29,11 +29,12 @@ async fn resize_image_and_save_it(
     id: &str,
 ) -> Result<String, Error> {
     let image = util.resize(data, size).map_err(|_| Error::ImageProcess)?;
-    let path = format!("{}/{}_{}_{}.png", out, id, image.width(), image.height());
+    let name = format!("{}_{}_{}.png", id, image.width(), image.height());
+    let path = format!("{}/{}", out, name.as_str());
     util.save_to_file(path.as_str(), image)
         .await
         .map_err(|_| Error::CreateImage)?;
-    Ok(path)
+    Ok(name)
 }
 pub async fn execute<IUnitOfWork>(
     uow: Mutex<IUnitOfWork>,
@@ -83,7 +84,7 @@ where
 
     let avatar_id = match lock
         .avatar_repository()
-        .insert(member_id.clone(), avatar_json)
+        .save(member_id.clone(), avatar_json)
         .await
     {
         Ok(id) => Ok(id),

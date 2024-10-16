@@ -23,7 +23,7 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - upload_folder:/usr/local/uploads
+      - upload_folder:/app/uploads
     networks:
       - app-network
 

@@ -4,4 +4,4 @@ database:
   port: 5432
 application:
   host: 0.0.0.0
-  upload_folder: /usr/local/upload
+  upload_folder: /app/uploads/images

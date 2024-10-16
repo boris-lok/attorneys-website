@@ -13,7 +13,7 @@ pub enum InsertError {
 }
 #[async_trait::async_trait]
 pub trait IAvatarRepository {
-    async fn insert(
+    async fn save(
         &self,
         id: ResourceID,
         avatar_json: AvatarJson,
@@ -54,7 +54,7 @@ impl InMemoryAvatarRepository {
 
 #[async_trait::async_trait]
 impl IAvatarRepository for InMemoryAvatarRepository {
-    async fn insert(
+    async fn save(
         &self,
         id: ResourceID,
         avatar_json: AvatarJson,
@@ -91,7 +91,7 @@ impl<'tx> SqlxAvatarRepository<'tx> {
 
 #[async_trait::async_trait]
 impl<'tx> IAvatarRepository for SqlxAvatarRepository<'tx> {
-    async fn insert(
+    async fn save(
         &self,
         id: ResourceID,
         avatar_json: AvatarJson,
@@ -100,8 +100,9 @@ impl<'tx> IAvatarRepository for SqlxAvatarRepository<'tx> {
         let mut lock = conn_ptr.lock().await;
         let conn = lock.acquire().await.unwrap();
 
-        sqlx::query("INSERT INTO \"avatar\" (id, data) VALUES ($1, $2); ")
+        sqlx::query("insert into \"avatar\" (id, data) values ($1, $2) on conflict (id) do update set data = $3;")
             .bind(id.as_str())
+            .bind(avatar_json.clone().get())
             .bind(avatar_json.get())
             .execute(conn)
             .await

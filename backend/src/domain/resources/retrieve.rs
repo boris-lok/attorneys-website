@@ -162,7 +162,7 @@ mod tests {
             Some(avatar) => {
                 let json = AvatarJson::try_from(avatar).unwrap();
                 uow.avatar_repository()
-                    .insert(resource_id.clone(), json)
+                    .save(resource_id.clone(), json)
                     .await
                     .unwrap();
             }

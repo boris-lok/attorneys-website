@@ -52,7 +52,7 @@
         transform: translateX(8px) translateY(-12px);
         font-size: 0.75em;
         padding: 0 16px;
-        background-color: $white;
+        background-color: white;
         border-radius: 4px;
       }
 

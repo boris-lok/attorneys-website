@@ -26,5 +26,6 @@
   "member.name": "名字",
   "member.description": "經歷",
   "save.success": "儲存成功",
-  "save.failed": "儲存失敗"
+  "save.failed": "儲存失敗",
+  "login": "登入"
 }

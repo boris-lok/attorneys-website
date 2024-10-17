@@ -26,5 +26,6 @@
   "member.name": "Name",
   "member.description": "Description",
   "save.success": "Save successfully",
-  "save.failed": "Save failed"
+  "save.failed": "Save failed",
+  "login": "Login"
 }

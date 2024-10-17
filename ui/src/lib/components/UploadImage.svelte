@@ -117,7 +117,7 @@
 	{/if}
 	{#if hasImage}
 		<div class="preview-zone-wrapper">
-			<img src="" bind:this={image} alt="avatarPreview" width="128" height="128">
+			<img src="" bind:this={image} alt="avatarPreview" width="256" height="256">
 			<i class="material-icon" on:click={onDeleteClicked}>delete</i>
 		</div>
 	{/if}
@@ -136,7 +136,7 @@
     .avatar-section {
       display: flex;
       flex-direction: row;
-      gap: 1rem;
+      gap: 2rem;
       align-items: center;
     }
 
@@ -158,6 +158,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      max-width: 512px;
 
       &:hover, &.is-dragging {
         border-color: $light-orange;
@@ -185,13 +186,20 @@
     }
 
     .preview-zone-wrapper {
-      height: 128px;
       position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 2rem;
+
+      img {
+        border-radius: 50%;
+        overflow: clip;
+      }
 
       i {
-        position: absolute;
-        top: calc(50% - 24px + 3px);
-        right: -64px;
+        width: 36px;
+        height: 36px;
       }
     }
   }

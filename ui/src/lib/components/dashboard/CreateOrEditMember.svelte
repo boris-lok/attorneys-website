@@ -11,6 +11,7 @@
 	import { finalize, mergeMap, of } from 'rxjs';
 	import type { AvatarData } from '$lib/models/Member';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
+	import { showNotification } from '../../../stores/notificationStore';
 
 	// If id is not empty, we update the member resource by id.
 	// Otherwise, we create a new member
@@ -78,7 +79,21 @@
 				})
 			)
 			.subscribe({
-				error: console.error
+				next: () => {
+					showNotification(
+						$t('save.success'),
+						'info',
+						3000
+					);
+				},
+				error: e => {
+					console.error(e);
+					showNotification(
+						$t('save.failed'),
+						'error',
+						3000
+					);
+				}
 			});
 
 	}

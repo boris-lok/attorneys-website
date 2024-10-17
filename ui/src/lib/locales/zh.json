@@ -24,5 +24,7 @@
   "article.title": "標題",
   "article.data": "文章內容",
   "member.name": "名字",
-  "member.description": "經歷"
+  "member.description": "經歷",
+  "save.success": "儲存成功",
+  "save.failed": "儲存失敗"
 }

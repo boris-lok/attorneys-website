@@ -24,5 +24,7 @@
   "article.title": "Title",
   "article.data": "Article",
   "member.name": "Name",
-  "member.description": "Description"
+  "member.description": "Description",
+  "save.success": "Save successfully",
+  "save.failed": "Save failed"
 }

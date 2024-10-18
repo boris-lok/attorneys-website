@@ -26,3 +26,11 @@ create table avatar
     data jsonb       not null,
     primary key (id)
 );
+
+CREATE TABLE users
+(
+    id            uuid NOT NULL,
+    username      TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    PRIMARY KEY (id)
+);

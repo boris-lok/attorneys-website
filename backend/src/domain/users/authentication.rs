@@ -85,8 +85,10 @@ mod tests {
         .hash_password(password.as_str().as_bytes(), &salt)
         .unwrap()
         .to_string();
+
         let username = "username".to_string();
         let secret_password = SecretBox::new(Box::new(password_hash));
+
 
         let user_repo = InMemoryUserRepository::new();
         user_repo

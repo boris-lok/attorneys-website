@@ -1,8 +1,7 @@
 -- Add down migration script here
-drop table member;
-drop table content;
-drop table avatar;
-drop table service;
-drop table home;
 
+drop table users;
+drop table avatar;
+drop table content;
+drop table resource;
 

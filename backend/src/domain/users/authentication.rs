@@ -89,7 +89,6 @@ mod tests {
         let username = "username".to_string();
         let secret_password = SecretBox::new(Box::new(password_hash));
 
-
         let user_repo = InMemoryUserRepository::new();
         user_repo
             .add_credentials(user_id.clone(), username.clone(), secret_password)

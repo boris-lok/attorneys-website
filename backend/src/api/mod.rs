@@ -35,6 +35,7 @@ pub use article::retrieve::retrieve_article;
 pub use article::update::update_article;
 
 pub use auth::login;
+pub use auth::logout;
 
 mod api_error;
 

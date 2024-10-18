@@ -1,4 +1,5 @@
 use crate::api::login::login;
+use crate::api::logout::logout;
 use crate::api::{
     create_article, create_contact, create_home, create_member, create_service, delete_article,
     delete_member, delete_service, health_check, list_articles, list_contact, list_home,
@@ -79,7 +80,9 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/articles/:id", get(retrieve_article))
         .route("/articles", get(list_articles));
 
-    let user_routes = Router::new().route("/login", post(login));
+    let user_routes = Router::new()
+        .route("/login", post(login))
+        .route("/logout", post(logout));
 
     let admin_routes = Router::new()
         .merge(admin_member_routes)

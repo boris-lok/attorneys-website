@@ -14,6 +14,12 @@ pub enum ApiError {
     BadRequest,
     #[error("Not found")]
     NotFound,
+    #[error("invalid credentials")]
+    InvalidCredentials,
+    #[error("missing bearer token")]
+    MissingBearer,
+    #[error("credentials is expired")]
+    ExpiredCredentials,
 }
 
 impl IntoResponse for ApiError {
@@ -26,6 +32,9 @@ impl IntoResponse for ApiError {
             ApiError::InternalServerError(reason) => (StatusCode::INTERNAL_SERVER_ERROR, reason),
             ApiError::BadRequest => (StatusCode::BAD_REQUEST, self.to_string()),
             ApiError::NotFound => (StatusCode::NOT_FOUND, self.to_string()),
+            ApiError::InvalidCredentials => (StatusCode::FORBIDDEN, self.to_string()),
+            ApiError::MissingBearer => (StatusCode::FORBIDDEN, self.to_string()),
+            ApiError::ExpiredCredentials => (StatusCode::FORBIDDEN, self.to_string()),
         };
 
         let payload = json!({

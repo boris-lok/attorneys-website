@@ -22,7 +22,7 @@ tokio = { version = "1.39.3", features = ["full"] }
 thiserror = "1.0.63"
 tower = "0.5.0"
 tower-http = { version = "0.6.1", features = ["cors"] }
-sqlx = { version = "0.8.2", features = ["chrono", "macros", "migrate", "postgres", "runtime-tokio-rustls"] }
+sqlx = { version = "0.8.2", features = ["chrono", "macros", "migrate", "postgres", "runtime-tokio-rustls", "uuid"] }
 chrono = { version = "0.4.38", default-features = false, features = ["serde"] }
 image = "0.25.2"
 validator = { version = "0.18.1", features = ["derive"] }
@@ -30,3 +30,5 @@ uuid = { version = "1.11.0", features = ["v4"] }
 secrecy = { version = "0.10.3", features = ["serde"] }
 argon2 = { version = "0.5.3", features = ["std"] }
 rand = "0.8.5"
+jsonwebtoken = "9.3.0"
+redis = { version = "0.27.4", features = ["tokio-comp"] }

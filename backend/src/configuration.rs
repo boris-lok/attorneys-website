@@ -1,3 +1,4 @@
+use secrecy::SecretBox;
 use serde::Deserialize;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
 
@@ -5,6 +6,7 @@ use sqlx::postgres::{PgConnectOptions, PgSslMode};
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: Application,
+    pub redis_uri: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -71,6 +73,7 @@ pub struct Application {
     pub host: String,
     pub port: u16,
     pub upload_folder: String,
+    pub jwt_secret: SecretBox<String>
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {

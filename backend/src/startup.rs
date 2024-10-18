@@ -1,3 +1,4 @@
+use crate::api::login::login;
 use crate::api::{
     create_article, create_contact, create_home, create_member, create_service, delete_article,
     delete_member, delete_service, health_check, list_articles, list_contact, list_home,
@@ -9,6 +10,7 @@ use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
 use axum::routing::{delete, get, post};
 use axum::{Extension, Router};
+use secrecy::ExposeSecret;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -19,12 +21,17 @@ use tower_http::cors::CorsLayer;
 pub struct AppState {
     pub pool: PgPool,
     pub upload_folder: Arc<String>,
+    pub jwt_secret: Arc<String>,
 }
 
 pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io::Error> {
+    let redis_client =
+        redis::Client::open(config.redis_uri.as_str()).expect("Failed to connect the redis server");
+
     let state = AppState {
         pool: get_database_connection(&config.database).await,
         upload_folder: Arc::new(config.application.upload_folder),
+        jwt_secret: Arc::new(config.application.jwt_secret.expose_secret().to_string()),
     };
     let image_util = ImageUtil {};
 
@@ -62,6 +69,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/articles/:id", get(retrieve_article))
         .route("/articles", get(list_articles));
 
+    let user_routes = Router::new().route("/login", post(login));
+
     let admin_routes = Router::new()
         .merge(admin_member_routes)
         .merge(admin_home_routes)
@@ -74,7 +83,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .merge(service_routes)
         .merge(home_routes)
         .merge(contact_routes)
-        .merge(article_routes);
+        .merge(article_routes)
+        .merge(user_routes);
 
     let app = Router::new()
         .route("/health", get(health_check))
@@ -82,6 +92,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .nest("/api/:version/", routes)
         .layer(CorsLayer::permissive())
         .layer(Extension(Arc::new(image_util)))
+        .layer(Extension(Arc::new(redis_client)))
         .with_state(state);
 
     axum::serve(listener, app.into_make_service()).await

@@ -43,10 +43,10 @@ pub async fn validate_credentials(
     })
     .await
     .map_err(|e| Error::Unknown(e.to_string()))?
-    .map_err(|e| Error::InvalidCredentials)?;
+    .map_err(|_| Error::InvalidCredentials)?;
 
     id.ok_or_else(|| anyhow!("Unknown username"))
-        .map_err(|e| Error::InvalidCredentials)
+        .map_err(|_| Error::InvalidCredentials)
 }
 
 fn verify_password_hash(
@@ -118,7 +118,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_should_be_invalid_password_otherwise() {
-        let (repo, user_id, username, password) = helper().await;
+        let (repo, _, username, _) = helper().await;
         let repo = Mutex::new(repo);
 
         let credentials = Credentials {

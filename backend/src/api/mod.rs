@@ -1,6 +1,9 @@
+use crate::api::api_error::ApiError;
+use crate::uow::IResourceUnitOfWork;
 use axum::http::StatusCode;
-pub use health::health_check;
 use tokio::sync::Mutex;
+
+pub use health::health_check;
 
 pub use home::create::create_home;
 pub use home::list::list_home;
@@ -25,13 +28,13 @@ pub use contact::list::list_contact;
 pub use contact::retrieve::retrieve_contact;
 pub use contact::update::update_contact;
 
-use crate::api::api_error::ApiError;
-use crate::uow::IResourceUnitOfWork;
 pub use article::create::create_article;
 pub use article::delete::delete_article;
 pub use article::list::list_articles;
 pub use article::retrieve::retrieve_article;
 pub use article::update::update_article;
+
+pub use auth::login;
 
 mod api_error;
 
@@ -46,6 +49,8 @@ mod service;
 mod article;
 
 mod contact;
+
+mod auth;
 
 /// A handler for updating the resource
 async fn update_resource_handler(

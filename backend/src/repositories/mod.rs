@@ -11,7 +11,9 @@ pub use resource_repository::InMemoryResourceRepository;
 pub use resource_repository::SqlxResourceRepository;
 
 pub use user_repository::IUserRepository;
+#[cfg(test)]
 pub use user_repository::InMemoryUserRepository;
+pub use user_repository::SqlxUserRepository;
 
 mod avatar_repository;
 

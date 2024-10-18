@@ -467,6 +467,12 @@ impl TryFrom<String> for UserID {
     }
 }
 
+impl From<uuid::Uuid> for UserID {
+    fn from(value: uuid::Uuid) -> Self {
+        UserID(value)
+    }
+}
+
 impl std::fmt::Display for UserID {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0.to_string())

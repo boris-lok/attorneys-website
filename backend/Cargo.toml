@@ -27,3 +27,6 @@ chrono = { version = "0.4.38", default-features = false, features = ["serde"] }
 image = "0.25.2"
 validator = { version = "0.18.1", features = ["derive"] }
 uuid = { version = "1.11.0", features = ["v4"] }
+secrecy = { version = "0.10.3", features = ["serde"] }
+argon2 = { version = "0.5.3", features = ["std"] }
+rand = "0.8.5"

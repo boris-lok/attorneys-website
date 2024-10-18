@@ -452,3 +452,23 @@ pub struct Page {
     pub page: u32,
     pub size: u32,
 }
+
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+pub struct UserID(uuid::Uuid);
+
+impl TryFrom<String> for UserID {
+    type Error = ();
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match uuid::Uuid::try_parse(value.as_str()) {
+            Ok(id) => Ok(UserID(id)),
+            Err(_) => Err(()),
+        }
+    }
+}
+
+impl std::fmt::Display for UserID {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.to_string())
+    }
+}

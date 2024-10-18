@@ -1,4 +1,5 @@
 use crate::api::api_error::ApiError;
+use crate::api::auth::Claims;
 use crate::domain::entities::{HomeData, Resource};
 use crate::startup::AppState;
 use crate::uow::InDatabase;
@@ -21,6 +22,7 @@ pub(crate) struct CreateHomeResponse {
 }
 
 pub async fn create_home(
+    _: Claims,
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<CreateHomeRequest>, ApiError>,
 ) -> Result<Json<CreateHomeResponse>, ApiError> {

@@ -1,4 +1,5 @@
 use crate::api::api_error::ApiError;
+use crate::api::auth::Claims;
 use crate::domain::entities::{ContactData, Resource};
 use crate::startup::AppState;
 use crate::uow::InDatabase;
@@ -23,6 +24,7 @@ pub struct CreateContactResponse {
 }
 
 pub async fn create_contact(
+    _: Claims,
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<CreateContactRequest>, ApiError>,
 ) -> Result<Json<CreateContactResponse>, ApiError> {

@@ -1,4 +1,5 @@
 use crate::api::api_error::ApiError;
+use crate::api::auth::Claims;
 use crate::domain::entities::ResourceType;
 use crate::domain::member::upload_avatar::{execute, Error, Request};
 use crate::startup::AppState;
@@ -11,6 +12,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 pub async fn upload_member_avatar(
+    _: Claims,
     State(state): State<AppState>,
     Extension(image_util): Extension<Arc<ImageUtil>>,
     Path(params): Path<HashMap<String, String>>,

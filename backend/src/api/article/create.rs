@@ -1,4 +1,5 @@
 use crate::api::api_error::ApiError;
+use crate::api::auth::Claims;
 use crate::domain::entities::{ArticleData, Resource};
 use crate::startup::AppState;
 use crate::uow::InDatabase;
@@ -22,6 +23,7 @@ pub(crate) struct CreateArticleResponse {
 }
 
 pub async fn create_article(
+    _: Claims,
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<CreateArticleRequest>, ApiError>,
 ) -> Result<Json<CreateArticleResponse>, ApiError> {

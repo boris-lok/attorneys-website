@@ -1,4 +1,5 @@
 use crate::api::api_error::ApiError;
+use crate::api::auth::Claims;
 use crate::api::update_resource_handler;
 use crate::domain::entities::{Resource, ServiceData};
 use crate::startup::AppState;
@@ -19,6 +20,7 @@ pub(crate) struct UpdateServiceRequest {
 }
 
 pub async fn update_service(
+    _: Claims,
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<UpdateServiceRequest>, ApiError>,
 ) -> Result<StatusCode, ApiError> {

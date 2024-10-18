@@ -21,6 +21,7 @@ pub struct InMemoryUserRepository {
     credentials: Mutex<HashMap<UserID, (String, SecretBox<String>)>>,
 }
 
+#[cfg(test)]
 impl InMemoryUserRepository {
     pub fn new() -> Self {
         Self {
@@ -36,7 +37,6 @@ impl InMemoryUserRepository {
         }
     }
 
-    #[cfg(test)]
     pub async fn add_credentials(&self, id: UserID, username: String, password: SecretBox<String>) {
         let mut lock = self.credentials.lock().await;
         lock.insert(id, (username, password));

@@ -133,4 +133,22 @@ mod tests {
             _ => unreachable!(),
         }
     }
+
+    #[tokio::test]
+    async fn it_should_return_an_unknown_error_when_unexpected_error_encountered() {
+        let (repo, _, username, password) = helper().await;
+        let repo = Mutex::new(repo.with_error());
+
+        let credentials = Credentials {
+            username: username.clone(),
+            password: SecretBox::new(Box::new(password)),
+        };
+
+        let res = validate_credentials(credentials, repo).await;
+
+        match res {
+            Err(Error::Unknown(_)) => {}
+            _ => unreachable!(),
+        }
+    }
 }

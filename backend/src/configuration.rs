@@ -73,7 +73,7 @@ pub struct Application {
     pub host: String,
     pub port: u16,
     pub upload_folder: String,
-    pub jwt_secret: SecretBox<String>
+    pub jwt_secret: SecretBox<String>,
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {

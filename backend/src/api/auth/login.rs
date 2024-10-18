@@ -63,7 +63,7 @@ where
             .and_then(|value| value.to_str().ok())
             .and_then(|value| value.split_once(' '))
             .context("Missing Authorization header")
-            .map_err(|e| ApiError::MissingBearer)?
+            .map_err(|_| ApiError::MissingBearer)?
             .1;
 
         let decoding_key = jsonwebtoken::DecodingKey::from_secret(state.jwt_secret.as_bytes());

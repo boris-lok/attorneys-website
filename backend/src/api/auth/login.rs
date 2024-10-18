@@ -66,11 +66,9 @@ where
             .map_err(|_| ApiError::MissingBearer)?
             .1;
 
-        let decoding_key = jsonwebtoken::DecodingKey::from_secret(state.jwt_secret.as_bytes());
-
         let token_data = jsonwebtoken::decode::<Claims>(
             bearer,
-            &decoding_key,
+            &state.jwt_decoding_key,
             &jsonwebtoken::Validation::default(),
         )
         .context("Failed to decode jwt")
@@ -131,7 +129,7 @@ pub async fn login(
             let token = jsonwebtoken::encode(
                 &jsonwebtoken::Header::default(),
                 &claims,
-                &jsonwebtoken::EncodingKey::from_secret(&state.jwt_secret.as_bytes()),
+                &state.jwt_encoding_key,
             )
             .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 

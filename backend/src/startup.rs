@@ -10,6 +10,7 @@ use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
 use axum::routing::{delete, get, post};
 use axum::{Extension, Router};
+use jsonwebtoken::{DecodingKey, EncodingKey};
 use secrecy::ExposeSecret;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -17,21 +18,30 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
     pub upload_folder: Arc<String>,
-    pub jwt_secret: Arc<String>,
+    pub jwt_encoding_key: Arc<EncodingKey>,
+    pub jwt_decoding_key: Arc<DecodingKey>,
 }
 
 pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io::Error> {
     let redis_client =
         redis::Client::open(config.redis_uri.as_str()).expect("Failed to connect the redis server");
 
+    let jwt_encoding_key = Arc::new(EncodingKey::from_secret(
+        config.application.jwt_secret.expose_secret().as_bytes(),
+    ));
+    let jwt_decoding_key = Arc::new(DecodingKey::from_secret(
+        config.application.jwt_secret.expose_secret().as_bytes(),
+    ));
+
     let state = AppState {
         pool: get_database_connection(&config.database).await,
         upload_folder: Arc::new(config.application.upload_folder),
-        jwt_secret: Arc::new(config.application.jwt_secret.expose_secret().to_string()),
+        jwt_decoding_key,
+        jwt_encoding_key,
     };
     let image_util = ImageUtil {};
 

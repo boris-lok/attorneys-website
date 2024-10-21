@@ -3,6 +3,9 @@
 	import Input from '$lib/components/Input.svelte';
 	import { t } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
+	import { Users } from '$lib/services';
+	import { startWithTap } from '$lib/utils';
+	import { finalize, tap } from 'rxjs';
 
 	// login information
 	let username = '';
@@ -49,11 +52,15 @@
 			return;
 		}
 
-		user.set(
-			JSON.stringify({
-				username: username
-			})
-		);
+		Users.login(username, password)
+			.pipe(
+				startWithTap(() => isLoading = true),
+				finalize(() => isLoading = false),
+				tap(e => {
+					user.set(e);
+				})
+			)
+			.subscribe()
 
 		goto('/admin/dashboard');
 	}

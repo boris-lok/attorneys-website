@@ -1,4 +1,6 @@
 import { get, writable } from 'svelte/store';
+import Cookies from 'js-cookie';
+import type { LoginResponse } from '$lib/models/User';
 
 const createWritableStore = (key: string, initial_value: any) => {
 	const { subscribe, set } = writable(initial_value);
@@ -7,18 +9,18 @@ const createWritableStore = (key: string, initial_value: any) => {
 		subscribe,
 		set,
 		useLocalStorage: () => {
-			const json = localStorage.getItem(key);
-			if (json && json !== 'null') {
-				set(json);
+			const u = Cookies.get(key);
+			if (u && u !== '') {
+				set(JSON.parse(u) as LoginResponse);
 			}
 
 			subscribe(current => {
-				localStorage.setItem(key, current);
+				Cookies.set(key, JSON.stringify(current), { expires: 7 });
 			});
 		},
 		remove: () => {
 			user.set(null);
-			localStorage.removeItem(key);
+			Cookies.remove(key);
 		},
 		get: () => {
 			return get(user);

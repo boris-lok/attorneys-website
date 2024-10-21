@@ -1,10 +1,12 @@
 import type { CreateMemberRequest, MemberData, SimpleMember, UpdateMemberRequest } from '$lib/models/Member';
 import type { CreateHomeRequest, HomeData, UpdateHomeRequest } from '$lib/models/Home';
 import type { Language } from '$lib/models/Language';
-import { from } from 'rxjs';
+import { from, throwError } from 'rxjs';
 import type { CreateServiceRequest, ServiceData, UpdateServiceRequest } from '$lib/models/Services';
 import type { ArticleData, CreateArticleRequest, UpdateArticleRequest } from '$lib/models/Articles';
 import type { ContactData, CreateContactRequest, UpdateContactRequest } from '$lib/models/ContactUs';
+import type { LoginResponse } from '$lib/models/User';
+import { user } from '../stores/userStore';
 
 const BASE_URL = 'http://localhost:8081/api/v1';
 const ADMIN_URL = `${BASE_URL}/admin`;
@@ -326,6 +328,43 @@ export const Contacts = {
 				signal: AbortSignal.timeout(TIMEOUT)
 			}
 		);
+
+		return from(request);
+	}
+};
+
+export const Users = {
+	login: (username: string, password: string) => {
+		const request = fetch(`${ADMIN_URL}/login`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				username: username,
+				password: password
+			}),
+			signal: AbortSignal.timeout(TIMEOUT)
+		})
+			.then(res => res.json())
+			.then(res => res as LoginResponse);
+
+		return from(request);
+	},
+	logout: () => {
+		const u = user.get();
+		if (!u) {
+			throw throwError(() => 'User not logged in');
+		}
+
+		const request = fetch(`${ADMIN_URL}/logout`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${u.token}`
+			},
+			signal: AbortSignal.timeout(TIMEOUT)
+		});
 
 		return from(request);
 	}

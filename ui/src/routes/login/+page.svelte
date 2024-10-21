@@ -60,7 +60,7 @@
 					user.set(e);
 				})
 			)
-			.subscribe()
+			.subscribe();
 
 		goto('/admin/dashboard');
 	}
@@ -77,9 +77,9 @@
 
 <div class="login-wrapper">
 	<h2>{$t('login')}</h2>
-	<Input type="text" name="username" value="" label="Username" on:keypress={onKeyPress} on:input={onUsernameChanged} />
-	<Input type="password" name="password" value="" label="Password" on:keypress={onKeyPress}
-				 on:input={onPasswordChanged} />
+	<Input label="Username" name="username" on:input={onUsernameChanged} on:keypress={onKeyPress} type="text" value="" />
+	<Input label="Password" name="password" on:input={onPasswordChanged} on:keypress={onKeyPress} type="password"
+				 value="" />
 
 	<div class="btn-container">
 		<button class="btn submit" disabled={isLoading} on:click={onSubmitButtonClicked}

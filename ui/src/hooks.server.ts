@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 
 export const handle = async ({ event, resolve }) => {
-	if (event.url.pathname.startsWith("/admin")) {
+	if (event.url.pathname.startsWith('/admin')) {
 		const user = JSON.parse(event.cookies.get('user') || '{}');
 
 		if (!(

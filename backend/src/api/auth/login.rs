@@ -50,7 +50,7 @@ pub async fn login(
     match res {
         Ok(id) => {
             let user_id = id.to_string();
-            let exp = Utc::now() + Duration::days(15);
+            let exp = Utc::now() + Duration::days(7);
 
             let mut redis_connection = redis_client
                 .get_connection()

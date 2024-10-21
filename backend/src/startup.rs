@@ -80,7 +80,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/articles/:id", get(retrieve_article))
         .route("/articles", get(list_articles));
 
-    let user_routes = Router::new()
+    let admin_user_routes = Router::new()
         .route("/login", post(login))
         .route("/logout", post(logout));
 
@@ -89,15 +89,15 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .merge(admin_home_routes)
         .merge(admin_service_routes)
         .merge(admin_contact_routes)
-        .merge(admin_article_routes);
+        .merge(admin_article_routes)
+        .merge(admin_user_routes);
 
     let routes = Router::new()
         .merge(member_routes)
         .merge(service_routes)
         .merge(home_routes)
         .merge(contact_routes)
-        .merge(article_routes)
-        .merge(user_routes);
+        .merge(article_routes);
 
     let app = Router::new()
         .route("/health", get(health_check))

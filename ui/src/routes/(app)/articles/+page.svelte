@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { Articles } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
-	import { finalize, tap } from 'rxjs';
+	import { BehaviorSubject, finalize, Subscription, tap } from 'rxjs';
 	import Loading from '$lib/components/Loading.svelte';
 	import { t } from 'svelte-i18n';
 	import type { Language } from '$lib/models/Language';
@@ -12,15 +12,47 @@
 	let articles: ArticleData[] = [];
 	let language: Language = 'zh';
 
+	// Pagination
+	let page = 0;
+	// Observable for the current page number. We use BehaviorSubject to ensure that the page number is updated correctly when we navigate to a new page.
+	const page$ = new BehaviorSubject(0);
+	// The size of the articles per page. We define it as 5.
+	let pageSize = 10;
+	// The flag indicates that we have previous page
+	let hasPreviousPage = false;
+	// The flag indicates that we have next page
+	let hasNextPage = false;
+	// The disposer for the subscription. We use it to unsubscribe when the component is destroyed.
+	let disposer: Subscription | null = null;
+
+	function onPreviousButtonClicked() {
+		page = page - 1;
+		page$.next(page);
+	}
+
+	function onNextButtonClicked() {
+		page = page + 1;
+		page$.next(page);
+	}
+
 	onMount(() => {
-		Articles.list(language)
-			.pipe(
-				startWithTap(() => isLoading = true),
-				finalize(() => isLoading = false),
-				tap(response => articles = response)
-			)
-			.subscribe();
+		disposer = page$
+			.subscribe(p => {
+				Articles.list(language, p, pageSize)
+					.pipe(
+						startWithTap(() => isLoading = true),
+						finalize(() => isLoading = false),
+						tap(e => {
+							articles = e.articles;
+							hasPreviousPage = page > 0;
+							hasNextPage = (e.total - ((page + 1) * pageSize)) > 0;
+						})
+					)
+					.subscribe();
+			});
 	});
+
+	onDestroy(() => disposer?.unsubscribe());
 </script>
 
 {#if isLoading}
@@ -35,6 +67,13 @@
 				</a>
 			</div>
 		{/each}
+		<div class="pagination-wrapper">
+			<button class="btn" on:click={onPreviousButtonClicked} class:disabled={!hasPreviousPage}
+							disabled={!hasPreviousPage}>Previous
+			</button>
+			<button class="btn" on:click={onNextButtonClicked} class:disabled={!hasNextPage} disabled={!hasNextPage}>Next
+			</button>
+		</div>
 	</div>
 {/if}
 
@@ -65,6 +104,26 @@
 
         &:hover {
           color: $deep-orange;
+        }
+      }
+    }
+
+    .pagination-wrapper {
+      display: flex;
+      width: 100%;
+      flex-direction: row;
+      gap: 1rem;
+      justify-content: center;
+
+      .btn {
+        border: none;
+        background-color: transparent;
+        text-decoration: underline;
+        cursor: pointer;
+
+        &.disabled {
+          color: $grey;
+          cursor: unset;
         }
       }
     }

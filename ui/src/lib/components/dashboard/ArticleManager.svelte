@@ -110,7 +110,11 @@
 
       .content-section {
         position: relative;
-        height: 200px;
+				padding: 0 1rem;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
 
         .content-title {
           width: calc(100% - 40px);
@@ -119,9 +123,6 @@
         }
 
         .btn {
-          position: absolute;
-          top: 1.25rem;
-          right: 1rem;
           text-decoration: none;
           gap: 0.25rem;
           display: flex;

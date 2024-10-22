@@ -501,7 +501,7 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 and content.language = $1
                 and resource.resource_type = $2
                 and resource.deleted_at is null
-                order by seq
+                order by seq, resource.created_at desc
                 "#;
 
         let res = match resource_type {
@@ -516,7 +516,7 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 and content.language = $1
                 and resource.resource_type = $2
                 and resource.deleted_at is null
-                order by seq";
+                order by seq, resource.created_at desc";
                 let query = format!("{}{}", query, offset);
 
                 sqlx::query_as::<_, SimpleMemberEntityFromSQLx>(query.as_str())

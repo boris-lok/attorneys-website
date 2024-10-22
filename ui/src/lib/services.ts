@@ -271,10 +271,10 @@ export const Services = {
 };
 
 export const Articles = {
-	list: (language: Language) => {
+	list: (language: Language, page: number, pageSize: number) => {
 		async function __inner() {
 			const response = await fetch(
-				`${BASE_URL}/articles`,
+				`${BASE_URL}/articles?page=${page}&page_size=${pageSize}`,
 				{
 					method: 'GET',
 					headers: {
@@ -286,9 +286,13 @@ export const Articles = {
 			);
 
 			await handleError(response, 'failed to list articles');
-			let json = await response.json();
 
-			return 'articles' in json ? json.articles as ArticleData[] : [];
+			const json = await response.json();
+			const articles = 'articles' in json ? json.articles as ArticleData[] : [];
+			return {
+				articles: articles,
+				total: json.total
+			};
 		}
 
 		return from(__inner());

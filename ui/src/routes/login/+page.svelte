@@ -5,7 +5,8 @@
 	import { goto } from '$app/navigation';
 	import { Users } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
-	import { finalize, tap } from 'rxjs';
+	import { finalize } from 'rxjs';
+	import { showNotification } from '../../stores/notificationStore';
 
 	// login information
 	let username = '';
@@ -55,14 +56,17 @@
 		Users.login(username, password)
 			.pipe(
 				startWithTap(() => isLoading = true),
-				finalize(() => isLoading = false),
-				tap(e => {
-					user.set(e);
-				})
+				finalize(() => isLoading = false)
 			)
-			.subscribe();
-
-		goto('/admin/dashboard');
+			.subscribe({
+				next: e => {
+					user.set(e);
+					goto('/admin/dashboard');
+				},
+				error: e => {
+					showNotification('Login failed', 'error', 3000);
+				}
+			});
 	}
 
 	function onBackButtonClicked() {

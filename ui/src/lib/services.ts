@@ -5,46 +5,77 @@ import { from, throwError } from 'rxjs';
 import type { CreateServiceRequest, ServiceData, UpdateServiceRequest } from '$lib/models/Services';
 import type { ArticleData, CreateArticleRequest, UpdateArticleRequest } from '$lib/models/Articles';
 import type { ContactData, CreateContactRequest, UpdateContactRequest } from '$lib/models/ContactUs';
-import type { LoginResponse } from '$lib/models/User';
 import { user } from '../stores/userStore';
+import type { LoginResponse } from '$lib/models/User';
 
-const BASE_URL = 'http://localhost:8081/api/v1';
+const BASE_URL = `${import.meta.env.VITE_BACKEND_HOST}:${import.meta.env.VITE_BACKEND_PORT}/api/v1`;
 const ADMIN_URL = `${BASE_URL}/admin`;
 const TIMEOUT = 5000;
 
+function getToken() {
+	const u = user.get();
+	if (!u) {
+		throw throwError(() => 'User not logged in');
+	}
+
+	return `Bearer ${u.token}`;
+}
+
+async function handleError(res: Response, defaultMessage: string) {
+	if (!res.ok) {
+		let json = await res.json();
+		console.error(json);
+		if ('message' in json && typeof json.message === 'string') {
+			throw new Error(json.message);
+		} else {
+			throw new Error(defaultMessage);
+		}
+	}
+}
+
 export const Members = {
 	uploadAvatar: (id: string, file: File) => {
-		const formData = new FormData();
-		formData.append('avatar', file);
+		async function __inner() {
+			const formData = new FormData();
+			formData.append('avatar', file);
 
-		const request: Promise<Response> = fetch(
-			`${ADMIN_URL}/members/${id}/avatar`,
-			{
-				method: 'POST',
-				body: formData
-			}
-		);
+			const response = await fetch(
+				`${ADMIN_URL}/members/${id}/avatar`,
+				{
+					method: 'POST',
+					body: formData,
+					headers: {
+						Authorization: getToken()
+					}
+				}
+			);
 
-		return from(request);
+			await handleError(response, 'failed to upload avatar');
+		}
+
+		return from(__inner());
 	},
 	list: (language: Language) => {
-		const request = fetch(
-			`${BASE_URL}/members`,
-			{
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					'Accept-Language': language
-				},
-				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		).then((res) => res.json())
-			.then((json: Object) => {
-				const data = 'members' in json ? json.members as SimpleMember[] : [];
-				return data;
-			});
+		async function __inner() {
+			const response = await fetch(
+				`${BASE_URL}/members`,
+				{
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept-Language': language
+					},
+					signal: AbortSignal.timeout(TIMEOUT)
+				}
+			);
 
-		return from(request);
+			await handleError(response, 'failed to list members');
+
+			const json = await response.json();
+			return 'members' in json ? json.members as SimpleMember[] : [];
+		}
+
+		return from(__inner());
 	},
 	save: (req: CreateMemberRequest | UpdateMemberRequest) => {
 		let method = 'POST';
@@ -52,93 +83,97 @@ export const Members = {
 			method = 'PUT';
 		}
 
-		const request = fetch(
-			`${ADMIN_URL}/members`,
-			{
-				method: method,
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(req),
-				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		).then(res => {
-			if (method === 'POST') {
-				let id = res.json()
-					.then(json => {
-						if ('id' in json) {
-							return json.id as string;
-						}
-
-						return null;
-					});
-				return id;
-			}
-		})
-			.then(e => {
-				if (method === 'PUT' && 'id' in req) {
-					return req.id;
-				} else if (e) {
-					return e;
-				} else {
-					return null;
+		async function __inner() {
+			const response = await fetch(
+				`${ADMIN_URL}/members`,
+				{
+					method: method,
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: getToken()
+					},
+					body: JSON.stringify(req),
+					signal: AbortSignal.timeout(TIMEOUT)
 				}
-			});
+			);
 
-		return from(request);
+			await handleError(response, 'failed to save member');
+
+			if (method === 'POST') {
+				const json = await response.json();
+				return 'id' in json ? json.id : null;
+			} else if (method === 'PUT' && 'id' in req) {
+				return req.id;
+			}
+
+			return null;
+		}
+
+		return from(__inner());
 	},
 	retrieve: (id: string, language: Language) => {
-		const request = fetch(`${BASE_URL}/members/${id}`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept-Language': language
-			},
-			signal: AbortSignal.timeout(TIMEOUT)
-		})
-			.then(res => res.json())
-			.then(res => 'member' in res ? res.member as MemberData : null);
-
-		return from(request);
-	}
-};
-
-export const Home = {
-	list: (language: Language) => {
-		const request = fetch(
-			`${BASE_URL}/home`,
-			{
+		async function __inner() {
+			const response = await fetch(`${BASE_URL}/members/${id}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
 					'Accept-Language': language
 				},
 				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		).then((res) => res.json())
-			.then((json: Object) => {
-				const data = 'home' in json ? json.home as HomeData[] : [];
-				if (data.length === 0) {
-					return null;
-				}
-				return data[0];
 			});
 
-		return from(request);
+			await handleError(response, 'failed to retrieve member');
+			const json = await response.json();
+
+			return 'member' in json ? json.member as MemberData : null;
+		}
+
+		return from(__inner());
+	}
+};
+
+export const Home = {
+	list: (language: Language) => {
+		async function __inner() {
+			const response = await fetch(
+				`${BASE_URL}/home`,
+				{
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept-Language': language
+					},
+					signal: AbortSignal.timeout(TIMEOUT)
+				}
+			);
+
+			await handleError(response, 'failed to list home');
+
+			const json = await response.json();
+			const data = 'home' in json ? json.home as HomeData[] : [];
+			return data.length === 0 ? null : data[0];
+		}
+
+		return from(__inner());
 	},
 	retrieve: (id: string, language: Language) => {
-		const request = fetch(`${BASE_URL}/home/${id}`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept-Language': language
-			},
-			signal: AbortSignal.timeout(TIMEOUT)
-		})
-			.then(res => res.json())
-			.then(res => 'home' in res ? res.home as HomeData : null);
+		async function __inner() {
+			const response = await fetch(`${BASE_URL}/home/${id}`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'Accept-Language': language
+				},
+				signal: AbortSignal.timeout(TIMEOUT)
+			});
 
-		return from(request);
+			await handleError(response, 'failed to retrieve home');
+			const json = await response.json();
+
+			return 'home' in json ? json.home as HomeData : null;
+		}
+
+		return from(__inner());
 	},
 	save: (req: CreateHomeRequest | UpdateHomeRequest) => {
 		let method = 'POST';
@@ -146,55 +181,68 @@ export const Home = {
 			method = 'PUT';
 		}
 
-		const request = fetch(
-			`${ADMIN_URL}/home`,
-			{
-				method: method,
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(req),
-				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		);
+		async function __inner() {
+			const response = await fetch(
+				`${ADMIN_URL}/home`,
+				{
+					method: method,
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: getToken()
+					},
+					body: JSON.stringify(req),
+					signal: AbortSignal.timeout(TIMEOUT)
+				}
+			);
 
-		return from(request);
+			await handleError(response, 'failed to save home');
+		}
+
+		return from(__inner());
 	}
 };
 
 export const Services = {
 	list: (language: Language) => {
-		const request = fetch(
-			`${BASE_URL}/services`,
-			{
+		async function __inner() {
+			const response = await fetch(
+				`${BASE_URL}/services`,
+				{
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept-Language': language
+					},
+					signal: AbortSignal.timeout(TIMEOUT)
+				}
+			);
+
+			await handleError(response, 'failed to list services');
+			const json = await response.json();
+
+			return 'services' in json ? json.services as ServiceData[] : [];
+		}
+
+		return from(__inner());
+	},
+	retrieve: (id: string, language: Language) => {
+		async function __inner() {
+			const response = await fetch(`${BASE_URL}/services/${id}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
 					'Accept-Language': language
 				},
 				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		).then((res) => res.json())
-			.then((json: Object) => {
-				const data = 'services' in json ? json.services as ServiceData[] : [];
-				return data;
 			});
 
-		return from(request);
-	},
-	retrieve: (id: string, language: Language) => {
-		const request = fetch(`${BASE_URL}/services/${id}`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept-Language': language
-			},
-			signal: AbortSignal.timeout(TIMEOUT)
-		})
-			.then(res => res.json())
-			.then(res => 'service' in res ? res.service as ServiceData : null);
+			await handleError(response, 'failed to retrieve service');
+			const json = await response.json();
 
-		return from(request);
+			return 'service' in json ? json.service as ServiceData : null;
+		}
+
+		return from(__inner());
 	},
 	save: (req: CreateServiceRequest | UpdateServiceRequest) => {
 		let method = 'POST';
@@ -202,55 +250,67 @@ export const Services = {
 			method = 'PUT';
 		}
 
-		const request = fetch(
-			`${ADMIN_URL}/services`,
-			{
-				method: method,
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(req),
-				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		);
+		async function __inner() {
+			const response = await fetch(
+				`${ADMIN_URL}/services`,
+				{
+					method: method,
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: getToken()
+					},
+					body: JSON.stringify(req),
+					signal: AbortSignal.timeout(TIMEOUT)
+				}
+			);
+			await handleError(response, 'failed to save service');
+		}
 
-		return from(request);
+		return from(__inner());
 	}
 };
 
 export const Articles = {
 	list: (language: Language) => {
-		const request = fetch(
-			`${BASE_URL}/articles`,
-			{
+		async function __inner() {
+			const response = await fetch(
+				`${BASE_URL}/articles`,
+				{
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept-Language': language
+					},
+					signal: AbortSignal.timeout(TIMEOUT)
+				}
+			);
+
+			await handleError(response, 'failed to list articles');
+			let json = await response.json();
+
+			return 'articles' in json ? json.articles as ArticleData[] : [];
+		}
+
+		return from(__inner());
+	},
+	retrieve: (id: string, language: Language) => {
+		async function __inner() {
+			const response = await fetch(`${BASE_URL}/articles/${id}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
 					'Accept-Language': language
 				},
 				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		).then((res) => res.json())
-			.then((json: Object) => {
-				const data = 'articles' in json ? json.articles as ArticleData[] : [];
-				return data;
 			});
 
-		return from(request);
-	},
-	retrieve: (id: string, language: Language) => {
-		const request = fetch(`${BASE_URL}/articles/${id}`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept-Language': language
-			},
-			signal: AbortSignal.timeout(TIMEOUT)
-		})
-			.then(res => res.json())
-			.then(res => 'article' in res ? res.article as ArticleData : null);
+			await handleError(response, 'failed to retrieve article');
 
-		return from(request);
+			const json = await response.json();
+			return 'article' in json ? json.article as ArticleData : null;
+		}
+
+		return from(__inner());
 	},
 	save: (req: CreateArticleRequest | UpdateArticleRequest) => {
 		let method = 'POST';
@@ -258,58 +318,73 @@ export const Articles = {
 			method = 'PUT';
 		}
 
-		const request = fetch(
-			`${ADMIN_URL}/articles`,
-			{
-				method: method,
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(req),
-				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		);
+		async function __inner() {
+			const response = await fetch(
+				`${ADMIN_URL}/articles`,
+				{
+					method: method,
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: getToken()
+					},
+					body: JSON.stringify(req),
+					signal: AbortSignal.timeout(TIMEOUT)
+				}
+			);
 
-		return from(request);
+			await handleError(response, 'failed to save article');
+		}
+
+		return from(__inner());
 	}
 };
 
 export const Contacts = {
 	list: (language: Language) => {
-		const request = fetch(
-			`${BASE_URL}/contact`,
-			{
+		async function __inner() {
+			const response = await fetch(
+				`${BASE_URL}/contact`,
+				{
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept-Language': language
+					},
+					signal: AbortSignal.timeout(TIMEOUT)
+				}
+			);
+			await handleError(response, 'failed to list contact');
+
+			let json = await response.json();
+
+			const data = 'contact' in json ? json.contact as ContactData[] : [];
+			return data.length === 0 ? null : data[0];
+		}
+
+		return from(__inner());
+	},
+	retrieve: (id: string, language: Language) => {
+		async function __inner() {
+			const response = await fetch(`${BASE_URL}/contact/${id}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
 					'Accept-Language': language
 				},
 				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		).then((res) => res.json())
-			.then((json: Object) => {
-				const data = 'contact' in json ? json.contact as ContactData[] : [];
-				if (data.length === 0) {
-					return null;
-				}
-				return data[0];
 			});
 
-		return from(request);
-	},
-	retrieve: (id: string, language: Language) => {
-		const request = fetch(`${BASE_URL}/contact/${id}`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept-Language': language
-			},
-			signal: AbortSignal.timeout(TIMEOUT)
-		})
-			.then(res => res.json())
-			.then(res => 'contact' in res ? res.contact as ContactData : null);
+			await handleError(response, 'failed to retrieve contact');
 
-		return from(request);
+			let json = await response.json();
+
+			if ('contact' in json) {
+				return json.contact as ContactData;
+			}
+			return null;
+		}
+
+		return from(__inner());
 	},
 	save: (req: CreateContactRequest | UpdateContactRequest) => {
 		let method = 'POST';
@@ -317,55 +392,73 @@ export const Contacts = {
 			method = 'PUT';
 		}
 
-		const request = fetch(
-			`${ADMIN_URL}/contact`,
-			{
-				method: method,
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(req),
-				signal: AbortSignal.timeout(TIMEOUT)
-			}
-		);
+		async function __inner() {
+			const response = await fetch(
+				`${ADMIN_URL}/contact`,
+				{
+					method: method,
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: getToken()
+					},
+					body: JSON.stringify(req),
+					signal: AbortSignal.timeout(TIMEOUT)
+				}
+			);
 
-		return from(request);
+			await handleError(response, 'failed to save contact');
+		}
+
+		return from(__inner());
 	}
 };
 
 export const Users = {
 	login: (username: string, password: string) => {
-		const request = fetch(`${ADMIN_URL}/login`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				username: username,
-				password: password
-			}),
-			signal: AbortSignal.timeout(TIMEOUT)
-		})
-			.then(res => res.json())
-			.then(res => res as LoginResponse);
+		async function __inner() {
+			const response = await fetch(`${ADMIN_URL}/login`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					username: username,
+					password: password
+				}),
+				signal: AbortSignal.timeout(TIMEOUT)
+			});
 
-		return from(request);
-	},
-	logout: () => {
-		const u = user.get();
-		if (!u) {
-			throw throwError(() => 'User not logged in');
+			await handleError(response, 'failed to login');
+
+			let json = await response.json();
+
+			if ('token' in json && 'user_id' in json && 'username' in json) {
+				return {
+					userId: json.user_id,
+					username: json.username,
+					token: json.token
+				} as LoginResponse;
+			}
+
+			return null;
 		}
 
-		const request = fetch(`${ADMIN_URL}/logout`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${u.token}`
-			},
-			signal: AbortSignal.timeout(TIMEOUT)
-		});
+		return from(__inner());
+	},
+	logout: () => {
+		async function __inner() {
+			const response = await fetch(`${ADMIN_URL}/logout`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: getToken()
+				},
+				signal: AbortSignal.timeout(TIMEOUT)
+			});
 
-		return from(request);
+			await handleError(response, 'failed to logout');
+		}
+
+		return from(__inner());
 	}
 };

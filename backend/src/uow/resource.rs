@@ -14,7 +14,7 @@ use crate::repositories::{IResourceRepository, SqlxAvatarRepository, SqlxContent
 use anyhow::anyhow;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use sqlx::{PgPool, Postgres, Transaction};
+use sqlx::{PgPool, Postgres, Row, Transaction};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -53,6 +53,13 @@ pub trait IResourceUnitOfWork {
     ) -> anyhow::Result<Vec<T>>
     where
         T: DeserializeOwned + Serialize;
+
+    /// Calculate how many resources
+    async fn count_resources(
+        &self,
+        language: &Language,
+        resource_type: &ResourceType,
+    ) -> anyhow::Result<usize>;
 
     /** Commit the transaction */
     async fn commit(mut self) -> anyhow::Result<()>;
@@ -278,6 +285,36 @@ impl IResourceUnitOfWork for InMemory {
             .collect::<Vec<_>>();
 
         Ok(res)
+    }
+
+    async fn count_resources(
+        &self,
+        language: &Language,
+        resource_type: &ResourceType,
+    ) -> anyhow::Result<usize> {
+        let contents = self
+            .content_repository
+            .as_ref()
+            .unwrap()
+            .list(language)
+            .await?;
+
+        let mut count = 0;
+        for content in contents {
+            let id = ResourceID::try_from(content.0.clone()).unwrap();
+            let exist = self
+                .resource_repository
+                .as_ref()
+                .unwrap()
+                .contains(&id, resource_type)
+                .await?;
+
+            if exist {
+                count += 1;
+            }
+        }
+
+        Ok(count)
     }
 
     async fn commit(mut self) -> anyhow::Result<()> {
@@ -551,6 +588,30 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
             .map(from_resource::<T>)
             .filter_map(|e| e.ok())
             .collect::<Vec<_>>())
+    }
+
+    async fn count_resources(
+        &self,
+        language: &Language,
+        resource_type: &ResourceType,
+    ) -> anyhow::Result<usize> {
+        let query = r#"select count(resource.id) as total
+                from resource,
+                    content
+                where resource.id = content.id
+                and content.language = $1
+                and resource.resource_type = $2
+                and resource.deleted_at is null
+                "#;
+
+        let count = sqlx::query(query)
+            .bind(language.as_str())
+            .bind(resource_type.as_str())
+            .fetch_one(self.pool)
+            .await
+            .map(|e| e.get::<i64, usize>(0))?;
+
+        Ok(count as usize)
     }
 
     async fn commit(self) -> anyhow::Result<()> {

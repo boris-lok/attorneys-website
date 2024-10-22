@@ -26,6 +26,7 @@ impl Default for QueryPagination {
 #[derive(Debug, Serialize)]
 pub struct ListArticlesResponse {
     articles: Vec<ArticleEntity>,
+    total: usize,
 }
 
 pub async fn list_articles(
@@ -56,7 +57,7 @@ pub async fn list_articles(
     };
 
     match crate::domain::resources::list::execute(uow, req).await {
-        Ok(articles) => Ok(Json(ListArticlesResponse { articles })),
+        Ok((articles, total)) => Ok(Json(ListArticlesResponse { articles, total })),
         Err(crate::domain::resources::list::Error::BadRequest) => Err(ApiError::BadRequest),
         Err(crate::domain::resources::list::Error::Unknown(e)) => {
             Err(ApiError::InternalServerError(e.to_string()))

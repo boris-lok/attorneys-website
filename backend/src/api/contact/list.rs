@@ -35,7 +35,7 @@ pub async fn list_contact(
     };
 
     match crate::domain::resources::list::execute(uow, req).await {
-        Ok(contact) => Ok(Json(ListContactResponse { contact })),
+        Ok((contact, _)) => Ok(Json(ListContactResponse { contact })),
         Err(crate::domain::resources::list::Error::BadRequest) => Err(ApiError::BadRequest),
         Err(crate::domain::resources::list::Error::Unknown(e)) => {
             Err(ApiError::InternalServerError(e.to_string()))

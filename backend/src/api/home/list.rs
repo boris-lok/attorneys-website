@@ -35,7 +35,7 @@ pub async fn list_home(
     };
 
     match crate::domain::resources::list::execute(uow, req).await {
-        Ok(home) => Ok(Json(ListHomeResponse { home })),
+        Ok((home, _)) => Ok(Json(ListHomeResponse { home })),
         Err(crate::domain::resources::list::Error::BadRequest) => Err(ApiError::BadRequest),
         Err(crate::domain::resources::list::Error::Unknown(e)) => {
             Err(ApiError::InternalServerError(e.to_string()))

@@ -35,7 +35,7 @@ pub async fn list_services(
     };
 
     match crate::domain::resources::list::execute(uow, req).await {
-        Ok(services) => Ok(Json(ListServicesResponse { services })),
+        Ok((services, _)) => Ok(Json(ListServicesResponse { services })),
         Err(crate::domain::resources::list::Error::BadRequest) => Err(ApiError::BadRequest),
         Err(crate::domain::resources::list::Error::Unknown(e)) => {
             Err(ApiError::InternalServerError(e.to_string()))

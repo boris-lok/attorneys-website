@@ -18,7 +18,10 @@ pub(crate) enum Error {
     Unknown(String),
 }
 
-pub async fn execute<IUnitOfWork, T>(uow: Mutex<IUnitOfWork>, req: Request) -> Result<Vec<T>, Error>
+pub async fn execute<IUnitOfWork, T>(
+    uow: Mutex<IUnitOfWork>,
+    req: Request,
+) -> Result<(Vec<T>, usize), Error>
 where
     IUnitOfWork: IResourceUnitOfWork,
     T: DeserializeOwned + Serialize,
@@ -28,19 +31,28 @@ where
         lang: &Language,
         resource_type: &ResourceType,
         pagination: &Pagination,
-    ) -> Result<Vec<T>, Error>
+    ) -> Result<(Vec<T>, usize), Error>
     where
         IUnitOfWork: IResourceUnitOfWork,
         T: DeserializeOwned + Serialize,
     {
         let lock = uow.lock().await;
-        match lock
+
+        let data = lock
             .list_resources::<T>(lang, resource_type, pagination)
             .await
-        {
-            Ok(res) => Ok(res),
-            Err(e) => Err(Error::Unknown(e.to_string())),
-        }
+            .map_err(|e| Error::Unknown(e.to_string()))?;
+
+        let total = match pagination {
+            Pagination::All => data.len(),
+            Pagination::Single => data.len(),
+            Pagination::Page(_) => lock
+                .count_resources(lang, resource_type)
+                .await
+                .map_err(|e| Error::Unknown(e.to_string()))?,
+        };
+
+        Ok((data, total))
     }
 
     let language = Language::try_from(req.language).map_err(|_| Error::BadRequest)?;
@@ -48,8 +60,8 @@ where
     let uow = Arc::new(uow);
 
     match inner_execute(uow.clone(), &language, &req.resource_type, &req.pagination).await {
-        Ok(res) => {
-            if res.is_empty() {
+        Ok((data, total)) => {
+            if data.is_empty() {
                 inner_execute(
                     uow.clone(),
                     &req.default_language,
@@ -58,7 +70,7 @@ where
                 )
                 .await
             } else {
-                Ok(res)
+                Ok((data, total))
             }
         }
         Err(e) => Err(e),
@@ -88,8 +100,9 @@ mod tests {
         let res = execute::<InMemory, SimpleMemberEntity>(Mutex::new(uow), req).await;
 
         match res {
-            Ok(list) => {
+            Ok((list, total)) => {
                 assert_eq!(list.len(), 1);
+                assert_eq!(total, 1);
             }
             Err(_) => unreachable!(),
         }
@@ -108,8 +121,9 @@ mod tests {
         let res = execute::<InMemory, SimpleMemberEntity>(Mutex::new(uow), req).await;
 
         match res {
-            Ok(list) => {
+            Ok((list, total)) => {
                 assert_eq!(list.len(), 1);
+                assert_eq!(total, 1);
             }
             Err(_) => unreachable!(),
         }

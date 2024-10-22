@@ -34,7 +34,7 @@ pub async fn list_members(
     };
 
     match crate::domain::resources::list::execute(uow, req).await {
-        Ok(members) => Ok(Json(ListMembersResponse { members })),
+        Ok((members, _)) => Ok(Json(ListMembersResponse { members })),
         Err(crate::domain::resources::list::Error::BadRequest) => Err(ApiError::BadRequest),
         Err(crate::domain::resources::list::Error::Unknown(e)) => {
             Err(ApiError::InternalServerError(e.to_string()))

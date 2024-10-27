@@ -16,8 +16,9 @@ use secrecy::ExposeSecret;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::sync::Arc;
+use axum::http::{HeaderValue, Method};
 use tokio::net::TcpListener;
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -103,9 +104,15 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/health", get(health_check))
         .nest("/api/:version/admin", admin_routes)
         .nest("/api/:version/", routes)
-        .layer(CorsLayer::permissive())
         .layer(Extension(Arc::new(image_util)))
         .layer(Extension(Arc::new(redis_client)))
+        .layer(CorsLayer::permissive())
+        .layer(
+            tower_http::set_header::response::SetResponseHeaderLayer::if_not_present(
+                axum::http::header::ACCESS_CONTROL_ALLOW_ORIGIN,
+                HeaderValue::from_static("*")
+            )
+        )
         .with_state(state);
 
     axum::serve(listener, app.into_make_service()).await

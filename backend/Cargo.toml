@@ -21,7 +21,7 @@ config = "0.14.0"
 tokio = { version = "1.39.3", features = ["full"] }
 thiserror = "1.0.63"
 tower = "0.5.0"
-tower-http = { version = "0.6.1", features = ["cors"] }
+tower-http = { version = "0.6.1", features = ["cors", "set-header"] }
 sqlx = { version = "0.8.2", features = ["chrono", "macros", "migrate", "postgres", "runtime-tokio-rustls", "uuid"] }
 chrono = { version = "0.4.38", default-features = false, features = ["serde"] }
 image = "0.25.2"

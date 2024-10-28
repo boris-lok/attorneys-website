@@ -26,8 +26,6 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.backend
-    ports:
-      - "8081:8081"
     volumes:
       - upload_folder:/app/uploads
     networks:

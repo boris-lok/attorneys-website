@@ -127,5 +127,13 @@
 			'members members'
 			'articles articles';
     }
+
+    .home-section {
+      width: 50vw;
+    }
+
+    .contact-us-section {
+      width: 50vw;
+    }
   }
 </style>

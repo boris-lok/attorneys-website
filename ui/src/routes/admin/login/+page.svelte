@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { user } from '../../stores/userStore';
+	import { user } from '../../../stores/userStore';
 	import Input from '$lib/components/Input.svelte';
 	import { t } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { Users } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
 	import { finalize } from 'rxjs';
-	import { showNotification } from '../../stores/notificationStore';
+	import { showNotification } from '../../../stores/notificationStore';
 
 	// login information
 	let username = '';
@@ -123,6 +123,12 @@
       &.back {
         border: 1px solid $deep-red;
       }
+    }
+  }
+
+  @media (min-width: 768px) {
+    .login-wrapper {
+      max-width: 30rem;
     }
   }
 </style>

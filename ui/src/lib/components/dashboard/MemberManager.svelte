@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { Members } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
-	import { finalize, tap } from 'rxjs';
+	import { finalize, mergeMap, tap } from 'rxjs';
 	import type { SimpleMember } from '$lib/models/Member';
 	import { t } from 'svelte-i18n';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
@@ -14,6 +14,27 @@
 	let language: Language = 'zh';
 	// The data that we want to display
 	let data: SimpleMember[] = [];
+
+	/**
+	 * Function to handle the deletion of a member
+	 * @param memberId The id of the member to be deleted
+	 */
+	function onDeleteButtonClicked(memberId: string) {
+		Members.delete(memberId)
+			.pipe(
+				startWithTap(() => isLoading = true),
+				finalize(() => isLoading = false),
+				mergeMap(_ => {
+					return Members.list(language)
+						.pipe(
+							tap(e => {
+								data = e;
+							})
+						);
+				})
+			)
+			.subscribe();
+	}
 
 	onMount(() => {
 		Members.list(language)
@@ -52,6 +73,10 @@
 						<span class="material-icon">edit_document</span>
 						<span>{$t('edit')}</span>
 					</a>
+					<button class="btn red" on:click={() => onDeleteButtonClicked(member.id)}>
+						<span class="material-icon">delete</span>
+						<span>{$t('edit')}</span>
+					</button>
 				</div>
 			{/each}
 		</div>
@@ -119,6 +144,7 @@
         margin: 0.5rem 0.5rem;
         border-radius: 4px;
         box-shadow: 0 0 4px 0 $deep-grey;
+        gap: 0.5rem;
 
         .content-title {
           width: calc(100% - 40px);
@@ -131,9 +157,16 @@
           gap: 0.25rem;
           display: flex;
           flex-direction: row;
+          border: 0;
+          background-color: transparent;
+          cursor: pointer;
 
           &.blue {
             color: $deep-blue;
+          }
+
+          &.red {
+            color: $deep-red;
           }
 
           span:nth-child(2) {

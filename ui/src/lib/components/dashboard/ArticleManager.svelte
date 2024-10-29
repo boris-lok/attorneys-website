@@ -174,7 +174,7 @@
       flex-direction: row;
       gap: 1rem;
       justify-content: center;
-			padding: 1rem 0;
+      padding: 1rem 0;
 
       .btn {
         border: none;

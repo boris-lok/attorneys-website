@@ -111,6 +111,22 @@ export const Members = {
 
 		return from(__inner());
 	},
+	delete: (id: string) => {
+		async function __inner() {
+			const response = await fetch(`${ADMIN_URL}/members/${id}`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: getToken()
+				},
+				signal: AbortSignal.timeout(TIMEOUT)
+			});
+
+			await handleError(response, 'failed to save article');
+		}
+
+		return from(__inner());
+	},
 	retrieve: (id: string, language: Language) => {
 		async function __inner() {
 			const response = await fetch(`${BASE_URL}/members/${id}`, {

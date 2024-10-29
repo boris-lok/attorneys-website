@@ -7,7 +7,7 @@ workdir /app
 
 # Copy the package.json and install dependencies
 copy ../ui/package.json /
-run npm install
+run npm install --verbose
 
 ## Copy the rest of the application code
 copy ../ui/ .

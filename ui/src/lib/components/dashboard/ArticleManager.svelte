@@ -4,7 +4,7 @@
 	import { Articles } from '$lib/services';
 	import type { Language } from '$lib/models/Language';
 	import { startWithTap } from '$lib/utils';
-	import { BehaviorSubject, finalize, Subscription, tap } from 'rxjs';
+	import { BehaviorSubject, finalize, mergeMap, Subscription, tap } from 'rxjs';
 	import type { ArticleData } from '$lib/models/Articles';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
@@ -37,6 +37,27 @@
 	function onNextButtonClicked() {
 		page = page + 1;
 		page$.next(page);
+	}
+
+	// handle delete button clicked
+	function onDeleteButtonClicked(id: string) {
+		Articles.delete(id)
+			.pipe(
+				startWithTap(() => isLoading = true),
+				finalize(() => isLoading = false),
+				mergeMap(_ => {
+					// reload the page
+					return Articles.list(language, page, pageSize)
+						.pipe(
+							tap(e => {
+								data = e.articles;
+								hasPreviousPage = page > 0;
+								hasNextPage = (e.total - ((page + 1) * pageSize)) > 0;
+							})
+						);
+				})
+			)
+			.subscribe();
 	}
 
 	onMount(() => {
@@ -79,10 +100,16 @@
 			{#each data as article, i}
 				<div class="content-section">
 					<p class="content-title">{article.data.title}</p>
-					<a class="btn blue" href="/admin/articles/edit/{article.id}">
-						<span class="material-icon">edit_document</span>
-						<span>{$t('edit')}</span>
-					</a>
+					<div class="tools-group">
+						<a class="btn blue" href="/admin/articles/edit/{article.id}">
+							<span class="material-icon">edit_document</span>
+							<span>{$t('edit')}</span>
+						</a>
+						<button class="btn red" on:click={() => onDeleteButtonClicked(article.id)}>
+							<span class="material-icon">delete</span>
+							<span>{$t('edit')}</span>
+						</button>
+					</div>
 				</div>
 			{/each}
 			<div class="pagination-wrapper">
@@ -175,9 +202,18 @@
         align-items: center;
 
         .content-title {
-          width: calc(100% - 40px);
+          width: 100%;
+          max-width: 60vw;
+          overflow: hidden;
+          text-overflow: ellipsis;
           font-size: 1rem;
           font-weight: bold;
+        }
+
+        .tools-group {
+          display: flex;
+          flex-direction: row;
+          gap: 0.5rem;
         }
 
         .btn {
@@ -185,9 +221,17 @@
           gap: 0.25rem;
           display: flex;
           flex-direction: row;
+          outline: none;
+          border: 0;
+          background-color: transparent;
+          cursor: pointer;
 
           &.blue {
             color: $deep-blue;
+          }
+
+          &.red {
+            color: $deep-red;
           }
 
           span:nth-child(2) {

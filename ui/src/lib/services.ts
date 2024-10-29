@@ -316,6 +316,22 @@ export const Articles = {
 
 		return from(__inner());
 	},
+	delete: (id: string) => {
+		async function __inner() {
+			const response = await fetch(`${ADMIN_URL}/articles/${id}`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: getToken()
+				},
+				signal: AbortSignal.timeout(TIMEOUT)
+			});
+
+			await handleError(response, 'failed to save article');
+		}
+
+		return from(__inner());
+	},
 	save: (req: CreateArticleRequest | UpdateArticleRequest) => {
 		let method = 'POST';
 		if ('id' in req) {

@@ -14,7 +14,7 @@ pub trait IResourceRepository {
 
     // check if the resource is already in the repository
     async fn contains(&self, id: &ResourceID, resource_type: &ResourceType)
-        -> anyhow::Result<bool>;
+                      -> anyhow::Result<bool>;
 
     // delete the resource from the repository
     async fn delete(&self, id: &ResourceID, resource_type: &ResourceType) -> anyhow::Result<()>;

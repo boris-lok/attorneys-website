@@ -56,8 +56,8 @@ where
             &state.jwt_decoding_key,
             &jsonwebtoken::Validation::default(),
         )
-        .context("Failed to decode jwt")
-        .map_err(|_| ApiError::InvalidCredentials)?;
+            .context("Failed to decode jwt")
+            .map_err(|_| ApiError::InvalidCredentials)?;
 
         let exp_from_session: Option<usize> = redis_connection
             .get(&token_data.claims.sub)

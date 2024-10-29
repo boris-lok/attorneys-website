@@ -41,9 +41,9 @@ pub async fn validate_credentials(
     tokio::task::spawn_blocking(move || {
         verify_password_hash(expected_password_hash, credentials.password)
     })
-    .await
-    .map_err(|e| Error::Unknown(e.to_string()))?
-    .map_err(|_| Error::InvalidCredentials)?;
+        .await
+        .map_err(|e| Error::Unknown(e.to_string()))?
+        .map_err(|_| Error::InvalidCredentials)?;
 
     id.ok_or_else(|| anyhow!("Unknown username"))
         .map_err(|_| Error::InvalidCredentials)
@@ -82,9 +82,9 @@ mod tests {
             Version::V0x13,
             Params::new(15000, 2, 1, None).unwrap(),
         )
-        .hash_password(password.as_str().as_bytes(), &salt)
-        .unwrap()
-        .to_string();
+            .hash_password(password.as_str().as_bytes(), &salt)
+            .unwrap()
+            .to_string();
 
         let username = "username".to_string();
         let secret_password = SecretBox::new(Box::new(password_hash));

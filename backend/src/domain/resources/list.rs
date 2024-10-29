@@ -68,7 +68,7 @@ where
                     &req.resource_type,
                     &req.pagination,
                 )
-                .await
+                    .await
             } else {
                 Ok((data, total))
             }

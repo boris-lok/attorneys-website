@@ -9,6 +9,7 @@ use crate::api::{
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
+use axum::http::HeaderValue;
 use axum::routing::{delete, get, post};
 use axum::{Extension, Router};
 use jsonwebtoken::{DecodingKey, EncodingKey};
@@ -16,9 +17,8 @@ use secrecy::ExposeSecret;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::sync::Arc;
-use axum::http::{HeaderValue, Method};
 use tokio::net::TcpListener;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -110,7 +110,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .layer(
             tower_http::set_header::response::SetResponseHeaderLayer::if_not_present(
                 axum::http::header::ACCESS_CONTROL_ALLOW_ORIGIN,
-                HeaderValue::from_static("*")
+                HeaderValue::from_static("*"),
             )
         )
         .with_state(state);

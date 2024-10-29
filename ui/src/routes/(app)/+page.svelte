@@ -44,6 +44,7 @@
       background-color: white;
       max-width: 768px;
       margin: 0 auto;
+      box-shadow: 0 0 1rem 0 $grey;
     }
   }
 </style>

@@ -23,7 +23,7 @@
 				{
 					next: () => {
 						user.remove();
-						goto('/login');
+						goto('/admin/login');
 					},
 					error: console.error
 				}

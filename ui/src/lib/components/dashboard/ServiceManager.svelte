@@ -155,7 +155,7 @@
     .wrapper {
       .function-tools-wrapper {
         padding: 0.5rem 1.25rem;
-        right: 1.25rem;
+        right: 5%;
 
         .btn {
           span:nth-child(2) {

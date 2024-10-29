@@ -112,13 +112,13 @@
 					</div>
 				</div>
 			{/each}
-			<div class="pagination-wrapper">
-				<button class="btn" on:click={onPreviousButtonClicked} class:disabled={!hasPreviousPage}
-								disabled={!hasPreviousPage}>Previous
-				</button>
-				<button class="btn" on:click={onNextButtonClicked} class:disabled={!hasNextPage} disabled={!hasNextPage}>Next
-				</button>
-			</div>
+		</div>
+		<div class="pagination-wrapper">
+			<button class="btn" on:click={onPreviousButtonClicked} class:disabled={!hasPreviousPage}
+							disabled={!hasPreviousPage}>Previous
+			</button>
+			<button class="btn" on:click={onNextButtonClicked} class:disabled={!hasNextPage} disabled={!hasNextPage}>Next
+			</button>
 		</div>
 	{:else}
 		<p class="no-data">{$t('no_data_available')}</p>
@@ -174,6 +174,7 @@
       flex-direction: row;
       gap: 1rem;
       justify-content: center;
+			padding: 1rem 0;
 
       .btn {
         border: none;
@@ -251,7 +252,7 @@
     .wrapper {
       .function-tools-wrapper {
         padding: 0.5rem 1.25rem;
-        right: 1.25rem;
+        right: 5%;
 
         .btn {
           span:nth-child(2) {
@@ -262,7 +263,7 @@
 
       .list-section {
         flex-direction: column;
-        height: 10rem;
+        height: 20rem;
         overflow-y: scroll;
 
         .content-section {

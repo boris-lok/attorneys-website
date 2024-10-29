@@ -5,7 +5,7 @@ export const handle = async ({ event, resolve }) => {
 		const user = JSON.parse(event.cookies.get('user') || '{}');
 
 		if (!(
-			user && 'user_id' in user && 'username' in user && 'token' in user
+			user && 'userId' in user && 'username' in user && 'token' in user
 		)) {
 			throw redirect(302, '/admin/login');
 		}

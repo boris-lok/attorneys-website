@@ -5,7 +5,7 @@
 	import { Services } from '$lib/services';
 	import type { Language } from '$lib/models/Language';
 	import { startWithTap, text_overflow } from '$lib/utils';
-	import { finalize, tap } from 'rxjs';
+	import { finalize, mergeMap, tap } from 'rxjs';
 	import SvelteMarkdown from 'svelte-markdown';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
@@ -14,6 +14,27 @@
 	// All Services data
 	let data: ServiceData[] = [];
 	let language: Language = 'zh';
+
+	/**
+	 * Function to handle the deletion of a service
+	 * @param memberId The id of the service to be deleted
+	 */
+	function onDeleteButtonClicked(id: string) {
+		Services.delete(id)
+			.pipe(
+				startWithTap(() => isLoading = true),
+				finalize(() => isLoading = false),
+				mergeMap(_ => {
+					return Services.list(language)
+						.pipe(
+							tap(e => {
+								data = e;
+							})
+						);
+				})
+			)
+			.subscribe();
+	}
 
 	onMount(() => {
 		Services.list(language)
@@ -52,10 +73,16 @@
 					<div class="add-margin-to-listview">
 						<SvelteMarkdown source={text_overflow(service.data.data, 50)} />
 					</div>
-					<a class="btn blue" href="/admin/services/edit/{service.id}">
-						<span class="material-icon">edit_document</span>
-						<span>{$t('edit')}</span>
-					</a>
+					<div class="tools-group">
+						<a class="btn blue" href="/admin/services/edit/{service.id}">
+							<span class="material-icon">edit_document</span>
+							<span>{$t('edit')}</span>
+						</a>
+						<button class="btn red" on:click={() => onDeleteButtonClicked(service.id)}>
+							<span class="material-icon">delete</span>
+							<span>{$t('edit')}</span>
+						</button>
+					</div>
 				</div>
 			{/each}
 		</div>
@@ -107,6 +134,13 @@
       }
     }
 
+    .tools-group {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
     .list-section {
       display: flex;
       flex-direction: column;
@@ -126,16 +160,20 @@
         }
 
         .btn {
-          position: absolute;
-          top: 1.25rem;
-          right: 1rem;
           text-decoration: none;
           gap: 0.25rem;
           display: flex;
           flex-direction: row;
+          border: 0;
+          background-color: transparent;
+          cursor: pointer;
 
           &.blue {
             color: $deep-blue;
+          }
+
+          &.red {
+            color: $deep-red;
           }
 
           span:nth-child(2) {

@@ -122,7 +122,7 @@ export const Members = {
 				signal: AbortSignal.timeout(TIMEOUT)
 			});
 
-			await handleError(response, 'failed to save article');
+			await handleError(response, 'failed to delete member');
 		}
 
 		return from(__inner());
@@ -260,6 +260,22 @@ export const Services = {
 
 		return from(__inner());
 	},
+	delete: (id: string) => {
+		async function __inner() {
+			const response = await fetch(`${ADMIN_URL}/services/${id}`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: getToken()
+				},
+				signal: AbortSignal.timeout(TIMEOUT)
+			});
+
+			await handleError(response, 'failed to delete service');
+		}
+
+		return from(__inner());
+	},
 	save: (req: CreateServiceRequest | UpdateServiceRequest) => {
 		let method = 'POST';
 		if ('id' in req) {
@@ -343,7 +359,7 @@ export const Articles = {
 				signal: AbortSignal.timeout(TIMEOUT)
 			});
 
-			await handleError(response, 'failed to save article');
+			await handleError(response, 'failed to delete article');
 		}
 
 		return from(__inner());

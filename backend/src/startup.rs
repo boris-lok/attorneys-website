@@ -111,7 +111,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
             tower_http::set_header::response::SetResponseHeaderLayer::if_not_present(
                 axum::http::header::ACCESS_CONTROL_ALLOW_ORIGIN,
                 HeaderValue::from_static("*"),
-            )
+            ),
         )
         .with_state(state);
 

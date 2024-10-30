@@ -16,6 +16,7 @@ pub struct CreateContactRequest {
     phone: String,
     email: String,
     language: String,
+    seq: i32,
 }
 
 #[derive(Debug, Serialize)]
@@ -39,6 +40,7 @@ pub async fn create_contact(
         id: id.clone(),
         data: Resource::Contact(ContactData::new(req.address, req.phone, req.email)),
         language: req.language,
+        seq: req.seq,
     };
 
     match crate::domain::resources::create::execute(uow, req).await {

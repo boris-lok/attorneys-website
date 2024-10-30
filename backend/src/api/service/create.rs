@@ -15,6 +15,7 @@ pub(crate) struct CreateServiceRequest {
     title: String,
     data: String,
     language: String,
+    seq: i32,
 }
 
 #[derive(Debug, Serialize)]
@@ -33,6 +34,7 @@ pub async fn create_service(
         id,
         data: Resource::Service(ServiceData::new(req.title, req.data)),
         language: req.language,
+        seq: req.seq,
     };
 
     let uow = InDatabase::new(&state.pool)

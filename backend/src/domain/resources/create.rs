@@ -8,6 +8,7 @@ pub(crate) struct Request {
     pub(crate) id: String,
     pub(crate) data: Resource,
     pub(crate) language: String,
+    pub(crate) seq: i32,
 }
 
 pub(crate) enum Error {
@@ -38,7 +39,7 @@ where
         };
 
         // insert the resource into the resource repository and retrieve the content id
-        let content_id = match lock.resource_repository().insert(id, kind).await {
+        let content_id = match lock.resource_repository().insert(id, kind, req.seq).await {
             Ok(id) => ContentID::from(id),
             Err(e) => return Err(Error::Unknown(e.to_string())),
         };
@@ -98,6 +99,7 @@ mod tests {
                 id: id.clone(),
                 data: d,
                 language: "zh".to_string(),
+                seq: 0,
             };
 
             let res = execute(Mutex::new(uow), req).await;
@@ -194,6 +196,7 @@ mod tests {
                 id: id.clone(),
                 data: d,
                 language: "zh".to_string(),
+                seq: 0,
             };
 
             let res = execute(Mutex::new(uow), req).await;
@@ -218,6 +221,7 @@ mod tests {
             id: id.clone(),
             data,
             language: "zh".to_string(),
+            seq: 0,
         };
 
         let res = execute(Mutex::new(uow), req).await;

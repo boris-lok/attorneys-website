@@ -14,6 +14,7 @@ use ulid::Ulid;
 pub(crate) struct CreateHomeRequest {
     data: String,
     language: String,
+    seq: i32,
 }
 
 #[derive(Debug, Serialize)]
@@ -32,6 +33,7 @@ pub async fn create_home(
         id: home_id.clone(),
         data: Resource::Home(HomeData::new(req.data)),
         language: req.language,
+        seq: req.seq,
     };
 
     let uow = InDatabase::new(&state.pool)

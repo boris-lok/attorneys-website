@@ -71,7 +71,7 @@ pub async fn login(
                 &claims,
                 &state.jwt_encoding_key,
             )
-                .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+            .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 
             Ok(Json(LoginResponse {
                 user_id,

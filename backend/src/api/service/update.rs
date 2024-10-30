@@ -17,6 +17,7 @@ pub(crate) struct UpdateServiceRequest {
     title: String,
     data: String,
     language: String,
+    seq: i32,
 }
 
 pub async fn update_service(
@@ -28,6 +29,7 @@ pub async fn update_service(
         id: req.id,
         data: Resource::Service(ServiceData::new(req.title, req.data)),
         language: req.language,
+        seq: req.seq,
     };
 
     let uow = InDatabase::new(&state.pool)

@@ -258,15 +258,23 @@ pub struct MemberEntity {
     pub language: String,
     pub data: MemberData,
     pub avatar: Option<AvatarData>,
+    pub seq: i32,
 }
 
 impl MemberEntity {
-    pub fn new(id: String, language: String, data: MemberData, avatar: Option<AvatarData>) -> Self {
+    pub fn new(
+        id: String,
+        language: String,
+        data: MemberData,
+        avatar: Option<AvatarData>,
+        seq: i32,
+    ) -> Self {
         Self {
             id,
             language,
             data,
             avatar,
+            seq,
         }
     }
 }
@@ -277,6 +285,7 @@ pub struct MemberEntityFromSQLx {
     pub language: String,
     pub data: sqlx::types::Json<MemberData>,
     pub avatar: Option<sqlx::types::Json<AvatarData>>,
+    pub seq: i32,
 }
 
 impl From<MemberEntityFromSQLx> for MemberEntity {
@@ -286,6 +295,7 @@ impl From<MemberEntityFromSQLx> for MemberEntity {
             language: value.language.trim().to_owned(),
             data: value.data.0,
             avatar: value.avatar.map(|a| a.0),
+            seq: value.seq,
         }
     }
 }
@@ -295,11 +305,17 @@ pub struct ServiceEntity {
     pub id: String,
     pub language: String,
     pub data: ServiceData,
+    pub seq: i32,
 }
 
 impl ServiceEntity {
-    pub fn new(id: String, language: String, data: ServiceData) -> Self {
-        Self { id, language, data }
+    pub fn new(id: String, language: String, data: ServiceData, seq: i32) -> Self {
+        Self {
+            id,
+            language,
+            data,
+            seq,
+        }
     }
 }
 
@@ -308,6 +324,7 @@ pub struct ServiceEntityFromSQLx {
     pub id: String,
     pub language: String,
     pub data: sqlx::types::Json<ServiceData>,
+    pub seq: i32,
 }
 
 impl From<ServiceEntityFromSQLx> for ServiceEntity {
@@ -316,6 +333,7 @@ impl From<ServiceEntityFromSQLx> for ServiceEntity {
             id: value.id.trim().to_owned(),
             language: value.language.trim().to_owned(),
             data: value.data.0,
+            seq: value.seq,
         }
     }
 }
@@ -385,11 +403,17 @@ pub struct ArticleEntity {
     pub id: String,
     pub language: String,
     pub data: ArticleData,
+    pub seq: i32,
 }
 
 impl ArticleEntity {
-    pub fn new(id: String, language: String, data: ArticleData) -> Self {
-        Self { id, language, data }
+    pub fn new(id: String, language: String, data: ArticleData, seq: i32) -> Self {
+        Self {
+            id,
+            language,
+            data,
+            seq,
+        }
     }
 }
 
@@ -398,6 +422,7 @@ pub struct ArticleEntityFromSQLx {
     pub id: String,
     pub language: String,
     pub data: sqlx::types::Json<ArticleData>,
+    pub seq: i32,
 }
 
 impl From<ArticleEntityFromSQLx> for ArticleEntity {
@@ -406,6 +431,7 @@ impl From<ArticleEntityFromSQLx> for ArticleEntity {
             id: value.id.trim().to_owned(),
             language: value.language.trim().to_owned(),
             data: value.data.0,
+            seq: value.seq,
         }
     }
 }
@@ -415,11 +441,17 @@ pub struct SimpleMemberEntity {
     pub id: String,
     pub name: String,
     pub avatar: Option<String>,
+    pub seq: i32,
 }
 
 impl SimpleMemberEntity {
-    pub fn new(id: String, name: String, avatar: Option<String>) -> Self {
-        Self { id, name, avatar }
+    pub fn new(id: String, name: String, avatar: Option<String>, seq: i32) -> Self {
+        Self {
+            id,
+            name,
+            avatar,
+            seq,
+        }
     }
 }
 
@@ -428,6 +460,7 @@ pub struct SimpleMemberEntityFromSQLx {
     pub id: String,
     pub name: String,
     pub avatar: Option<String>,
+    pub seq: i32,
 }
 
 impl From<SimpleMemberEntityFromSQLx> for SimpleMemberEntity {
@@ -436,6 +469,7 @@ impl From<SimpleMemberEntityFromSQLx> for SimpleMemberEntity {
             id: value.id.to_owned(),
             name: value.name.to_owned(),
             avatar: value.avatar,
+            seq: value.seq,
         }
     }
 }

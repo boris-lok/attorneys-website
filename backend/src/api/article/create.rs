@@ -15,6 +15,7 @@ pub(crate) struct CreateArticleRequest {
     title: String,
     content: String,
     language: String,
+    seq: i32,
 }
 
 #[derive(Debug, Serialize)]
@@ -33,6 +34,7 @@ pub async fn create_article(
         id: home_id.clone(),
         data: Resource::Article(ArticleData::new(req.title, req.content)),
         language: req.language,
+        seq: req.seq,
     };
 
     let uow = InDatabase::new(&state.pool)

@@ -229,7 +229,7 @@ mod tests {
                 resource.clone(),
                 avatar.clone(),
             )
-                .await;
+            .await;
 
             let req = Request {
                 id: id.clone(),
@@ -252,7 +252,7 @@ mod tests {
                 resource.clone(),
                 avatar.clone(),
             )
-                .await;
+            .await;
 
             let req = Request {
                 id: id.clone(),
@@ -275,8 +275,8 @@ mod tests {
                 resource.clone(),
                 avatar,
             )
-                .await
-                .with_error();
+            .await
+            .with_error();
 
             let req = Request {
                 id: id.clone(),

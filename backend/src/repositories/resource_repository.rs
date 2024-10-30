@@ -10,14 +10,18 @@ pub trait IResourceRepository {
         &self,
         id: ResourceID,
         resource_type: ResourceType,
+        seq: i32,
     ) -> anyhow::Result<ResourceID>;
 
     // check if the resource is already in the repository
     async fn contains(&self, id: &ResourceID, resource_type: &ResourceType)
-                      -> anyhow::Result<bool>;
+        -> anyhow::Result<bool>;
 
     // delete the resource from the repository
     async fn delete(&self, id: &ResourceID, resource_type: &ResourceType) -> anyhow::Result<()>;
+
+    // update the sequence of the resource in the repository
+    async fn update_seq(&self, id: &ResourceID, seq: i32) -> anyhow::Result<()>;
 }
 
 #[derive(Debug)]
@@ -48,6 +52,7 @@ impl IResourceRepository for InMemoryResourceRepository {
         &self,
         id: ResourceID,
         resource_type: ResourceType,
+        _: i32,
     ) -> anyhow::Result<ResourceID> {
         if self.error {
             return Err(anyhow!("Internal Server Error"));
@@ -101,6 +106,16 @@ impl IResourceRepository for InMemoryResourceRepository {
             None => Err(anyhow!("{} not found", id)),
         }
     }
+
+    async fn update_seq(&self, _: &ResourceID, _: i32) -> anyhow::Result<()> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        // TODO: handle seq
+
+        Ok(())
+    }
 }
 
 #[derive(Debug)]
@@ -120,14 +135,16 @@ impl<'tx> IResourceRepository for SqlxResourceRepository<'tx> {
         &self,
         id: ResourceID,
         resource_type: ResourceType,
+        seq: i32,
     ) -> anyhow::Result<ResourceID> {
         let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
         let mut lock = conn_ptr.lock().await;
         let conn = lock.acquire().await?;
 
-        sqlx::query("INSERT INTO \"resource\" (id, created_at, resource_type, seq) VALUES ($1, now(), $2, 32767 );")
+        sqlx::query("INSERT INTO \"resource\" (id, created_at, resource_type, seq) VALUES ($1, now(), $2, $3);")
             .bind(id.as_str())
             .bind(resource_type.as_str())
+            .bind(seq)
             .execute(conn)
             .await?;
 
@@ -169,6 +186,22 @@ impl<'tx> IResourceRepository for SqlxResourceRepository<'tx> {
         sqlx::query(query)
             .bind(id.as_str())
             .bind(resource_type.as_str())
+            .execute(conn)
+            .await?;
+
+        Ok(())
+    }
+
+    async fn update_seq(&self, id: &ResourceID, seq: i32) -> anyhow::Result<()> {
+        let query = "UPDATE \"resource\" SET seq = $2 WHERE id = $1";
+
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        sqlx::query(query)
+            .bind(id.as_str())
+            .bind(seq)
             .execute(conn)
             .await?;
 

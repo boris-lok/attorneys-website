@@ -18,6 +18,7 @@ pub struct UpdateContactRequest {
     phone: String,
     email: String,
     language: String,
+    seq: i32,
 }
 
 pub async fn update_contact(
@@ -29,6 +30,7 @@ pub async fn update_contact(
         id: req.id,
         data: Resource::Contact(ContactData::new(req.address, req.phone, req.email)),
         language: req.language,
+        seq: req.seq,
     };
 
     let uow = InDatabase::new(&state.pool)

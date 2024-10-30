@@ -17,6 +17,7 @@ pub struct UpdateArticleRequest {
     title: String,
     content: String,
     language: String,
+    seq: i32,
 }
 
 pub async fn update_article(
@@ -28,6 +29,7 @@ pub async fn update_article(
         id: req.id,
         data: Resource::Article(ArticleData::new(req.title, req.content)),
         language: req.language,
+        seq: req.seq,
     };
 
     let uow = InDatabase::new(&state.pool)

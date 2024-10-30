@@ -15,6 +15,7 @@ pub(crate) struct CreateMemberRequest {
     name: String,
     description: String,
     language: String,
+    seq: i32,
 }
 
 #[derive(Debug, Serialize)]
@@ -33,6 +34,7 @@ pub async fn create_member(
         id: member_id,
         data: Resource::Member(MemberData::new(req.name, req.description)),
         language: req.language,
+        seq: req.seq,
     };
 
     let uow = InDatabase::new(&state.pool)

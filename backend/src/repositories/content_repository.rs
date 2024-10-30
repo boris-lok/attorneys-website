@@ -172,11 +172,11 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         sqlx::query(
             "UPDATE \"content\" SET data = $1, updated_at = now() WHERE id = $2 AND language = $3;",
         )
-            .bind(data.as_json())
-            .bind(id.as_str())
-            .bind(language.as_str())
-            .execute(conn)
-            .await?;
+        .bind(data.as_json())
+        .bind(id.as_str())
+        .bind(language.as_str())
+        .execute(conn)
+        .await?;
 
         Ok(())
     }

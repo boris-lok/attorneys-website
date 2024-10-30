@@ -17,6 +17,7 @@ pub(crate) struct UpdateMemberRequest {
     name: String,
     description: String,
     language: String,
+    seq: i32,
 }
 
 pub async fn update_member(
@@ -28,6 +29,7 @@ pub async fn update_member(
         id: req.id,
         data: Resource::Member(MemberData::new(req.name, req.description)),
         language: req.language,
+        seq: req.seq,
     };
 
     let uow = InDatabase::new(&state.pool)

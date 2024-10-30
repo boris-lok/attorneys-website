@@ -8,6 +8,7 @@ pub(crate) struct Request {
     pub(crate) id: String,
     pub(crate) data: Resource,
     pub(crate) language: String,
+    pub(crate) seq: i32,
 }
 
 pub(crate) enum Error {
@@ -38,6 +39,11 @@ where
             .map_err(|e| Error::Unknown(e.to_string()))?
         {
             return Err(Error::NotFound);
+        }
+
+        match lock.resource_repository().update_seq(&id, req.seq).await {
+            Ok(_) => {}
+            Err(e) => return Err(Error::Unknown(e.to_string())),
         }
 
         let id = ContentID::from(id);
@@ -106,6 +112,7 @@ mod tests {
                 id: id.to_string().clone(),
                 data: updated_resource.clone(),
                 language: "zh".to_string(),
+                seq: 0,
             };
 
             let res = execute(Mutex::new(uow), req).await;
@@ -129,6 +136,7 @@ mod tests {
                 id: Ulid::new().to_string(),
                 data: updated_resource,
                 language: "zh".to_string(),
+                seq: 0,
             };
 
             let res = execute(Mutex::new(uow), req).await;
@@ -154,6 +162,7 @@ mod tests {
                 id: id.to_string().clone(),
                 data: updated_resource.clone(),
                 language: "zh".to_string(),
+                seq: 0,
             };
 
             let res = execute(Mutex::new(uow.with_error()), req).await;

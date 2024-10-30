@@ -164,6 +164,7 @@ impl IResourceUnitOfWork for InMemory {
                             lang.as_str().to_string(),
                             json,
                             avatar,
+                            0,
                         );
                         serde_json::value::to_value(member)?
                     }
@@ -173,6 +174,7 @@ impl IResourceUnitOfWork for InMemory {
                             id.clone().to_string(),
                             lang.as_str().to_string(),
                             json,
+                            0,
                         );
 
                         serde_json::value::to_value(service)?
@@ -203,6 +205,7 @@ impl IResourceUnitOfWork for InMemory {
                             id.clone().to_string(),
                             lang.as_str().to_string(),
                             json,
+                            0,
                         );
 
                         serde_json::value::to_value(article)?
@@ -250,7 +253,7 @@ impl IResourceUnitOfWork for InMemory {
                         let data =
                             serde_json::value::from_value::<MemberData>(content.1.to_json())?;
                         Some(serde_json::value::to_value(SimpleMemberEntity::new(
-                            content.0, data.name, None,
+                            content.0, data.name, None, 0,
                         ))?)
                     } else {
                         None
@@ -264,6 +267,7 @@ impl IResourceUnitOfWork for InMemory {
                             content.0,
                             language.as_str().to_string(),
                             data,
+                            0,
                         ))?)
                     } else {
                         None
@@ -402,7 +406,8 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
         let query = r#"
                 select resource.id as id,
                     content.data as data,
-                    content.language as language
+                    content.language as language,
+                    resource.seq as seq
                 from resource,
                      content
                 where resource.id = content.id
@@ -417,7 +422,8 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 select resource.id as id,
                     content.data as data,
                     avatar.data as avatar,
-                    content.language as language
+                    content.language as language,
+                    resource.seq as seq
                 from resource,
                      content
                          left join avatar on avatar.id = content.id
@@ -494,7 +500,8 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
 
         let query = r#"select resource.id as id,
                 content.data as data,
-                content.language as language
+                content.language as language,
+                resource.seq as seq
                 from resource,
                     content
                 where resource.id = content.id
@@ -508,7 +515,8 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
             ResourceType::Member => {
                 let query = r"select resource.id as id,
                 content.data->>'name' as name,
-                avatar.data->>'small_image' as avatar
+                avatar.data->>'small_image' as avatar,
+                resource.seq as seq
                 from resource,
                      content
                 left join avatar on content.id = avatar.id

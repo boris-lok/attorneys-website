@@ -11,6 +11,7 @@ export type HomeData = {
 export type CreateHomeRequest = {
 	data: string;
 	language: Language;
+	seq: number;
 }
 
 export type UpdateHomeRequest = { id: string } & CreateHomeRequest;

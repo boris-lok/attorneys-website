@@ -27,5 +27,7 @@
   "member.description": "經歷",
   "save.success": "儲存成功",
   "save.failed": "儲存失敗",
-  "login": "登入"
+  "login": "登入",
+  "seq": "排序",
+  "seq.warning": "請輸入 -32,768 ~ +32,767，數字越少越前。"
 }

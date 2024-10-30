@@ -6,13 +6,15 @@ export type ArticleData = {
 	data: {
 		title: string;
 		content: string;
-	}
+	},
+	seq: number;
 }
 
 export type CreateArticleRequest = {
 	title: string;
 	content: string;
 	language: Language;
+	seq: number;
 }
 
 export type UpdateArticleRequest = { id: string } & CreateArticleRequest;

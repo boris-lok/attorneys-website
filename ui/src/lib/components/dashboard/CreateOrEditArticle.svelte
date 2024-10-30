@@ -10,14 +10,17 @@
 	import { startWithTap } from '$lib/utils';
 	import { finalize } from 'rxjs';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
+	import NumberInput from '$lib/components/NumberInput.svelte';
 
-	// If id is not empty, we update the contact resource by id.
-	// Otherwise, we create a new service
+	// If id is not empty, we update the resource by id.
+	// Otherwise, we create a new article
 	export let id = '';
-	// The title of the service
+	// The title of the article
 	export let title = '';
-	// The description of the service
+	// The description of the article
 	export let content = '';
+	// The sequence of the article
+	export let seq = 0;
 
 	let language: Language = 'zh';
 	let isLoading = false;
@@ -33,6 +36,11 @@
 		content = (e.target as HTMLInputElement).value;
 	}
 
+	// An event handler handles the sequence changed
+	function onSeqChanged(e: Event) {
+		seq = parseInt((e.target as HTMLInputElement).value);
+	}
+
 	// An event handler handles `back` button click
 	function onBackButtonClicked() {
 		if (browser) {
@@ -42,7 +50,8 @@
 
 	// validate the service data
 	function validate() {
-		return title.trim() !== '' && content.trim() !== '';
+		const validSeq = !isNaN(seq) && seq <= 32767 && seq >= -32768;
+		return title.trim() !== '' && content.trim() !== '' && validSeq;
 	}
 
 	// An event handler handles `save` button click
@@ -59,6 +68,7 @@
 			...id !== '' ? { id: id } : {},
 			title: title,
 			content: content,
+			seq: seq,
 			language: language
 		};
 
@@ -79,6 +89,7 @@
 	<div class="edit-section">
 		<Input label={$t('article.title')} name="name" on:input={onTitleChanged} value={title} />
 		<TextArea data={content} label={$t('article.data')} on:input={onContentChanged} />
+		<NumberInput label={$t('seq')} name="seq" on:input={onSeqChanged} value={seq} placeholder={$t("seq.warning")} />
 	</div>
 
 	<div class="btn-container">
@@ -104,6 +115,9 @@
 
   .edit-section {
     grid-area: edit-section;
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
   }
 
   .preview-section {

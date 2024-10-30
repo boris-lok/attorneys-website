@@ -10,6 +10,7 @@
 	import { startWithTap } from '$lib/utils';
 	import { finalize } from 'rxjs';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
+	import NumberInput from '$lib/components/NumberInput.svelte';
 
 	// If id is not empty, we update the contact resource by id.
 	// Otherwise, we create a new service
@@ -18,6 +19,7 @@
 	export let title = '';
 	// The description of the service
 	export let data = '';
+	export let seq = 0;
 
 	let language: Language = 'zh';
 	let isLoading = false;
@@ -40,9 +42,15 @@
 		}
 	}
 
+	// An event handler handles the sequence changed
+	function onSeqChanged(e: Event) {
+		seq = parseInt((e.target as HTMLInputElement).value);
+	}
+
 	// validate the service data
 	function validate() {
-		return title.trim() !== '' && data.trim() !== '';
+		const validSeq = !isNaN(seq) && seq <= 32767 && seq >= -32768;
+		return title.trim() !== '' && data.trim() !== '' && validSeq;
 	}
 
 	// An event handler handles `save` button click
@@ -59,7 +67,8 @@
 			...id !== '' ? { id: id } : {},
 			title: title,
 			data: data,
-			language: language
+			language: language,
+			seq: seq
 		};
 
 		Services.save(json).pipe(
@@ -79,6 +88,7 @@
 	<div class="edit-section">
 		<Input label={$t('service.title')} name="name" on:input={onTitleChanged} value={title} />
 		<TextArea data={data} label={$t('service.data')} on:input={onDataChanged} />
+		<NumberInput label={$t('seq')} name="seq" on:input={onSeqChanged} value={seq} placeholder={$t("seq.warning")} />
 	</div>
 
 	<div class="btn-container">
@@ -104,6 +114,9 @@
 
   .edit-section {
     grid-area: edit-section;
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
   }
 
   .preview-section {

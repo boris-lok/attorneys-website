@@ -15,6 +15,7 @@ export type CreateContactRequest = {
 	phone: string;
 	email: string;
 	language: Language;
+	seq: number;
 }
 
 export type UpdateContactRequest = { id: string } & CreateContactRequest;

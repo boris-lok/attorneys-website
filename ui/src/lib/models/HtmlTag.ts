@@ -1,4 +1,4 @@
-export type InputBoxType = 'text' | 'password';
+export type InputBoxType = 'text' | 'password' | 'number';
 
 export type ButtonClass = 'primary-blue' | 'primary-orange' | 'primary-red';
 

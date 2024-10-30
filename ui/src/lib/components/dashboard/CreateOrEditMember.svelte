@@ -12,6 +12,7 @@
 	import type { AvatarData } from '$lib/models/Member';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 	import { showNotification } from '../../../stores/notificationStore';
+	import NumberInput from '$lib/components/NumberInput.svelte';
 
 	// If id is not empty, we update the member resource by id.
 	// Otherwise, we create a new member
@@ -22,6 +23,8 @@
 	export let description = '';
 	// The avatar URL of the staff member
 	export let avatarData: AvatarData | null;
+	// The sequence of the member
+	export let seq = 0;
 	// The updated avatar of the staff member
 	let avatar: File | null = null;
 	// isLoading is a flag that indicates we are loading a resource from API.
@@ -46,9 +49,15 @@
 		description = target.value.trim();
 	}
 
+	// An event handler handles the sequence changed
+	function onSeqChanged(e: Event) {
+		seq = parseInt((e.target as HTMLInputElement).value);
+	}
+
 	// Check the name and description is not empty
 	function validate() {
-		return name.trim() !== '' && description !== '';
+		const validSeq = !isNaN(seq) && seq <= 32767 && seq >= -32768;
+		return name.trim() !== '' && description !== '' && validSeq;
 	}
 
 	function onSubmitButtonClicked() {
@@ -116,6 +125,7 @@
 		<div class="edit-section">
 			<Input label={$t('member.name')} name="name" on:input={onNameChanged} value={name} />
 			<TextArea data={description} label={$t('member.description')} on:input={onDescriptionChanged} />
+			<NumberInput label={$t('seq')} name="seq" on:input={onSeqChanged} value={seq} placeholder={$t("seq.warning")} />
 		</div>
 
 		<div class="btn-container">
@@ -143,6 +153,9 @@
 
   .edit-section {
     grid-area: edit-section;
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
   }
 
   .preview-section {

@@ -31,7 +31,7 @@
 {#if isLoading}
 	<Loading />
 {:else if article}
-	<CreateOrEditArticle title={article.data.title} content={article.data.content} id={id} />
+	<CreateOrEditArticle title={article.data.title} content={article.data.content} id={id} seq={article.seq} />
 {:else}
 	<p>{$t('no_data_available')}</p>
 {/if}

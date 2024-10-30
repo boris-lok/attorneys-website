@@ -75,7 +75,8 @@
 			address: address,
 			phone: phone,
 			email: email,
-			language: language
+			language: language,
+			seq: 0
 		};
 
 		Contacts.save(json)

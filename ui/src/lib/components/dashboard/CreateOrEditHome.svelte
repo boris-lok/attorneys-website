@@ -40,7 +40,8 @@
 		let json = {
 			...id !== '' ? { id: id } : {},
 			data: content,
-			language: language
+			language: language,
+			seq: 0
 		};
 
 		Home.save(json)

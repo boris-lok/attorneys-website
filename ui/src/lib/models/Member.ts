@@ -4,6 +4,7 @@ export type SimpleMember = {
 	id: string;
 	name: string;
 	avatar?: string;
+	seq: number;
 }
 
 export type CreateMemberRequest = {
@@ -24,7 +25,8 @@ export type MemberData = {
 		name: string;
 		description: string;
 	}
-	avatar?: AvatarData
+	avatar?: AvatarData,
+	seq: number,
 }
 
 export type UpdateMemberRequest = { id: string } & CreateMemberRequest;

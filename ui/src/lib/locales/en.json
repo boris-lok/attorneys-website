@@ -27,5 +27,7 @@
   "member.description": "Description",
   "save.success": "Save successfully",
   "save.failed": "Save failed",
-  "login": "Login"
+  "login": "Login",
+  "seq": "Order",
+  "seq.warning": "The range is from -32,768 to +32,767, if the value is smaller, then the order is higher"
 }

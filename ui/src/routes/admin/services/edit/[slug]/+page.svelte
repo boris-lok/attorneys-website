@@ -31,7 +31,7 @@
 {#if isLoading}
 	<Loading />
 {:else if service}
-	<CreateOrEditService title={service.data.title} data={service.data.data} id={id} />
+	<CreateOrEditService title={service.data.title} data={service.data.data} id={id} seq={service.seq} />
 {:else}
 	<p>{$t('no_data_available')}</p>
 {/if}

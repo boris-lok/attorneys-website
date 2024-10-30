@@ -6,13 +6,15 @@ export type ServiceData = {
 	data: {
 		title: string;
 		data: string;
-	}
+	},
+	seq: number;
 }
 
 export type CreateServiceRequest = {
 	title: string;
 	data: string;
 	language: Language;
+	seq: number;
 }
 
 export type UpdateServiceRequest = { id: string } & CreateServiceRequest;

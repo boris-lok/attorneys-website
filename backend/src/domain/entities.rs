@@ -258,7 +258,7 @@ pub struct MemberEntity {
     pub language: String,
     pub data: MemberData,
     pub avatar: Option<AvatarData>,
-    pub seq: i32,
+    pub seq: i16,
 }
 
 impl MemberEntity {
@@ -267,7 +267,7 @@ impl MemberEntity {
         language: String,
         data: MemberData,
         avatar: Option<AvatarData>,
-        seq: i32,
+        seq: i16,
     ) -> Self {
         Self {
             id,
@@ -285,7 +285,7 @@ pub struct MemberEntityFromSQLx {
     pub language: String,
     pub data: sqlx::types::Json<MemberData>,
     pub avatar: Option<sqlx::types::Json<AvatarData>>,
-    pub seq: i32,
+    pub seq: i16,
 }
 
 impl From<MemberEntityFromSQLx> for MemberEntity {
@@ -305,11 +305,11 @@ pub struct ServiceEntity {
     pub id: String,
     pub language: String,
     pub data: ServiceData,
-    pub seq: i32,
+    pub seq: i16,
 }
 
 impl ServiceEntity {
-    pub fn new(id: String, language: String, data: ServiceData, seq: i32) -> Self {
+    pub fn new(id: String, language: String, data: ServiceData, seq: i16) -> Self {
         Self {
             id,
             language,
@@ -324,7 +324,7 @@ pub struct ServiceEntityFromSQLx {
     pub id: String,
     pub language: String,
     pub data: sqlx::types::Json<ServiceData>,
-    pub seq: i32,
+    pub seq: i16,
 }
 
 impl From<ServiceEntityFromSQLx> for ServiceEntity {
@@ -403,11 +403,11 @@ pub struct ArticleEntity {
     pub id: String,
     pub language: String,
     pub data: ArticleData,
-    pub seq: i32,
+    pub seq: i16,
 }
 
 impl ArticleEntity {
-    pub fn new(id: String, language: String, data: ArticleData, seq: i32) -> Self {
+    pub fn new(id: String, language: String, data: ArticleData, seq: i16) -> Self {
         Self {
             id,
             language,
@@ -422,7 +422,7 @@ pub struct ArticleEntityFromSQLx {
     pub id: String,
     pub language: String,
     pub data: sqlx::types::Json<ArticleData>,
-    pub seq: i32,
+    pub seq: i16,
 }
 
 impl From<ArticleEntityFromSQLx> for ArticleEntity {
@@ -441,11 +441,11 @@ pub struct SimpleMemberEntity {
     pub id: String,
     pub name: String,
     pub avatar: Option<String>,
-    pub seq: i32,
+    pub seq: i16,
 }
 
 impl SimpleMemberEntity {
-    pub fn new(id: String, name: String, avatar: Option<String>, seq: i32) -> Self {
+    pub fn new(id: String, name: String, avatar: Option<String>, seq: i16) -> Self {
         Self {
             id,
             name,
@@ -460,7 +460,7 @@ pub struct SimpleMemberEntityFromSQLx {
     pub id: String,
     pub name: String,
     pub avatar: Option<String>,
-    pub seq: i32,
+    pub seq: i16,
 }
 
 impl From<SimpleMemberEntityFromSQLx> for SimpleMemberEntity {

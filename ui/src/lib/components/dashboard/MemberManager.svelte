@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { Members } from '$lib/services';
 	import { startWithTap } from '$lib/utils';
-	import { finalize, mergeMap, tap } from 'rxjs';
+	import { concatMap, finalize, tap } from 'rxjs';
 	import type { SimpleMember } from '$lib/models/Member';
 	import { t } from 'svelte-i18n';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
@@ -23,17 +23,12 @@
 		Members.delete(memberId)
 			.pipe(
 				startWithTap(() => isLoading = true),
-				finalize(() => isLoading = false),
-				mergeMap(_ => {
-					return Members.list(language)
-						.pipe(
-							tap(e => {
-								data = e;
-							})
-						);
-				})
+				concatMap(() => {
+					return Members.list(language);
+				}),
+				tap(e => data = e)
 			)
-			.subscribe();
+			.subscribe({ error: () => isLoading = false, complete: () => isLoading = false });
 	}
 
 	onMount(() => {

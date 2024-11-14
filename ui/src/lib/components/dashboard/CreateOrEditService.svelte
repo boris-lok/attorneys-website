@@ -88,7 +88,7 @@
 	<div class="edit-section">
 		<Input label={$t('service.title')} name="name" on:input={onTitleChanged} value={title} />
 		<TextArea data={data} label={$t('service.data')} on:input={onDataChanged} />
-		<NumberInput label={$t('seq')} name="seq" on:input={onSeqChanged} value={seq} placeholder={$t("seq.warning")} />
+		<NumberInput label={$t('seq')} name="seq" on:input={onSeqChanged} placeholder={$t("seq.warning")} value={seq} />
 	</div>
 
 	<div class="btn-container">

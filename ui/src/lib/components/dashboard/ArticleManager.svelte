@@ -4,7 +4,7 @@
 	import { Articles } from '$lib/services';
 	import type { Language } from '$lib/models/Language';
 	import { startWithTap } from '$lib/utils';
-	import { BehaviorSubject, finalize, mergeMap, Subscription, tap } from 'rxjs';
+	import { BehaviorSubject, concatMap, finalize, Subscription, tap } from 'rxjs';
 	import type { ArticleData } from '$lib/models/Articles';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
@@ -45,19 +45,18 @@
 			.pipe(
 				startWithTap(() => isLoading = true),
 				finalize(() => isLoading = false),
-				mergeMap(_ => {
+				concatMap(_ => {
 					// reload the page
-					return Articles.list(language, page, pageSize)
-						.pipe(
-							tap(e => {
-								data = e.articles;
-								hasPreviousPage = page > 0;
-								hasNextPage = (e.total - ((page + 1) * pageSize)) > 0;
-							})
-						);
+					return Articles.list(language, page, pageSize);
+				}),
+				tap(e => {
+
+					data = e.articles;
+					hasPreviousPage = page > 0;
+					hasNextPage = (e.total - ((page + 1) * pageSize)) > 0;
 				})
 			)
-			.subscribe();
+			.subscribe({ error: () => isLoading = false, complete: () => isLoading = false });
 	}
 
 	onMount(() => {

@@ -8,7 +8,7 @@
 	import { Members } from '$lib/services';
 	import type { Language } from '$lib/models/Language';
 	import { startWithTap } from '$lib/utils';
-	import { finalize, mergeMap, of } from 'rxjs';
+	import { concatMap, of } from 'rxjs';
 	import type { AvatarData } from '$lib/models/Member';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 	import { showNotification } from '../../../stores/notificationStore';
@@ -79,8 +79,7 @@
 		Members.save(json)
 			.pipe(
 				startWithTap(() => isLoading = true),
-				finalize(() => isLoading = false),
-				mergeMap(e => {
+				concatMap(e => {
 					if (e !== null && avatar instanceof File && avatar) {
 						return Members.uploadAvatar(e, avatar);
 					}
@@ -95,13 +94,16 @@
 						3000
 					);
 				},
-				error: e => {
-					console.error(e);
+				error: () => {
+					isLoading = false;
 					showNotification(
 						$t('save.failed'),
 						'error',
 						3000
 					);
+				},
+				complete: () => {
+					isLoading = false;
 				}
 			});
 
@@ -125,7 +127,7 @@
 		<div class="edit-section">
 			<Input label={$t('member.name')} name="name" on:input={onNameChanged} value={name} />
 			<TextArea data={description} label={$t('member.description')} on:input={onDescriptionChanged} />
-			<NumberInput label={$t('seq')} name="seq" on:input={onSeqChanged} value={seq} placeholder={$t("seq.warning")} />
+			<NumberInput label={$t('seq')} name="seq" on:input={onSeqChanged} placeholder={$t("seq.warning")} value={seq} />
 		</div>
 
 		<div class="btn-container">

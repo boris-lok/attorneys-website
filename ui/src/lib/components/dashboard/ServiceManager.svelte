@@ -5,7 +5,7 @@
 	import { Services } from '$lib/services';
 	import type { Language } from '$lib/models/Language';
 	import { startWithTap, text_overflow } from '$lib/utils';
-	import { finalize, mergeMap, tap } from 'rxjs';
+	import { concatMap, finalize, tap } from 'rxjs';
 	import SvelteMarkdown from 'svelte-markdown';
 	import SpinningLoading from '$lib/components/SpinningLoading.svelte';
 
@@ -23,17 +23,12 @@
 		Services.delete(id)
 			.pipe(
 				startWithTap(() => isLoading = true),
-				finalize(() => isLoading = false),
-				mergeMap(_ => {
-					return Services.list(language)
-						.pipe(
-							tap(e => {
-								data = e;
-							})
-						);
-				})
+				concatMap(() => {
+					return Services.list(language);
+				}),
+				tap(e => data = e)
 			)
-			.subscribe();
+			.subscribe({ error: () => isLoading = false, complete: () => isLoading = false });
 	}
 
 	onMount(() => {

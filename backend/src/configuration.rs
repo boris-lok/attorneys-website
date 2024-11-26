@@ -1,4 +1,4 @@
-use secrecy::SecretBox;
+use secrecy::{ExposeSecret, SecretBox};
 use serde::Deserialize;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
 
@@ -12,7 +12,7 @@ pub struct Settings {
 #[derive(Debug, Deserialize)]
 pub struct DatabaseSettings {
     pub username: String,
-    pub password: String,
+    pub password: SecretBox<String>,
     pub port: u16,
     pub host: String,
     pub database_name: String,
@@ -30,7 +30,7 @@ impl DatabaseSettings {
         PgConnectOptions::new()
             .host(&self.host)
             .username(&self.username)
-            .password(&self.password)
+            .password(&self.password.expose_secret())
             .port(self.port)
             .ssl_mode(ssl_mode)
     }
@@ -73,6 +73,7 @@ pub struct Application {
     pub host: String,
     pub port: u16,
     pub upload_folder: String,
+    pub log_file: String,
     pub jwt_secret: SecretBox<String>,
 }
 

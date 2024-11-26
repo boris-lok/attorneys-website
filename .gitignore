@@ -52,6 +52,7 @@ ui/build
 ui/.env.prod
 
 upload/*
+logs/
 
 
 # Editor directories and files

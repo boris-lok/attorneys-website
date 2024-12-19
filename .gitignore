@@ -20,19 +20,6 @@ backend/Cargo.lock
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-frontend/logs
-frontend/*.log
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
-frontend/pnpm-debug.log*
-frontend/lerna-debug.log*
-
-frontend/node_modules
-frontend/dist
-frontend/dist-ssr
-frontend/*.local
-
 ui/logs
 ui/*.log
 ui/npm-debug.log*
@@ -40,15 +27,15 @@ ui/yarn-debug.log*
 ui/yarn-error.log*
 ui/pnpm-debug.log*
 ui/lerna-debug.log*
-ui/.npmrc
+**/.npmrc
 
-ui/node_modules
+**/node_modules
 ui/dist
 ui/dist-ssr
 ui/*.local
-ui/.svelte-kit
+**/.svelte-kit
 ui/static/avatar
-ui/build
+**/build
 ui/.env.prod
 
 upload/*
@@ -62,3 +49,22 @@ logs/*
 **/*.njsproj
 **/*.sln
 **/*.sw?
+
+# Output
+**/.output
+**/.vercel
+**/.netlify
+**/.wrangler
+
+# OS
+**/Thumbs.db
+
+# Env
+**/.env
+**/.env.*
+**/!.env.example
+**/!.env.test
+
+# Vite
+**/vite.config.js.timestamp-*
+**/vite.config.ts.timestamp-*

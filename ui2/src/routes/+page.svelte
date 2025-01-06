@@ -1,3 +1,10 @@
-<h1 class="text-3xl font-bold underline">
-	Hello Tailwind!
-</h1>
+<script>
+	import NavigateBar from '$lib/components/sidebar/NavigateBar.svelte';
+</script>
+
+<NavigateBar>
+</NavigateBar>
+
+<div class="bg-blue-300 w-screen h-screen">
+	123
+</div>

@@ -1,31 +1,35 @@
 <script lang="ts">
-	import IconifyIcon from '@iconify/svelte';
+	import { Fa } from 'svelte-fa';
+	import { faAddressBook, faBars, faBook, faHouse, faIdCard, faList, faXmark } from '@fortawesome/free-solid-svg-icons';
+	import NavigateItem from '$lib/components/sidebar/NavigateItem.svelte';
 
 	let items = [
 		{
-			icon: 'line-md:home',
+			icon: faHouse,
 			name: 'Home'
 		},
 		{
-			icon: 'stash:espiral-book-light',
+			icon: faList,
 			name: 'Services'
 		},
 		{
-			icon: 'tabler:books',
+			icon: faBook,
 			name: 'Articles'
 		},
 		{
-			icon: 'tdesign:member-filled',
+			icon: faIdCard,
 			name: 'Members'
 		},
 		{
-			icon: 'hugeicons:contact-02',
+			icon: faAddressBook,
 			name: 'Contact us'
 		}
 	];
 
+	// The status of dropdown menu.
 	let show = $state(false);
 
+	// handle the menu button clicked.
 	function toggleMenu() {
 		show = !show;
 	}
@@ -40,29 +44,27 @@
 			</div>
 
 			<!-- Menu Icon -->
-			<div class="sm:hidden w-6 h-6">
+			<div class="sm:hidden w-6 h-6 relative flex items-center justify-center">
 				<button onclick={toggleMenu}>
-					<IconifyIcon icon="ri:menu-2-fill" width="24" height="24" />
+					<Fa class="text-xl" icon={show ? faXmark : faBars} />
 				</button>
 			</div>
 
-			<!--			&lt;!&ndash; Navigate Item &ndash;&gt;-->
-			<!--			<div class="">-->
-			<!--				{#each items as item (item.name)}-->
-			<!--					<NavigateItem label={item.name} icon={item.icon} />-->
-			<!--				{/each}-->
-			<!--			</div>-->
+			<!-- Top Bar Navigate Item -->
+			<div class="relative flex flex-row sm:gap-4 md:gap-8 xl:gap-12 max-sm:hidden">
+				{#each items as item (item.name)}
+					<NavigateItem label={item.name} icon={item.icon} topBar={true} />
+				{/each}
+			</div>
+
 		</div>
 	</div>
-	<div class:show={show}
-			 class="absolute h-0 transition-[height,opacity] backdrop-blur-sm top-16 w-screen overflow-y-scroll duration-300 opacity-0">
+	<!-- Dropdown Navigate Item -->
+	<div class="absolute h-0 transition-[height,opacity] backdrop-blur-sm top-16 w-screen overflow-y-scroll duration-300 opacity-0 md:hidden"
+			 class:show={show}>
 		<div class="grid grid-cols-2 h-[32rem] w-full justify-items-center items-center pt-6">
 			{#each items as item (item.name)}
-				<div
-					class="relative flex flex-col gap-2 w-32 h-32 items-center p-4 rounded border-black hover:border-orange-500 group border-2 hover:border-4">
-					<IconifyIcon icon={item.icon} width="48" height="48" class="group-hover:menu-icon-hover" />
-					<p class="group-hover:text-orange-500 group-hover:font-bold">{item.name}</p>
-				</div>
+				<NavigateItem label={item.name} icon={item.icon} topBar={false} />
 			{/each}
 		</div>
 	</div>

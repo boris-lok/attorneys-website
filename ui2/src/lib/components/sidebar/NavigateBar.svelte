@@ -1,27 +1,26 @@
 <script lang="ts">
-	import { Fa } from 'svelte-fa';
-	import { faAddressBook, faBars, faBook, faHouse, faIdCard, faList, faXmark } from '@fortawesome/free-solid-svg-icons';
 	import NavigateItem from '$lib/components/sidebar/NavigateItem.svelte';
+	import IconifyIcon from '@iconify/svelte';
 
 	let items = [
 		{
-			icon: faHouse,
+			icon: 'iconoir:home',
 			name: 'Home'
 		},
 		{
-			icon: faList,
+			icon: 'lsicon:list-outline',
 			name: 'Services'
 		},
 		{
-			icon: faBook,
+			icon: 'lineicons:books-2',
 			name: 'Articles'
 		},
 		{
-			icon: faIdCard,
+			icon: 'tdesign:member',
 			name: 'Members'
 		},
 		{
-			icon: faAddressBook,
+			icon: 'hugeicons:contact-02',
 			name: 'Contact us'
 		}
 	];
@@ -46,7 +45,7 @@
 			<!-- Menu Icon -->
 			<div class="sm:hidden w-6 h-6 relative flex items-center justify-center">
 				<button onclick={toggleMenu}>
-					<Fa class="text-xl" icon={show ? faXmark : faBars} />
+					<IconifyIcon class="w-6 h-6" icon={show ? 'material-symbols-light:close': 'ri:menu-3-fill'} />
 				</button>
 			</div>
 

@@ -8,9 +8,9 @@ importers:
 
   .:
     devDependencies:
-      '@fortawesome/free-solid-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+      '@iconify/svelte':
+        specifier: ^4.2.0
+        version: 4.2.0(svelte@5.16.0)
       '@magidoc/plugin-svelte-marked':
         specifier: ^6.2.0
         version: 6.2.0
@@ -50,9 +50,6 @@ importers:
       svelte-check:
         specifier: ^4.0.0
         version: 4.1.1(svelte@5.16.0)(typescript@5.7.2)
-      svelte-fa:
-        specifier: ^4.0.3
-        version: 4.0.3(svelte@5.16.0)
       svelte-i18n:
         specifier: ^4.0.1
         version: 4.0.1(svelte@5.16.0)
@@ -367,13 +364,13 @@ packages:
   '@formatjs/intl-localematcher@0.5.9':
     resolution: {integrity: sha512-8zkGu/sv5euxbjfZ/xmklqLyDGQSxsLqg8XOq88JW3cmJtzhCP8EtSJXlaKZnVO4beEaoiT9wj4eIoCQ9smwxA==}
 
-  '@fortawesome/fontawesome-common-types@6.7.2':
-    resolution: {integrity: sha512-Zs+YeHUC5fkt7Mg1l6XTniei3k4bwG/yo3iFUtZWd/pMx9g3fdvkSK9E0FOC+++phXOka78uJcYb8JaFkW52Xg==}
-    engines: {node: '>=6'}
+  '@iconify/svelte@4.2.0':
+    resolution: {integrity: sha512-fEl0T7SAPonK7xk6xUlRPDmFDZVDe2Z7ZstlqeDS/sS8ve2uyU+Qa8rTWbIqzZJlRvONkK5kVXiUf9nIc+6OOQ==}
+    peerDependencies:
+      svelte: '>4.0.0'
 
-  '@fortawesome/free-solid-svg-icons@6.7.2':
-    resolution: {integrity: sha512-GsBrnOzU8uj0LECDfD5zomZJIjrPhIlWU82AHwa2s40FKH+kcxQaBvBo3Z4TxyZHIyX8XTDxsyA33/Vx9eFuQA==}
-    engines: {node: '>=6'}
+  '@iconify/types@2.0.0':
+    resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -1161,11 +1158,6 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
 
-  svelte-fa@4.0.3:
-    resolution: {integrity: sha512-saZ8yACM0k9Aexey+2NXU1W0MBosU5lBsRgqFCJKM+Taw7d0HyimPaPAjmvY/Xkyi3UwEYL/Sdu1IZJv/p0Flw==}
-    peerDependencies:
-      svelte: ^4.0.0 || ^5.0.0
-
   svelte-i18n@4.0.1:
     resolution: {integrity: sha512-jaykGlGT5PUaaq04JWbJREvivlCnALtT+m87Kbm0fxyYHynkQaxQMnIKHLm2WeIuBRoljzwgyvz0Z6/CMwfdmQ==}
     engines: {node: '>= 16'}
@@ -1467,11 +1459,12 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@fortawesome/fontawesome-common-types@6.7.2': {}
-
-  '@fortawesome/free-solid-svg-icons@6.7.2':
+  '@iconify/svelte@4.2.0(svelte@5.16.0)':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@iconify/types': 2.0.0
+      svelte: 5.16.0
+
+  '@iconify/types@2.0.0': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -2263,10 +2256,6 @@ snapshots:
       typescript: 5.7.2
     transitivePeerDependencies:
       - picomatch
-
-  svelte-fa@4.0.3(svelte@5.16.0):
-    dependencies:
-      svelte: 5.16.0
 
   svelte-i18n@4.0.1(svelte@5.16.0):
     dependencies:

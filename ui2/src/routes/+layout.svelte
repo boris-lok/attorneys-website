@@ -1,7 +1,12 @@
 <script lang="ts">
 	import '../app.css';
+	import NavigateBar from '$lib/components/sidebar/NavigateBar.svelte';
 
 	let { children } = $props();
 </script>
 
-{@render children()}
+<NavigateBar></NavigateBar>
+
+<main>
+	{@render children()}
+</main>

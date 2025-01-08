@@ -60,8 +60,9 @@
 		</div>
 	</div>
 	<!-- Dropdown Navigate Item -->
-	<div class="absolute h-0 transition-[height,opacity] backdrop-blur-sm top-16 w-screen overflow-y-scroll duration-300 opacity-0 md:hidden"
-			 class:show={show}>
+	<div
+		class="absolute h-0 transition-[height,opacity] backdrop-blur-sm top-16 w-screen overflow-y-scroll duration-300 opacity-0 md:hidden"
+		class:show={show}>
 		<div class="grid grid-cols-2 h-[32rem] w-full justify-items-center items-center pt-6">
 			{#each items as item (item.name)}
 				<NavigateItem label={item.name} icon={item.icon} topBar={false} />

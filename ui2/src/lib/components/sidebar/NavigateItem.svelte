@@ -1,26 +1,27 @@
 <script lang="ts">
-	import IconifyIcon from '@iconify/svelte';
+    import IconifyIcon from '@iconify/svelte'
 
-	let { icon, label, topBar }: {
-		icon: string,
-		label: string,
-		topBar: boolean,
-	} = $props();
-
+    let {
+        icon,
+        label,
+        topBar,
+    }: {
+        icon: string
+        label: string
+        topBar: boolean
+    } = $props()
 </script>
 
-
 {#if topBar}
-	<div
-		class="relative flex flex-row gap-2 group cursor-pointer items-center">
-		<IconifyIcon icon={icon} class="w-6 h-6" />
-		<p>{label}</p>
-	</div>
+    <div class="group relative flex cursor-pointer flex-row items-center gap-2">
+        <IconifyIcon {icon} class="h-6 w-6" />
+        <p>{label}</p>
+    </div>
 {:else}
-	<div
-		class="relative flex flex-col gap-2 w-32 h-32 items-center justify-around p-4 rounded border-black group border-2 hover:border-4 cursor-pointer">
-		<IconifyIcon icon={icon} class="w-12 h-12" />
-		<p class=" group-hover:font-bold">{label}</p>
-	</div>
+    <div
+        class="group relative flex h-32 w-32 cursor-pointer flex-col items-center justify-around gap-2 rounded border-2 border-black p-4 hover:border-4"
+    >
+        <IconifyIcon {icon} class="h-12 w-12" />
+        <p class=" group-hover:font-bold">{label}</p>
+    </div>
 {/if}
-

@@ -11,7 +11,7 @@ database:
 application:
   port: 8081
   host: 127.0.0.1
-  upload_folder: /Users/boris/Documents/workspace/projects/attorneys-website/upload/
-  log_file: /Users/boris/Documents/workspace/projects/attorneys-website/logs/log.txt
+  upload_folder: /Users/boris/Documents/workspace/attorneys-website/upload/
+  log_file: /Users/boris/Documents/workspaces/attorneys-website/logs/log.txt
   jwt_secret: secret
 redis_uri: redis://127.0.0.1:6379

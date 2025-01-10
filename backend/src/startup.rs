@@ -50,35 +50,35 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     // Config the routes
     let admin_member_routes = Router::new()
         .route("/members", post(create_member).put(update_member))
-        .route("/members/:id", delete(delete_member))
-        .route("/members/:id/avatar", post(upload_member_avatar));
+        .route("/members/{id}", delete(delete_member))
+        .route("/members/{id}/avatar", post(upload_member_avatar));
     let member_routes = Router::new()
-        .route("/members/:id", get(retrieve_member))
+        .route("/members/{id}", get(retrieve_member))
         .route("/members", get(list_members));
 
     let admin_service_routes = Router::new()
         .route("/services", post(create_service).put(update_service))
-        .route("/services/:id", delete(delete_service));
+        .route("/services/{id}", delete(delete_service));
     let service_routes = Router::new()
-        .route("/services/:id", get(retrieve_service))
+        .route("/services/{id}", get(retrieve_service))
         .route("/services", get(list_services));
 
     let admin_home_routes = Router::new().route("/home", post(create_home).put(update_home));
     let home_routes = Router::new()
-        .route("/home/:id", get(retrieve_home))
+        .route("/home/{id}", get(retrieve_home))
         .route("/home", get(list_home));
 
     let admin_contact_routes =
         Router::new().route("/contact", post(create_contact).put(update_contact));
     let contact_routes = Router::new()
-        .route("/contact/:id", get(retrieve_contact))
+        .route("/contact/{id}", get(retrieve_contact))
         .route("/contact", get(list_contact));
 
     let admin_article_routes = Router::new()
         .route("/articles", post(create_article).put(update_article))
-        .route("/articles/:id", delete(delete_article));
+        .route("/articles/{id}", delete(delete_article));
     let article_routes = Router::new()
-        .route("/articles/:id", get(retrieve_article))
+        .route("/articles/{id}", get(retrieve_article))
         .route("/articles", get(list_articles));
 
     let admin_user_routes = Router::new()
@@ -102,8 +102,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
 
     let app = Router::new()
         .route("/health", get(health_check))
-        .nest("/api/:version/admin", admin_routes)
-        .nest("/api/:version/", routes)
+        .nest("/api/{version}/admin", admin_routes)
+        .nest("/api/{version}/", routes)
         .layer(Extension(Arc::new(image_util)))
         .layer(Extension(Arc::new(redis_client)))
         .layer(CorsLayer::permissive())

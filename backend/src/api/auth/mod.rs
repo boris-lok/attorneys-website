@@ -18,7 +18,6 @@ pub struct Claims {
     pub exp: usize,
 }
 
-#[async_trait::async_trait]
 impl<S> FromRequestParts<S> for Claims
 where
     AppState: FromRef<S>,

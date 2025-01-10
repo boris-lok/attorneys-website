@@ -42,31 +42,31 @@ pub(crate) mod tests {
             match &resource {
                 Resource::Member(_) => {
                     uow.resource_repository()
-                        .insert(resource_id.clone(), ResourceType::Member)
+                        .insert(resource_id.clone(), ResourceType::Member, 0)
                         .await
                         .unwrap();
                 }
                 Resource::Service(_) => {
                     uow.resource_repository()
-                        .insert(resource_id.clone(), ResourceType::Service)
+                        .insert(resource_id.clone(), ResourceType::Service, 1)
                         .await
                         .unwrap();
                 }
                 Resource::Home(_) => {
                     uow.resource_repository()
-                        .insert(resource_id.clone(), ResourceType::Home)
+                        .insert(resource_id.clone(), ResourceType::Home, 2)
                         .await
                         .unwrap();
                 }
                 Resource::Contact(_) => {
                     uow.resource_repository()
-                        .insert(resource_id.clone(), ResourceType::Contact)
+                        .insert(resource_id.clone(), ResourceType::Contact, 3)
                         .await
                         .unwrap();
                 }
                 Resource::Article(_) => {
                     uow.resource_repository()
-                        .insert(resource_id.clone(), ResourceType::Article)
+                        .insert(resource_id.clone(), ResourceType::Article, 4)
                         .await
                         .unwrap();
                 }

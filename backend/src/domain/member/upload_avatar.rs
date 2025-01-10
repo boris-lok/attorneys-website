@@ -131,7 +131,7 @@ mod test {
         let id = Ulid::new().to_string();
         let id = ResourceID::try_from(id).unwrap();
         uow.resource_repository()
-            .insert(id.clone(), ResourceType::Member)
+            .insert(id.clone(), ResourceType::Member, 0)
             .await
             .expect("can't insert a member");
 
@@ -163,7 +163,7 @@ mod test {
         let id = Ulid::new().to_string();
         let id = ResourceID::try_from(id).unwrap();
         uow.resource_repository()
-            .insert(id.clone(), ResourceType::Member)
+            .insert(id.clone(), ResourceType::Member, 0)
             .await
             .expect("can't insert a member");
 
@@ -191,7 +191,7 @@ mod test {
         let id = Ulid::new().to_string();
         let id = ResourceID::try_from(id).unwrap();
         uow.resource_repository()
-            .insert(id.clone(), ResourceType::Member)
+            .insert(id.clone(), ResourceType::Member, 0)
             .await
             .expect("can't insert a member");
 

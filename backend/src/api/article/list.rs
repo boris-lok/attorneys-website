@@ -10,17 +10,8 @@ use tokio::sync::Mutex;
 
 #[derive(Deserialize)]
 pub struct QueryPagination {
-    page: u32,
-    page_size: u32,
-}
-
-impl Default for QueryPagination {
-    fn default() -> Self {
-        Self {
-            page: 0,
-            page_size: 10,
-        }
-    }
+    page: Option<u32>,
+    page_size: Option<u32>,
 }
 
 #[derive(Debug, Serialize)]
@@ -31,15 +22,13 @@ pub struct ListArticlesResponse {
 
 pub async fn list_articles(
     State(state): State<AppState>,
-    pagination: Option<Query<QueryPagination>>,
     headers: HeaderMap,
+    pagination: Query<QueryPagination>,
 ) -> Result<Json<ListArticlesResponse>, ApiError> {
     let uow = InDatabase::new(&state.pool)
         .await
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
     let uow = Mutex::new(uow);
-
-    let pagination = pagination.unwrap_or_default();
 
     let lang = headers
         .get("Accept-Language")
@@ -51,8 +40,8 @@ pub async fn list_articles(
         language: lang.to_string(),
         default_language: Language::ZH,
         pagination: Pagination::Page(Page {
-            page: pagination.page,
-            size: pagination.page_size,
+            page: pagination.page.unwrap_or(0),
+            size: pagination.page_size.unwrap_or(10),
         }),
     };
 

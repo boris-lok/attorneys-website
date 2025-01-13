@@ -22,7 +22,7 @@ function login(req: {
         body: JSON.stringify(req),
         signal: AbortSignal.timeout(TIMEOUT),
         selector: (resp) => {
-            if (resp.ok) {
+            if (!resp.ok) {
                 return of({ error: true, message: `Error: ${resp.status}` })
             }
             return resp.json()

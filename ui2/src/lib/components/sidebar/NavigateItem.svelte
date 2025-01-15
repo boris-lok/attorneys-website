@@ -13,7 +13,9 @@
 </script>
 
 {#if topBar}
-    <div class="group relative flex cursor-pointer flex-row items-center gap-2">
+    <div
+        class="group relative flex cursor-pointer flex-row items-center gap-[0.25rem]"
+    >
         <IconifyIcon {icon} class="h-6 w-6" />
         <p>{label}</p>
     </div>

@@ -1,6 +1,7 @@
 import { fromFetch } from 'rxjs/fetch'
 import { ADMIN_URL, TIMEOUT } from '$lib/constant'
 import { catchError, map, Observable, of } from 'rxjs'
+import { getToken } from '$lib/utils'
 
 type Error = { error: boolean; message: unknown | string }
 type LoginSuccessResponse = {
@@ -50,6 +51,28 @@ function login(req: {
     )
 }
 
+function logout() {
+    return fromFetch(`${ADMIN_URL}/logout`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: getToken(),
+        },
+        signal: AbortSignal.timeout(TIMEOUT),
+        selector: (resp) => {
+            if (!resp.ok) {
+                return of({ error: true, message: `Error: ${resp.status}` })
+            }
+            return of({ error: false, message: 'logout successful' })
+        },
+    }).pipe(
+        catchError((err: unknown) => {
+            return of({ error: true, message: err })
+        }),
+    )
+}
+
 export const UserService = {
     login: login,
+    logout: logout,
 }

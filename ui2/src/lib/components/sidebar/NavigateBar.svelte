@@ -1,29 +1,32 @@
 <script lang="ts">
     import NavigateItem from '$lib/components/sidebar/NavigateItem.svelte'
     import IconifyIcon from '@iconify/svelte'
+    import type { NavigationItem } from '$lib/types'
 
-    let items = [
-        {
-            icon: 'iconoir:home',
-            name: 'Home',
-        },
-        {
-            icon: 'lsicon:list-outline',
-            name: 'Services',
-        },
-        {
-            icon: 'lineicons:books-2',
-            name: 'Articles',
-        },
-        {
-            icon: 'tdesign:member',
-            name: 'Members',
-        },
-        {
-            icon: 'hugeicons:contact-02',
-            name: 'Contact us',
-        },
-    ]
+    let { items }: { items: NavigationItem[] } = $props()
+
+    // let items = [
+    //     {
+    //         icon: 'iconoir:home',
+    //         name: 'Home',
+    //     },
+    //     {
+    //         icon: 'lsicon:list-outline',
+    //         name: 'Services',
+    //     },
+    //     {
+    //         icon: 'lineicons:books-2',
+    //         name: 'Articles',
+    //     },
+    //     {
+    //         icon: 'tdesign:member',
+    //         name: 'Members',
+    //     },
+    //     {
+    //         icon: 'hugeicons:contact-02',
+    //         name: 'Contact us',
+    //     },
+    // ]
 
     // The status of dropdown menu.
     let show = $state(false)
@@ -65,11 +68,15 @@
                 class="relative flex flex-row max-sm:hidden sm:gap-4 md:gap-8 xl:gap-12"
             >
                 {#each items as item (item.name)}
-                    <NavigateItem
-                        label={item.name}
-                        icon={item.icon}
-                        topBar={true}
-                    />
+                    {#if 'onClick' in item}
+                        <button class="outline-none" onclick={item.onClick}>
+                            <NavigateItem
+                                label={item.name}
+                                icon={item.icon}
+                                topBar={true}
+                            />
+                        </button>
+                    {/if}
                 {/each}
             </div>
         </div>
@@ -83,11 +90,15 @@
             class="grid h-[32rem] w-full grid-cols-2 items-center justify-items-center pt-6"
         >
             {#each items as item (item.name)}
-                <NavigateItem
-                    label={item.name}
-                    icon={item.icon}
-                    topBar={false}
-                />
+                {#if 'onClick' in item}
+                    <button class="outline-none" onclick={item.onClick}>
+                        <NavigateItem
+                            label={item.name}
+                            icon={item.icon}
+                            topBar={false}
+                        />
+                    </button>
+                {/if}
             {/each}
         </div>
     </div>

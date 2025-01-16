@@ -16,14 +16,16 @@
                 // Call an API to remove the token, navigate to the login page
                 // whatever success or failure. because we have removed the token
                 // from the cookie. We won't use the previous token again.
-                UserService.logout(
-                    finalize(() => {
-                        // Remove the token from the cookie
-                        user.remove()
-                    }),
-                ).subscribe({
-                    next: () => goto('/admin/login'),
-                })
+                UserService.logout()
+                    .pipe(
+                        finalize(() => {
+                            // Remove the token from the cookie
+                            user.remove()
+                        }),
+                    )
+                    .subscribe({
+                        next: () => goto('/admin/login'),
+                    })
             },
         },
     ]

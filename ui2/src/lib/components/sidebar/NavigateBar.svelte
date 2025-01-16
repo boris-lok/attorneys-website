@@ -5,29 +5,6 @@
 
     let { items }: { items: NavigationItem[] } = $props()
 
-    // let items = [
-    //     {
-    //         icon: 'iconoir:home',
-    //         name: 'Home',
-    //     },
-    //     {
-    //         icon: 'lsicon:list-outline',
-    //         name: 'Services',
-    //     },
-    //     {
-    //         icon: 'lineicons:books-2',
-    //         name: 'Articles',
-    //     },
-    //     {
-    //         icon: 'tdesign:member',
-    //         name: 'Members',
-    //     },
-    //     {
-    //         icon: 'hugeicons:contact-02',
-    //         name: 'Contact us',
-    //     },
-    // ]
-
     // The status of dropdown menu.
     let show = $state(false)
 
@@ -69,13 +46,27 @@
             >
                 {#each items as item (item.name)}
                     {#if 'onClick' in item}
-                        <button class="outline-none" onclick={item.onClick}>
+                        <button
+                            class="outline-none"
+                            onclick={() => {
+                                show = false
+                                item.onClick()
+                            }}
+                        >
                             <NavigateItem
                                 label={item.name}
                                 icon={item.icon}
                                 topBar={true}
                             />
                         </button>
+                    {:else if 'url' in item}
+                        <a href={item.url} onclick={() => (show = false)}>
+                            <NavigateItem
+                                label={item.name}
+                                icon={item.icon}
+                                topBar={true}
+                            />
+                        </a>
                     {/if}
                 {/each}
             </div>
@@ -87,17 +78,31 @@
         class:show
     >
         <div
-            class="grid h-[32rem] w-full grid-cols-2 items-center justify-items-center pt-6"
+            class="grid max-h-[calc(100vh-4rem)] w-full grid-cols-2 justify-items-center gap-y-8 overflow-y-auto overflow-x-hidden px-4 py-6"
         >
             {#each items as item (item.name)}
                 {#if 'onClick' in item}
-                    <button class="outline-none" onclick={item.onClick}>
+                    <button
+                        class="outline-none"
+                        onclick={() => {
+                            show = false
+                            item.onClick()
+                        }}
+                    >
                         <NavigateItem
                             label={item.name}
                             icon={item.icon}
                             topBar={false}
                         />
                     </button>
+                {:else if 'url' in item}
+                    <a href={item.url} onclick={() => (show = false)}>
+                        <NavigateItem
+                            label={item.name}
+                            icon={item.icon}
+                            topBar={false}
+                        />
+                    </a>
                 {/if}
             {/each}
         </div>

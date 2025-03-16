@@ -1,8 +1,13 @@
-import type { CreateHomeRequest, UpdateHomeRequest } from '$lib/types'
+import type {
+    CreateHomeRequest,
+    HomeData,
+    Language,
+    UpdateHomeRequest,
+} from '$lib/types'
 import { fromFetch } from 'rxjs/fetch'
-import { ADMIN_URL, TIMEOUT } from '$lib/constant'
+import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
-import { map, of } from 'rxjs'
+import { map } from 'rxjs'
 
 /**
  * The API endpoint of saving the content of home page
@@ -32,7 +37,44 @@ function save(req: CreateHomeRequest | UpdateHomeRequest) {
     )
 }
 
+/**
+ * The API endpoint of retrieving the content of home page.
+ * @param id The id of the Home data
+ * @param language The language of the data
+ */
+function retrieve(id: string, language: Language) {
+    return fromFetch(`${BASE_URL}/home/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept-Language': language,
+        },
+        signal: AbortSignal.timeout(TIMEOUT),
+        selector: (resp) =>
+            resp.json().then((json) => {
+                return 'home' in json ? (json.home as HomeData) : null
+            }),
+    })
+}
+
+function list(language: Language) {
+    return fromFetch(`${BASE_URL}/home`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept-Language': language,
+        },
+        signal: AbortSignal.timeout(TIMEOUT),
+        selector: (resp) =>
+            resp.json().then((value) => {
+                return 'home' in value ? (value.home as HomeData[]) : []
+            }),
+    })
+}
+
 export const HomeServices = {
     // save the content of home page.
     save: save,
+    retrieve: retrieve,
+    list: list,
 }

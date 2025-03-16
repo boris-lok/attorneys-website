@@ -59,7 +59,7 @@
 </script>
 
 <div
-    class="mx-auto mb-4 mt-[10%] w-11/12 rounded bg-white px-8 pb-8 pt-6 shadow-md md:w-96"
+    class="mx-auto mt-[10%] mb-4 w-11/12 rounded bg-white px-8 pt-6 pb-8 shadow-md md:w-96"
 >
     <Input
         hasError={false}

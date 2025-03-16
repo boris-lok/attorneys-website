@@ -16,7 +16,7 @@
 
 <nav class="relative">
     <div
-        class="relative flex h-16 flex-row items-center gap-12 overflow-hidden bg-gray-400 px-8"
+        class="relative flex h-16 flex-row items-center gap-12 overflow-hidden bg-[var(--primary-color)] px-8"
     >
         <div
             class="relative flex h-12 w-[100%] flex-row items-center justify-between"
@@ -74,11 +74,11 @@
     </div>
     <!-- Dropdown Navigate Item -->
     <div
-        class="absolute top-16 h-0 w-screen overflow-y-scroll opacity-0 backdrop-blur-sm transition-[height,opacity] duration-300 md:hidden"
+        class="absolute top-16 z-50 h-0 w-screen overflow-y-scroll opacity-0 backdrop-blur-sm transition-[height,opacity] duration-300 md:hidden"
         class:show
     >
         <div
-            class="grid max-h-[calc(100vh-4rem)] w-full grid-cols-2 justify-items-center gap-y-8 overflow-y-auto overflow-x-hidden px-4 py-6"
+            class="grid max-h-[calc(100vh-4rem)] w-full grid-cols-2 justify-items-center gap-y-8 overflow-x-hidden overflow-y-auto px-4 py-6"
         >
             {#each items as item (item.name)}
                 {#if 'onClick' in item}

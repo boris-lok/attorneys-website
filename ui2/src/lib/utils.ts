@@ -16,10 +16,8 @@ export function startWithTap<T>(callback: () => void) {
 export function getToken() {
     const u = user.get()
     if (!u) {
-        throw throwError(() => 'User not logged in')
+        return ''
     }
-
-    console.log(`User: ${JSON.stringify(u)}`)
 
     return `Bearer ${u.token}`
 }

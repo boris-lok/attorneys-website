@@ -20,3 +20,11 @@ export type CreateHomeRequest = {
 
 // The request of updating home content
 export type UpdateHomeRequest = CreateHomeRequest & { id: string }
+
+export type HomeData = {
+    id: string
+    language: Language
+    data: {
+        data: string
+    }
+}

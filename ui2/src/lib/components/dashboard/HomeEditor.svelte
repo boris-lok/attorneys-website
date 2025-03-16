@@ -4,7 +4,14 @@
     import { HomeServices } from '$lib/services/home.service'
     import { tap } from 'rxjs'
 
-    let content = $state('')
+    type EditorProps = {
+        id?: string
+        data?: string
+    }
+
+    let { id, data }: EditorProps = $props()
+
+    let content = $state(data ?? '')
     let errorMsg = $state('')
 
     // handles content has been changed
@@ -31,6 +38,7 @@
         }
 
         HomeServices.save({
+            ...(id === undefined ? {} : { id: id }),
             data: content,
             language: 'zh',
             seq: 0,
@@ -61,19 +69,21 @@
             label="Home Content"
             name="home"
             onInput={onContentChanged}
-            value=""
+            value={data ?? ''}
         ></Textarea>
     </div>
     <div class="flex-1">
         <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
-        <div class="prose block min-h-96 w-full rounded-lg bg-gray-100">
+        <div
+            class="prose block min-h-96 w-full rounded-lg bg-gray-100 px-4 py-4"
+        >
             <Markdown source={content}></Markdown>
         </div>
     </div>
 </div>
 <div class="relative flex flex-row justify-center gap-x-4">
     <button
-        class="block rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:bg-gray-500"
+        class="block cursor-pointer rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:cursor-auto disabled:bg-gray-500"
         disabled={content === ''}
         onclick={onSaveClicked}
     >

@@ -3,7 +3,9 @@
     import { HomeServices } from '$lib/services/home.service'
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
+    import Icon from '@iconify/svelte'
 
+    let id = $state('')
     // The content of home page
     let content = $state('')
     // The loading statue of retrieving the content from API.
@@ -20,8 +22,8 @@
                         content = ''
                     } else {
                         content = resp[0].data.data
+                        id = resp[0].id
                     }
-                    console.log(resp)
                 }),
             )
             .subscribe({
@@ -34,6 +36,25 @@
     })
 </script>
 
-<div class="prose mx-auto my-4 max-w-[var(--max-screen-width)] px-16 py-16">
-    <Markdown source={content}></Markdown>
-</div>
+{#if isLoading}
+    <p>Loading...</p>
+{:else}
+    <div
+        class="relative mx-auto flex max-w-[var(--max-screen-width)] flex-col gap-y-8 px-16 py-16"
+    >
+        <div class="relative flex flex-row justify-end">
+            {#if id !== ''}
+                <a href="/admin/home/edit/{id}">
+                    <Icon icon="mingcute:edit-line" width="24" height="24" />
+                </a>
+            {:else}
+                <a href="/admin/home/edit">
+                    <Icon icon="gridicons:create" width="24" height="24" />
+                </a>
+            {/if}
+        </div>
+        <div class="prose">
+            <Markdown source={content}></Markdown>
+        </div>
+    </div>
+{/if}

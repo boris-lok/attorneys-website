@@ -21,6 +21,7 @@ export type CreateHomeRequest = {
 // The request of updating home content
 export type UpdateHomeRequest = CreateHomeRequest & { id: string }
 
+// The data structure of home data
 export type HomeData = {
     id: string
     language: Language
@@ -28,3 +29,25 @@ export type HomeData = {
         data: string
     }
 }
+
+// The data structure of service data
+export type ServiceData = {
+    id: string
+    language: Language
+    data: {
+        title: string
+        data: string
+    }
+    seq: number
+}
+
+// The request of creating service content
+export type CreateServiceRequest = {
+    title: string
+    data: string
+    language: Language
+    seq: number
+}
+
+// The request of updating service content
+export type UpdateServiceRequest = { id: string } & CreateServiceRequest

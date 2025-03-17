@@ -7,4 +7,6 @@
     --secondary-color: #ffde59;
 
     --max-screen-width: 1024px;
+
+    --box-shadow: 0 0 1rem 0 #d4d4d4;
 }

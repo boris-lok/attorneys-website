@@ -30,7 +30,7 @@
             <div
                 class="relative flex h-6 w-6 items-center justify-center sm:hidden"
             >
-                <button onclick={toggleMenu}>
+                <button class="cursor-pointer" onclick={toggleMenu}>
                     <IconifyIcon
                         class="h-6 w-6"
                         icon={show

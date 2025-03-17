@@ -1,8 +1,8 @@
 import type {
-    CreateHomeRequest,
-    HomeData,
+    CreateServiceRequest,
     Language,
-    UpdateHomeRequest,
+    ServiceData,
+    UpdateServiceRequest,
 } from '$lib/types'
 import { fromFetch } from 'rxjs/fetch'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
@@ -10,13 +10,13 @@ import { getToken } from '$lib/utils'
 import { map } from 'rxjs'
 
 /**
- * The API endpoint of saving the content of home page
+ * The API endpoint of saving service
  * @param req
  */
-function save(req: CreateHomeRequest | UpdateHomeRequest) {
+function save(req: CreateServiceRequest | UpdateServiceRequest) {
     let method = 'id' in req ? 'PUT' : 'POST'
 
-    return fromFetch(`${ADMIN_URL}/home`, {
+    return fromFetch(`${ADMIN_URL}/services`, {
         method: method,
         headers: {
             'Content-Type': 'application/json',
@@ -35,12 +35,12 @@ function save(req: CreateHomeRequest | UpdateHomeRequest) {
 }
 
 /**
- * The API endpoint of retrieving the content of home page.
- * @param id The id of the Home data
- * @param language The language of the data
+ * The API endpoint of retrieving the service by id and language
+ * @param id the ID of service
+ * @param language the language
  */
 function retrieve(id: string, language: Language) {
-    return fromFetch(`${BASE_URL}/home/${id}`, {
+    return fromFetch(`${BASE_URL}/services/${id}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -49,17 +49,13 @@ function retrieve(id: string, language: Language) {
         signal: AbortSignal.timeout(TIMEOUT),
         selector: (resp) =>
             resp.json().then((json) => {
-                return 'home' in json ? (json.home as HomeData) : null
+                return 'service' in json ? (json.service as ServiceData) : null
             }),
     })
 }
 
-/**
- * The API endpoint of list all home
- * @param language the language of the data
- */
 function list(language: Language) {
-    return fromFetch(`${BASE_URL}/home`, {
+    return fromFetch(`${BASE_URL}/services`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -68,16 +64,18 @@ function list(language: Language) {
         signal: AbortSignal.timeout(TIMEOUT),
         selector: (resp) =>
             resp.json().then((value) => {
-                return 'home' in value ? (value.home as HomeData[]) : []
+                return 'services' in value
+                    ? (value.services as ServiceData[])
+                    : []
             }),
     })
 }
 
-export const HomeServices = {
-    // save the content of home page.
+export const ServicesServices = {
+    // save the content of service page.
     save: save,
-    // retrieve the home
+    // retrieve the service
     retrieve: retrieve,
-    // list all home
+    // list all services
     list: list,
 }

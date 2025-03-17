@@ -10,6 +10,31 @@
 
     let items: NavigationItem[] = [
         {
+            icon: 'iconoir:home',
+            name: 'Home',
+            url: '/admin/home',
+        },
+        {
+            icon: 'lsicon:list-outline',
+            name: 'Services',
+            url: '/admin/services',
+        },
+        {
+            icon: 'lineicons:books-2',
+            name: 'Articles',
+            url: '/admin/articles',
+        },
+        {
+            icon: 'tdesign:member',
+            name: 'Members',
+            url: '/admin/members',
+        },
+        {
+            icon: 'hugeicons:contact-02',
+            name: 'Contact us',
+            url: '/admin/contact_us',
+        },
+        {
             icon: 'tabler:logout',
             name: 'logout',
             onClick: () => {

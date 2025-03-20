@@ -54,36 +54,37 @@ export type UpdateServiceRequest = { id: string } & CreateServiceRequest
 
 // The request of creating member content
 export type CreateMemberRequest = {
-    name: string;
-    description: string;
-    language: Language;
+    name: string
+    description: string
+    language: Language
+    seq: number
 }
 
 // The request of updating member content
-export type UpdateMemberRequest = {id : string} & CreateMemberRequest;
+export type UpdateMemberRequest = { id: string } & CreateMemberRequest
 
 // The data structure of simple member
 export type SimpleMember = {
-    id: string;
-    name: string;
-    avatar?: string;
-    seq: number;
+    id: string
+    name: string
+    avatar?: string
+    seq: number
 }
 
-// The data structure of avatar
-export type AvatarData = {
-    large_image: string;
-    small_image: string;
+// The data structure of image
+export type ImageData = {
+    large_image: string
+    small_image: string
 }
 
 // The data structure of member
 export type MemberData = {
-    id: string;
-    language: Language,
+    id: string
+    language: Language
     data: {
-        name: string;
-        description: string;
+        name: string
+        description: string
     }
-    avatar?: AvatarData,
-    seq: number,
+    avatar?: ImageData
+    seq: number
 }

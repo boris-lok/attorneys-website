@@ -7,7 +7,7 @@
     // The content of home page
     let content = $state('')
     // The loading statue of retrieving the content from API.
-    let isLoading = false
+    let isLoading = $state(false)
 
     // fetch the content from API.
     function fetchData() {

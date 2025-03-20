@@ -1,12 +1,19 @@
 import type {
     CreateMemberRequest,
-    Language, MemberData, SimpleMember,
-    UpdateMemberRequest
+    Language,
+    MemberData,
+    SimpleMember,
+    UpdateMemberRequest,
 } from '$lib/types'
 import { fromFetch } from 'rxjs/fetch'
-import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
+import {
+    ADMIN_URL,
+    BASE_URL,
+    TIMEOUT,
+    UPLOAD_IMAGE_TIMEOUT,
+} from '$lib/constant'
 import { getToken } from '$lib/utils'
-import { map } from 'rxjs'
+import { asyncScheduler, map, Observable, of, scheduled, switchMap } from 'rxjs'
 
 /**
  * The API endpoint of saving member
@@ -19,17 +26,32 @@ function save(req: CreateMemberRequest | UpdateMemberRequest) {
         method: method,
         headers: {
             'Content-Type': 'application/json',
-            Authorization: getToken()
+            Authorization: getToken(),
         },
         body: JSON.stringify(req),
-        signal: AbortSignal.timeout(TIMEOUT)
+        signal: AbortSignal.timeout(TIMEOUT),
     }).pipe(
-        map((resp) => {
+        switchMap((resp) => {
             if (!resp.ok) {
-                return { error: true, message: `Error: ${resp.status}` }
+                console.log('1')
+                return Observable.create({
+                    error: true,
+                    message: `Error: ${resp.status}`,
+                })
             }
-            return { error: false }
-        })
+
+            if ('id' in req) {
+                return Observable.create({ error: false, id: req.id })
+            } else {
+                return resp.json().then((json) => {
+                    if ('id' in json) {
+                        return { error: false, id: json.id }
+                    }
+                    console.error('Missing id from response')
+                    return { error: false }
+                })
+            }
+        }),
     )
 }
 
@@ -39,17 +61,17 @@ function save(req: CreateMemberRequest | UpdateMemberRequest) {
  * @param language the language
  */
 function retrieve(id: string, language: Language) {
-    return fromFetch(`${BASE_URL}/services/${id}`, {
+    return fromFetch(`${BASE_URL}/members/${id}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Accept-Language': language
+            'Accept-Language': language,
         },
         signal: AbortSignal.timeout(TIMEOUT),
         selector: (resp) =>
             resp.json().then((json) => {
                 return 'member' in json ? (json.member as MemberData) : null
-            })
+            }),
     })
 }
 
@@ -58,11 +80,11 @@ function retrieve(id: string, language: Language) {
  * @param language the language
  */
 function list(language: Language) {
-    return fromFetch(`${BASE_URL}/services`, {
+    return fromFetch(`${BASE_URL}/members`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Accept-Language': language
+            'Accept-Language': language,
         },
         signal: AbortSignal.timeout(TIMEOUT),
         selector: (resp) =>
@@ -70,7 +92,7 @@ function list(language: Language) {
                 return 'members' in value
                     ? (value.members as SimpleMember[])
                     : []
-            })
+            }),
     })
 }
 
@@ -82,22 +104,22 @@ function list(language: Language) {
 function saveAvatar(id: string, file: File) {
     const formData = new FormData()
     formData.append('avatar', file)
+
     return fromFetch(`${ADMIN_URL}/members/${id}/avatar`, {
         method: 'POST',
         body: formData,
         headers: {
-            Authorization: getToken()
+            Authorization: getToken(),
         },
-        signal: AbortSignal.timeout(TIMEOUT)
-    })
-        .pipe(
-            map((resp) => {
-                if (!resp.ok) {
-                    return { error: true, message: `Error: ${resp.status}` }
-                }
-                return { error: false }
-            })
-        )
+        signal: AbortSignal.timeout(UPLOAD_IMAGE_TIMEOUT),
+    }).pipe(
+        map((resp) => {
+            if (!resp.ok) {
+                return { error: true, message: `Error: ${resp.status}` }
+            }
+            return { error: false }
+        }),
+    )
 }
 
 export const MemberServices = {
@@ -108,5 +130,5 @@ export const MemberServices = {
     // list all members
     list: list,
     // save member avatar
-    saveAvatar: saveAvatar
+    saveAvatar: saveAvatar,
 }

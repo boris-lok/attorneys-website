@@ -17,7 +17,7 @@
                 startWithTap(() => (isLoading = true)),
                 finalize(() => (isLoading = false)),
                 tap((resp) => {
-                    content = resp.data.data
+                    content = resp?.data.data ?? ''
                 }),
             )
             .subscribe({

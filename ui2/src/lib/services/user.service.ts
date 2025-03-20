@@ -13,10 +13,7 @@ type LoginSuccessResponse = {
     }
 }
 
-function login(req: {
-    username: string
-    password: string
-}): Observable<Error | LoginSuccessResponse> {
+function login(req: { username: string; password: string }): Observable {
     return fromFetch(`${ADMIN_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -6,7 +6,7 @@ export function sleep(ms: number) {
 }
 
 export function startWithTap<T>(callback: () => void) {
-    return (source: Observable<T>) =>
+    return (source: Observable) =>
         defer(() => {
             callback()
             return source

@@ -3,19 +3,19 @@
     import Markdown from '@magidoc/plugin-svelte-marked'
     import { tap } from 'rxjs'
     import Input from '$lib/components/common/Input.svelte'
-    import { ServiceServices } from '$lib/services/service.service'
+    import { ArticleServices } from '$lib/services/article.service'
 
     type EditorProps = {
         id?: string
         title?: string
-        data?: string
+        content?: string
     }
 
-    let { id, data, title }: EditorProps = $props()
+    let { id, content, title }: EditorProps = $props()
 
     let newData = $state({
         title: title ?? '',
-        data: data ?? ''
+        content: content ?? ''
     })
     let errorMsg = $state('')
 
@@ -26,7 +26,7 @@
     ) {
         newData = {
             ...newData,
-            data: (e.currentTarget as HTMLTextAreaElement).value.trim()
+            content: (e.currentTarget as HTMLTextAreaElement).value.trim()
         }
     }
 
@@ -43,7 +43,7 @@
     // checks if content is not empty
     // if it is, returns false. Otherwise, returns true
     function isValid() {
-        return newData.title.trim() !== '' && newData.data !== ''
+        return newData.title.trim() !== '' && newData.content !== ''
     }
 
     // handles the save button has been clicked
@@ -55,7 +55,7 @@
             return
         }
 
-        ServiceServices.save({
+        ArticleServices.save({
             ...(id === undefined ? {} : { id: id }),
             ...newData,
             language: 'zh',
@@ -86,17 +86,17 @@
         <div class="relative flex-row gap-x-4">
             <Input
                 hasError={errorMsg !== ''}
-                label="Service Title"
+                label="Article Title"
                 name="title"
                 onInput={onTitleChanged}
                 type="text"
                 value={title ?? ''}
             />
             <Textarea
-                label="Service Content"
+                label="Article Content"
                 name="service"
                 onInput={onContentChanged}
-                value={data ?? ''}
+                value={content ?? ''}
             ></Textarea>
         </div>
     </div>
@@ -109,7 +109,7 @@
                 {newData.title}
             </p>
             <div class="prose">
-                <Markdown source={newData.data}></Markdown>
+                <Markdown source={newData.content}></Markdown>
             </div>
         </div>
     </div>
@@ -117,7 +117,7 @@
 <div class="relative flex flex-row justify-center gap-x-4">
     <button
         class="block cursor-pointer rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:cursor-auto disabled:bg-gray-500"
-        disabled={newData.title === '' || newData.data === ''}
+        disabled={newData.title === '' || newData.content=== ''}
         onclick={onSaveClicked}
     >
         Save

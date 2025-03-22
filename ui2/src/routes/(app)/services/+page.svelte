@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ServicesServices } from '$lib/services/service.service'
+    import { ServiceServices } from '$lib/services/service.service'
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
     import type { ServiceData } from '$lib/types'
@@ -9,7 +9,7 @@
     let isLoading = false
 
     function fetchData() {
-        ServicesServices.list('zh')
+        ServiceServices.list('zh')
             .pipe(
                 startWithTap(() => (isLoading = true)),
                 finalize(() => (isLoading = false)),

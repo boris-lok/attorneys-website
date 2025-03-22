@@ -88,3 +88,25 @@ export type MemberData = {
     avatar?: ImageData
     seq: number
 }
+
+// The request of creating article content
+export type CreateArticleRequest = {
+    title: string
+    content: string
+    language: Language
+    seq: number
+}
+
+// The request of updating article content
+export type UpdateArticleRequest = { id: string } & CreateArticleRequest
+
+// The data structure of article
+export type ArticleData = {
+    id: string
+    language: Language
+    data: {
+        title: string
+        content: string
+    }
+    seq: number
+}

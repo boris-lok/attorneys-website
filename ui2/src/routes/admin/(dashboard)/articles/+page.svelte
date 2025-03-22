@@ -61,21 +61,33 @@
     <p>Loading...</p>
 {:else}
     <div class="relative">
+        <div class="relative my-4 flex flex-row justify-end px-2">
+            <a href="/admin/articles/edit">
+                <Icon icon="gridicons:create" width="24" height="24" />
+            </a>
+        </div>
         <div class="relative flex flex-col gap-4">
             {#each articles as article}
-                <a href="/articles/{article.id}">
-                    <div
-                        class="flex w-full flex-row overflow-clip rounded shadow"
-                    >
-                        <div class="flex-auto">
-                            <p
-                                class="px-8 py-2 text-lg font-bold text-[var(--primary-color)]"
-                            >
-                                {article.data.title}
-                            </p>
-                        </div>
+                <div
+                    class="flex w-full flex-row overflow-clip rounded shadow"
+                >
+                    <div class="flex-auto">
+                        <p
+                            class="px-8 py-2 text-lg font-bold text-[var(--primary-color)]"
+                        >
+                            {article.data.title}
+                        </p>
                     </div>
-                </a>
+                    <div class="px-2 py-2">
+                        <a href="/admin/articles/edit/{article.id}">
+                            <Icon
+                                icon="mingcute:edit-line"
+                                width="24"
+                                height="24"
+                            />
+                        </a>
+                    </div>
+                </div>
             {/each}
         </div>
         <div class="relative flex flex-row justify-center items-center my-4 gap-4">

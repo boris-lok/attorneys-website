@@ -71,7 +71,7 @@ function list(language: Language) {
     })
 }
 
-export const ServicesServices = {
+export const ServiceServices = {
     // save the content of service page.
     save: save,
     // retrieve the service

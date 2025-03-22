@@ -1,9 +1,9 @@
 <script lang="ts">
-    import type { PageProps } from './$types'
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
-    import { ServiceServices } from '$lib/services/service.service'
-    import ServiceEditor from '$lib/components/dashboard/ServiceEditor.svelte'
+    import { ArticleServices } from '$lib/services/article.service'
+    import ArticleEditor from '$lib/components/dashboard/ArticleEditor.svelte'
+    import type { PageProps } from './$types'
 
     let { data }: PageProps = $props()
 
@@ -12,12 +12,12 @@
     let content = $state('')
 
     function fetchData() {
-        ServiceServices.retrieve(data.id, 'zh')
+        ArticleServices.retrieve(data.id, 'zh')
             .pipe(
                 startWithTap(() => (isLoading = true)),
                 finalize(() => (isLoading = false)),
                 tap((resp) => {
-                    content = resp?.data.data ?? ''
+                    content = resp?.data.content ?? ''
                     title = resp?.data.title ?? ''
                 })
             )
@@ -32,5 +32,5 @@
 {#if isLoading}
     <p>Loading...</p>
 {:else}
-    <ServiceEditor id={data.id} {title} data={content} />
+    <ArticleEditor id={data.id} {title} content={content} />
 {/if}

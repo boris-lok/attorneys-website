@@ -59,7 +59,7 @@
 <NavigateBar {items}></NavigateBar>
 
 <main>
-    <div class="relative max-w-[var(--max-screen-width)] mx-auto my-8">
+    <div class="relative max-w-[var(--max-screen-width)] mx-4 md:mx-auto my-8">
         {@render children()}
     </div>
 </main>

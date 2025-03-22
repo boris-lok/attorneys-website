@@ -22,10 +22,10 @@
                         content = resp[0].data.data
                     }
                     console.log(resp)
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 

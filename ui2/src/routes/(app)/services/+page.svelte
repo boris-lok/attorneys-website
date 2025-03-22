@@ -16,10 +16,10 @@
                 tap((resp) => {
                     services = resp
                     console.log(services)
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 

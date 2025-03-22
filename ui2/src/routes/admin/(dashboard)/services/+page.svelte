@@ -17,10 +17,10 @@
                 tap((resp) => {
                     services = resp
                     console.log(services)
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 
@@ -30,7 +30,7 @@
 {#if isLoading}
     <p>Loading...</p>
 {:else}
-    <div class="mx-4 my-8 md:mx-auto md:max-w-[var(--max-screen-width)]">
+    <div>
         <div class="relative my-4 flex flex-row justify-end px-2">
             <a href="/admin/services/edit">
                 <Icon icon="gridicons:create" width="24" height="24" />

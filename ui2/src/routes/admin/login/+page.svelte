@@ -15,12 +15,12 @@
 
     let data: Data = {
         username: '',
-        password: '',
+        password: ''
     }
 
     function onDataChanged<K extends keyof Data>(
         key: K,
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
+        e: Event & { currentTarget: EventTarget & HTMLInputElement }
     ) {
         if (!e.target) {
             return
@@ -29,7 +29,7 @@
         const { value } = e.target as HTMLInputElement
         data = {
             ...data,
-            [key]: value.trim(),
+            [key]: value.trim()
         }
     }
 
@@ -41,7 +41,7 @@
         UserService.login(data)
             .pipe(
                 startWithTap(() => (formLoading = true)),
-                finalize(() => (formLoading = false)),
+                finalize(() => (formLoading = false))
             )
             .subscribe({
                 next: (resp) => {
@@ -53,7 +53,7 @@
                         user.set(resp.data)
                         goto('/admin/dashboard')
                     }
-                },
+                }
             })
     }
 </script>
@@ -82,7 +82,7 @@
             class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:bg-gray-500"
             disabled={formLoading}
             onclick={onSubmitClicked}
-            >Login
+        >Login
         </button>
     </div>
 </div>

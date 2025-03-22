@@ -34,14 +34,14 @@
 
     // An handler handles the name has been changed
     function onNameChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
+        e: Event & { currentTarget: EventTarget & HTMLInputElement }
     ) {
         name = (e.target as HTMLInputElement).value.trim()
     }
 
     // An handler handles the description has been changed
     function onDescriptionChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
+        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
     ) {
         description = (e.target as HTMLTextAreaElement).value.trim()
     }
@@ -74,7 +74,7 @@
             name: name!,
             description: description!,
             seq: 0,
-            language: 'zh',
+            language: 'zh'
         })
             .pipe(
                 startWithTap(() => (isLoading = true)),
@@ -100,7 +100,7 @@
                         console.error('Error saving content:', resp.message)
                         errorMsg = 'We got an error when saving content.'
                     }
-                }),
+                })
             )
             .subscribe()
     }

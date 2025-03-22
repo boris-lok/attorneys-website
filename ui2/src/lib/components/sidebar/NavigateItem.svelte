@@ -4,7 +4,7 @@
     let {
         icon,
         label,
-        topBar,
+        topBar
     }: {
         icon: string
         label: string

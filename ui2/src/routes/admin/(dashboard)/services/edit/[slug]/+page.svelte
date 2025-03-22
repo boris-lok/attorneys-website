@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { PageProps } from './$types'
-    import HomeEditor from '$lib/components/dashboard/HomeEditor.svelte'
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
     import { ServicesServices } from '$lib/services/service.service'
@@ -20,10 +19,10 @@
                 tap((resp) => {
                     content = resp?.data.data ?? ''
                     title = resp?.data.title ?? ''
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 

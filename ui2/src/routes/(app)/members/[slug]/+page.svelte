@@ -3,8 +3,10 @@
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
     import { MemberServices } from '$lib/services/member.service'
-    import MemberEditor from '$lib/components/dashboard/MemberEditor.svelte'
     import type { MemberData, ImageData } from '$lib/types'
+    import Markdown from '@magidoc/plugin-svelte-marked'
+    import Image from '$lib/components/common/Image.svelte'
+    import IconifyIcon from '@iconify/svelte'
 
     let { data }: PageProps = $props()
 
@@ -39,5 +41,20 @@
 {#if isLoading}
     <p>Loading...</p>
 {:else}
-    <MemberEditor id={data.id} {name} {description} avatarData={avatar} {seq} />
+    <div>
+        <div class="relative flex flex-col md:flex-row justify-between items-center">
+            <p class="mb-8 text-3xl font-bold text-[var(--primary-color)]">{name}</p>
+            {#if avatar}
+                <div class="w-48 h-48">
+                    <Image alt={name} image={avatar} />
+                </div>
+            {:else}
+                <IconifyIcon icon="radix-icons:avatar" class="w-48 h-48" />
+            {/if}
+        </div>
+        <div class="prose">
+            <Markdown source={description ?? ''}></Markdown>
+        </div>
+    </div>
+
 {/if}

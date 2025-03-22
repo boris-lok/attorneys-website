@@ -4,7 +4,6 @@
     type InputProps = {
         alt: string
         image: ImageData | string
-        size?: number
     }
 
     let { alt, image, size = 96 }: InputProps = $props()
@@ -13,10 +12,10 @@
     const debug = import.meta.env.VITE_DEBUG === 'true'
 
     let lgImage = $state(
-        typeof image !== 'string' ? organizeURL(image.large_image) : '',
+        typeof image !== 'string' ? organizeURL(image.large_image) : ''
     )
     let smImage = $state(
-        organizeURL(typeof image !== 'string' ? image.small_image : image),
+        organizeURL(typeof image !== 'string' ? image.small_image : image)
     )
 
     function organizeURL(path: string) {
@@ -36,10 +35,8 @@
         {/if}
         <img
             {alt}
-            height={size > 96 ? 96 : size}
-            width={size > 96 ? 96 : size}
+            class="rounded-[50%] w-full h-full"
             src={smImage}
-            class="rounded-[50%]"
         />
     </picture>
 </div>

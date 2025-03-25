@@ -5,4 +5,5 @@ database:
 application:
   host: 0.0.0.0
   upload_folder: /app/uploads/images
+  log_file: /app/logs/log.txt
 redis_uri: redis://redis:6379

@@ -5,7 +5,7 @@ from rust:1.81.0-bullseye as builder
 workdir /app
 
 # Copy the Cargo.toml and Cargo.lock files to the container
-copy ../backend/Cargo.toml ../backend/Cargo.lock ./
+copy ../backend/Cargo.toml ./
 
 # Fetch the dependencies
 run cargo fetch
@@ -50,6 +50,8 @@ copy ./backend/src/configuration ./src/configuration
 # create a upload directory
 run mkdir /app/uploads
 run mkdir /app/uploads/images
+
+run mkdir /app/logs/
 
 env APP_ENVIRONMENT production
 

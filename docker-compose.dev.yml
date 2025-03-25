@@ -28,6 +28,7 @@ services:
       dockerfile: dockerfiles/Dockerfile.backend
     volumes:
       - upload_folder:/app/uploads
+      - logs:/app/logs
     networks:
       - app-network
 
@@ -64,3 +65,4 @@ networks:
 volumes:
   postgres_data:
   upload_folder:
+  logs:

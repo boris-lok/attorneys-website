@@ -37,7 +37,7 @@
 
 
 <main>
-    <div class="relative max-w-[var(--max-screen-width)] mx-4 md:mx-auto my-8">
+    <div class="relative md:mx-auto">
         {@render children()}
     </div>
 </main>

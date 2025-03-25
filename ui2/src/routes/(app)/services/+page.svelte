@@ -6,7 +6,11 @@
     import Markdown from '@magidoc/plugin-svelte-marked'
 
     let services: ServiceData[] = $state([])
-    let isLoading = false
+    let isLoading = $state(false)
+
+    function onServiceClicked() {
+
+    }
 
     function fetchData() {
         ServiceServices.list('zh')
@@ -26,17 +30,29 @@
     $effect(() => fetchData())
 </script>
 
-<div
-    class="relative mx-4 my-8 grid grid-cols-1 gap-x-8 gap-y-16 md:mx-auto md:max-w-[var(--max-screen-width)] md:grid-cols-2"
->
-    {#each services as service, i}
-        <div class="w-full overflow-clip rounded shadow-(--box-shadow)">
-            <p class="px-8 py-2 text-lg font-bold text-[var(--primary-color)]">
-                {service.data.title}
-            </p>
-            <div class="prose px-8 py-2">
-                <Markdown source={service.data.data}></Markdown>
+<div class="relative flex flex-col">
+    <p class="text-4xl px-16 pt-16 text-[var(--primary-color)] font-bold">法律服務項目</p>
+    <div class="relative flex md:flex-row flex-col md:items-center mt-8">
+        <div class="flex-1">
+            <div class="px-16">
+                {#each services as service}
+                    <div class="overflow-clip rounded flex flex-col border border-green-700 my-4" onclick={() => onServiceClicked(service.id)}>
+                        <p class="px-8 py-4 text-lg font-bold text-[var(--primary-color)]">
+                            {service.data.title}
+                        </p>
+
+                        <div class="prose h-0 overflow-hidden [&.show]:h-fit px-8">
+                            <Markdown source={service.data.data}></Markdown>
+                        </div>
+                    </div>
+                {/each}
             </div>
         </div>
-    {/each}
+
+        <div class="overflow-clip hidden md:block w-[50%] rounded-2xl">
+            <img
+                src="https://images.pexels.com/photos/4186912/pexels-photo-4186912.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                alt="home-bg" />
+        </div>
+    </div>
 </div>

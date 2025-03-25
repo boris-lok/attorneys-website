@@ -34,6 +34,14 @@
     })
 </script>
 
-<div class="prose mx-auto my-4 max-w-[var(--max-screen-width)] px-16 py-16">
-    <Markdown source={content}></Markdown>
+<div class="relative flex md:flex-row flex-col md:items-center">
+    <div class="overflow-clip hidden md:block">
+        <img
+            src="https://images.pexels.com/photos/139195/pexels-photo-139195.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            alt="home-bg" />
+    </div>
+
+    <div class="prose mx-auto my-4 max-w-[var(--max-screen-width)] px-4 py-4 md:px-16 md:py-16">
+        <Markdown source={content}></Markdown>
+    </div>
 </div>

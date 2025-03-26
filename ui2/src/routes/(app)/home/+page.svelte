@@ -37,9 +37,9 @@
 <div class="relative flex md:flex-row flex-col md:items-center">
     <div class="overflow-clip hidden md:block">
         <img
+            alt="home-bg"
             class="h-[48rem]"
             src="https://images.pexels.com/photos/139195/pexels-photo-139195.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            alt="home-bg"
         />
     </div>
 

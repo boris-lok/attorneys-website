@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai+Mono+TC&family=LXGW+WenKai+TC&display=swap');
 
 @tailwind utilities;
 @plugin "@tailwindcss/typography";
@@ -11,4 +12,8 @@
     --max-screen-width: 1024px;
 
     --box-shadow: 0 0 1rem 0 #d4d4d4;
+}
+
+body {
+    font-family: "LXGW WenKai Mono TC", monospace;
 }

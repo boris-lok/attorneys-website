@@ -11,7 +11,7 @@
     let line = '@594ylsoj'
 </script>
 
-<div class="relative flex flex-col items-center">
+<div class="relative flex flex-col items-center h-[calc(100vh-144px-96px)] min-h-[48rem]">
     <p class="text-4xl px-16 pt-16 text-[var(--primary-color)] font-bold">聯絡我們</p>
     <div class="relative flex flex-col md:w-full md:flex-row-reverse md:gap-8 md:mt-12 md:max-w-4xl md:mx-auto">
         <div class="w-full md:h-96 rounded-xl overflow-clip md:flex-1">
@@ -29,15 +29,15 @@
         </div>
         <div class="flex flex-col px-4 py-4 gap-4 md:flex-1 md:justify-evenly">
             <div class="flex flex-row gap-2 items-center">
-                <IconifyIcon icon="mdi:address-marker-outline" class="h-8 w-8" />
+                <IconifyIcon class="h-8 w-8" icon="mdi:address-marker-outline" />
                 <p>{address}</p>
             </div>
             <div class="flex flex-row gap-2 items-center">
-                <IconifyIcon icon="fontisto:line" class="h-8 w-8" />
+                <IconifyIcon class="h-8 w-8" icon="fontisto:line" />
                 <a href="https://lin.ee/NW5iyIk">{line}</a>
             </div>
             <div class="flex flex-row gap-2 items-center">
-                <IconifyIcon icon="formkit:email" class="h-8 w-8" />
+                <IconifyIcon class="h-8 w-8" icon="formkit:email" />
                 <a href="mailto:{email}">{email}</a>
             </div>
         </div>

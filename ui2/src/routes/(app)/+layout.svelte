@@ -33,11 +33,11 @@
     ]
 </script>
 
-<NavigateBar {items}></NavigateBar>
-
+<NavigateBar {items} />
 
 <main>
-    <div class="relative md:mx-auto">
+    <div class="relative">
         {@render children()}
     </div>
 </main>
+

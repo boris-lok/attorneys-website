@@ -2,6 +2,7 @@
 
 @tailwind utilities;
 @plugin "@tailwindcss/typography";
+@source "./safelist.txt";
 
 @theme {
     --primary-color: #697b43;

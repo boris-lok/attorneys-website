@@ -35,15 +35,16 @@
 </script>
 
 <div class="relative flex w-full flex-col md:flex-row md:items-center">
-    <div class="hidden w-[50%] overflow-clip md:block">
+    <div class="hidden w-[50%] overflow-clip md:block min-h-[calc(100vh-64px-48px)]">
         <img
+            class="min-h-[calc(100vh-64px-48px)]"
             alt="home-bg"
             src="https://images.pexels.com/photos/1324803/pexels-photo-1324803.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
         />
     </div>
 
     <div
-        class="prose w-full px-6 pt-16 md:max-w-[50%] md:min-w-[50%] md:animate-[--right-to-left_1s_ease-in-out] md:px-16 md:pt-0"
+        class="prose w-full px-6 pt-16 md:max-w-[50%] md:min-w-[50%] md:animate-[--right-to-left_1s_ease-in-out] md:px-16 md:pt-0 mx-auto"
     >
         <Markdown source={content}></Markdown>
     </div>

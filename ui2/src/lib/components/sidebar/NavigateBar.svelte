@@ -24,11 +24,7 @@
         >
             <!-- Logo -->
             <div>
-                <img
-                    class="h-14 md:h-16"
-                    alt="logo"
-                    src={logo}
-                />
+                <img class="h-14 md:h-16" alt="logo" src={logo} />
             </div>
 
             <!-- Menu Icon -->
@@ -79,7 +75,7 @@
     </div>
     <!-- Dropdown Navigate Item -->
     <div
-        class="absolute top-16 z-50 h-0 w-screen overflow-y-scroll opacity-0 backdrop-blur-sm transition-[height,opacity] duration-300 md:hidden [&.show]:opacity-100 [&.show]:h-[calc(100vh-4rem)]"
+        class="absolute top-16 z-50 h-0 w-screen overflow-y-scroll opacity-0 backdrop-blur-sm transition-[height,opacity] duration-300 md:hidden [&.show]:h-[calc(100vh-4rem)] [&.show]:opacity-100"
         class:show
     >
         <div

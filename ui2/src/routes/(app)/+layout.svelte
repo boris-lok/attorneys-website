@@ -35,12 +35,11 @@
     ]
 </script>
 
-
 <NavigateBar {items} />
 <Background />
 
 <main>
-    <div class="relative">
+    <div class="relative min-h-[calc(100vh-64px-48px)]">
         {@render children()}
     </div>
 </main>

@@ -5,7 +5,7 @@
 <div class="relative flex h-36 justify-center overflow-clip md:h-[480px]">
     <img
         alt="bg"
-        class="animate-[--brightness_3s_ease-in-out] absolute z-0 h-36 w-full object-cover brightness-75 md:h-[480px]"
+        class="absolute z-0 h-36 w-full animate-[--brightness_3s_ease-in-out] object-cover brightness-75 md:h-[480px]"
         src={bgImage}
     />
 

@@ -37,9 +37,11 @@ services:
     depends_on:
       - backend
     container_name: ui
+    ports:
+      - "3000:3000"
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.ui
+      dockerfile: dockerfiles/Dockerfile.ui2
     networks:
       - app-network
 

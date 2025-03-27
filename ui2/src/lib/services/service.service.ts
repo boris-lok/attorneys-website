@@ -1,9 +1,4 @@
-import type {
-    CreateServiceRequest,
-    Language,
-    ServiceData,
-    UpdateServiceRequest,
-} from '$lib/types'
+import type { CreateServiceRequest, Language, ServiceData, UpdateServiceRequest } from '$lib/types'
 import { fromFetch } from 'rxjs/fetch'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'

@@ -12,10 +12,10 @@
     const debug = import.meta.env.VITE_DEBUG === 'true'
 
     let lgImage = $state(
-        typeof image !== 'string' ? organizeURL(image.large_image) : '',
+        typeof image !== 'string' ? organizeURL(image.large_image) : ''
     )
     let smImage = $state(
-        organizeURL(typeof image !== 'string' ? image.small_image : image),
+        organizeURL(typeof image !== 'string' ? image.small_image : image)
     )
 
     function organizeURL(path: string) {

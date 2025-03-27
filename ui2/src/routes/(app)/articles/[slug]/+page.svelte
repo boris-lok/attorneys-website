@@ -2,7 +2,6 @@
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
     import { ArticleServices } from '$lib/services/article.service'
-    import ArticleEditor from '$lib/components/dashboard/ArticleEditor.svelte'
     import type { PageProps } from './$types'
     import Markdown from '@magidoc/plugin-svelte-marked'
 
@@ -20,10 +19,10 @@
                 tap((resp) => {
                     content = resp?.data.content ?? ''
                     title = resp?.data.title ?? ''
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 

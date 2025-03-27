@@ -7,6 +7,7 @@
 
     let services: ServiceData[] = $state([])
     let isLoading = $state(false)
+
     function fetchData() {
         ServiceServices.list('zh')
             .pipe(
@@ -15,10 +16,10 @@
                 tap((resp) => {
                     services = resp
                     console.log(services)
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 

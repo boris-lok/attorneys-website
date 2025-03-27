@@ -15,28 +15,28 @@
 
     let newData = $state({
         title: title ?? '',
-        data: data ?? '',
+        data: data ?? ''
     })
     let errorMsg = $state('')
 
     // handles content has been changed
     // it will update the preview zone automatically
     function onContentChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
+        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
     ) {
         newData = {
             ...newData,
-            data: (e.currentTarget as HTMLTextAreaElement).value.trim(),
+            data: (e.currentTarget as HTMLTextAreaElement).value.trim()
         }
     }
 
     // handles title has been changed
     function onTitleChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
+        e: Event & { currentTarget: EventTarget & HTMLInputElement }
     ) {
         newData = {
             ...newData,
-            title: (e.currentTarget as HTMLInputElement).value.trim(),
+            title: (e.currentTarget as HTMLInputElement).value.trim()
         }
     }
 
@@ -59,7 +59,7 @@
             ...(id === undefined ? {} : { id: id }),
             ...newData,
             language: 'zh',
-            seq: 0,
+            seq: 0
         })
             .pipe(
                 tap((resp) => {
@@ -67,7 +67,7 @@
                         console.error('Error saving content:', resp.message)
                         errorMsg = 'We got an error when saving content.'
                     }
-                }),
+                })
             )
             .subscribe()
     }

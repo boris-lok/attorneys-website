@@ -1,12 +1,6 @@
 <script lang="ts">
     import { startWithTap } from '$lib/utils'
-    import {
-        BehaviorSubject,
-        distinctUntilChanged,
-        finalize,
-        switchMap,
-        tap,
-    } from 'rxjs'
+    import { BehaviorSubject, distinctUntilChanged, finalize, switchMap, tap } from 'rxjs'
     import type { ArticleData, Language } from '$lib/types'
     import Icon from '@iconify/svelte'
     import { ArticleServices } from '$lib/services/article.service'
@@ -42,7 +36,7 @@
                 hasPreviousPage = page > 0
                 hasNextPage = resp.total - (page + 1) * pageSize > 0
                 console.log(hasNextPage, hasPreviousPage)
-            }),
+            })
         )
     }
 
@@ -52,7 +46,7 @@
                 distinctUntilChanged(),
                 switchMap((page) => {
                     return fetchData('zh', page, pageSize)
-                }),
+                })
             )
             .subscribe({ error: console.error })
 
@@ -101,14 +95,14 @@
                 onclick={onPreviousButtonClicked}
                 class:disabled={!hasPreviousPage}
                 disabled={!hasPreviousPage}
-                >Previous
+            >Previous
             </button>
             <button
                 class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
                 onclick={onNextButtonClicked}
                 class:disabled={!hasNextPage}
                 disabled={!hasNextPage}
-                >Next
+            >Next
             </button>
         </div>
     </div>

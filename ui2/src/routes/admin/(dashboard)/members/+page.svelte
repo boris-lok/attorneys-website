@@ -19,7 +19,7 @@
                 tap((resp) => {
                     console.log(resp)
                     members = resp
-                }),
+                })
             )
             .subscribe({ error: console.error })
     })

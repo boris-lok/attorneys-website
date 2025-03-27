@@ -1,4 +1,4 @@
-import { defer, type Observable, throwError } from 'rxjs'
+import { defer, type Observable } from 'rxjs'
 import { user } from '$lib/stores/user.store'
 
 export function sleep(ms: number) {

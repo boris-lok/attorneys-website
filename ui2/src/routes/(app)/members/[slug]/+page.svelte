@@ -3,7 +3,7 @@
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
     import { MemberServices } from '$lib/services/member.service'
-    import type { MemberData, ImageData } from '$lib/types'
+    import type { ImageData, MemberData } from '$lib/types'
     import Markdown from '@magidoc/plugin-svelte-marked'
     import Image from '$lib/components/common/Image.svelte'
     import IconifyIcon from '@iconify/svelte'
@@ -28,10 +28,10 @@
                         avatar = resp.avatar
                         seq = resp.seq ?? 0
                     }
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 

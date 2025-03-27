@@ -1,9 +1,4 @@
-import type {
-    CreateHomeRequest,
-    HomeData,
-    Language,
-    UpdateHomeRequest,
-} from '$lib/types'
+import type { CreateHomeRequest, HomeData, Language, UpdateHomeRequest } from '$lib/types'
 import { fromFetch } from 'rxjs/fetch'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'

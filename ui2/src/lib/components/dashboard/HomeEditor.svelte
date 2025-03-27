@@ -17,7 +17,7 @@
     // handles content has been changed
     // it will update the preview zone automatically
     function onContentChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
+        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
     ) {
         content = (e.currentTarget as HTMLTextAreaElement).value.trim()
     }
@@ -41,7 +41,7 @@
             ...(id === undefined ? {} : { id: id }),
             data: content,
             language: 'zh',
-            seq: 0,
+            seq: 0
         })
             .pipe(
                 tap((resp) => {
@@ -49,7 +49,7 @@
                         console.error('Error saving content:', resp.message)
                         errorMsg = 'We got an error when saving content.'
                     }
-                }),
+                })
             )
             .subscribe()
     }

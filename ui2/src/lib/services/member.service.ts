@@ -1,19 +1,8 @@
-import type {
-    CreateMemberRequest,
-    Language,
-    MemberData,
-    SimpleMember,
-    UpdateMemberRequest,
-} from '$lib/types'
+import type { CreateMemberRequest, Language, MemberData, SimpleMember, UpdateMemberRequest } from '$lib/types'
 import { fromFetch } from 'rxjs/fetch'
-import {
-    ADMIN_URL,
-    BASE_URL,
-    TIMEOUT,
-    UPLOAD_IMAGE_TIMEOUT,
-} from '$lib/constant'
+import { ADMIN_URL, BASE_URL, TIMEOUT, UPLOAD_IMAGE_TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
-import { asyncScheduler, map, Observable, of, scheduled, switchMap } from 'rxjs'
+import { map, Observable, switchMap } from 'rxjs'
 
 /**
  * The API endpoint of saving member

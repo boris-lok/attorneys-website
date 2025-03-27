@@ -24,10 +24,10 @@
                         content = resp[0].data.data
                         id = resp[0].id
                     }
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 

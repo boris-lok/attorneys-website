@@ -4,7 +4,7 @@
     import { finalize, tap } from 'rxjs'
     import { MemberServices } from '$lib/services/member.service'
     import MemberEditor from '$lib/components/dashboard/MemberEditor.svelte'
-    import type { MemberData, ImageData } from '$lib/types'
+    import type { ImageData, MemberData } from '$lib/types'
 
     let { data }: PageProps = $props()
 
@@ -26,10 +26,10 @@
                         avatar = resp.avatar
                         seq = resp.seq ?? 0
                     }
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 

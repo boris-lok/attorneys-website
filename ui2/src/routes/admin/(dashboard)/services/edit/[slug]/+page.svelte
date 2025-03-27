@@ -19,10 +19,10 @@
                 tap((resp) => {
                     content = resp?.data.data ?? ''
                     title = resp?.data.title ?? ''
-                }),
+                })
             )
             .subscribe({
-                error: console.error,
+                error: console.error
             })
     }
 

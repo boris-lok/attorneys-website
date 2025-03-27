@@ -5,7 +5,6 @@
     import type { Language, SimpleMember } from '$lib/types'
     import Image from '$lib/components/common/Image.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import Icon from '@iconify/svelte'
 
     let members: SimpleMember[] = $state([])
     let isLoading = $state(false)
@@ -18,7 +17,7 @@
                 finalize(() => (isLoading = false)),
                 tap((resp) => {
                     members = resp
-                }),
+                })
             )
             .subscribe({ error: console.error })
     })

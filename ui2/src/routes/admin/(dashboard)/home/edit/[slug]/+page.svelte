@@ -18,10 +18,10 @@
                 finalize(() => (isLoading = false)),
                 tap((resp) => {
                     content = resp?.data.data ?? ''
-                })
+                }),
             )
             .subscribe({
-                error: console.error
+                error: console.error,
             })
     }
 

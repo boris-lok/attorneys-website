@@ -6,28 +6,28 @@
         {
             icon: 'iconoir:home',
             name: 'Home',
-            url: '/home'
+            url: '/home',
         },
         {
             icon: 'lsicon:list-outline',
             name: 'Services',
-            url: '/services'
+            url: '/services',
         },
         {
             icon: 'lineicons:books-2',
             name: 'Articles',
-            url: '/articles'
+            url: '/articles',
         },
         {
             icon: 'tdesign:member',
             name: 'Members',
-            url: '/members'
+            url: '/members',
         },
         {
             icon: 'hugeicons:contact-02',
             name: 'Contact us',
-            url: '/contact_us'
-        }
+            url: '/contact_us',
+        },
     ]
 </script>
 

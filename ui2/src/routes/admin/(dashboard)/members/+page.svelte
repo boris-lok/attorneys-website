@@ -19,7 +19,7 @@
                 tap((resp) => {
                     console.log(resp)
                     members = resp
-                })
+                }),
             )
             .subscribe({ error: console.error })
     })
@@ -34,16 +34,25 @@
                 <Icon icon="gridicons:create" width="24" height="24" />
             </a>
         </div>
-        <div class="relative flex md:flex-row flex-col gap-8">
+        <div class="relative flex flex-col gap-8 md:flex-row">
             {#each members as member}
-                <div class="flex flex-row w-fit px-4 py-4 items-center gap-2 rounded shadow">
+                <div
+                    class="flex w-fit flex-row items-center gap-2 rounded px-4 py-4 shadow"
+                >
                     {#if member.avatar}
-                        <Image alt={member.name} image={member.avatar} size={48} />
+                        <Image
+                            alt={member.name}
+                            image={member.avatar}
+                            size={48}
+                        />
                     {:else}
-                        <IconifyIcon icon="radix-icons:avatar" class="w-12 h-12" />
+                        <IconifyIcon
+                            icon="radix-icons:avatar"
+                            class="h-12 w-12"
+                        />
                     {/if}
                     <p class="text-lg">{member.name}</p>
-                    <div class="pl-12 py-2">
+                    <div class="py-2 pl-12">
                         <a href="/admin/members/edit/{member.id}">
                             <Icon
                                 icon="mingcute:edit-line"

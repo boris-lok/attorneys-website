@@ -22,10 +22,10 @@
                         content = resp[0].data.data
                     }
                     console.log(resp)
-                })
+                }),
             )
             .subscribe({
-                error: console.error
+                error: console.error,
             })
     }
 
@@ -34,8 +34,8 @@
     })
 </script>
 
-<div class="relative flex md:flex-row flex-col md:items-center">
-    <div class="overflow-clip hidden md:block">
+<div class="relative flex flex-col md:flex-row md:items-center">
+    <div class="hidden overflow-clip md:block">
         <img
             alt="home-bg"
             class="h-[48rem]"
@@ -43,7 +43,9 @@
         />
     </div>
 
-    <div class="prose mx-auto my-4 max-w-[var(--max-screen-width)] px-4 py-4 md:px-16 md:py-16">
+    <div
+        class="prose mx-auto my-4 max-w-[var(--max-screen-width)] px-4 py-4 md:px-16 md:py-16"
+    >
         <Markdown source={content}></Markdown>
     </div>
 </div>

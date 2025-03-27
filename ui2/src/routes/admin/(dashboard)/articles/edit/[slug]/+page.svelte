@@ -19,10 +19,10 @@
                 tap((resp) => {
                     content = resp?.data.content ?? ''
                     title = resp?.data.title ?? ''
-                })
+                }),
             )
             .subscribe({
-                error: console.error
+                error: console.error,
             })
     }
 
@@ -32,5 +32,5 @@
 {#if isLoading}
     <p>Loading...</p>
 {:else}
-    <ArticleEditor id={data.id} {title} content={content} />
+    <ArticleEditor id={data.id} {title} {content} />
 {/if}

@@ -28,10 +28,10 @@
                         avatar = resp.avatar
                         seq = resp.seq ?? 0
                     }
-                })
+                }),
             )
             .subscribe({
-                error: console.error
+                error: console.error,
             })
     }
 
@@ -42,19 +42,22 @@
     <p>Loading...</p>
 {:else}
     <div>
-        <div class="relative flex flex-col md:flex-row justify-between items-center">
-            <p class="mb-8 text-3xl font-bold text-[var(--primary-color)]">{name}</p>
+        <div
+            class="relative flex flex-col items-center justify-between md:flex-row"
+        >
+            <p class="mb-8 text-3xl font-bold text-[var(--primary-color)]">
+                {name}
+            </p>
             {#if avatar}
-                <div class="w-48 h-48">
+                <div class="h-48 w-48">
                     <Image alt={name} image={avatar} />
                 </div>
             {:else}
-                <IconifyIcon icon="radix-icons:avatar" class="w-48 h-48" />
+                <IconifyIcon icon="radix-icons:avatar" class="h-48 w-48" />
             {/if}
         </div>
         <div class="prose">
             <Markdown source={description ?? ''}></Markdown>
         </div>
     </div>
-
 {/if}

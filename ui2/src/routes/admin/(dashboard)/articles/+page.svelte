@@ -1,6 +1,12 @@
 <script lang="ts">
     import { startWithTap } from '$lib/utils'
-    import { BehaviorSubject, distinctUntilChanged, finalize, switchMap, tap } from 'rxjs'
+    import {
+        BehaviorSubject,
+        distinctUntilChanged,
+        finalize,
+        switchMap,
+        tap,
+    } from 'rxjs'
     import type { ArticleData, Language } from '$lib/types'
     import Icon from '@iconify/svelte'
     import { ArticleServices } from '$lib/services/article.service'
@@ -27,27 +33,26 @@
     }
 
     function fetchData(lang: Language, page: number, pageSize: number) {
-        return ArticleServices.list(lang, page, pageSize)
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                finalize(() => (isLoading = false)),
-                tap((resp) => {
-                    console.log(resp)
-                    articles = resp.articles
-                    hasPreviousPage = page > 0
-                    hasNextPage = (resp.total - ((page + 1) * pageSize)) > 0
-                    console.log(hasNextPage, hasPreviousPage)
-                })
-            )
+        return ArticleServices.list(lang, page, pageSize).pipe(
+            startWithTap(() => (isLoading = true)),
+            finalize(() => (isLoading = false)),
+            tap((resp) => {
+                console.log(resp)
+                articles = resp.articles
+                hasPreviousPage = page > 0
+                hasNextPage = resp.total - (page + 1) * pageSize > 0
+                console.log(hasNextPage, hasPreviousPage)
+            }),
+        )
     }
 
     $effect(() => {
         const disposer = page$
             .pipe(
                 distinctUntilChanged(),
-                switchMap(page => {
+                switchMap((page) => {
                     return fetchData('zh', page, pageSize)
-                })
+                }),
             )
             .subscribe({ error: console.error })
 
@@ -68,9 +73,7 @@
         </div>
         <div class="relative flex flex-col gap-4">
             {#each articles as article}
-                <div
-                    class="flex w-full flex-row overflow-clip rounded shadow"
-                >
+                <div class="flex w-full flex-row overflow-clip rounded shadow">
                     <div class="flex-auto">
                         <p
                             class="px-8 py-2 text-lg font-bold text-[var(--primary-color)]"
@@ -90,15 +93,22 @@
                 </div>
             {/each}
         </div>
-        <div class="relative flex flex-row justify-center items-center my-4 gap-4">
+        <div
+            class="relative my-4 flex flex-row items-center justify-center gap-4"
+        >
             <button
-                class="border-none bg-transparent underline cursor-pointer [&.disabled]:text-gray-500 [&.disabled]:cursor-default"
-                onclick={onPreviousButtonClicked} class:disabled={!hasPreviousPage}
-                disabled={!hasPreviousPage}>Previous
+                class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
+                onclick={onPreviousButtonClicked}
+                class:disabled={!hasPreviousPage}
+                disabled={!hasPreviousPage}
+                >Previous
             </button>
             <button
-                class="border-none bg-transparent underline cursor-pointer [&.disabled]:text-gray-500 [&.disabled]:cursor-default"
-                onclick={onNextButtonClicked} class:disabled={!hasNextPage} disabled={!hasNextPage}>Next
+                class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
+                onclick={onNextButtonClicked}
+                class:disabled={!hasNextPage}
+                disabled={!hasNextPage}
+                >Next
             </button>
         </div>
     </div>

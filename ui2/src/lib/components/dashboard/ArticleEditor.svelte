@@ -15,28 +15,28 @@
 
     let newData = $state({
         title: title ?? '',
-        content: content ?? ''
+        content: content ?? '',
     })
     let errorMsg = $state('')
 
     // handles content has been changed
     // it will update the preview zone automatically
     function onContentChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
+        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
     ) {
         newData = {
             ...newData,
-            content: (e.currentTarget as HTMLTextAreaElement).value.trim()
+            content: (e.currentTarget as HTMLTextAreaElement).value.trim(),
         }
     }
 
     // handles title has been changed
     function onTitleChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement }
+        e: Event & { currentTarget: EventTarget & HTMLInputElement },
     ) {
         newData = {
             ...newData,
-            title: (e.currentTarget as HTMLInputElement).value.trim()
+            title: (e.currentTarget as HTMLInputElement).value.trim(),
         }
     }
 
@@ -59,7 +59,7 @@
             ...(id === undefined ? {} : { id: id }),
             ...newData,
             language: 'zh',
-            seq: 0
+            seq: 0,
         })
             .pipe(
                 tap((resp) => {
@@ -67,7 +67,7 @@
                         console.error('Error saving content:', resp.message)
                         errorMsg = 'We got an error when saving content.'
                     }
-                })
+                }),
             )
             .subscribe()
     }
@@ -117,7 +117,7 @@
 <div class="relative flex flex-row justify-center gap-x-4">
     <button
         class="block cursor-pointer rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:cursor-auto disabled:bg-gray-500"
-        disabled={newData.title === '' || newData.content=== ''}
+        disabled={newData.title === '' || newData.content === ''}
         onclick={onSaveClicked}
     >
         Save

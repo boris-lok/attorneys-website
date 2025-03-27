@@ -18,7 +18,7 @@
                 finalize(() => (isLoading = false)),
                 tap((resp) => {
                     members = resp
-                })
+                }),
             )
             .subscribe({ error: console.error })
     })
@@ -27,20 +27,33 @@
 {#if isLoading}
     <p>Loading...</p>
 {:else}
-    <div class="relative flex md:flex-row flex-col md:items-center">
+    <div class="relative flex flex-col md:flex-row md:items-center">
         <div class="relative flex flex-col gap-4">
-            <p class="text-4xl px-4 text-[var(--primary-color)] font-bold md:px-8 lg:px-16">本所成員</p>
-            <div class="relative flex md:flex-row flex-col gap-8 px-4 md:px-8 lg:px-16">
+            <p
+                class="px-4 text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16"
+            >
+                本所成員
+            </p>
+            <div
+                class="relative flex flex-col gap-8 px-4 md:flex-row md:px-8 lg:px-16"
+            >
                 {#each members as member}
                     <a href="/members/{member.id}">
                         <div
-                            class="flex flex-col w-full md:w-72 h-48 px-4 py-4 items-center gap-2 rounded shadow justify-center">
+                            class="flex h-48 w-full flex-col items-center justify-center gap-2 rounded px-4 py-4 shadow md:w-72"
+                        >
                             {#if member.avatar}
-                                <div class="w-24 h-24">
-                                    <Image alt={member.name} image={member.avatar} />
+                                <div class="h-24 w-24">
+                                    <Image
+                                        alt={member.name}
+                                        image={member.avatar}
+                                    />
                                 </div>
                             {:else}
-                                <IconifyIcon icon="radix-icons:avatar" class="w-24 h-24" />
+                                <IconifyIcon
+                                    icon="radix-icons:avatar"
+                                    class="h-24 w-24"
+                                />
                             {/if}
                             <p class="text-2xl">{member.name}</p>
                         </div>
@@ -49,11 +62,14 @@
             </div>
         </div>
 
-        <div class="overflow-clip hidden md:flex justify-end flex-1 h-[calc(100vh-64px-144px)] min-h-[48rem]">
+        <div
+            class="hidden h-[calc(100vh-64px-144px)] min-h-[48rem] flex-1 justify-end overflow-clip md:flex"
+        >
             <img
                 class="w-[80%]"
                 src="https://images.pexels.com/photos/7681417/pexels-photo-7681417.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                alt="members-bg" />
+                alt="members-bg"
+            />
         </div>
     </div>
 {/if}

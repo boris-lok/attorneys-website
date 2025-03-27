@@ -32,7 +32,7 @@
                 console.log(f)
                 hasImage = !!f
                 onChange?.(f)
-            }
+            },
         })
 
         return () => {
@@ -68,7 +68,7 @@
 
     function generatePreview(file: File) {
         const reader = new FileReader()
-        reader.onload = function() {
+        reader.onload = function () {
             if (typeof reader.result === 'string') {
                 imageSrc = reader.result
             }

@@ -20,10 +20,10 @@
                 tap((resp) => {
                     content = resp?.data.content ?? ''
                     title = resp?.data.title ?? ''
-                })
+                }),
             )
             .subscribe({
-                error: console.error
+                error: console.error,
             })
     }
 
@@ -34,7 +34,9 @@
     <p>Loading...</p>
 {:else}
     <div class="relative">
-        <p class="mb-8 text-3xl font-bold text-[var(--primary-color)]">{title}</p>
+        <p class="mb-8 text-3xl font-bold text-[var(--primary-color)]">
+            {title}
+        </p>
         <div class="prose">
             <Markdown source={content}></Markdown>
         </div>

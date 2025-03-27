@@ -26,10 +26,10 @@
                         avatar = resp.avatar
                         seq = resp.seq ?? 0
                     }
-                })
+                }),
             )
             .subscribe({
-                error: console.error
+                error: console.error,
             })
     }
 

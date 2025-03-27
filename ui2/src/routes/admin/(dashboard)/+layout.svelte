@@ -12,27 +12,27 @@
         {
             icon: 'iconoir:home',
             name: 'Home',
-            url: '/admin/home'
+            url: '/admin/home',
         },
         {
             icon: 'lsicon:list-outline',
             name: 'Services',
-            url: '/admin/services'
+            url: '/admin/services',
         },
         {
             icon: 'lineicons:books-2',
             name: 'Articles',
-            url: '/admin/articles'
+            url: '/admin/articles',
         },
         {
             icon: 'tdesign:member',
             name: 'Members',
-            url: '/admin/members'
+            url: '/admin/members',
         },
         {
             icon: 'hugeicons:contact-02',
             name: 'Contact us',
-            url: '/admin/contact_us'
+            url: '/admin/contact_us',
         },
         {
             icon: 'tabler:logout',
@@ -46,20 +46,20 @@
                         finalize(() => {
                             // Remove the token from the cookie
                             user.remove()
-                        })
+                        }),
                     )
                     .subscribe({
-                        next: () => goto('/admin/login')
+                        next: () => goto('/admin/login'),
                     })
-            }
-        }
+            },
+        },
     ]
 </script>
 
 <NavigateBar {items}></NavigateBar>
 
 <main>
-    <div class="relative max-w-[var(--max-screen-width)] mx-4 md:mx-auto my-8">
+    <div class="relative mx-4 my-8 max-w-[var(--max-screen-width)] md:mx-auto">
         {@render children()}
     </div>
 </main>

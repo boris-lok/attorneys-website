@@ -2,6 +2,7 @@
     import NavigateBar from '$lib/components/sidebar/NavigateBar.svelte'
     import Background from '$lib/components/Background.svelte'
     import type { NavigationItem } from '$lib/types'
+    import Footer from '$lib/components/Footer.svelte'
 
     let { children } = $props()
 
@@ -34,6 +35,7 @@
     ]
 </script>
 
+
 <NavigateBar {items} />
 <Background />
 
@@ -42,3 +44,5 @@
         {@render children()}
     </div>
 </main>
+
+<Footer />

@@ -34,17 +34,13 @@
     })
 </script>
 
-<div class="relative flex flex-col md:flex-row md:items-center">
-    <div class="hidden overflow-clip md:block">
-        <img
-            alt="home-bg"
-            class="h-[48rem]"
-            src="https://images.pexels.com/photos/139195/pexels-photo-139195.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-        />
+<div class="relative flex flex-col md:flex-row md:items-center w-full">
+    <div class="hidden overflow-clip md:block w-[50%]">
+        <img alt="home-bg" src="https://images.pexels.com/photos/1324803/pexels-photo-1324803.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"/>
     </div>
 
     <div
-        class="prose mx-auto my-4 max-w-[var(--max-screen-width)] px-4 py-4 md:px-16 md:py-16"
+        class="prose w-full md:min-w-[50%] md:max-w-[50%] md:px-16 px-6 pt-16 md:pt-0 md:animate-[--right-to-left_1s_ease-in-out]"
     >
         <Markdown source={content}></Markdown>
     </div>

@@ -1,0 +1,1 @@
+<div class="h-12 bg-[var(--primary-color)] w-full"></div>

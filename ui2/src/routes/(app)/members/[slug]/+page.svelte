@@ -14,7 +14,6 @@
     let name = $state('')
     let description = $state('')
     let avatar: ImageData | undefined = $state(undefined)
-    let seq = $state(0)
 
     function fetchData() {
         MemberServices.retrieve(data.id, 'zh')
@@ -26,7 +25,6 @@
                         name = resp.data.name ?? ''
                         description = resp.data.description ?? ''
                         avatar = resp.avatar
-                        seq = resp.seq ?? 0
                     }
                 })
             )
@@ -41,7 +39,7 @@
 {#if isLoading}
     <p>Loading...</p>
 {:else}
-    <div>
+    <div class="px-4 my-8 md:px-8 md:my-16 md:max-w-5xl md:mx-auto">
         <div
             class="relative flex flex-col items-center justify-between md:flex-row"
         >
@@ -56,7 +54,7 @@
                 <IconifyIcon icon="radix-icons:avatar" class="h-48 w-48" />
             {/if}
         </div>
-        <div class="prose">
+        <div class="prose max-w-2xl md:max-w-3xl lg:max-w-4xl mt-4">
             <Markdown source={description ?? ''}></Markdown>
         </div>
     </div>

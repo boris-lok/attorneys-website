@@ -55,9 +55,9 @@
                         </p>
                     </div>
 
-                    <div class="absolute inset-0 opacity-0 bg-white group-hover:block [&.active]:block [&.active]:opacity-80 group-hover:opacity-80" class:active={service.id === selectedServiceID}></div>
+                    <div class="absolute inset-0 opacity-0 bg-white group-hover:block max-sm:[&.active]:block max-sm:[&.active]:opacity-80 group-hover:opacity-80" class:active={service.id === selectedServiceID}></div>
                     <div
-                        class="absolute inset-0 hidden items-center justify-center p-4 group-hover:flex [&.active]:flex" class:active={service.id === selectedServiceID}
+                        class="absolute inset-0 hidden items-center justify-center p-4 group-hover:flex max-sm:[&.active]:flex" class:active={service.id === selectedServiceID}
                     >
                         <Markdown source={service.data.data} />
                     </div>

@@ -44,20 +44,20 @@
         >
             {#each services as service}
                 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                <div class="group relative h-72 w-72 overflow-clip rounded-xl" onclick={() => onServiceClicked(service.id)}>
+                <div class="group relative h-72 w-72 overflow-clip rounded-xl" onclick={() => onServiceClicked(service.id)} class:active={service.id === selectedServiceID}>
                     <div
                         class="relative h-full w-full rounded-xl border border-[var(--primary-color)] p-4 transition-[width,height]"
                     >
                         <p
-                            class="flex h-full w-full items-center justify-center text-2xl font-bold text-[var(--primary-color)]"
+                            class="flex h-full w-full items-center justify-center text-2xl font-bold text-[var(--primary-color)] max-sm:group-[.active]:opacity-20 group-hover:opacity-20"
                         >
                             {service.data.title}
                         </p>
                     </div>
 
-                    <div class="absolute inset-0 opacity-0 bg-white group-hover:block max-sm:[&.active]:block max-sm:[&.active]:opacity-80 group-hover:opacity-80" class:active={service.id === selectedServiceID}></div>
+                    <div class="absolute inset-0 opacity-0 bg-white group-hover:block max-sm:[&.active]:block max-sm:group-[.active]:opacity-80 group-hover:opacity-80"></div>
                     <div
-                        class="absolute inset-0 hidden items-center justify-center p-4 group-hover:flex max-sm:[&.active]:flex" class:active={service.id === selectedServiceID}
+                        class="absolute inset-0 hidden items-center justify-center p-4 group-hover:flex max-sm:group-[.active]:flex"
                     >
                         <Markdown source={service.data.data} />
                     </div>

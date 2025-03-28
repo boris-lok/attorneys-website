@@ -60,15 +60,5 @@
                 {/each}
             </div>
         </div>
-
-        <div
-            class="hidden h-[calc(100vh-64px-144px)] min-h-[48rem] flex-1 justify-end overflow-clip md:flex"
-        >
-            <img
-                class="w-[80%]"
-                src="https://images.pexels.com/photos/7681417/pexels-photo-7681417.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                alt="members-bg"
-            />
-        </div>
     </div>
 {/if}

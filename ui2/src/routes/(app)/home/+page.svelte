@@ -35,7 +35,7 @@
 </script>
 
 <div
-    class="prose w-full px-6 pt-16 md:max-w-[50%] md:min-w-[50%] md:animate-[--right-to-left_1s_ease-in-out] md:px-16 md:pt-0 mx-auto md:mt-16"
+    class="prose w-full px-6 pt-16 md:min-w-2xl lg:min-w-3xl md:animate-[--right-to-left_1s_ease-in-out] md:px-16 md:pt-0 mx-auto md:mt-16"
 >
     <Markdown source={content}></Markdown>
 </div>

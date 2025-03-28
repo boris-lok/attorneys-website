@@ -4,6 +4,6 @@
     let { children } = $props()
 </script>
 
-<main>
+<div class="relative">
     {@render children()}
-</main>
+</div>

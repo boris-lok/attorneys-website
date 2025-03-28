@@ -24,7 +24,9 @@
         >
             <!-- Logo -->
             <div>
-                <img alt="logo" class="h-14 md:h-16" src={logo} />
+                <a href="/">
+                    <img alt="logo" class="h-14 md:h-16" src={logo} />
+                </a>
             </div>
 
             <!-- Menu Icon -->

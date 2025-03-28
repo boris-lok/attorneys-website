@@ -76,23 +76,25 @@
                 </a>
             {/each}
         </div>
-        <div
-            class="relative my-4 flex flex-row items-center justify-center gap-4"
-        >
-            <button
-                class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
-                onclick={onPreviousButtonClicked}
-                class:disabled={!hasPreviousPage}
-                disabled={!hasPreviousPage}
-            >Previous
-            </button>
-            <button
-                class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
-                onclick={onNextButtonClicked}
-                class:disabled={!hasNextPage}
-                disabled={!hasNextPage}
-            >Next
-            </button>
-        </div>
+        {#if articles.length > 0}
+            <div
+                class="relative my-4 flex flex-row items-center justify-center gap-4"
+            >
+                <button
+                    class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
+                    onclick={onPreviousButtonClicked}
+                    class:disabled={!hasPreviousPage}
+                    disabled={!hasPreviousPage}
+                >Previous
+                </button>
+                <button
+                    class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
+                    onclick={onNextButtonClicked}
+                    class:disabled={!hasNextPage}
+                    disabled={!hasNextPage}
+                >Next
+                </button>
+            </div>
+        {/if}
     </div>
 {/if}

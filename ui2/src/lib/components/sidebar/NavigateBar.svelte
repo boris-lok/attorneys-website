@@ -73,9 +73,12 @@
             </div>
         </div>
     </div>
+
+    <!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
+    <div class="absolute top-16 h-0 [&.show]:h-[calc(100vh-4rem)] w-screen z-20 bg-gray-200 opacity-80 opacity-0 transition-[height,opacity] duration-300 md:hidden" class:show></div>
     <!-- Dropdown Navigate Item -->
     <div
-        class="absolute top-16 z-50 h-0 w-screen overflow-y-scroll opacity-0 backdrop-blur-sm transition-[height,opacity] duration-300 md:hidden [&.show]:h-[calc(100vh-4rem)] [&.show]:opacity-100"
+        class="absolute top-16 z-50 h-0 w-screen overflow-y-scroll opacity-0 transition-[height,opacity] duration-300 md:hidden [&.show]:h-[calc(100vh-4rem)] [&.show]:opacity-100"
         class:show
     >
         <div

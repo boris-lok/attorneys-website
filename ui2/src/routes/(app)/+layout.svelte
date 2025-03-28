@@ -8,28 +8,23 @@
 
     let items: NavigationItem[] = [
         {
-            icon: 'iconoir:home',
-            name: 'Home',
-            url: '/home'
-        },
-        {
             icon: 'lsicon:list-outline',
-            name: 'Services',
+            name: '服務項目',
             url: '/services'
         },
         {
             icon: 'lineicons:books-2',
-            name: 'Articles',
+            name: '文章',
             url: '/articles'
         },
         {
             icon: 'tdesign:member',
-            name: 'Members',
+            name: '專業團隊',
             url: '/members'
         },
         {
             icon: 'hugeicons:contact-02',
-            name: 'Contact us',
+            name: '聯絡我們',
             url: '/contact_us'
         }
     ]

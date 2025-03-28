@@ -115,4 +115,6 @@
 </nav>
 
 <!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
-<div class="absolute top-16 bottom-0 h-0 [&.show]:h-auto w-screen z-20 bg-gray-200 opacity-80 opacity-0 transition-[height,opacity] duration-1000 md:hidden ease-linear " class:show></div>
+<div
+    class="absolute top-16 bottom-0 h-0 [&.show]:h-auto w-screen z-20 bg-gray-200 opacity-80 opacity-0 transition-[height,opacity] duration-1000 md:hidden ease-linear "
+    class:show></div>

@@ -44,7 +44,8 @@
         >
             {#each services as service}
                 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                <div class="group relative h-72 w-72 overflow-clip rounded-xl" onclick={() => onServiceClicked(service.id)} class:active={service.id === selectedServiceID}>
+                <div class="group relative h-72 w-72 overflow-clip rounded-xl"
+                     onclick={() => onServiceClicked(service.id)} class:active={service.id === selectedServiceID}>
                     <div
                         class="relative h-full w-full rounded-xl border border-[var(--primary-color)] p-4 transition-[width,height]"
                     >
@@ -55,7 +56,8 @@
                         </p>
                     </div>
 
-                    <div class="absolute inset-0 opacity-0 bg-white group-hover:block max-sm:[&.active]:block max-sm:group-[.active]:opacity-80 group-hover:opacity-80"></div>
+                    <div
+                        class="absolute inset-0 opacity-0 bg-white group-hover:block max-sm:[&.active]:block max-sm:group-[.active]:opacity-80 group-hover:opacity-80"></div>
                     <div
                         class="prose absolute hidden p-4 group-hover:block max-sm:group-[.active]:block overflow-y-auto top-0 h-72"
                     >

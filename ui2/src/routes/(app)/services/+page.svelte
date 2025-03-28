@@ -7,6 +7,12 @@
 
     let services: ServiceData[] = $state([])
     let isLoading = $state(false)
+    let selectedServiceID = $state('')
+
+    // handles serivce block clicked.
+    function onServiceClicked(id: string) {
+        selectedServiceID = id
+    }
 
     function fetchData() {
         ServiceServices.list('zh')
@@ -27,7 +33,7 @@
 </script>
 
 <div class="relative flex flex-col md:flex-row md:items-center">
-    <div class="relative flex w-full flex-col">
+    <div class="relative flex w-full flex-col md:max-w-6xl mx-auto">
         <p
             class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16"
         >
@@ -37,7 +43,8 @@
             class="relative mb-16 flex w-full flex-col items-center justify-center gap-x-16 gap-y-8 px-16 md:flex-row md:flex-wrap"
         >
             {#each services as service}
-                <div class="group relative h-72 w-72 overflow-clip rounded-xl">
+                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                <div class="group relative h-72 w-72 overflow-clip rounded-xl" onclick={() => onServiceClicked(service.id)}>
                     <div
                         class="relative h-full w-full rounded-xl border border-[var(--primary-color)] p-4 transition-[width,height]"
                     >
@@ -47,8 +54,10 @@
                             {service.data.title}
                         </p>
                     </div>
+
+                    <div class="absolute inset-0 opacity-0 bg-white group-hover:block [&.active]:block [&.active]:opacity-80 group-hover:opacity-80" class:active={service.id === selectedServiceID}></div>
                     <div
-                        class="absolute inset-0 hidden items-center justify-center p-4 group-hover:flex group-hover:backdrop-blur-sm"
+                        class="absolute inset-0 hidden items-center justify-center p-4 group-hover:flex [&.active]:flex" class:active={service.id === selectedServiceID}
                     >
                         <Markdown source={service.data.data} />
                     </div>

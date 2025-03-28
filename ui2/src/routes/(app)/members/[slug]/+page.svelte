@@ -7,6 +7,7 @@
     import Markdown from '@magidoc/plugin-svelte-marked'
     import Image from '$lib/components/common/Image.svelte'
     import IconifyIcon from '@iconify/svelte'
+    import { browser } from '$app/environment'
 
     let { data }: PageProps = $props()
 
@@ -14,6 +15,12 @@
     let name = $state('')
     let description = $state('')
     let avatar: ImageData | undefined = $state(undefined)
+
+    function onBackClicked() {
+        if (browser) {
+            window.history.back()
+        }
+    }
 
     function fetchData() {
         MemberServices.retrieve(data.id, 'zh')
@@ -56,6 +63,10 @@
         </div>
         <div class="prose max-w-2xl md:max-w-3xl lg:max-w-4xl mt-4">
             <Markdown source={description ?? ''}></Markdown>
+        </div>
+
+        <div class="relative flex flex-row justify-center items-center">
+            <button class="rounded border w-36 h-10 hover:border-[var(--primary-color)] cursor-pointer hover:bg-[var(--primary-color)] hover:text-white transition-[background-color,font-size] duration-500 hover:text-lg" onclick={onBackClicked}>返回</button>
         </div>
     </div>
 {/if}

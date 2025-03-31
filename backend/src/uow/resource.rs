@@ -1,9 +1,5 @@
 use crate::domain::entities::{
-    ArticleData, ArticleEntity, ArticleEntityFromSQLx, ContactData, ContactEntity,
-    ContactEntityFromSQLx, ContentID, HomeData, HomeEntity, HomeEntityFromSQLx, Language,
-    MemberData, MemberEntity, MemberEntityFromSQLx, Pagination, ResourceID, ResourceType,
-    ServiceData, ServiceEntity, ServiceEntityFromSQLx, SimpleMemberEntity,
-    SimpleMemberEntityFromSQLx,
+    ArticleData, ArticleEntity, ArticleEntityFromSQLx, ContactData, ContactEntity, ContactEntityFromSQLx, ContentID, HomeData, HomeEntity, HomeEntityFromSQLx, Language, MemberData, MemberEntity, MemberEntityFromSQLx, Pagination, ResourceID, ResourceType, ServiceData, ServiceEntity, ServiceEntityFromSQLx, SimpleArticleEntity, SimpleArticleEntityFromSQLx, SimpleMemberEntity, SimpleMemberEntityFromSQLx
 };
 use crate::domain::member::entities::AvatarData;
 use crate::repositories::{
@@ -564,15 +560,29 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                     .collect::<Vec<_>>()
             }
             ResourceType::Article => {
+                let query = r#"select resource.id as id,
+                content.data->>'title' as title,
+                content.created_at as created_at,
+                content.language as language,
+                resource.seq as seq
+                from resource,
+                    content
+                where resource.id = content.id
+                and content.language = $1
+                and resource.resource_type = $2
+                and resource.deleted_at is null
+                order by seq, resource.created_at desc
+                "#;
+
                 let query = format!("{}{}", query, offset);
 
-                sqlx::query_as::<_, ArticleEntityFromSQLx>(query.as_str())
+                sqlx::query_as::<_, SimpleArticleEntityFromSQLx>(query.as_str())
                     .bind(language.as_str())
                     .bind(resource_type.as_str())
                     .fetch_all(self.pool)
                     .await?
                     .into_iter()
-                    .map(ArticleEntity::from)
+                    .map(SimpleArticleEntity::from)
                     .filter_map(|e| serde_json::value::to_value(e).ok())
                     .collect::<Vec<_>>()
             }

@@ -437,6 +437,37 @@ impl From<ArticleEntityFromSQLx> for ArticleEntity {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct SimpleArticleEntity {
+    pub id: String,
+    pub title: String,
+    pub language: String,
+    pub created_at: i64,
+    pub seq: i16,
+}
+
+#[derive(Debug, FromRow)]
+pub struct SimpleArticleEntityFromSQLx {
+    pub id: String,
+    pub title: String,
+    pub language: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub seq: i16,
+}
+
+
+impl From<SimpleArticleEntityFromSQLx> for SimpleArticleEntity {
+ fn from(value: SimpleArticleEntityFromSQLx) -> Self {
+     Self {
+         id: value.id.trim().to_owned(),
+         title: value.title.trim().to_owned(),
+         language: value.language.trim().to_owned(),
+         created_at: value.created_at.timestamp_millis(),
+         seq: value.seq,
+     }
+ }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SimpleMemberEntity {
     pub id: String,
     pub name: String,

@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::domain::entities::{ArticleEntity, Language, Page, Pagination, ResourceType};
+use crate::domain::entities::{Language, Page, Pagination, ResourceType, SimpleArticleEntity};
 use crate::startup::AppState;
 use crate::uow::InDatabase;
 use axum::extract::{Query, State};
@@ -16,7 +16,7 @@ pub struct QueryPagination {
 
 #[derive(Debug, Serialize)]
 pub struct ListArticlesResponse {
-    articles: Vec<ArticleEntity>,
+    articles: Vec<SimpleArticleEntity>,
     total: usize,
 }
 

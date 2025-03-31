@@ -68,11 +68,12 @@ fn verify_password_hash(
 mod tests {
     use super::*;
     use crate::repositories::InMemoryUserRepository;
-    use argon2::password_hash::SaltString;
+    use argon2::password_hash::{rand_core, SaltString};
     use argon2::{Algorithm, Params, PasswordHasher, Version};
+    use rand_core::OsRng;
 
     async fn helper() -> (InMemoryUserRepository, UserID, String, String) {
-        let salt = SaltString::generate(&mut rand::thread_rng());
+        let salt = SaltString::generate(&mut OsRng);
 
         let user_id = uuid::Uuid::new_v4();
         let user_id = UserID::try_from(user_id.to_string()).unwrap();

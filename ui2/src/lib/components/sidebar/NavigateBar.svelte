@@ -8,12 +8,47 @@
 
     // The status of dropdown menu.
     let show = $state(false)
+    let innerWidth = $state(0)
+
 
     // handle the menu button clicked.
     function toggleMenu() {
         show = !show
     }
+
+    // remove the classes from body and set show to false
+    function disableDropdownNavigationBar() {
+        show = false;
+        document.body?.classList.remove('overflow-hidden')
+        document.body?.classList.remove('h-[calc(100vh-4rem)]')
+    }
+
+    // add the classes to body
+    function enableDropdownNavigationBar() {
+        document.body?.classList.add('overflow-hidden')
+        document.body?.classList.add('h-[calc(100vh-4rem)]')
+    }
+
+    $effect(() => {
+        if (innerWidth > 768) {
+            // if user resizes the window and then
+            // the window size is greater than 48rem(768px)
+            // we need to hidden the dropdown navigation bar
+            // and remove the classes from body
+            disableDropdownNavigationBar()
+        }
+    })
+
+    $effect(() => {
+        if (show) {
+            enableDropdownNavigationBar()
+        } else {
+           disableDropdownNavigationBar()
+        }
+    })
 </script>
+
+<svelte:window bind:innerWidth={innerWidth} />
 
 <nav class="relative">
     <div
@@ -24,6 +59,7 @@
         >
             <!-- Logo -->
             <div>
+                <p>{innerWidth}</p>
                 <a href="/">
                     <img alt="logo" class="h-14 md:h-16" src={logo} />
                 </a>
@@ -76,10 +112,16 @@
         </div>
     </div>
 
+</nav>
 
-    <!-- Dropdown Navigate Item -->
+<!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
+<div
+    class="absolute h-0 [&.show]:h-[calc(100vh-4rem)] bg-gray-300/95 w-full opacity-0 [&.show]:opacity-100 transition-[height,opacity] duration-300 z-50 overflow-hidden ease-in-out"
+    class:show>
+
+    <!--Dropdown Navigate Item -->
     <div
-        class="absolute top-16 z-50 h-0 w-screen overflow-y-scroll opacity-0 transition-[height,opacity] duration-500 md:hidden [&.show]:h-[calc(100vh-4rem)] [&.show]:opacity-100 ease-in"
+        class="relative w-screen overflow-y-scroll md:hidden h-[calc(100vh-4rem)]"
         class:show
     >
         <div
@@ -112,9 +154,4 @@
             {/each}
         </div>
     </div>
-</nav>
-
-<!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
-<div
-    class="absolute top-16 bottom-0 h-0 [&.show]:h-auto w-screen z-20 bg-gray-200 opacity-80 opacity-0 transition-[height,opacity] duration-1000 md:hidden ease-linear "
-    class:show></div>
+</div>

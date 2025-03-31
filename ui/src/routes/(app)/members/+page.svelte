@@ -1,157 +1,64 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import type { SimpleMember } from '$lib/models/Member';
-	import { Members } from '$lib/services';
-	import { startWithTap } from '$lib/utils';
-	import { finalize, tap } from 'rxjs';
-	import Loading from '$lib/components/Loading.svelte';
-	import { t } from 'svelte-i18n';
-	import type { Language } from '$lib/models/Language';
-	import Avatar from '$lib/components/Avatar.svelte';
+    import { MemberServices } from '$lib/services/member.service'
+    import { startWithTap } from '$lib/utils'
+    import { finalize, tap } from 'rxjs'
+    import type { Language, SimpleMember } from '$lib/types'
+    import Image from '$lib/components/common/Image.svelte'
+    import IconifyIcon from '@iconify/svelte'
 
-	// The members data
-	let members: SimpleMember[] = [];
-	// The flag that indicates the page is loading
-	let isLoading = false;
-	// The language that we want to fetch
-	let language: Language = 'zh';
+    let members: SimpleMember[] = $state([])
+    let isLoading = $state(false)
+    let lang: Language = 'zh'
 
-	onMount(() => {
-		Members.list(language)
-			.pipe(
-				startWithTap(() => isLoading = true),
-				finalize(() => isLoading = false),
-				tap(e => members = e)
-			)
-			.subscribe();
-	});
+    $effect(() => {
+        MemberServices.list(lang)
+            .pipe(
+                startWithTap(() => (isLoading = true)),
+                finalize(() => (isLoading = false)),
+                tap((resp) => {
+                    members = resp
+                })
+            )
+            .subscribe({ error: console.error })
+    })
 </script>
 
 {#if isLoading}
-	<Loading />
+    <p>Loading...</p>
 {:else}
-	<div class="members-section">
-		<h1>{$t('Members')}</h1>
-		<div class="members-list-section">
-			{#each members as member}
-				<div class="member-card">
-					<div class="bg"></div>
-					<a href="/members/{member.id}">
-						{#if member.avatar}
-							<Avatar avatar={member.avatar} regularSize={64} />
-						{:else}
-							<span class="material-icon">account_circle</span>
-						{/if}
-						<span class="name">
-							<h3>{member.name}</h3>
-							<p>{$t('member.attorney.suffix')}</p>
-						</span>
-					</a>
-				</div>
-			{/each}
-		</div>
-	</div>
+    <div class="relative flex flex-col md:flex-row md:items-center mt-8 md:mt-16">
+        <div class="relative flex flex-col gap-4 w-full">
+            <p
+                class="px-4 text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16 w-full text-center"
+            >
+                本所成員
+            </p>
+            <div
+                class="relative flex flex-col gap-8 px-4 md:flex-row md:px-24 lg:px-48 mt-4"
+            >
+                {#each members as member}
+                    <a href="/members/{member.id}">
+                        <div
+                            class="flex h-36 w-full flex-row items-center gap-6 rounded px-4 py-4 shadow-md md:w-84 lg:w-96"
+                        >
+                            {#if member.avatar}
+                                <div class="h-24 w-24">
+                                    <Image
+                                        alt={member.name}
+                                        image={member.avatar}
+                                    />
+                                </div>
+                            {:else}
+                                <IconifyIcon
+                                    icon="radix-icons:avatar"
+                                    class="h-24 w-24"
+                                />
+                            {/if}
+                            <p class="text-2xl">{member.name}</p>
+                        </div>
+                    </a>
+                {/each}
+            </div>
+        </div>
+    </div>
 {/if}
-
-
-<style lang="scss">
-  .members-list-section {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding: 1.25rem 5%;
-  }
-
-  h1 {
-    text-align: center;
-  }
-
-  .member-card {
-    border-radius: 0.25rem;
-    box-shadow: 0 0 1rem 0 $grey;
-    padding: 1.25rem;
-    position: relative;
-
-    .bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0;
-      height: 100%;
-      background: linear-gradient(90deg, rgba(234, 88, 12, 0.5) 0%, rgba(232, 232, 232, 0) 100%);;
-      z-index: -1;
-      transition: width .5s linear;
-    }
-
-    &:hover {
-      .bg {
-        width: 100%;
-      }
-    }
-
-    a {
-      text-decoration: none;
-      color: $black;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      span.material-icon {
-        font-size: 4rem;
-        margin-bottom: 0.5rem;
-      }
-
-      span.name {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-        gap: 0.5rem;
-        justify-content: center;
-
-        h3 {
-          font-weight: 700;
-        }
-      }
-    }
-  }
-
-  @media (min-width: 768px) {
-    .members-section {
-      padding: 0 5%;
-      margin: 0 auto;
-      max-width: 1280px;
-    }
-
-    .members-list-section {
-      flex-direction: row;
-      flex-wrap: wrap;
-      padding: 1.5rem 0;
-      gap: 1rem;
-
-      .member-card {
-        min-width: 22rem;
-
-        a {
-          flex-direction: row;
-          gap: 1rem;
-
-          span.material-icon {
-            margin-bottom: 0;
-          }
-
-          span.name {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-end;
-            gap: 0.5rem;
-            justify-content: center;
-
-            h3 {
-              font-weight: 700;
-            }
-          }
-        }
-      }
-    }
-  }
-</style>

@@ -1,80 +1,75 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import { Members } from '$lib/services';
-	import { startWithTap } from '$lib/utils';
-	import { finalize, tap } from 'rxjs';
-	import Loading from '$lib/components/Loading.svelte';
-	import { t } from 'svelte-i18n';
-	import SvelteMarkdown from 'svelte-markdown';
-	import type { MemberData } from '$lib/models/Member';
-	import type { Language } from '$lib/models/Language';
-	import Avatar from '$lib/components/Avatar.svelte';
+    import type { PageProps } from './$types'
+    import { startWithTap } from '$lib/utils'
+    import { finalize, tap } from 'rxjs'
+    import { MemberServices } from '$lib/services/member.service'
+    import type { ImageData, MemberData } from '$lib/types'
+    import Markdown from '@magidoc/plugin-svelte-marked'
+    import Image from '$lib/components/common/Image.svelte'
+    import IconifyIcon from '@iconify/svelte'
+    import { browser } from '$app/environment'
 
-	let id = $page.params.slug;
-	let language: Language = 'zh';
-	let isLoading = false;
-	let member: MemberData | null = null;
+    let { data }: PageProps = $props()
 
-	onMount(() => {
-		Members.retrieve(id, language)
-			.pipe(
-				startWithTap(() => isLoading = true),
-				finalize(() => isLoading = false),
-				tap(e => member = e)
-			)
-			.subscribe();
-	});
+    let isLoading = $state(false)
+    let name = $state('')
+    let description = $state('')
+    let avatar: ImageData | undefined = $state(undefined)
+
+    function onBackClicked() {
+        if (browser) {
+            window.history.back()
+        }
+    }
+
+    function fetchData() {
+        MemberServices.retrieve(data.id, 'zh')
+            .pipe(
+                startWithTap(() => (isLoading = true)),
+                finalize(() => (isLoading = false)),
+                tap((resp: MemberData | null) => {
+                    if (resp) {
+                        name = resp.data.name ?? ''
+                        description = resp.data.description ?? ''
+                        avatar = resp.avatar
+                    }
+                })
+            )
+            .subscribe({
+                error: console.error
+            })
+    }
+
+    $effect(() => fetchData())
 </script>
 
 {#if isLoading}
-	<Loading />
+    <p>Loading...</p>
 {:else}
-	<div class="member-section">
-		{#if member && member.avatar}
-			<div class="avatar-section">
-				<Avatar avatar={member.avatar} />
-			</div>
-		{/if}
-		{#if member}
-			<div class="member-detail-section add-margin-to-listview">
-				<h1>{member.data.name}</h1>
-				<SvelteMarkdown source={member.data.description} />
-			</div>
-		{:else}
-			<p>{$t('no_member_message')}</p>
-		{/if}
-	</div>
+    <div class="px-4 my-8 md:px-8 md:my-16 md:max-w-5xl md:mx-auto">
+        <div
+            class="relative flex flex-col items-center justify-between md:flex-row"
+        >
+            <p class="mb-8 text-3xl font-bold text-[var(--primary-color)]">
+                {name}
+            </p>
+            {#if avatar}
+                <div class="h-48 w-48">
+                    <Image alt={name} image={avatar} />
+                </div>
+            {:else}
+                <IconifyIcon icon="radix-icons:avatar" class="h-48 w-48" />
+            {/if}
+        </div>
+        <div class="prose max-w-2xl md:max-w-3xl lg:max-w-4xl mt-4">
+            <Markdown source={description ?? ''}></Markdown>
+        </div>
+
+        <div class="relative flex flex-row justify-center items-center">
+            <button
+                class="rounded border w-36 h-10 hover:border-[var(--primary-color)] cursor-pointer hover:bg-[var(--primary-color)] hover:text-white transition-[background-color,font-size] duration-500 hover:text-lg"
+                onclick={onBackClicked}>返回
+            </button>
+        </div>
+    </div>
 {/if}
-
-
-<style lang="scss">
-  .member-section {
-    display: flex;
-    flex-direction: column;
-    padding: 0 2.5rem 1.25rem 10%;
-
-    p {
-      text-align: center;
-    }
-
-    .avatar-section {
-      margin: 0 auto;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .member-section {
-      max-width: 1024px;
-      padding: 0 10% 1.5rem 10%;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: space-between;
-
-      .avatar-section {
-        margin: 0;
-      }
-    }
-  }
-</style>

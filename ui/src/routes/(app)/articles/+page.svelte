@@ -1,147 +1,135 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
-	import { Articles } from '$lib/services';
-	import { startWithTap } from '$lib/utils';
-	import { BehaviorSubject, finalize, Subscription, tap } from 'rxjs';
-	import Loading from '$lib/components/Loading.svelte';
-	import { t } from 'svelte-i18n';
-	import type { Language } from '$lib/models/Language';
-	import type { ArticleData } from '$lib/models/Articles';
+    import { startWithTap } from '$lib/utils'
+    import { BehaviorSubject, distinctUntilChanged, finalize, switchMap, tap } from 'rxjs'
+    import type { ArticleData, Language } from '$lib/types'
+    import { ArticleServices } from '$lib/services/article.service'
+    import Article from '$lib/components/Article.svelte'
+    import IconifyIcon from '@iconify/svelte'
 
-	let isLoading = false;
-	let articles: ArticleData[] = [];
-	let language: Language = 'zh';
+    let articles: ArticleData[] = $state([])
+    let isLoading = $state(false)
+    let pageSize = 10
+    let page = $state(0)
+    // Observable for the current page number. We use BehaviorSubject to ensure that the page number is updated correctly when we navigate to a new page.
+    const page$ = new BehaviorSubject(0)
+    // The flag indicates that we have previous page
+    let hasPreviousPage = $state(false)
+    // The flag indicates that we have next page
+    let hasNextPage = $state(false)
+    // The ID of the article that is currently selected
+    let articleID: string = $state('')
 
-	// Pagination
-	let page = 0;
-	// Observable for the current page number. We use BehaviorSubject to ensure that the page number is updated correctly when we navigate to a new page.
-	const page$ = new BehaviorSubject(0);
-	// The size of the articles per page. We define it as 5.
-	let pageSize = 10;
-	// The flag indicates that we have previous page
-	let hasPreviousPage = false;
-	// The flag indicates that we have next page
-	let hasNextPage = false;
-	// The disposer for the subscription. We use it to unsubscribe when the component is destroyed.
-	let disposer: Subscription | null = null;
+    function onPreviousButtonClicked() {
+        page = page - 1
+        page$.next(page)
+    }
 
-	function onPreviousButtonClicked() {
-		page = page - 1;
-		page$.next(page);
-	}
+    function onNextButtonClicked() {
+        page = page + 1
+        page$.next(page)
+    }
 
-	function onNextButtonClicked() {
-		page = page + 1;
-		page$.next(page);
-	}
+    function fetchData(lang: Language, page: number, pageSize: number) {
+        return ArticleServices.list(lang, page, pageSize).pipe(
+            startWithTap(() => (isLoading = true)),
+            finalize(() => (isLoading = false)),
+            tap((resp) => {
+                console.log(resp)
+                articles = resp.articles
+                hasPreviousPage = page > 0
+                hasNextPage = resp.total - (page + 1) * pageSize > 0
+                console.log(hasNextPage, hasPreviousPage)
+            })
+        )
+    }
 
-	onMount(() => {
-		disposer = page$
-			.subscribe(p => {
-				Articles.list(language, p, pageSize)
-					.pipe(
-						startWithTap(() => isLoading = true),
-						finalize(() => isLoading = false),
-						tap(e => {
-							articles = e.articles;
-							hasPreviousPage = page > 0;
-							hasNextPage = (e.total - ((page + 1) * pageSize)) > 0;
-						})
-					)
-					.subscribe();
-			});
-	});
+    function onArticleClicked(id: string) {
+        articleID = id
+    }
 
-	onDestroy(() => disposer?.unsubscribe());
+    function onBackClicked() {
+        articleID = ''
+    }
+
+    $effect(() => {
+        const disposer = page$
+            .pipe(
+                distinctUntilChanged(),
+                switchMap((page) => {
+                    return fetchData('zh', page, pageSize)
+                })
+            )
+            .subscribe({ error: console.error })
+
+        return () => {
+            disposer.unsubscribe()
+        }
+    })
 </script>
 
 {#if isLoading}
-	<Loading />
+    <p>Loading...</p>
 {:else}
-	<div class="articles-section">
-		<h1>{$t('articles')}</h1>
-		{#each articles as article}
-			<div class="article-wrapper">
-				<a href="/articles/{article.id}">
-					<h3>{article.data.title}</h3>
-				</a>
-			</div>
-		{/each}
-		<div class="pagination-wrapper">
-			<button class="btn" on:click={onPreviousButtonClicked} class:disabled={!hasPreviousPage}
-							disabled={!hasPreviousPage}>Previous
-			</button>
-			<button class="btn" on:click={onNextButtonClicked} class:disabled={!hasNextPage} disabled={!hasNextPage}>Next
-			</button>
-		</div>
-	</div>
+    <div class="relative">
+        <!-- Title -->
+        {#if articleID === ''}
+            <div class="my-8 md:my-16">
+                <p
+                    class="px-4 text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16 w-full text-center"
+                >
+                    文章
+                </p>
+            </div>
+        {/if}
+
+        <!-- Articles -->
+        <div class="flex flex-col md:flex-row gap-8 group"
+             class:active={articleID !== ''}>
+            <div
+                class="relative flex flex-row md:flex-col gap-4 md:max-w-[48rem] md:mx-auto group-[.active]:flex-1 group-[.active]:pt-24 overflow-auto py-8 px-4 w-full"
+            >
+                {#each articles as article}
+                    <button
+                        class="relative rounded shadow h-12 w-full cursor-pointer [.active]:text-[var(--primary-color)]"
+                        class:active={articleID === article.id} onclick={() => onArticleClicked(article.id)}>
+                        <p class="text-xl text-ellipsis w-full overflow-hidden whitespace-nowrap px-8">{article.data.title}</p>
+                    </button>
+                {/each}
+            </div>
+
+
+            {#if articleID !== ''}
+                <div class="group-[.active]:flex-4 relative px-4">
+                    <button class="cursor-pointer" onclick={onBackClicked}>
+                        <IconifyIcon icon="lets-icons:refund-back-light"
+                                     class="md:absolute h-8 w-8 top-8 md:top-16 md:left-8" />
+                    </button>
+                    <Article id={articleID} />
+                </div>
+            {/if}
+        </div>
+
+
+        <!-- The button group for controlling the page -->
+        {#if articles.length > 0 && articleID === ''}
+            <div
+                class="relative my-8 flex flex-row items-center justify-center gap-4"
+            >
+                <button
+                    class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
+                    onclick={onPreviousButtonClicked}
+                    class:disabled={!hasPreviousPage}
+                    disabled={!hasPreviousPage}
+                >Previous
+                </button>
+                <button
+                    class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
+                    onclick={onNextButtonClicked}
+                    class:disabled={!hasNextPage}
+                    disabled={!hasNextPage}
+                >Next
+                </button>
+            </div>
+        {/if}
+    </div>
 {/if}
-
-<style lang="scss">
-  .articles-section {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-    padding: 0 5%;
-    width: 100%;
-
-    .article-wrapper {
-      width: 100%;
-
-      a {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        width: 100%;
-        text-decoration: none;
-        color: $black;
-        border-bottom: 1px solid $grey;
-
-        h3 {
-          font-size: 1rem;
-          font-weight: 500;
-          line-height: 1.25rem;
-        }
-
-        &:hover {
-          color: $deep-orange;
-        }
-      }
-    }
-
-    .pagination-wrapper {
-      display: flex;
-      width: 100%;
-      flex-direction: row;
-      gap: 1rem;
-      justify-content: center;
-
-      .btn {
-        border: none;
-        background-color: transparent;
-        text-decoration: underline;
-        cursor: pointer;
-
-        &.disabled {
-          color: $grey;
-          cursor: unset;
-        }
-      }
-    }
-  }
-
-  @media (min-width: 768px) {
-    .articles-section {
-      justify-content: center;
-      align-items: center;
-      padding: 0 10%;
-      max-width: 1024px;
-      overflow: clip;
-      margin: 0 auto;
-
-      h1 {
-        padding: 0 0 1rem 0;
-        line-height: 2rem;
-      }
-    }
-  }
-</style>

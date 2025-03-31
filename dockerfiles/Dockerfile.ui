@@ -5,18 +5,19 @@ from node:22 as builder
 # Setup the working directory
 workdir /app
 
-# Copy the package.json and install dependencies
-copy ../ui/package.json /
-run npm install --verbose
+# Install app dependencies using pnpm
+# run npm install -g pnpm
 
 ## Copy the rest of the application code
-copy ../ui/ .
+copy ../ui2/ .
 ## Replace the .env to production environment
-copy ../ui/.env.prod ./.env
+copy ../ui2/.env ./.env
 
 ## Delete the node_modules and previous build files
 run rm -rf /app/node_modules
 run rm -rf /app/.svelte-kit
+
+run npm install --verbose
 
 run npm run build
 

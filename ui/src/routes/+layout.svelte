@@ -1,8 +1,9 @@
-<script>
-	import Notification from '$lib/components/Notification.svelte';
-	import '../styles/global.scss';
+<script lang="ts">
+    import '../app.css'
+
+    let { children } = $props()
 </script>
 
-<slot />
-
-<Notification />
+<div class="relative">
+    {@render children()}
+</div>

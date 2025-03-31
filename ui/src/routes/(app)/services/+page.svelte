@@ -1,137 +1,70 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { Services } from '$lib/services';
-	import { shuffle, startWithTap } from '$lib/utils';
-	import { finalize, tap } from 'rxjs';
-	import Loading from '$lib/components/Loading.svelte';
-	import SvelteMarkdown from 'svelte-markdown';
-	import type { Language } from '$lib/models/Language';
-	import type { ServiceData } from '$lib/models/Services';
+    import { ServiceServices } from '$lib/services/service.service'
+    import { startWithTap } from '$lib/utils'
+    import { finalize, tap } from 'rxjs'
+    import type { ServiceData } from '$lib/types'
+    import Markdown from '@magidoc/plugin-svelte-marked'
 
-	// isLoading is a flag that indicates we are loading a resource from API.
-	let loading = false;
-	// language is the language that we want to load
-	let language: Language = 'zh';
-	// The resource data
-	let data: ServiceData[] = [];
-	// The images that we want to display
-	let images: string[] = [];
+    let services: ServiceData[] = $state([])
+    let isLoading = $state(false)
+    let selectedServiceID = $state('')
 
+    // handles serivce block clicked.
+    function onServiceClicked(id: string) {
+        selectedServiceID = id
+    }
 
-	onMount(() => {
-		const imported = import.meta.glob('$lib/assets/*_480.png', { eager: true });
-		for (let key in Object.keys(imported)) {
-			let value = Object.values(imported)[key];
-			if (typeof value === 'object' && value != null && 'default' in value && typeof value.default == 'string') {
-				images.push(value.default);
-			}
-		}
+    function fetchData() {
+        ServiceServices.list('zh')
+            .pipe(
+                startWithTap(() => (isLoading = true)),
+                finalize(() => (isLoading = false)),
+                tap((resp) => {
+                    services = resp
+                    console.log(services)
+                })
+            )
+            .subscribe({
+                error: console.error
+            })
+    }
 
-		Services.list(language)
-			.pipe(
-				startWithTap(() => loading = true),
-				finalize(() => loading = false),
-				tap(services => {
-					data = services;
-					while (data.length > images.length) {
-						images = [...images, ...images];
-					}
-					images = shuffle(images);
-				})
-			)
-			.subscribe();
-	});
+    $effect(() => fetchData())
 </script>
 
-{#if loading}
-	<Loading />
-{:else}
-	<div class="services-wrapper">
-		{#each data as service, i}
-			<div class="service-section" class:even={i % 2 === 0}>
-				<h3>{service.data.title}</h3>
-				<img src={images[i]} alt="{service.data.title}" />
-				<div class="add-margin-to-listview">
-					<SvelteMarkdown source={service.data.data} />
-				</div>
-			</div>
-		{/each}
-	</div>
-{/if}
+<div class="relative flex flex-col md:flex-row md:items-center">
+    <div class="relative flex w-full flex-col md:max-w-6xl mx-auto">
+        <p
+            class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16"
+        >
+            法律服務項目
+        </p>
+        <div
+            class="relative mb-16 flex w-full flex-col items-center justify-center gap-x-16 gap-y-8 px-16 md:flex-row md:flex-wrap"
+        >
+            {#each services as service}
+                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                <div class="group relative h-72 w-72 overflow-clip rounded-xl"
+                     onclick={() => onServiceClicked(service.id)} class:active={service.id === selectedServiceID}>
+                    <div
+                        class="relative h-full w-full rounded-xl border border-[var(--primary-color)] p-4 transition-[width,height]"
+                    >
+                        <p
+                            class="flex h-full w-full items-center justify-center text-2xl font-bold text-[var(--primary-color)] max-sm:group-[.active]:opacity-20 group-hover:opacity-20"
+                        >
+                            {service.data.title}
+                        </p>
+                    </div>
 
-<style lang="scss">
-  .services-wrapper {
-    padding: 1rem 5%;
-  }
-
-  .service-section {
-    position: relative;
-
-    h3 {
-      border-bottom: 1px solid $grey;
-      margin-bottom: 1rem;
-    }
-
-    img {
-      display: none;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .services-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-      padding: 0;
-      max-width: 1024px;
-      margin: 0 auto;
-    }
-
-    .service-section {
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 0 1rem 0 $grey;
-      padding: 1.25rem 2.5rem 1.25rem 24rem;
-      border-radius: 0.25rem;
-      min-height: 280px;
-      justify-content: center;
-      overflow: clip;
-      background: white;
-
-      img {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 22rem;
-        max-width: 22rem;
-        height: 100%;
-        max-height: 100%;
-      }
-
-      h3 {
-        min-width: 15rem;
-        width: 15rem;
-        border-bottom: none;
-        margin-bottom: 0;
-        color: $deep-blue;
-        font-weight: 700;
-        font-size: 2rem;
-      }
-
-      &.even {
-        padding: 1.25rem 24rem 1.25rem 1.25rem;
-
-        img {
-          left: unset;
-          right: 0;
-        }
-
-        h3 {
-          color: $deep-orange;
-        }
-      }
-    }
-  }
-</style>
-
+                    <div
+                        class="absolute inset-0 opacity-0 bg-white group-hover:block max-sm:[&.active]:block max-sm:group-[.active]:opacity-80 group-hover:opacity-80"></div>
+                    <div
+                        class="prose absolute hidden p-4 group-hover:block max-sm:group-[.active]:block overflow-y-auto top-0 h-72"
+                    >
+                        <Markdown source={service.data.data} />
+                    </div>
+                </div>
+            {/each}
+        </div>
+    </div>
+</div>

@@ -1,51 +1,41 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { Home } from '$lib/services';
-	import { startWithTap } from '$lib/utils';
-	import { finalize, tap } from 'rxjs';
-	import SvelteMarkdown from 'svelte-markdown';
-	import Loading from '$lib/components/Loading.svelte';
+    import Markdown from '@magidoc/plugin-svelte-marked'
+    import { HomeServices } from '$lib/services/home.service'
+    import { startWithTap } from '$lib/utils'
+    import { finalize, tap } from 'rxjs'
 
-	let isLoading = false;
-	let content = '';
+    // The content of home page
+    let content = $state('')
+    // The loading statue of retrieving the content from API.
+    let isLoading = $state(false)
 
-	onMount(async () => {
-		Home.list('zh')
-			.pipe(
-				startWithTap(() => isLoading = true),
-				finalize(() => isLoading = false),
-				tap(e => {
-					content = e?.data.data ?? '';
-				})
-			)
-			.subscribe();
-	});
+    // fetch the content from API.
+    function fetchData() {
+        HomeServices.list('zh')
+            .pipe(
+                startWithTap(() => (isLoading = true)),
+                finalize(() => (isLoading = false)),
+                tap((resp) => {
+                    if (resp.length === 0) {
+                        content = ''
+                    } else {
+                        content = resp[0].data.data
+                    }
+                    console.log(resp)
+                })
+            )
+            .subscribe({
+                error: console.error
+            })
+    }
+
+    $effect(() => {
+        fetchData()
+    })
 </script>
 
-{#if isLoading}
-	<Loading />
-{:else}
-	<div class="home-wrapper">
-		<SvelteMarkdown source={content} />
-	</div>
-{/if}
-
-<style lang="scss">
-  .home-wrapper {
-    display: flex;
-    flex-direction: column;
-    padding: 1rem 5%;
-  }
-
-  @media (min-width: 768px) {
-    .home-wrapper {
-      padding: 3rem;
-      border-radius: 1rem;
-      background-color: white;
-      max-width: 768px;
-      margin: 0 auto;
-      box-shadow: 0 0 1rem 0 $grey;
-    }
-  }
-</style>
-
+<div
+    class="prose w-full px-6 pt-16 md:min-w-2xl lg:min-w-3xl md:animate-[--right-to-left_1s_ease-in-out] md:px-16 md:pt-0 mx-auto md:mt-16"
+>
+    <Markdown source={content}></Markdown>
+</div>

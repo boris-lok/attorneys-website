@@ -1,134 +1,88 @@
 <script lang="ts">
-	import { user } from '../../../stores/userStore';
-	import Input from '$lib/components/Input.svelte';
-	import { t } from 'svelte-i18n';
-	import { goto } from '$app/navigation';
-	import { Users } from '$lib/services';
-	import { startWithTap } from '$lib/utils';
-	import { finalize } from 'rxjs';
-	import { showNotification } from '../../../stores/notificationStore';
+    import Input from '$lib/components/common/Input.svelte'
+    import { UserService } from '$lib/services/user.service'
+    import { startWithTap } from '$lib/utils'
+    import { finalize } from 'rxjs'
+    import { goto } from '$app/navigation'
+    import { user } from '$lib/stores/user.store'
 
-	// login information
-	let username = '';
-	let password = '';
+    let formLoading = $state(false)
 
-	// The flag indicates is calling an API
-	let isLoading = false;
+    type Data = {
+        username: string
+        password: string
+    }
 
-	// redirect to dashboard if user is logged in
-	$: if ($user) {
-		goto('/admin/dashboard');
-	}
+    let data: Data = {
+        username: '',
+        password: ''
+    }
 
-	// validate username and password are not empty
-	function validate() {
-		return username.trim() !== '' && password.trim() !== '';
-	}
+    function onDataChanged<K extends keyof Data>(
+        key: K,
+        e: Event & { currentTarget: EventTarget & HTMLInputElement }
+    ) {
+        if (!e.target) {
+            return
+        }
 
-	// handles username has been changed
-	function onUsernameChanged(event: Event) {
-		username = (event.target as HTMLInputElement).value;
-	}
+        const { value } = e.target as HTMLInputElement
+        data = {
+            ...data,
+            [key]: value.trim()
+        }
+    }
 
-	// handles password has been changed
-	function onPasswordChanged(event: Event) {
-		password = (event.target as HTMLInputElement).value;
-	}
+    function onSubmitClicked() {
+        if (data.username === '' || data.password === '') {
+            return
+        }
 
-	// handles keyboard press event
-	function onKeyPress(event: KeyboardEvent) {
-		let key_code = event.code || event.key;
-		if (key_code === 'Enter') {
-			loginHandler();
-		}
-	}
+        UserService.login(data)
+            .pipe(
+                startWithTap(() => (formLoading = true)),
+                finalize(() => (formLoading = false))
+            )
+            .subscribe({
+                next: (resp) => {
+                    console.log(`response: ${JSON.stringify(resp)}`)
 
-	// handles login
-	function loginHandler() {
-		if (isLoading) {
-			return;
-		}
-
-		if (!validate()) {
-			return;
-		}
-
-		Users.login(username, password)
-			.pipe(
-				startWithTap(() => isLoading = true),
-				finalize(() => isLoading = false)
-			)
-			.subscribe({
-				next: e => {
-					user.set(e);
-					goto('/admin/dashboard');
-				},
-				error: e => {
-					showNotification('Login failed', 'error', 3000);
-				}
-			});
-	}
-
-	function onBackButtonClicked() {
-		goto('/');
-	}
-
-	function onSubmitButtonClicked() {
-		loginHandler();
-	}
-
+                    if (resp.error) {
+                        console.error(`login failed: ${JSON.stringify(resp)}`)
+                    } else if (!resp.error && 'data' in resp) {
+                        user.set(resp.data)
+                        goto('/admin/dashboard')
+                    }
+                }
+            })
+    }
 </script>
 
-<div class="login-wrapper">
-	<h2>{$t('login')}</h2>
-	<Input label="Username" name="username" on:input={onUsernameChanged} on:keypress={onKeyPress} type="text" value="" />
-	<Input label="Password" name="password" on:input={onPasswordChanged} on:keypress={onKeyPress} type="password"
-				 value="" />
-
-	<div class="btn-container">
-		<button class="btn submit" disabled={isLoading} on:click={onSubmitButtonClicked}
-						type="button">{$t('login')}</button>
-		<button class="btn back" disabled={isLoading} on:click={onBackButtonClicked} type="button">{$t('back')}</button>
-	</div>
+<div
+    class="mx-auto mt-[10%] mb-4 w-11/12 rounded bg-white px-8 pt-6 pb-8 shadow-md md:w-96"
+>
+    <Input
+        hasError={false}
+        label="Username"
+        name="username"
+        onInput={(e) => onDataChanged('username', e)}
+        type="text"
+        value=""
+    />
+    <Input
+        hasError={false}
+        label="Password"
+        name="password"
+        onInput={(e) => onDataChanged('password', e)}
+        type="password"
+        value=""
+    />
+    <div class="flex items-center justify-center">
+        <button
+            class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:bg-gray-500"
+            disabled={formLoading}
+            onclick={onSubmitClicked}
+        >Login
+        </button>
+    </div>
 </div>
-
-<style lang="scss">
-  .login-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    align-items: center;
-    box-shadow: 0 0 8px 0 $deep-grey;
-    padding: 1.5rem 0.5rem;
-    border-radius: 4px;
-    margin: 2rem auto;
-  }
-
-  .btn-container {
-    grid-area: btn-container;
-    text-align: center;
-    margin-top: 2rem;
-
-    .btn {
-      width: 7.5rem;
-      height: 2.5rem;
-      cursor: pointer;
-      margin: 0 0.25rem;
-      background-color: transparent;
-
-      &.submit {
-        border: 1px solid $deep-blue;
-      }
-
-      &.back {
-        border: 1px solid $deep-red;
-      }
-    }
-  }
-
-  @media (min-width: 768px) {
-    .login-wrapper {
-      max-width: 30rem;
-    }
-  }
-</style>

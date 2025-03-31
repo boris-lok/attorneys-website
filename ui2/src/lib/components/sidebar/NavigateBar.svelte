@@ -1,7 +1,8 @@
 <script lang="ts">
     import NavigateItem from '$lib/components/sidebar/NavigateItem.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import logo from '$lib/assets/logo.png'
+    import logo from '$lib/assets/logo.webp'
+    import smLogo from '$lib/assets/logo.sm.webp'
     import type { NavigationItem } from '$lib/types'
 
     type InputProps = {
@@ -65,7 +66,11 @@
             <!-- Logo -->
             <div>
                 <a href={rootUrl}>
-                    <img alt="logo" class="h-14 md:h-16" src={logo} />
+                    <picture>
+                        <source media="(min-width: 768px)" srcset={logo}>
+                        <img alt="logo" class="h-14 md:h-16" src={smLogo} />
+                    </picture>
+
                 </a>
             </div>
 

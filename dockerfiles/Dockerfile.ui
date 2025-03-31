@@ -17,6 +17,7 @@ copy ../ui2/.env ./.env
 run rm -rf /app/node_modules
 run rm -rf /app/.svelte-kit
 
+run npm cache clean --force
 run npm install --verbose
 
 run npm run build

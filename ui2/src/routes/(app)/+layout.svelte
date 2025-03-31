@@ -30,7 +30,7 @@
     ]
 </script>
 
-<NavigateBar {items} />
+<NavigateBar {items} rootUrl="/" />
 <Background />
 
 <main>

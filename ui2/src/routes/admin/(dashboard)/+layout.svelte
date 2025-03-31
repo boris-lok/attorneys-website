@@ -56,7 +56,7 @@
     ]
 </script>
 
-<NavigateBar {items}></NavigateBar>
+<NavigateBar {items} rootUrl="/admin/dashboard"></NavigateBar>
 
 <main>
     <div class="relative mx-4 my-8 max-w-[var(--max-screen-width)] md:mx-auto">

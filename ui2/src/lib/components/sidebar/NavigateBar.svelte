@@ -1,10 +1,15 @@
 <script lang="ts">
     import NavigateItem from '$lib/components/sidebar/NavigateItem.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import type { NavigationItem } from '$lib/types'
     import logo from '$lib/assets/logo.png'
+    import type { NavigationItem } from '$lib/types'
 
-    let { items }: { items: NavigationItem[] } = $props()
+    type InputProps = {
+        rootUrl: string
+        items: NavigateItem[]
+    }
+
+    let { rootUrl, items }: InputProps = $props()
 
     // The status of dropdown menu.
     let show = $state(false)
@@ -59,8 +64,7 @@
         >
             <!-- Logo -->
             <div>
-                <p>{innerWidth}</p>
-                <a href="/">
+                <a href={rootUrl}>
                     <img alt="logo" class="h-14 md:h-16" src={logo} />
                 </a>
             </div>

@@ -9,9 +9,9 @@ workdir /app
 # run npm install -g pnpm
 
 ## Copy the rest of the application code
-copy ../ui2/ .
+copy ../ui/ .
 ## Replace the .env to production environment
-copy ../ui2/.env ./.env
+copy ../ui/.env ./.env
 
 ## Delete the node_modules and previous build files
 run rm -rf /app/node_modules

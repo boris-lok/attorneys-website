@@ -1,7 +1,7 @@
 <script lang="ts">
     import { startWithTap } from '$lib/utils'
     import { BehaviorSubject, distinctUntilChanged, finalize, switchMap, tap } from 'rxjs'
-    import type { ArticleData, Language, SimpleArticle } from '$lib/types'
+    import type { Language, SimpleArticle } from '$lib/types'
     import Icon from '@iconify/svelte'
     import { ArticleServices } from '$lib/services/article.service'
 

@@ -3,7 +3,6 @@
     import IconifyIcon from '@iconify/svelte'
     import logo from '$lib/assets/logo.webp'
     import smLogo from '$lib/assets/logo.sm.webp'
-    import type { NavigationItem } from '$lib/types'
 
     type InputProps = {
         rootUrl: string
@@ -24,7 +23,7 @@
 
     // remove the classes from body and set show to false
     function disableDropdownNavigationBar() {
-        show = false;
+        show = false
         document.body?.classList.remove('overflow-hidden')
         document.body?.classList.remove('h-[calc(100vh-4rem)]')
     }
@@ -49,7 +48,7 @@
         if (show) {
             enableDropdownNavigationBar()
         } else {
-           disableDropdownNavigationBar()
+            disableDropdownNavigationBar()
         }
     })
 </script>

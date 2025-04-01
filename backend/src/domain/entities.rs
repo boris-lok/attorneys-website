@@ -454,17 +454,16 @@ pub struct SimpleArticleEntityFromSQLx {
     pub seq: i16,
 }
 
-
 impl From<SimpleArticleEntityFromSQLx> for SimpleArticleEntity {
- fn from(value: SimpleArticleEntityFromSQLx) -> Self {
-     Self {
-         id: value.id.trim().to_owned(),
-         title: value.title.trim().to_owned(),
-         language: value.language.trim().to_owned(),
-         created_at: value.created_at.timestamp_millis(),
-         seq: value.seq,
-     }
- }
+    fn from(value: SimpleArticleEntityFromSQLx) -> Self {
+        Self {
+            id: value.id.trim().to_owned(),
+            title: value.title.trim().to_owned(),
+            language: value.language.trim().to_owned(),
+            created_at: value.created_at.timestamp_millis(),
+            seq: value.seq,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

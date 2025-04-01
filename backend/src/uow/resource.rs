@@ -1,5 +1,9 @@
 use crate::domain::entities::{
-    ArticleData, ArticleEntity, ArticleEntityFromSQLx, ContactData, ContactEntity, ContactEntityFromSQLx, ContentID, HomeData, HomeEntity, HomeEntityFromSQLx, Language, MemberData, MemberEntity, MemberEntityFromSQLx, Pagination, ResourceID, ResourceType, ServiceData, ServiceEntity, ServiceEntityFromSQLx, SimpleArticleEntity, SimpleArticleEntityFromSQLx, SimpleMemberEntity, SimpleMemberEntityFromSQLx
+    ArticleData, ArticleEntity, ArticleEntityFromSQLx, ContactData, ContactEntity,
+    ContactEntityFromSQLx, ContentID, HomeData, HomeEntity, HomeEntityFromSQLx, Language,
+    MemberData, MemberEntity, MemberEntityFromSQLx, Pagination, ResourceID, ResourceType,
+    ServiceData, ServiceEntity, ServiceEntityFromSQLx, SimpleArticleEntity,
+    SimpleArticleEntityFromSQLx, SimpleMemberEntity, SimpleMemberEntityFromSQLx,
 };
 use crate::domain::member::entities::AvatarData;
 use crate::repositories::{

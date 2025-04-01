@@ -1,12 +1,11 @@
 <script lang="ts">
     import { startWithTap } from '$lib/utils'
     import { BehaviorSubject, distinctUntilChanged, finalize, switchMap, tap } from 'rxjs'
-    import type { ArticleData, Language } from '$lib/types'
+    import type { Language, SimpleArticle } from '$lib/types'
     import { ArticleServices } from '$lib/services/article.service'
     import Article from '$lib/components/Article.svelte'
-    import IconifyIcon from '@iconify/svelte'
 
-    let articles: ArticleData[] = $state([])
+    let articles: SimpleArticle[] = $state([])
     let isLoading = $state(false)
     let pageSize = 10
     let page = $state(0)
@@ -19,16 +18,23 @@
     // The ID of the article that is currently selected
     let articleID: string = $state('')
 
+    // handles previous button clicked
     function onPreviousButtonClicked() {
-        page = page - 1
-        page$.next(page)
+        if (hasPreviousPage) {
+            page = page - 1
+            page$.next(page)
+        }
     }
 
+    // handles next button clicked
     function onNextButtonClicked() {
-        page = page + 1
-        page$.next(page)
+        if (hasNextPage) {
+            page = page + 1
+            page$.next(page)
+        }
     }
 
+    // fetch data for a specific language and page number
     function fetchData(lang: Language, page: number, pageSize: number) {
         return ArticleServices.list(lang, page, pageSize).pipe(
             startWithTap(() => (isLoading = true)),
@@ -43,15 +49,18 @@
         )
     }
 
+    // handles article clicked event
     function onArticleClicked(id: string) {
         articleID = id
     }
 
+    // handles back button clicked event
     function onBackClicked() {
         articleID = ''
     }
 
     $effect(() => {
+        // create an event listener to listen the page has been changed
         const disposer = page$
             .pipe(
                 distinctUntilChanged(),
@@ -71,40 +80,44 @@
     <p>Loading...</p>
 {:else}
     <div class="relative">
-        <!-- Title -->
-        {#if articleID === ''}
-            <div class="my-8 md:my-16">
-                <p
-                    class="px-4 text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16 w-full text-center"
-                >
-                    文章
-                </p>
-            </div>
-        {/if}
 
         <!-- Articles -->
-        <div class="flex flex-col md:flex-row gap-8 group"
+        <div class="flex flex-col md:flex-row group justify-center"
              class:active={articleID !== ''}>
+
             <div
-                class="relative flex flex-row md:flex-col gap-4 md:max-w-[48rem] md:mx-auto group-[.active]:flex-1 group-[.active]:pt-24 overflow-auto py-8 px-4 w-full"
+                class="relative px-8 w-full max-w-[64rem] group-[.active]:max-w-[32rem] transition-[max-width,padding] duration-500 ease-in-out"
             >
-                {#each articles as article}
-                    <button
-                        class="relative rounded shadow h-12 w-full cursor-pointer [.active]:text-[var(--primary-color)]"
-                        class:active={articleID === article.id} onclick={() => onArticleClicked(article.id)}>
-                        <p class="text-xl text-ellipsis w-full overflow-hidden whitespace-nowrap px-8">{article.data.title}</p>
-                    </button>
-                {/each}
+
+                <!-- Title -->
+                <div class="my-8 md:my-16">
+                    <p
+                        class="px-4 text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16 w-full text-center opacity-100 max-sm:group-[.active]:hidden md:group-[.active]:invisible"
+                    >
+                        文章
+                    </p>
+                </div>
+
+                <div class="flex flex-row md:flex-col gap-6 overflow-auto py-4 w-full">
+                    {#each articles as article}
+                        <button
+                            class="relative flex flex-row gap-4 justify-between items-center rounded shadow h-12 w-full min-w-72 cursor-pointer [.active]:text-[var(--primary-color)] [.active]:border [.active]:border-[var(--primary-color)]"
+                            class:active={articleID === article.id} onclick={() => onArticleClicked(article.id)}>
+                            <span class="w-[calc(100%-120px)]">
+                                <p class="text-xl text-left text-ellipsis overflow-hidden whitespace-nowrap pl-4 md:pl-8">{article.title}</p>
+                            </span>
+                            <span>
+                                <p class="text-sm text-gray-500 border-l pl-4 pr-4 md:pr-8">{article.createdAtString}</p>
+                            </span>
+                        </button>
+                    {/each}
+                </div>
             </div>
 
 
             {#if articleID !== ''}
                 <div class="group-[.active]:flex-4 relative px-4">
-                    <button class="cursor-pointer" onclick={onBackClicked}>
-                        <IconifyIcon icon="lets-icons:refund-back-light"
-                                     class="md:absolute h-8 w-8 top-8 md:top-16 md:left-8" />
-                    </button>
-                    <Article id={articleID} />
+                    <Article id={articleID} onBackClicked={onBackClicked} />
                 </div>
             {/if}
         </div>

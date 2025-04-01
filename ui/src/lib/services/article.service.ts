@@ -1,4 +1,4 @@
-import type { ArticleData, CreateArticleRequest, Language, UpdateArticleRequest } from '$lib/types'
+import type { ArticleData, CreateArticleRequest, Language, SimpleArticle, UpdateArticleRequest } from '$lib/types'
 import { fromFetch } from 'rxjs/fetch'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
@@ -61,10 +61,21 @@ function list(language: Language, page: number, pageSize: number) {
             signal: AbortSignal.timeout(TIMEOUT),
             selector: (resp) =>
                 resp.json().then((value) => {
-                    const articles =
-                        'articles' in value
-                            ? (value.articles as ArticleData[])
-                            : []
+                    const articles = [];
+
+                    if ('articles' in value && value.articles.length > 0) {
+                        for (const article of value.articles) {
+                            const date = new Date(article.created_at)
+                            articles.push({
+                                id: article.id,
+                                title: article.title,
+                                language: article.language,
+                                createdAt: date,
+                                createdAtString: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+                                seq: article.seq,
+                            })
+                        }
+                    }
 
                     return {
                         articles: articles,

@@ -1,11 +1,11 @@
 <script lang="ts">
     import { startWithTap } from '$lib/utils'
     import { BehaviorSubject, distinctUntilChanged, finalize, switchMap, tap } from 'rxjs'
-    import type { ArticleData, Language } from '$lib/types'
+    import type { ArticleData, Language, SimpleArticle } from '$lib/types'
     import Icon from '@iconify/svelte'
     import { ArticleServices } from '$lib/services/article.service'
 
-    let articles: ArticleData[] = $state([])
+    let articles: SimpleArticle[] = $state([])
     let isLoading = $state(false)
     let pageSize = 10
     let page = $state(0)
@@ -72,7 +72,7 @@
                         <p
                             class="px-8 py-2 text-lg font-bold text-[var(--primary-color)]"
                         >
-                            {article.data.title}
+                            {article.title}
                         </p>
                     </div>
                     <div class="px-2 py-2">

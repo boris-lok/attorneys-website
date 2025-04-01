@@ -110,3 +110,12 @@ export type ArticleData = {
     }
     seq: number
 }
+
+export type SimpleArticle = {
+    id: string
+    title: string
+    language: Language
+    createdAt: Date
+    createdAtString: string
+    seq: number
+}

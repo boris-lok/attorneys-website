@@ -3,10 +3,11 @@
     import IconifyIcon from '@iconify/svelte'
     import logo from '$lib/assets/logo.webp'
     import smLogo from '$lib/assets/logo.sm.webp'
+    import type { NavigationItem } from '$lib/types'
 
     type InputProps = {
         rootUrl: string
-        items: NavigateItem[]
+        items: NavigationItem[]
     }
 
     let { rootUrl, items }: InputProps = $props()
@@ -89,7 +90,7 @@
 
             <!-- Top Bar Navigate Item -->
             <div
-                class="relative flex flex-row max-sm:hidden sm:gap-4 md:gap-8 xl:gap-12"
+                class="relative flex flex-row max-sm:hidden gap-8"
             >
                 {#each items as item (item.name)}
                     {#if 'onClick' in item}

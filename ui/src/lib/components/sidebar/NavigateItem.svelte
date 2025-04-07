@@ -17,7 +17,7 @@
         class="group relative flex cursor-pointer flex-row items-center gap-[0.25rem]"
     >
         <IconifyIcon {icon} class="h-6 w-6" />
-        <p>{label}</p>
+        <p class="hidden whitespace-nowrap text-base absolute lg:relative lg:block group-hover:block max-lg:group-hover:top-5">{label}</p>
     </div>
 {:else}
     <div

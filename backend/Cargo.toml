@@ -15,7 +15,7 @@ async-trait = "0.1.86"
 anyhow = "1.0.95"
 ulid = "1.1.4"
 axum = { version = "0.8.1", features = ["multipart"] }
-axum-macros="0.5.0"
+axum-macros = "0.5.0"
 axum-extra = "0.10.0"
 config = "0.15.7"
 tokio = { version = "1.43.0", features = ["full"] }

@@ -66,12 +66,12 @@ where
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use super::*;
     use crate::domain::entities::{ArticleData, ContactData, HomeData, MemberData, ServiceData};
     use crate::domain::resources::test_helpers::tests::{
         create_resources, create_some_fake_data_and_return_uow,
     };
+    use serde_json::json;
     use ulid::Ulid;
 
     fn update_resource(resource: Resource) -> Resource {
@@ -90,7 +90,7 @@ mod tests {
             Resource::Contact(c) => Resource::Contact(ContactData {
                 data: json!({
                     "address": "new address",
-                })
+                }),
             }),
             Resource::Article(a) => Resource::Article(ArticleData {
                 title: "new title".to_string(),

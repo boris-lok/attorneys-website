@@ -66,6 +66,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
     use super::*;
     use crate::domain::entities::{ArticleData, ContactData, HomeData, MemberData, ServiceData};
     use crate::domain::resources::test_helpers::tests::{
@@ -87,8 +88,9 @@ mod tests {
                 data: "new data".to_string(),
             }),
             Resource::Contact(c) => Resource::Contact(ContactData {
-                address: "new address".to_string(),
-                ..c
+                data: json!({
+                    "address": "new address",
+                })
             }),
             Resource::Article(a) => Resource::Article(ArticleData {
                 title: "new title".to_string(),

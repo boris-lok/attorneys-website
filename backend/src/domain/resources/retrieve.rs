@@ -85,17 +85,21 @@ mod tests {
     use crate::repositories::IAvatarRepository;
     use crate::repositories::IContentRepository;
     use crate::uow::InMemory;
+    use serde_json::json;
     use ulid::Ulid;
 
     fn create_testcases() -> Vec<(String, ResourceType, Resource, Option<AvatarData>)> {
         let member = MemberData::new("boris".to_string(), "description".to_string());
         let service = ServiceData::new("title".to_string(), "data".to_string());
         let home = HomeData::new("home".to_string());
-        let contact = ContactData::new(
-            "address".to_string(),
-            "1234".to_string(),
-            "info@example.com".to_string(),
-        );
+        let contact = json!({
+            "data": {
+                "address": "address".to_string(),
+                "phone": "1234".to_string(),
+                "email": "info@example.com".to_string(),
+            }
+        });
+        let contact = ContactData::new(contact);
         let avatar = AvatarData {
             large_image: "large".to_string(),
             small_image: "small".to_string(),
@@ -208,7 +212,7 @@ mod tests {
                 let res: ContactEntity = execute(Mutex::new(uow), req)
                     .await
                     .expect("should execute successfully");
-                assert_eq!(res.data, c)
+                assert_eq!(res.data.data, c.data["data"]);
             }
             Resource::Article(a) => {
                 let res: ArticleEntity = execute(Mutex::new(uow), req)

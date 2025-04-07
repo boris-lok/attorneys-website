@@ -69,6 +69,7 @@ mod tests {
     use super::*;
     use crate::domain::entities::{ArticleData, ContactData, HomeData, MemberData, ServiceData};
     use crate::uow::InMemory;
+    use serde_json::json;
     use ulid::Ulid;
 
     #[tokio::test]
@@ -76,11 +77,12 @@ mod tests {
         let member_data = MemberData::new("boris".to_string(), "description".to_string());
         let service_data = ServiceData::new("title".to_string(), "data".to_string());
         let home_data = HomeData::new("data".to_string());
-        let contact_data = ContactData::new(
-            "address".to_string(),
-            "1234".to_string(),
-            "info@example.com".to_string(),
-        );
+        let contact = json!({
+            "address": "address".to_string(),
+            "phone": "1234".to_string(),
+            "email": "info@example.com".to_string(),
+        });
+        let contact_data = ContactData::new(contact);
         let article_data = ArticleData::new("title".to_string(), "data".to_string());
 
         let different_data = vec![
@@ -136,48 +138,6 @@ mod tests {
             Resource::Home(HomeData::new("".to_string())),
             // data is conducted by spaces
             Resource::Home(HomeData::new(" ".to_string())),
-            // address is missing
-            Resource::Contact(ContactData::new(
-                "".to_string(),
-                "123".to_string(),
-                "info@example.com".to_string(),
-            )),
-            // phone is missing
-            Resource::Contact(ContactData::new(
-                "address".to_string(),
-                "".to_string(),
-                "info@example.com".to_string(),
-            )),
-            // email is missing
-            Resource::Contact(ContactData::new(
-                "address".to_string(),
-                "123".to_string(),
-                "".to_string(),
-            )),
-            // The address is conducted by spaces
-            Resource::Contact(ContactData::new(
-                " ".to_string(),
-                "123".to_string(),
-                "info@example.com".to_string(),
-            )),
-            // The phone is conducted by spaces
-            Resource::Contact(ContactData::new(
-                "address".to_string(),
-                " ".to_string(),
-                "info@example.com".to_string(),
-            )),
-            // The email is conducted by spaces
-            Resource::Contact(ContactData::new(
-                "address".to_string(),
-                "123".to_string(),
-                " ".to_string(),
-            )),
-            // The email is invalid
-            Resource::Contact(ContactData::new(
-                "address".to_string(),
-                "123".to_string(),
-                "email".to_string(),
-            )),
             // title is missing
             Resource::Article(ArticleData::new("".to_string(), "data".to_string())),
             // data is missing

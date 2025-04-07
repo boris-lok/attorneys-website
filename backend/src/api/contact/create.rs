@@ -12,9 +12,7 @@ use ulid::Ulid;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateContactRequest {
-    address: String,
-    phone: String,
-    email: String,
+    data: serde_json::Value,
     language: String,
     seq: i32,
 }
@@ -38,7 +36,7 @@ pub async fn create_contact(
 
     let req = crate::domain::resources::create::Request {
         id: id.clone(),
-        data: Resource::Contact(ContactData::new(req.address, req.phone, req.email)),
+        data: Resource::Contact(ContactData::new(req.data)),
         language: req.language,
         seq: req.seq,
     };

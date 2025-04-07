@@ -99,7 +99,7 @@ impl TryFrom<Resource> for ContentData {
             Resource::Member(m) => try_parse_to_value(m),
             Resource::Service(s) => try_parse_to_value(s),
             Resource::Home(h) => try_parse_to_value(h),
-            Resource::Contact(c) => try_parse_to_value(c),
+            Resource::Contact(c) => Ok(ContentData(c.data)),
             Resource::Article(a) => try_parse_to_value(a),
         }
     }
@@ -168,21 +168,12 @@ impl HomeData {
 
 #[derive(Debug, Serialize, Validate, Deserialize, Clone, Eq, PartialEq)]
 pub struct ContactData {
-    #[validate(length(min = 1))]
-    pub address: String,
-    #[validate(length(min = 1))]
-    pub phone: String,
-    #[validate(email)]
-    pub email: String,
+    pub data: serde_json::Value,
 }
 
 impl ContactData {
-    pub fn new(address: String, phone: String, email: String) -> Self {
-        Self {
-            address: address.trim().to_string(),
-            phone: phone.trim().to_string(),
-            email: email.trim().to_string(),
-        }
+    pub fn new(data: serde_json::Value) -> Self {
+        Self { data }
     }
 }
 

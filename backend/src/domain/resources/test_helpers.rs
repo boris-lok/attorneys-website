@@ -7,16 +7,18 @@ pub(crate) mod tests {
     use crate::repositories::IContentRepository;
     use crate::repositories::IResourceRepository;
     use crate::uow::{IResourceUnitOfWork, InMemory};
+    use serde_json::json;
 
     pub fn create_resources() -> Vec<Resource> {
         let member = MemberData::new("boris".to_string(), "description".to_string());
         let service = ServiceData::new("title".to_string(), "data".to_string());
         let home = HomeData::new("home".to_string());
-        let contact = ContactData::new(
-            "address".to_string(),
-            "1234".to_string(),
-            "info@example.com".to_string(),
-        );
+        let contact = json!({
+            "address": "address".to_string(),
+            "phone": "1234".to_string(),
+            "email": "info@example.com".to_string(),
+        });
+        let contact = ContactData::new(contact);
         let article = ArticleData::new("title".to_string(), "data".to_string());
 
         vec![

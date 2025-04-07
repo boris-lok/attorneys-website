@@ -14,9 +14,7 @@ use tokio::sync::Mutex;
 #[derive(Debug, Deserialize)]
 pub struct UpdateContactRequest {
     id: String,
-    address: String,
-    phone: String,
-    email: String,
+    data: serde_json::Value,
     language: String,
     seq: i32,
 }
@@ -28,7 +26,7 @@ pub async fn update_contact(
 ) -> Result<StatusCode, ApiError> {
     let req = crate::domain::resources::update::Request {
         id: req.id,
-        data: Resource::Contact(ContactData::new(req.address, req.phone, req.email)),
+        data: Resource::Contact(ContactData::new(req.data)),
         language: req.language,
         seq: req.seq,
     };

@@ -1,5 +1,5 @@
 # Use the official Rust Image as the base image for building the application
-from rust:1.81.0-bullseye as builder
+from rust:1.86.0-bullseye as builder
 
 # Set the working directory
 workdir /app

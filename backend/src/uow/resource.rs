@@ -194,7 +194,7 @@ impl IResourceUnitOfWork for InMemory {
                         let contact = ContactEntity::new(
                             id.clone().to_string(),
                             lang.as_str().to_string(),
-                            json,
+                            json.data,
                         );
 
                         serde_json::value::to_value(contact)?

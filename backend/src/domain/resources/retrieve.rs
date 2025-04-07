@@ -212,7 +212,7 @@ mod tests {
                 let res: ContactEntity = execute(Mutex::new(uow), req)
                     .await
                     .expect("should execute successfully");
-                assert_eq!(res.data.data, c.data["data"]);
+                assert_eq!(res.data, c.data);
             }
             Resource::Article(a) => {
                 let res: ArticleEntity = execute(Mutex::new(uow), req)

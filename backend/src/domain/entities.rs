@@ -1,5 +1,6 @@
 use crate::domain::member::entities::AvatarData;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::FromRow;
 use std::fmt::Formatter;
 use validator::Validate;
@@ -99,7 +100,9 @@ impl TryFrom<Resource> for ContentData {
             Resource::Member(m) => try_parse_to_value(m),
             Resource::Service(s) => try_parse_to_value(s),
             Resource::Home(h) => try_parse_to_value(h),
-            Resource::Contact(c) => Ok(ContentData(c.data)),
+            Resource::Contact(c) => Ok(ContentData(json!({
+                "data": c.data
+            }))),
             Resource::Article(a) => try_parse_to_value(a),
         }
     }
@@ -363,11 +366,11 @@ impl From<HomeEntityFromSQLx> for HomeEntity {
 pub struct ContactEntity {
     pub id: String,
     pub language: String,
-    pub data: ContactData,
+    pub data: serde_json::Value,
 }
 
 impl ContactEntity {
-    pub fn new(id: String, language: String, data: ContactData) -> Self {
+    pub fn new(id: String, language: String, data: serde_json::Value) -> Self {
         Self { id, language, data }
     }
 }
@@ -384,7 +387,7 @@ impl From<ContactEntityFromSQLx> for ContactEntity {
         Self {
             id: value.id.trim().to_owned(),
             language: value.language.trim().to_owned(),
-            data: value.data.0,
+            data: value.data.0.data,
         }
     }
 }

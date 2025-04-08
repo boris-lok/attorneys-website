@@ -34,7 +34,7 @@
                 本所成員
             </p>
             <div
-                class="relative flex flex-col gap-8 px-4 md:flex-row md:px-24 lg:px-48 mt-4"
+                class="relative flex flex-col gap-8 px-4 md:flex-row md:px-24 lg:px-48 mt-4 md:justify-center"
             >
                 {#each members as member}
                     <a href="/members/{member.id}">

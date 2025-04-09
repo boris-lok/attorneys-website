@@ -1,23 +1,26 @@
 <script lang="ts">
     import Textarea from '$lib/components/common/Textarea.svelte'
-    import Markdown from '@magidoc/plugin-svelte-marked'
     import { tap } from 'rxjs'
     import Input from '$lib/components/common/Input.svelte'
     import { ServiceServices } from '$lib/services/service.service'
+    import ServiceBox from '$lib/components/ServiceBox.svelte'
 
     type EditorProps = {
         id?: string
         title?: string
         data?: string
+        icon?: string
     }
 
-    let { id, data, title }: EditorProps = $props()
+    let { id, data, title, icon }: EditorProps = $props()
 
     let newData = $state({
         title: title ?? '',
-        data: data ?? ''
+        data: data ?? '',
+        icon: icon ?? ''
     })
     let errorMsg = $state('')
+    let show = $state(false)
 
     // handles content has been changed
     // it will update the preview zone automatically
@@ -40,10 +43,23 @@
         }
     }
 
+    // handles icon has been changed
+    function onIconChanged(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+        newData = {
+            ...newData,
+            icon: (e.currentTarget as HTMLInputElement).value.trim()
+        }
+    }
+
+    // handles the preview box has been clicked
+    function onServiceBoxClicked() {
+        show = !show
+    }
+
     // checks if content is not empty
     // if it is, returns false. Otherwise, returns true
     function isValid() {
-        return newData.title.trim() !== '' && newData.data !== ''
+        return newData.title.trim() !== '' && newData.data !== '' && newData.icon.trim() !== ''
     }
 
     // handles the save button has been clicked
@@ -84,6 +100,22 @@
 <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
     <div class="flex-1">
         <div class="relative flex-row gap-x-4">
+            <div class="flex flex-col gap-x-1">
+                <Input
+                    hasError={errorMsg !== ''}
+                    label="Service Icon"
+                    name="icon"
+                    onInput={onIconChanged}
+                    type="text"
+                    value={icon ?? ''}
+                />
+                <p class="mt-[-8px] text-gray-500 text-xs mb-2 px-2">Please find the icon from <a
+                    class="text-blue-600 underline hover:text-blue-800 visited:text-pink-600"
+                    href="https://icon-sets.iconify.design/"
+                    target="_blank"
+                >here</a></p>
+            </div>
+
             <Input
                 hasError={errorMsg !== ''}
                 label="Service Title"
@@ -102,16 +134,9 @@
     </div>
     <div class="flex-1">
         <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
-        <div
-            class="prose block min-h-96 w-full rounded-lg bg-gray-100 px-4 py-4"
-        >
-            <p class="py-2 text-lg font-bold text-[var(--primary-color)]">
-                {newData.title}
-            </p>
-            <div class="prose">
-                <Markdown source={newData.data}></Markdown>
-            </div>
-        </div>
+        <button onclick={onServiceBoxClicked}>
+            <ServiceBox active={show} content={newData.data} icon={newData.icon} title={newData.title} />
+        </button>
     </div>
 </div>
 <div class="relative flex flex-row justify-center gap-x-4">

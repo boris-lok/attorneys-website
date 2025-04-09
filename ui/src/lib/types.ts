@@ -37,6 +37,7 @@ export type ServiceData = {
     data: {
         title: string
         data: string
+        icon?: string
     }
     seq: number
 }

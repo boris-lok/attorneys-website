@@ -3,13 +3,13 @@
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
     import type { ServiceData } from '$lib/types'
-    import Markdown from '@magidoc/plugin-svelte-marked'
+    import ServiceBox from '$lib/components/ServiceBox.svelte'
 
     let services: ServiceData[] = $state([])
     let isLoading = $state(false)
     let selectedServiceID = $state('')
 
-    // handles serivce block clicked.
+    // handles service block clicked.
     function onServiceClicked(id: string) {
         selectedServiceID = id
     }
@@ -29,8 +29,10 @@
             })
     }
 
+
     $effect(() => fetchData())
 </script>
+
 
 <div class="relative flex flex-col md:flex-row md:items-center">
     <div class="relative flex w-full flex-col md:max-w-6xl mx-auto">
@@ -43,27 +45,10 @@
             class="relative mb-16 flex w-full flex-col items-center justify-center gap-x-16 gap-y-8 px-16 md:flex-row md:flex-wrap"
         >
             {#each services as service}
-                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                <div class="group relative h-72 w-72 overflow-clip rounded-xl"
-                     onclick={() => onServiceClicked(service.id)} class:active={service.id === selectedServiceID}>
-                    <div
-                        class="relative h-full w-full rounded-xl border border-[var(--primary-color)] p-4 transition-[width,height]"
-                    >
-                        <p
-                            class="flex h-full w-full items-center justify-center text-2xl font-bold text-[var(--primary-color)] max-sm:group-[.active]:opacity-20 group-hover:opacity-20"
-                        >
-                            {service.data.title}
-                        </p>
-                    </div>
-
-                    <div
-                        class="absolute inset-0 opacity-0 bg-white group-hover:block max-sm:[&.active]:block max-sm:group-[.active]:opacity-80 group-hover:opacity-80"></div>
-                    <div
-                        class="prose absolute hidden p-4 group-hover:block max-sm:group-[.active]:block overflow-y-auto top-0 h-72"
-                    >
-                        <Markdown source={service.data.data} />
-                    </div>
-                </div>
+                <button onclick={() => onServiceClicked(service.id)}>
+                    <ServiceBox icon={service.data.icon} title={service.data.title}
+                                content={service.data.data} active={service.id === selectedServiceID} />
+                </button>
             {/each}
         </div>
     </div>

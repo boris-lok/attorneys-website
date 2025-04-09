@@ -75,7 +75,8 @@ mod tests {
     #[tokio::test]
     async fn it_should_create_a_resource_successful_otherwise() {
         let member_data = MemberData::new("boris".to_string(), "description".to_string());
-        let service_data = ServiceData::new("title".to_string(), "data".to_string());
+        let service_data =
+            ServiceData::new("title".to_string(), "data".to_string(), "icon".to_string());
         let home_data = HomeData::new("data".to_string());
         let contact = json!({
             "address": "address".to_string(),
@@ -127,13 +128,29 @@ mod tests {
             // The description is conducted by spaces
             Resource::Member(MemberData::new("boris".to_string(), "  ".to_string())),
             // title is missing
-            Resource::Service(ServiceData::new("".to_string(), "data".to_string())),
+            Resource::Service(ServiceData::new(
+                "".to_string(),
+                "data".to_string(),
+                "icon".to_string(),
+            )),
             // data is missing
-            Resource::Service(ServiceData::new("title".to_string(), "".to_string())),
+            Resource::Service(ServiceData::new(
+                "title".to_string(),
+                "".to_string(),
+                "icon".to_string(),
+            )),
             // The title is conducted by spaces
-            Resource::Service(ServiceData::new("  ".to_string(), "data".to_string())),
+            Resource::Service(ServiceData::new(
+                "  ".to_string(),
+                "data".to_string(),
+                "icon".to_string(),
+            )),
             // The data is conducted by spaces
-            Resource::Service(ServiceData::new("title".to_string(), " ".to_string())),
+            Resource::Service(ServiceData::new(
+                "title".to_string(),
+                " ".to_string(),
+                "icon".to_string(),
+            )),
             // data is missing
             Resource::Home(HomeData::new("".to_string())),
             // data is conducted by spaces

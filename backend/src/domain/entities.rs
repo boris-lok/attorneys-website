@@ -144,13 +144,15 @@ pub struct ServiceData {
     pub title: String,
     #[validate(length(min = 1))]
     pub data: String,
+    pub icon: Option<String>,
 }
 
 impl ServiceData {
-    pub fn new(title: String, data: String) -> Self {
+    pub fn new(title: String, data: String, icon: String) -> Self {
         Self {
             title: title.trim().to_string(),
             data: data.trim().to_string(),
+            icon: Some(icon.trim().to_string()),
         }
     }
 }

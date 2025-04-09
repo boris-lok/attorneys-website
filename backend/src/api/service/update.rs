@@ -16,6 +16,7 @@ pub(crate) struct UpdateServiceRequest {
     id: String,
     title: String,
     data: String,
+    icon: String,
     language: String,
     seq: i32,
 }
@@ -27,7 +28,7 @@ pub async fn update_service(
 ) -> Result<StatusCode, ApiError> {
     let req = crate::domain::resources::update::Request {
         id: req.id,
-        data: Resource::Service(ServiceData::new(req.title, req.data)),
+        data: Resource::Service(ServiceData::new(req.title, req.data, req.icon)),
         language: req.language,
         seq: req.seq,
     };

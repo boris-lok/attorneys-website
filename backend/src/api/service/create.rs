@@ -14,6 +14,7 @@ use ulid::Ulid;
 pub(crate) struct CreateServiceRequest {
     title: String,
     data: String,
+    icon: String,
     language: String,
     seq: i32,
 }
@@ -32,7 +33,7 @@ pub async fn create_service(
 
     let request = crate::domain::resources::create::Request {
         id,
-        data: Resource::Service(ServiceData::new(req.title, req.data)),
+        data: Resource::Service(ServiceData::new(req.title, req.data, req.icon)),
         language: req.language,
         seq: req.seq,
     };

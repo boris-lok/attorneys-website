@@ -11,7 +11,7 @@ pub(crate) mod tests {
 
     pub fn create_resources() -> Vec<Resource> {
         let member = MemberData::new("boris".to_string(), "description".to_string());
-        let service = ServiceData::new("title".to_string(), "data".to_string());
+        let service = ServiceData::new("title".to_string(), "data".to_string(), "icon".to_string());
         let home = HomeData::new("home".to_string());
         let contact = json!({
             "address": "address".to_string(),

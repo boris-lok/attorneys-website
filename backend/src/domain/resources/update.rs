@@ -87,7 +87,7 @@ mod tests {
             Resource::Home(_) => Resource::Home(HomeData {
                 data: "new data".to_string(),
             }),
-            Resource::Contact(c) => Resource::Contact(ContactData {
+            Resource::Contact(_) => Resource::Contact(ContactData {
                 data: json!({
                     "address": "new address",
                 }),

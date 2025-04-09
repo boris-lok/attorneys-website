@@ -70,6 +70,7 @@ mod tests {
             Resource::Home(_) => ResourceType::Home,
             Resource::Contact(_) => ResourceType::Contact,
             Resource::Article(_) => ResourceType::Article,
+            Resource::Category(_) => ResourceType::Category,
         }
     }
 

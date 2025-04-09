@@ -104,6 +104,7 @@ impl TryFrom<Resource> for ContentData {
                 "data": c.data
             }))),
             Resource::Article(a) => try_parse_to_value(a),
+            Resource::Category(c) => try_parse_to_value(c),
         }
     }
 }
@@ -206,6 +207,7 @@ pub enum ResourceType {
     Home,
     Contact,
     Article,
+    Category,
 }
 
 impl ResourceType {
@@ -216,6 +218,7 @@ impl ResourceType {
             Self::Home => "home",
             Self::Contact => "contact",
             Self::Article => "article",
+            Self::Category => "category",
         }
     }
 }
@@ -227,6 +230,7 @@ pub enum Resource {
     Home(HomeData),
     Contact(ContactData),
     Article(ArticleData),
+    Category(CategoryData),
 }
 
 impl Resource {
@@ -243,6 +247,9 @@ impl Resource {
             }
             Resource::Article(_) => {
                 Ok((ResourceType::Article, ContentData::try_from(self.clone())?))
+            }
+            Resource::Category(_) => {
+                Ok((ResourceType::Category, ContentData::try_from(self.clone())?))
             }
         }
     }
@@ -536,5 +543,55 @@ impl From<uuid::Uuid> for UserID {
 impl std::fmt::Display for UserID {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0.to_string())
+    }
+}
+
+#[derive(Debug, Serialize, Validate, Deserialize, Clone, Eq, PartialEq)]
+pub struct CategoryData {
+    pub icon: Option<String>,
+    pub name: String,
+}
+
+impl CategoryData {
+    pub fn new(icon: Option<String>, name: String) -> Self {
+        Self { icon, name }
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct CategoryEntityFromSQLx {
+    pub id: String,
+    pub data: sqlx::types::Json<CategoryData>,
+    pub language: String,
+    pub seq: i16,
+}
+
+impl From<CategoryEntityFromSQLx> for CategoryEntity {
+    fn from(value: CategoryEntityFromSQLx) -> Self {
+        Self {
+            id: value.id.trim().to_owned(),
+            language: value.language.trim().to_owned(),
+            data: value.data.0,
+            seq: value.seq,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CategoryEntity {
+    pub id: String,
+    pub language: String,
+    pub data: CategoryData,
+    pub seq: i16,
+}
+
+impl CategoryEntity {
+    pub fn new(id: String, language: String, data: CategoryData, seq: i16) -> Self {
+        Self {
+            id,
+            language,
+            data,
+            seq,
+        }
     }
 }

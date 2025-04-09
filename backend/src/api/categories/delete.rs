@@ -9,20 +9,20 @@ use axum::http::StatusCode;
 use std::collections::HashMap;
 use tokio::sync::Mutex;
 
-pub async fn delete_member(
+pub async fn delete_category(
     _: Claims,
-    State(state): State<AppState>,
-    Path(params): Path<HashMap<String, String>>,
+    state: State<AppState>,
+    params: Path<HashMap<String, String>>,
 ) -> Result<StatusCode, ApiError> {
     let uow = InDatabase::new(&state.pool)
         .await
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
     let uow = Mutex::new(uow);
-    let id = params.get("id").ok_or(ApiError::BadRequest)?;
 
+    let id = params.get("id").ok_or(ApiError::BadRequest)?;
     let req = crate::domain::resources::delete::Request {
         id: id.to_string(),
-        resource_type: ResourceType::Member,
+        resource_type: ResourceType::Category,
     };
 
     delete_resource_handler(uow, req).await

@@ -1,8 +1,8 @@
 #[cfg(test)]
 pub(crate) mod tests {
     use crate::domain::entities::{
-        ArticleData, ContactData, ContentData, ContentID, HomeData, Language, MemberData, Resource,
-        ResourceID, ResourceType, ServiceData,
+        ArticleData, CategoryData, ContactData, ContentData, ContentID, HomeData, Language,
+        MemberData, Resource, ResourceID, ResourceType, ServiceData,
     };
     use crate::repositories::IContentRepository;
     use crate::repositories::IResourceRepository;
@@ -20,6 +20,7 @@ pub(crate) mod tests {
         });
         let contact = ContactData::new(contact);
         let article = ArticleData::new("title".to_string(), "data".to_string());
+        let category = CategoryData::new(None, "category".to_string());
 
         vec![
             Resource::Article(article),
@@ -27,6 +28,7 @@ pub(crate) mod tests {
             Resource::Home(home),
             Resource::Member(member),
             Resource::Contact(contact),
+            Resource::Category(category),
         ]
     }
     pub async fn create_some_fake_data_and_return_uow(
@@ -69,6 +71,12 @@ pub(crate) mod tests {
                 Resource::Article(_) => {
                     uow.resource_repository()
                         .insert(resource_id.clone(), ResourceType::Article, 4)
+                        .await
+                        .unwrap();
+                }
+                Resource::Category(_) => {
+                    uow.resource_repository()
+                        .insert(resource_id.clone(), ResourceType::Category, 5)
                         .await
                         .unwrap();
                 }

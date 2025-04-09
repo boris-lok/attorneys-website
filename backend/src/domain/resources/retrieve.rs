@@ -78,8 +78,9 @@ where
 mod tests {
     use super::*;
     use crate::domain::entities::{
-        ArticleData, ArticleEntity, ContactData, ContactEntity, ContentData, ContentID, HomeData,
-        HomeEntity, MemberData, MemberEntity, Resource, ServiceData, ServiceEntity,
+        ArticleData, ArticleEntity, CategoryData, CategoryEntity, ContactData, ContactEntity,
+        ContentData, ContentID, HomeData, HomeEntity, MemberData, MemberEntity, Resource,
+        ServiceData, ServiceEntity,
     };
     use crate::domain::member::entities::{AvatarData, AvatarJson};
     use crate::repositories::IAvatarRepository;
@@ -105,6 +106,7 @@ mod tests {
             small_image: "small".to_string(),
         };
         let article = ArticleData::new("title".to_string(), "data".to_string());
+        let category = CategoryData::new(None, "category".to_string());
         vec![
             (
                 Ulid::new().to_string(),
@@ -140,6 +142,12 @@ mod tests {
                 Ulid::new().to_string(),
                 ResourceType::Article,
                 Resource::Article(article.clone()),
+                None,
+            ),
+            (
+                Ulid::new().to_string(),
+                ResourceType::Category,
+                Resource::Category(category.clone()),
                 None,
             ),
         ]
@@ -219,6 +227,12 @@ mod tests {
                     .await
                     .expect("should execute successfully");
                 assert_eq!(res.data, a)
+            }
+            Resource::Category(c) => {
+                let res: CategoryEntity = execute(Mutex::new(uow), req)
+                    .await
+                    .expect("should execute successfully");
+                assert_eq!(res.data, c)
             }
         }
     }
@@ -310,6 +324,10 @@ mod tests {
                 Resource::Article(_) => {
                     let res: Result<ArticleEntity, Error> = execute(Mutex::new(uow), req).await;
                     assert!(res.is_err());
+                }
+                Resource::Category(_) => {
+                    let res: Result<CategoryEntity, Error> = execute(Mutex::new(uow), req).await;
+                    assert!(res.is_err())
                 }
             }
         }

@@ -67,7 +67,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::entities::{ArticleData, ContactData, HomeData, MemberData, ServiceData};
+    use crate::domain::entities::{
+        ArticleData, CategoryData, ContactData, HomeData, MemberData, ServiceData,
+    };
     use crate::domain::resources::test_helpers::tests::{
         create_resources, create_some_fake_data_and_return_uow,
     };
@@ -96,6 +98,9 @@ mod tests {
                 title: "new title".to_string(),
                 ..a
             }),
+            Resource::Category(c) => {
+                Resource::Category(CategoryData::new(None, "new category".to_string()))
+            }
         }
     }
 

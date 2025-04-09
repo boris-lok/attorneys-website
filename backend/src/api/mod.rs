@@ -34,6 +34,11 @@ pub use article::list::list_articles;
 pub use article::retrieve::retrieve_article;
 pub use article::update::update_article;
 
+pub use categories::create::create_category;
+pub use categories::delete::delete_category;
+pub use categories::list::list_categories;
+pub use categories::update::update_category;
+
 pub use auth::login;
 pub use auth::logout;
 
@@ -53,6 +58,8 @@ mod contact;
 
 mod auth;
 
+mod categories;
+
 /// A handler for updating the resource
 async fn update_resource_handler(
     uow: Mutex<impl IResourceUnitOfWork>,
@@ -64,6 +71,20 @@ async fn update_resource_handler(
         Err(crate::domain::resources::update::Error::BadRequest) => Err(ApiError::BadRequest),
         Err(crate::domain::resources::update::Error::Unknown(e)) => {
             Err(ApiError::InternalServerError(e.to_string()))
+        }
+    }
+}
+
+async fn delete_resource_handler(
+    uow: Mutex<impl IResourceUnitOfWork>,
+    req: crate::domain::resources::delete::Request,
+) -> Result<StatusCode, ApiError> {
+    match crate::domain::resources::delete::execute(uow, req).await {
+        Ok(_) => Ok(StatusCode::OK),
+        Err(crate::domain::resources::delete::Error::BadRequest) => Err(ApiError::BadRequest),
+        Err(crate::domain::resources::delete::Error::NotFound) => Err(ApiError::NotFound),
+        Err(crate::domain::resources::delete::Error::Unknown(reason)) => {
+            Err(ApiError::InternalServerError(reason))
         }
     }
 }

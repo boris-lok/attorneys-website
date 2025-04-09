@@ -1,9 +1,10 @@
 use crate::domain::entities::{
-    ArticleData, ArticleEntity, ArticleEntityFromSQLx, ContactData, ContactEntity,
-    ContactEntityFromSQLx, ContentID, HomeData, HomeEntity, HomeEntityFromSQLx, Language,
-    MemberData, MemberEntity, MemberEntityFromSQLx, Pagination, ResourceID, ResourceType,
-    ServiceData, ServiceEntity, ServiceEntityFromSQLx, SimpleArticleEntity,
-    SimpleArticleEntityFromSQLx, SimpleMemberEntity, SimpleMemberEntityFromSQLx,
+    ArticleData, ArticleEntity, ArticleEntityFromSQLx, CategoryData, CategoryEntity,
+    CategoryEntityFromSQLx, ContactData, ContactEntity, ContactEntityFromSQLx, ContentID, HomeData,
+    HomeEntity, HomeEntityFromSQLx, Language, MemberData, MemberEntity, MemberEntityFromSQLx,
+    Pagination, ResourceID, ResourceType, ServiceData, ServiceEntity, ServiceEntityFromSQLx,
+    SimpleArticleEntity, SimpleArticleEntityFromSQLx, SimpleMemberEntity,
+    SimpleMemberEntityFromSQLx,
 };
 use crate::domain::member::entities::AvatarData;
 use crate::repositories::{
@@ -209,6 +210,17 @@ impl IResourceUnitOfWork for InMemory {
                         );
 
                         serde_json::value::to_value(article)?
+                    }
+                    ResourceType::Category => {
+                        let json = serde_json::from_value::<CategoryData>(data.clone().to_json())?;
+                        let category = CategoryEntity::new(
+                            id.clone().to_string(),
+                            lang.as_str().to_string(),
+                            json,
+                            0,
+                        );
+
+                        serde_json::value::to_value(category)?
                     }
                 };
 
@@ -469,6 +481,13 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 .await?
                 .map(ArticleEntity::from)
                 .and_then(|e| serde_json::value::to_value(e).ok()),
+            ResourceType::Category => sqlx::query_as::<_, CategoryEntityFromSQLx>(query)
+                .bind(id.as_str())
+                .bind(lang.as_str())
+                .fetch_optional(self.pool)
+                .await?
+                .map(CategoryEntity::from)
+                .and_then(|e| serde_json::value::to_value(e).ok()),
         };
 
         match res {
@@ -600,6 +619,19 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                     .await?
                     .into_iter()
                     .map(ContactEntity::from)
+                    .filter_map(|e| serde_json::value::to_value(e).ok())
+                    .collect::<Vec<_>>()
+            }
+            ResourceType::Category => {
+                let query = format!("{}{}", query, offset);
+
+                sqlx::query_as::<_, CategoryEntityFromSQLx>(query.as_str())
+                    .bind(language.as_str())
+                    .bind(resource_type.as_str())
+                    .fetch_all(self.pool)
+                    .await?
+                    .into_iter()
+                    .map(CategoryEntity::from)
                     .filter_map(|e| serde_json::value::to_value(e).ok())
                     .collect::<Vec<_>>()
             }

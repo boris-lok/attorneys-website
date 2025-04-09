@@ -1,5 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
+use crate::api::delete_resource_handler;
 use crate::domain::entities::ResourceType;
 use crate::startup::AppState;
 use crate::uow::InDatabase;
@@ -24,12 +25,5 @@ pub async fn delete_article(
         resource_type: ResourceType::Article,
     };
 
-    match crate::domain::resources::delete::execute(uow, req).await {
-        Ok(_) => Ok(StatusCode::OK),
-        Err(crate::domain::resources::delete::Error::BadRequest) => Err(ApiError::BadRequest),
-        Err(crate::domain::resources::delete::Error::NotFound) => Err(ApiError::NotFound),
-        Err(crate::domain::resources::delete::Error::Unknown(reason)) => {
-            Err(ApiError::InternalServerError(reason))
-        }
-    }
+    delete_resource_handler(uow, req).await
 }

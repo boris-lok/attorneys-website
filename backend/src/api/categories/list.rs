@@ -5,8 +5,10 @@ use crate::uow::InDatabase;
 use axum::extract::State;
 use axum::http::HeaderMap;
 use axum::Json;
+use serde::Serialize;
 use tokio::sync::Mutex;
 
+#[derive(Debug, Serialize)]
 pub(crate) struct ListCategoriesResponse {
     categories: Vec<CategoryEntity>,
 }

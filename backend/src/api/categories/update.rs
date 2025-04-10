@@ -8,8 +8,10 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
 use axum_extra::extract::WithRejection;
+use serde::Deserialize;
 use tokio::sync::Mutex;
 
+#[derive(Debug, Deserialize)]
 pub(crate) struct UpdateCategoryRequest {
     id: String,
     icon: Option<String>,

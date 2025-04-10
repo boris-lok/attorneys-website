@@ -41,6 +41,7 @@ pub use categories::update::update_category;
 
 pub use auth::login;
 pub use auth::logout;
+pub use users::change_password;
 
 mod api_error;
 
@@ -59,6 +60,7 @@ mod contact;
 mod auth;
 
 mod categories;
+mod users;
 
 /// A handler for updating the resource
 async fn update_resource_handler(

@@ -121,6 +121,18 @@ impl<'tx> IUserRepository for SqlxUserRepository<'tx> {
     }
 
     async fn change_password(&self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()> {
-        todo!()
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        let query = "UPDATE \"users\" SET password_hash = $1 WHERE id = $2";
+
+        sqlx::query(query)
+            .bind(password.expose_secret().to_string().as_str())
+            .bind(id.to_string().as_str())
+            .execute(conn)
+            .await?;
+
+        Ok(())
     }
 }

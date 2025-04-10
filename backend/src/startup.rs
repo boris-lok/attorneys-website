@@ -1,3 +1,4 @@
+use crate::api::change_password::change_password;
 use crate::api::login::login;
 use crate::api::logout::logout;
 use crate::api::{
@@ -11,7 +12,7 @@ use crate::api::{
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
 use axum::http::HeaderValue;
-use axum::routing::{delete, get, post};
+use axum::routing::{delete, get, post, put};
 use axum::{Extension, Router};
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use secrecy::ExposeSecret;
@@ -89,7 +90,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
 
     let admin_user_routes = Router::new()
         .route("/login", post(login))
-        .route("/logout", post(logout));
+        .route("/logout", post(logout))
+        .route("/password", put(change_password));
 
     let admin_routes = Router::new()
         .merge(admin_member_routes)

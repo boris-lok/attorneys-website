@@ -1,6 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::api::contact::retrieve::RetrieveContactResponse;
-use crate::domain::entities::{CategoryEntity, ContactEntity, Language, ResourceType};
+use crate::domain::entities::{CategoryEntity, Language, ResourceType};
 use crate::startup::AppState;
 use crate::uow::InDatabase;
 use axum::extract::{Path, State};

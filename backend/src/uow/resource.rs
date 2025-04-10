@@ -49,6 +49,7 @@ pub trait IResourceUnitOfWork {
     async fn list_resources<T>(
         &self,
         language: &Language,
+        filter_str: &Option<String>,
         resource_type: &ResourceType,
         page: &Pagination,
     ) -> anyhow::Result<Vec<T>>
@@ -235,6 +236,7 @@ impl IResourceUnitOfWork for InMemory {
     async fn list_resources<T>(
         &self,
         language: &Language,
+        _: &Option<String>,
         resource_type: &ResourceType,
         _: &Pagination,
     ) -> anyhow::Result<Vec<T>>
@@ -502,12 +504,16 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
     async fn list_resources<T>(
         &self,
         language: &Language,
+        filter_str: &Option<String>,
         resource_type: &ResourceType,
         page: &Pagination,
     ) -> anyhow::Result<Vec<T>>
     where
         T: DeserializeOwned + Serialize,
     {
+        let filter_str = filter_str.clone().unwrap();
+        let filter_str = filter_str.as_str();
+
         let offset = match page {
             Pagination::All => ";".to_string(),
             Pagination::Single => "limit 1;".to_string(),
@@ -517,7 +523,8 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
             }
         };
 
-        let query = r#"select resource.id as id,
+        let query = format!(
+            r#"select resource.id as id,
                 content.data as data,
                 content.language as language,
                 resource.seq as seq
@@ -527,12 +534,16 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 and content.language = $1
                 and resource.resource_type = $2
                 and resource.deleted_at is null
+                {}
                 order by seq, resource.created_at desc
-                "#;
+                "#,
+            filter_str
+        );
 
         let res = match resource_type {
             ResourceType::Member => {
-                let query = r"select resource.id as id,
+                let query = format!(
+                    r"select resource.id as id,
                 content.data->>'name' as name,
                 avatar.data->>'small_image' as avatar,
                 resource.seq as seq
@@ -543,8 +554,10 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 and content.language = $1
                 and resource.resource_type = $2
                 and resource.deleted_at is null
-                order by seq, resource.created_at desc";
-                let query = format!("{}{}", query, offset);
+                {}
+                order by seq, resource.created_at desc {}",
+                    filter_str, offset
+                );
 
                 sqlx::query_as::<_, SimpleMemberEntityFromSQLx>(query.as_str())
                     .bind(language.as_str())
@@ -583,7 +596,8 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                     .collect::<Vec<_>>()
             }
             ResourceType::Article => {
-                let query = r#"select resource.id as id,
+                let query = format!(
+                    r#"select resource.id as id,
                 content.data->>'title' as title,
                 content.created_at as created_at,
                 content.language as language,
@@ -594,10 +608,12 @@ impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
                 and content.language = $1
                 and resource.resource_type = $2
                 and resource.deleted_at is null
+                {}
                 order by seq, resource.created_at desc
-                "#;
-
-                let query = format!("{}{}", query, offset);
+                {}
+                "#,
+                    filter_str, offset
+                );
 
                 sqlx::query_as::<_, SimpleArticleEntityFromSQLx>(query.as_str())
                     .bind(language.as_str())

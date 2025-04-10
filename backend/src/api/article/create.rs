@@ -12,6 +12,7 @@ use ulid::Ulid;
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct CreateArticleRequest {
+    category_id: Option<String>,
     title: String,
     content: String,
     language: String,
@@ -32,7 +33,7 @@ pub async fn create_article(
 
     let req = crate::domain::resources::create::Request {
         id: home_id.clone(),
-        data: Resource::Article(ArticleData::new(req.title, req.content)),
+        data: Resource::Article(ArticleData::new(req.category_id, req.title, req.content)),
         language: req.language,
         seq: req.seq,
     };

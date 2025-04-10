@@ -27,6 +27,7 @@ pub async fn list_categories(
         .unwrap_or("zh");
 
     let req = crate::domain::resources::list::Request {
+        filter_str: None,
         resource_type: ResourceType::Category,
         language: lang.to_string(),
         default_language: Language::ZH,

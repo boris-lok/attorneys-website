@@ -14,6 +14,7 @@ use tokio::sync::Mutex;
 #[derive(Debug, Deserialize)]
 pub struct UpdateArticleRequest {
     id: String,
+    category_id: Option<String>,
     title: String,
     content: String,
     language: String,
@@ -27,7 +28,7 @@ pub async fn update_article(
 ) -> Result<StatusCode, ApiError> {
     let req = crate::domain::resources::update::Request {
         id: req.id,
-        data: Resource::Article(ArticleData::new(req.title, req.content)),
+        data: Resource::Article(ArticleData::new(req.category_id, req.title, req.content)),
         language: req.language,
         seq: req.seq,
     };

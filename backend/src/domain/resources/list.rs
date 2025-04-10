@@ -7,6 +7,7 @@ use tokio::sync::Mutex;
 
 #[derive(Debug)]
 pub(crate) struct Request {
+    pub(crate) filter_str: Option<String>,
     pub(crate) resource_type: ResourceType,
     pub(crate) language: String,
     pub(crate) default_language: Language,
@@ -29,6 +30,7 @@ where
     async fn inner_execute<IUnitOfWork, T>(
         uow: Arc<Mutex<IUnitOfWork>>,
         lang: &Language,
+        filter_str: &Option<String>,
         resource_type: &ResourceType,
         pagination: &Pagination,
     ) -> Result<(Vec<T>, usize), Error>
@@ -39,7 +41,7 @@ where
         let lock = uow.lock().await;
 
         let data = lock
-            .list_resources::<T>(lang, resource_type, pagination)
+            .list_resources::<T>(lang, filter_str, resource_type, pagination)
             .await
             .map_err(|e| Error::Unknown(e.to_string()))?;
 
@@ -59,12 +61,21 @@ where
 
     let uow = Arc::new(uow);
 
-    match inner_execute(uow.clone(), &language, &req.resource_type, &req.pagination).await {
+    match inner_execute(
+        uow.clone(),
+        &language,
+        &req.filter_str,
+        &req.resource_type,
+        &req.pagination,
+    )
+    .await
+    {
         Ok((data, total)) => {
             if data.is_empty() {
                 inner_execute(
                     uow.clone(),
                     &req.default_language,
+                    &req.filter_str,
                     &req.resource_type,
                     &req.pagination,
                 )
@@ -91,6 +102,7 @@ mod tests {
         let (uow, _) = create_some_fake_data_and_return_uow(create_resources()).await;
 
         let req = Request {
+            filter_str: None,
             resource_type: ResourceType::Member,
             language: "zh".to_string(),
             default_language: Language::ZH,
@@ -112,6 +124,7 @@ mod tests {
         let (uow, _) = create_some_fake_data_and_return_uow(create_resources()).await;
 
         let req = Request {
+            filter_str: None,
             resource_type: ResourceType::Member,
             language: "en".to_string(),
             default_language: Language::ZH,

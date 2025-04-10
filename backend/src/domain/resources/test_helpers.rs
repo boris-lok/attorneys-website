@@ -19,7 +19,7 @@ pub(crate) mod tests {
             "email": "info@example.com".to_string(),
         });
         let contact = ContactData::new(contact);
-        let article = ArticleData::new("title".to_string(), "data".to_string());
+        let article = ArticleData::new(None, "title".to_string(), "data".to_string());
         let category = CategoryData::new(None, "category".to_string());
 
         vec![

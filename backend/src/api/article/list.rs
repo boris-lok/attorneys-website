@@ -14,6 +14,11 @@ pub struct QueryPagination {
     page_size: Option<u32>,
 }
 
+#[derive(Deserialize)]
+pub struct CategoryQuery {
+    category_id: Option<String>,
+}
+
 #[derive(Debug, Serialize)]
 pub struct ListArticlesResponse {
     articles: Vec<SimpleArticleEntity>,
@@ -24,7 +29,10 @@ pub async fn list_articles(
     State(state): State<AppState>,
     headers: HeaderMap,
     pagination: Query<QueryPagination>,
+    category_query: Query<CategoryQuery>,
 ) -> Result<Json<ListArticlesResponse>, ApiError> {
+    let category_id = category_query.category_id.clone();
+
     let uow = InDatabase::new(&state.pool)
         .await
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
@@ -36,6 +44,10 @@ pub async fn list_articles(
         .unwrap_or("zh");
 
     let req = crate::domain::resources::list::Request {
+        filter_str: match category_id {
+            None => None,
+            Some(s) => Some(format!("content.data->>'category_id' = '{}'", s)),
+        },
         resource_type: ResourceType::Article,
         language: lang.to_string(),
         default_language: Language::ZH,

@@ -105,7 +105,7 @@ mod tests {
             large_image: "large".to_string(),
             small_image: "small".to_string(),
         };
-        let article = ArticleData::new("title".to_string(), "data".to_string());
+        let article = ArticleData::new(None, "title".to_string(), "data".to_string());
         let category = CategoryData::new(None, "category".to_string());
         vec![
             (

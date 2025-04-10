@@ -28,6 +28,7 @@ pub async fn list_contact(
         .unwrap_or("zh");
 
     let req = crate::domain::resources::list::Request {
+        filter_str: None,
         resource_type: ResourceType::Contact,
         language: lang.to_string(),
         default_language: Language::ZH,

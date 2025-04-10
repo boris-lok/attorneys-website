@@ -185,6 +185,7 @@ impl ContactData {
 
 #[derive(Debug, Serialize, Validate, Deserialize, Clone, Eq, PartialEq)]
 pub struct ArticleData {
+    pub category_id: Option<String>,
     #[validate(length(min = 1))]
     pub title: String,
     #[validate(length(min = 1))]
@@ -192,8 +193,9 @@ pub struct ArticleData {
 }
 
 impl ArticleData {
-    pub fn new(title: String, content: String) -> Self {
+    pub fn new(category_id: Option<String>, title: String, content: String) -> Self {
         Self {
+            category_id,
             title: title.trim().to_string(),
             content: content.trim().to_string(),
         }

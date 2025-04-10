@@ -84,7 +84,7 @@ mod tests {
             "email": "info@example.com".to_string(),
         });
         let contact_data = ContactData::new(contact);
-        let article_data = ArticleData::new("title".to_string(), "data".to_string());
+        let article_data = ArticleData::new(None, "title".to_string(), "data".to_string());
 
         let different_data = vec![
             Resource::Member(member_data),
@@ -156,13 +156,13 @@ mod tests {
             // data is conducted by spaces
             Resource::Home(HomeData::new(" ".to_string())),
             // title is missing
-            Resource::Article(ArticleData::new("".to_string(), "data".to_string())),
+            Resource::Article(ArticleData::new(None, "".to_string(), "data".to_string())),
             // data is missing
-            Resource::Article(ArticleData::new("title".to_string(), "".to_string())),
+            Resource::Article(ArticleData::new(None, "title".to_string(), "".to_string())),
             // The title is conducted by spaces
-            Resource::Article(ArticleData::new("  ".to_string(), "data".to_string())),
+            Resource::Article(ArticleData::new(None, "  ".to_string(), "data".to_string())),
             // The data is conducted by spaces
-            Resource::Article(ArticleData::new("title".to_string(), " ".to_string())),
+            Resource::Article(ArticleData::new(None, "title".to_string(), " ".to_string())),
         ];
 
         for d in missing_or_invalid_data {

@@ -376,7 +376,7 @@ impl<'tx> InDatabase<'tx> {
 }
 
 #[async_trait::async_trait]
-impl<'tx> IResourceUnitOfWork for InDatabase<'tx> {
+impl IResourceUnitOfWork for InDatabase<'_> {
     fn resource_repository(&mut self) -> &mut impl IResourceRepository {
         if self.resource_repository.is_none() {
             let resource_repo = SqlxResourceRepository::new(Arc::downgrade(&self.tx));

@@ -6,16 +6,14 @@ pub fn get_subscriber<Sink>(sink: Sink) -> impl Subscriber + Send + Sync
 where
     Sink: for<'a> MakeWriter<'a> + Sync + Send + 'static,
 {
-    let subscriber = tracing_subscriber::fmt()
+    tracing_subscriber::fmt()
         .json()
         .with_file(true)
         .with_line_number(true)
         .with_thread_ids(true)
         .with_target(false)
         .with_writer(sink)
-        .finish();
-
-    subscriber
+        .finish()
 }
 
 pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync) {

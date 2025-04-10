@@ -149,7 +149,7 @@ impl<'tx> SqlxContentRepository<'tx> {
 }
 
 #[async_trait::async_trait]
-impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
+impl IContentRepository for SqlxContentRepository<'_> {
     async fn insert(
         &self,
         id: ContentID,

@@ -130,7 +130,7 @@ impl<'tx> SqlxResourceRepository<'tx> {
 }
 
 #[async_trait::async_trait]
-impl<'tx> IResourceRepository for SqlxResourceRepository<'tx> {
+impl IResourceRepository for SqlxResourceRepository<'_> {
     async fn insert(
         &self,
         id: ResourceID,

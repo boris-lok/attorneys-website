@@ -90,7 +90,7 @@ impl<'tx> SqlxAvatarRepository<'tx> {
 }
 
 #[async_trait::async_trait]
-impl<'tx> IAvatarRepository for SqlxAvatarRepository<'tx> {
+impl IAvatarRepository for SqlxAvatarRepository<'_> {
     async fn save(
         &self,
         id: ResourceID,

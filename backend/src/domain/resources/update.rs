@@ -115,7 +115,7 @@ mod tests {
                 title: "new title".to_string(),
                 ..a
             }),
-            Resource::Category(c) => {
+            Resource::Category(_) => {
                 Resource::Category(CategoryData::new(None, "new category".to_string()))
             }
         }

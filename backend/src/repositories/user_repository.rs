@@ -91,7 +91,7 @@ impl<'tx> SqlxUserRepository<'tx> {
 }
 
 #[async_trait::async_trait]
-impl<'tx> IUserRepository for SqlxUserRepository<'tx> {
+impl IUserRepository for SqlxUserRepository<'_> {
     async fn get_credentials(
         &self,
         username: &str,

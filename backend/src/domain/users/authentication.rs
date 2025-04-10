@@ -83,7 +83,7 @@ mod tests {
             Version::V0x13,
             Params::new(15000, 2, 1, None).unwrap(),
         )
-        .hash_password(password.as_str().as_bytes(), &salt)
+        .hash_password(password.as_bytes(), &salt)
         .unwrap()
         .to_string();
 

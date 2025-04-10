@@ -544,7 +544,7 @@ impl From<uuid::Uuid> for UserID {
 
 impl std::fmt::Display for UserID {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0.to_string())
+        write!(f, "{}", self.0)
     }
 }
 

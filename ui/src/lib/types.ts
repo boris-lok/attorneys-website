@@ -120,3 +120,24 @@ export type SimpleArticle = {
     createdAtString: string
     seq: number
 }
+
+export type CategoryData = {
+    id: string
+    language: Language
+    data: {
+        icon?: string
+        name: string
+    }
+    seq: number
+}
+
+// The request of creating article content
+export type CreateCategoryRequest = {
+    icon?: string
+    name: string
+    language: Language
+    seq: number
+}
+
+// The request of updating article content
+export type UpdateCategoryRequest = { id: string } & CreateCategoryRequest

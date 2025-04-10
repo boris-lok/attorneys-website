@@ -5,8 +5,8 @@ use crate::api::{
     create_article, create_category, create_contact, create_home, create_member, create_service,
     delete_article, delete_category, delete_member, delete_service, health_check, list_articles,
     list_categories, list_contact, list_home, list_members, list_services, retrieve_article,
-    retrieve_contact, retrieve_home, retrieve_member, retrieve_service, update_article,
-    update_category, update_contact, update_home, update_member, update_service,
+    retrieve_category, retrieve_contact, retrieve_home, retrieve_member, retrieve_service,
+    update_article, update_category, update_contact, update_home, update_member, update_service,
     upload_member_avatar,
 };
 use crate::configuration::{DatabaseSettings, Settings};
@@ -86,7 +86,9 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let admin_category_routes = Router::new()
         .route("/categories", post(create_category).put(update_category))
         .route("/categories/{id}", delete(delete_category));
-    let category_routes = Router::new().route("/categories", get(list_categories));
+    let category_routes = Router::new()
+        .route("/categories", get(list_categories))
+        .route("/categories/{id}", get(retrieve_category));
 
     let admin_user_routes = Router::new()
         .route("/login", post(login))

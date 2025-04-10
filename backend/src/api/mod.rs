@@ -37,6 +37,7 @@ pub use article::update::update_article;
 pub use categories::create::create_category;
 pub use categories::delete::delete_category;
 pub use categories::list::list_categories;
+pub use categories::retrieve::retrieve_category;
 pub use categories::update::update_category;
 
 pub use auth::login;

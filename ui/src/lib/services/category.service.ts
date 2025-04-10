@@ -64,6 +64,28 @@ function del(id: string) {
     )
 }
 
+/**
+ * The API endpoint of retrieving the category by id and language
+ * @param id the ID of service
+ * @param language the language
+ */
+function retrieve(id: string, language: Language) {
+    return fromFetch(`${BASE_URL}/categories/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept-Language': language,
+        },
+        signal: AbortSignal.timeout(TIMEOUT),
+        selector: (resp) =>
+            resp.json().then((json) => {
+                return 'category' in json
+                    ? (json.category as CategoryData)
+                    : null
+            }),
+    })
+}
+
 export const CategoryService = {
     // save the content of category.
     save: save,
@@ -71,4 +93,6 @@ export const CategoryService = {
     list: list,
     // delete the category
     delete: del,
+    // retrieve the category
+    retrieve: retrieve,
 }

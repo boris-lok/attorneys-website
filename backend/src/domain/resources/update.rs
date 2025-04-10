@@ -48,10 +48,27 @@ where
 
         let id = ContentID::from(id);
 
-        // insert the content into the content repository and retrieve the content id
-        match lock.content_repository().update(&id, data, language).await {
-            Ok(_) => Ok(id),
-            Err(e) => return Err(Error::Unknown(e.to_string())),
+        if !lock
+            .content_repository()
+            .contains(&id, &language)
+            .await
+            .map_err(|e| Error::Unknown(e.to_string()))?
+        {
+            // insert the content into the content repository and retrieve the content id
+            match lock
+                .content_repository()
+                .insert(id.clone(), data, language)
+                .await
+            {
+                Ok(_) => Ok(id),
+                Err(e) => return Err(Error::Unknown(e.to_string())),
+            }
+        } else {
+            // insert the content into the content repository and retrieve the content id
+            match lock.content_repository().update(&id, data, language).await {
+                Ok(_) => Ok(id),
+                Err(e) => return Err(Error::Unknown(e.to_string())),
+            }
         }
     }?;
 
@@ -178,5 +195,28 @@ mod tests {
                 _ => unreachable!(),
             }
         }
+    }
+
+    #[tokio::test]
+    async fn it_should_create_a_new_content_for_different_language() {
+        let resources = create_resources();
+        let resource = resources.first().unwrap().clone();
+
+        let (uow, r) = create_some_fake_data_and_return_uow(vec![resource]).await;
+
+        let (id, resource) = r[0].clone();
+
+        let req = Request {
+            id: id.clone().to_string(),
+            data: resource,
+            language: "en".to_string(),
+            seq: 0,
+        };
+
+        let uow = Mutex::new(uow);
+
+        let res = execute(uow, req).await;
+        // TODO: check the updated data
+        assert!(res.is_ok());
     }
 }

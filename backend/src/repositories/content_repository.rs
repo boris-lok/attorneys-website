@@ -1,6 +1,6 @@
 use crate::domain::entities::{ContentData, ContentID, Language};
 use anyhow::anyhow;
-use sqlx::{Acquire, Postgres, Transaction};
+use sqlx::{Acquire, Postgres, Row, Transaction};
 use std::collections::HashMap;
 use std::sync::Weak;
 use tokio::sync::Mutex;
@@ -20,6 +20,8 @@ pub trait IContentRepository {
         data: ContentData,
         language: Language,
     ) -> anyhow::Result<()>;
+
+    async fn contains(&self, id: &ContentID, language: &Language) -> anyhow::Result<bool>;
 }
 
 #[derive(Debug)]
@@ -122,6 +124,17 @@ impl IContentRepository for InMemoryContentRepository {
 
         Ok(())
     }
+
+    async fn contains(&self, id: &ContentID, language: &Language) -> anyhow::Result<bool> {
+        if self.error {
+            return Err(anyhow!("Internal Server Error"));
+        }
+
+        let lock = self.content.lock().await;
+
+        let key = format!("{}_{}", id.as_str(), language.as_str());
+        Ok(lock.contains_key(key.as_str()))
+    }
 }
 
 #[derive(Debug)]
@@ -179,5 +192,25 @@ impl<'tx> IContentRepository for SqlxContentRepository<'tx> {
         .await?;
 
         Ok(())
+    }
+
+    async fn contains(&self, id: &ContentID, language: &Language) -> anyhow::Result<bool> {
+        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+        let mut lock = conn_ptr.lock().await;
+        let conn = lock.acquire().await?;
+
+        let query = "SELECT id FROM \"content\" WHERE id = $1 AND language = $2 limit 1";
+
+        let res = sqlx::query(query)
+            .bind(id.as_str())
+            .bind(language.as_str())
+            .fetch_optional(conn)
+            .await
+            .map(|row| match row {
+                None => false,
+                Some(row) => row.len() > 0,
+            })?;
+
+        Ok(res)
     }
 }

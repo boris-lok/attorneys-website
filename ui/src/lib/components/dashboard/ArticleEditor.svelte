@@ -6,20 +6,24 @@
     import { ArticleServices } from '$lib/services/article.service'
     import Loading from '$lib/components/common/Loading.svelte'
     import { startWithTap } from '$lib/utils'
+    import type { CategoryData } from '$lib/types'
 
     type EditorProps = {
         id?: string
         title?: string
         content?: string
+        categoryId?: string
+        categories: CategoryData[]
     }
 
-    let { id, content, title }: EditorProps = $props()
-    let newData: { title: string, content: string } = $state({ title: '', content: '' })
+    let { id, content, title, categoryId, categories }: EditorProps = $props()
+    let newData: { title: string, content: string, category_id?: string } = $state({ title: '', content: '' })
     $effect(() => {
         // init the state by props
         newData = {
             title: title ?? '',
-            content: content ?? ''
+            content: content ?? '',
+            category_id: categoryId
         }
     })
     let errorMsg = $state('')
@@ -43,6 +47,16 @@
         newData = {
             ...newData,
             title: (e.currentTarget as HTMLInputElement).value.trim()
+        }
+    }
+
+    // handles category has been changed
+    function onCategoryChanged(
+        e: Event & { currentTarget: EventTarget & HTMLSelectElement }
+    ) {
+        newData = {
+            ...newData,
+            category_id: (e.currentTarget as HTMLSelectElement).value.trim()
         }
     }
 
@@ -100,6 +114,20 @@
                 type="text"
                 value={title ?? ''}
             />
+
+            <div class="mb-4">
+                <label class="block mb-2 text-sm font-bold text-gray-700" for="countries">Category</label>
+                <select class="bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg block w-full p-2.5"
+                        id="countries"
+                        onchange={onCategoryChanged}
+                >
+                    <option selected>Choose a category</option>
+                    {#each categories as category (category.id) }
+                        <option value={category.id} selected={categoryId === category.id}>{category.data.name}</option>
+                    {/each}
+                </select>
+            </div>
+
             <Textarea
                 label="Article Content"
                 name="service"

@@ -108,6 +108,7 @@ export type ArticleData = {
     data: {
         title: string
         content: string
+        category_id?: string
     }
     seq: number
 }

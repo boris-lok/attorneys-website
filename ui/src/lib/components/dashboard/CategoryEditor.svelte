@@ -126,7 +126,7 @@
 <div class="relative flex flex-row justify-center gap-x-4">
     <button
         class="block cursor-pointer rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:cursor-auto disabled:bg-gray-500"
-        disabled={data.name.trim() !== ''}
+        disabled={data.name.trim() === ''}
         onclick={onSaveClicked}
     >
         Save

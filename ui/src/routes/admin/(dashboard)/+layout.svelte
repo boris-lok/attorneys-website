@@ -11,32 +11,32 @@
     let items: NavigationItem[] = [
         {
             icon: 'iconoir:home',
-            name: 'Home',
+            name: '首頁',
             url: '/admin/home'
         },
         {
             icon: 'lsicon:list-outline',
-            name: 'Services',
+            name: '服務',
             url: '/admin/services'
         },
         {
+            icon: 'ph:books-light',
+            name: '文章分類',
+            url: '/admin/categories'
+        },
+        {
             icon: 'lineicons:books-2',
-            name: 'Articles',
+            name: '文章',
             url: '/admin/articles'
         },
         {
             icon: 'tdesign:member',
-            name: 'Members',
+            name: '專業團隊',
             url: '/admin/members'
         },
         {
-            icon: 'hugeicons:contact-02',
-            name: 'Contact us',
-            url: '/admin/contact_us'
-        },
-        {
             icon: 'tabler:logout',
-            name: 'logout',
+            name: '登出',
             onClick: () => {
                 // Call an API to remove the token, navigate to the login page
                 // whatever success or failure. because we have removed the token

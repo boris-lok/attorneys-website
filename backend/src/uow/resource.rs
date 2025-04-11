@@ -511,7 +511,7 @@ impl IResourceUnitOfWork for InDatabase<'_> {
     where
         T: DeserializeOwned + Serialize,
     {
-        let filter_str = filter_str.clone().unwrap();
+        let filter_str = filter_str.clone().unwrap_or_default();
         let filter_str = filter_str.as_str();
 
         let offset = match page {

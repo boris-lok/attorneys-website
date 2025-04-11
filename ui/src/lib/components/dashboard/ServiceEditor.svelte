@@ -16,10 +16,18 @@
 
     let { id, data, title, icon }: EditorProps = $props()
 
-    let newData = $state({
-        title: title ?? '',
-        data: data ?? '',
-        icon: icon ?? ''
+    let newData: { icon: string, title: string, data: string } = $state({
+        icon: '',
+        title: '',
+        data: ''
+    })
+    $effect(() => {
+        // init the state by props
+        newData = {
+            icon: icon ?? '',
+            title: title ?? '',
+            data: data ?? ''
+        }
     })
     let errorMsg = $state('')
     let show = $state(false)

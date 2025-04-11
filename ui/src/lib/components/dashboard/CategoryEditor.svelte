@@ -10,15 +10,18 @@
         id?: string
         icon?: string
         name?: string
-
     }
 
     let { id, icon, name }: EditorProps = $props()
-
-    let data = $state({
-        icon: icon ?? '',
-        name: name ?? ''
+    let data: { icon: string, name: string } = $state({ icon: '', name: '' })
+    $effect(() => {
+        // init the state by props
+        data = {
+            icon: icon ?? '',
+            name: name ?? ''
+        }
     })
+
     let errorMsg = $state('')
     let isLoading = $state(false)
 

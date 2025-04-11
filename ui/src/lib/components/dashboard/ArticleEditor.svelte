@@ -14,10 +14,13 @@
     }
 
     let { id, content, title }: EditorProps = $props()
-
-    let newData = $state({
-        title: title ?? '',
-        content: content ?? ''
+    let newData: { title: string, content: string } = $state({ title: '', content: '' })
+    $effect(() => {
+        // init the state by props
+        newData = {
+            title: title ?? '',
+            content: content ?? ''
+        }
     })
     let errorMsg = $state('')
     let isLoading = $state(false)

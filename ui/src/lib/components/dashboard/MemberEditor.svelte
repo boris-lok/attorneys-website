@@ -19,11 +19,18 @@
 
     let _in: InputProps = $props()
 
-    let name = $state($state.snapshot(_in.name))
-    let description = $state($state.snapshot(_in.description))
-    let avatarData = $state($state.snapshot(_in.avatarData))
+    let name = $state('')
+    let description = $state('')
+    let avatarData: ImageData | undefined = $state(undefined)
     let newAvatar: File | undefined = undefined
     let errorMsg = $state('')
+
+    $effect(() => {
+        // init the state by props
+        name = _in.name ?? ''
+        description = _in.description ?? ''
+        avatarData = _in.avatarData
+    })
 
     let isLoading = $state(false)
 

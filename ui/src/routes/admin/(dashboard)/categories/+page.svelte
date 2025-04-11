@@ -6,6 +6,7 @@
     import { CategoryService } from '$lib/services/category.service'
     import Loading from '$lib/components/common/Loading.svelte'
     import Icon from '@iconify/svelte'
+    import IconifyIcon from '@iconify/svelte'
 
     let categories: CategoryData[] = $state([])
     let isLoading = $state(false)
@@ -34,10 +35,22 @@
         <Icon icon="gridicons:create" width="24" height="24" />
     </a>
 </div>
-<div>
+<div class="flex flex-wrap">
     {#each categories as category (category.id)}
-        <div>
+        <div class="rounded border w-36 h-36 flex flex-col items-center justify-center relative">
+            {#if category.data.icon}
+                <IconifyIcon icon={category.data.icon} class="w-8 h-8" />
+            {/if}
             <p>{category.data.name}</p>
+            <div class="absolute p-2 top-0 right-0">
+                <a href="/admin/categories/edit/{category.id}">
+                    <Icon
+                        icon="mingcute:edit-line"
+                        width="24"
+                        height="24"
+                    />
+                </a>
+            </div>
         </div>
     {/each}
 </div>

@@ -44,7 +44,7 @@ pub async fn list_articles(
         .unwrap_or("zh");
 
     let req = crate::domain::resources::list::Request {
-        filter_str: category_id.map(|s| format!("content.data->>'category_id' = '{}'", s)),
+        filter_str: category_id.map(|s| format!(" and content.data->>'category_id' = '{}'", s)),
         resource_type: ResourceType::Article,
         language: lang.to_string(),
         default_language: Language::ZH,

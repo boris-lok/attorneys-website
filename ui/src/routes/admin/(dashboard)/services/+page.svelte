@@ -32,7 +32,7 @@
 <div>
     <div class="relative my-4 flex flex-row justify-end px-2">
         <a href="/admin/services/edit">
-            <Icon icon="gridicons:create" width="24" height="24" />
+            <Icon height="24" icon="gridicons:create" width="24" />
         </a>
     </div>
     <div class="relative grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2">

@@ -38,4 +38,4 @@
 </script>
 
 <Loading show={isLoading} />
-<MemberEditor id={data.id} {name} {description} avatarData={avatar} {seq} />
+<MemberEditor avatarData={avatar} {description} id={data.id} {name} {seq} />

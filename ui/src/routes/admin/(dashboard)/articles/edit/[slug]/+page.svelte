@@ -31,4 +31,4 @@
 </script>
 
 <Loading show={isLoading} />
-<ArticleEditor id={data.id} {title} {content} />
+<ArticleEditor {content} id={data.id} {title} />

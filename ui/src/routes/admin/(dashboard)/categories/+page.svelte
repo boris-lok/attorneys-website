@@ -32,7 +32,7 @@
 <Loading show={isLoading} />
 <div class="relative my-4 flex flex-row justify-end px-2">
     <a href="/admin/categories/edit">
-        <Icon icon="gridicons:create" width="24" height="24" />
+        <Icon height="24" icon="gridicons:create" width="24" />
     </a>
 </div>
 <div class="flex flex-wrap">

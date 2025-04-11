@@ -30,4 +30,4 @@
 </script>
 
 <Loading show={isLoading} />
-<HomeEditor id={data.id} data={content} />
+<HomeEditor data={content} id={data.id} />

@@ -31,4 +31,4 @@
 </script>
 
 <Loading show={isLoading} />
-<ServiceEditor id={data.id} {title} data={content} />
+<ServiceEditor data={content} id={data.id} {title} />

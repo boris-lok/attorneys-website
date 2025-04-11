@@ -115,8 +115,8 @@
 <Loading show={isLoading} />
 <div
     class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
-    role="alert"
     class:show={errorMsg!==''}
+    role="alert"
 >
     <p class="w-full text-center">{errorMsg}</p>
 </div>

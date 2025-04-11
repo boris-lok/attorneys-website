@@ -62,7 +62,7 @@
 <div class="relative">
     <div class="relative my-4 flex flex-row justify-end px-2">
         <a href="/admin/articles/edit">
-            <Icon icon="gridicons:create" width="24" height="24" />
+            <Icon height="24" icon="gridicons:create" width="24" />
         </a>
     </div>
     <div class="relative flex flex-col gap-4">
@@ -92,16 +92,16 @@
     >
         <button
             class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
-            onclick={onPreviousButtonClicked}
             class:disabled={!hasPreviousPage}
             disabled={!hasPreviousPage}
+            onclick={onPreviousButtonClicked}
         >Previous
         </button>
         <button
             class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
-            onclick={onNextButtonClicked}
             class:disabled={!hasNextPage}
             disabled={!hasNextPage}
+            onclick={onNextButtonClicked}
         >Next
         </button>
     </div>

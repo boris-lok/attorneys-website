@@ -4,6 +4,7 @@
     import { finalize, tap } from 'rxjs'
     import CategoryEditor from '$lib/components/dashboard/CategoryEditor.svelte'
     import { CategoryService } from '$lib/services/category.service'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     let { data }: PageProps = $props()
 
@@ -29,8 +30,5 @@
     $effect(() => fetchData())
 </script>
 
-{#if isLoading}
-    <p>Loading...</p>
-{:else}
-    <CategoryEditor icon={icon} name={name} />
-{/if}
+<Loading show={isLoading} />
+<CategoryEditor icon={icon} name={name} />

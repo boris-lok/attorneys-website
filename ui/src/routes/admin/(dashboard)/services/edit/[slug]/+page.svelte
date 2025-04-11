@@ -4,6 +4,7 @@
     import { finalize, tap } from 'rxjs'
     import { ServiceServices } from '$lib/services/service.service'
     import ServiceEditor from '$lib/components/dashboard/ServiceEditor.svelte'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     let { data }: PageProps = $props()
 
@@ -29,8 +30,5 @@
     $effect(() => fetchData())
 </script>
 
-{#if isLoading}
-    <p>Loading...</p>
-{:else}
-    <ServiceEditor id={data.id} {title} data={content} />
-{/if}
+<Loading show={isLoading} />
+<ServiceEditor id={data.id} {title} data={content} />

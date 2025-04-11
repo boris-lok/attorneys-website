@@ -4,6 +4,7 @@
     import { finalize, tap } from 'rxjs'
     import type { ServiceData } from '$lib/types'
     import ServiceBox from '$lib/components/ServiceBox.svelte'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     let services: ServiceData[] = $state([])
     let isLoading = $state(false)
@@ -33,7 +34,7 @@
     $effect(() => fetchData())
 </script>
 
-
+<Loading show={isLoading} />
 <div class="relative flex flex-col md:flex-row md:items-center">
     <div class="relative flex w-full flex-col md:max-w-6xl mx-auto">
         <p

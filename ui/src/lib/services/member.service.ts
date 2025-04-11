@@ -2,7 +2,7 @@ import type { CreateMemberRequest, Language, MemberData, SimpleMember, UpdateMem
 import { fromFetch } from 'rxjs/fetch'
 import { ADMIN_URL, BASE_URL, TIMEOUT, UPLOAD_IMAGE_TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
-import { map, Observable, switchMap } from 'rxjs'
+import { map, of, switchMap } from 'rxjs'
 
 /**
  * The API endpoint of saving member
@@ -22,15 +22,14 @@ function save(req: CreateMemberRequest | UpdateMemberRequest) {
     }).pipe(
         switchMap((resp) => {
             if (!resp.ok) {
-                console.log('1')
-                return Observable.create({
+                return of({
                     error: true,
                     message: `Error: ${resp.status}`,
                 })
             }
 
             if ('id' in req) {
-                return Observable.create({ error: false, id: req.id })
+                return of({ error: false, id: req.id })
             } else {
                 return resp.json().then((json) => {
                     if ('id' in json) {

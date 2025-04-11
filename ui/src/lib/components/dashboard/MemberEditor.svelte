@@ -7,6 +7,7 @@
     import { MemberServices } from '$lib/services/member.service'
     import { startWithTap } from '$lib/utils'
     import { concatMap, finalize, of, tap } from 'rxjs'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     type InputProps = {
         id?: string
@@ -26,20 +27,20 @@
 
     let isLoading = $state(false)
 
-    // An handler handles the avatar has been changed
+    // handles the avatar has been changed
     function onImageChanged(file: File | undefined) {
         newAvatar = file
         console.log(newAvatar)
     }
 
-    // An handler handles the name has been changed
+    // handles the name has been changed
     function onNameChanged(
         e: Event & { currentTarget: EventTarget & HTMLInputElement }
     ) {
         name = (e.target as HTMLInputElement).value.trim()
     }
 
-    // An handler handles the description has been changed
+    // handles the description has been changed
     function onDescriptionChanged(
         e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
     ) {
@@ -79,9 +80,7 @@
             .pipe(
                 startWithTap(() => (isLoading = true)),
                 concatMap((resp) => {
-                    console.log(resp)
-                    console.log(newAvatar)
-                    if (resp.error) {
+                    if ('error' in resp && resp.error) {
                         return of(resp)
                     } else if (
                         newAvatar &&
@@ -96,7 +95,7 @@
                 }),
                 finalize(() => (isLoading = false)),
                 tap((resp) => {
-                    if ('error' in resp && resp.error) {
+                    if ('message' in resp) {
                         console.error('Error saving content:', resp.message)
                         errorMsg = 'We got an error when saving content.'
                     }
@@ -106,14 +105,14 @@
     }
 </script>
 
-{#if errorMsg !== ''}
-    <div
-        class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800"
-        role="alert"
-    >
-        <p class="w-full text-center">{errorMsg}</p>
-    </div>
-{/if}
+<Loading show={isLoading} />
+<div
+    class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
+    role="alert"
+    class:show={errorMsg!==''}
+>
+    <p class="w-full text-center">{errorMsg}</p>
+</div>
 <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
     <div class="flex-1">
         <div class="relative flex flex-col gap-4">

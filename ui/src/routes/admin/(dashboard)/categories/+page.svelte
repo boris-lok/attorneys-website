@@ -4,6 +4,7 @@
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
     import { CategoryService } from '$lib/services/category.service'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     let categories: CategoryData[] = $state([])
     let isLoading = $state(false)
@@ -26,14 +27,11 @@
     $effect(() => fetchData())
 </script>
 
-{#if isLoading}
-    <p>Loading...</p>
-{:else}
-    <div>
-        {#each categories as category (category.id)}
-            <div>
-                <p>{category.data.name}</p>
-            </div>
-        {/each}
-    </div>
-{/if}
+<Loading show={isLoading} />
+<div>
+    {#each categories as category (category.id)}
+        <div>
+            <p>{category.data.name}</p>
+        </div>
+    {/each}
+</div>

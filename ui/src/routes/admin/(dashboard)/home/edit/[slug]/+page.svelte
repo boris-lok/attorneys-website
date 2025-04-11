@@ -4,6 +4,7 @@
     import { HomeServices } from '$lib/services/home.service'
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     let { data }: PageProps = $props()
 
@@ -28,8 +29,5 @@
     $effect(() => fetchData())
 </script>
 
-{#if isLoading}
-    <p>Loading...</p>
-{:else}
-    <HomeEditor id={data.id} data={content} />
-{/if}
+<Loading show={isLoading} />
+<HomeEditor id={data.id} data={content} />

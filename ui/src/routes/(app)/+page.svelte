@@ -3,6 +3,7 @@
     import { HomeServices } from '$lib/services/home.service'
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     // The content of home page
     let content = $state('')
@@ -34,6 +35,7 @@
     })
 </script>
 
+<Loading show={isLoading} />
 <div
     class="prose w-full px-6 pt-16 md:min-w-2xl lg:min-w-3xl md:animate-[--right-to-left_1s_ease-in-out] md:px-16 md:pt-0 mx-auto md:mt-16"
 >

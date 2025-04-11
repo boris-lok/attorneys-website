@@ -6,6 +6,7 @@
     import Image from '$lib/components/common/Image.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Icon from '@iconify/svelte'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     let members: SimpleMember[] = $state([])
     let isLoading = $state(false)
@@ -25,44 +26,41 @@
     })
 </script>
 
-{#if isLoading}
-    <p>Loading...</p>
-{:else}
-    <div>
-        <div class="relative my-4 flex flex-row justify-end px-2">
-            <a href="/admin/members/edit">
-                <Icon icon="gridicons:create" width="24" height="24" />
-            </a>
-        </div>
-        <div class="relative flex flex-col gap-8 md:flex-row">
-            {#each members as member}
-                <div
-                    class="flex w-fit flex-row items-center gap-2 rounded px-4 py-4 shadow"
-                >
-                    {#if member.avatar}
-                        <Image
-                            alt={member.name}
-                            image={member.avatar}
-                            size={48}
-                        />
-                    {:else}
-                        <IconifyIcon
-                            icon="radix-icons:avatar"
-                            class="h-12 w-12"
-                        />
-                    {/if}
-                    <p class="text-lg">{member.name}</p>
-                    <div class="py-2 pl-12">
-                        <a href="/admin/members/edit/{member.id}">
-                            <Icon
-                                icon="mingcute:edit-line"
-                                width="24"
-                                height="24"
-                            />
-                        </a>
-                    </div>
-                </div>
-            {/each}
-        </div>
+<Loading show={isLoading} />
+<div>
+    <div class="relative my-4 flex flex-row justify-end px-2">
+        <a href="/admin/members/edit">
+            <Icon icon="gridicons:create" width="24" height="24" />
+        </a>
     </div>
-{/if}
+    <div class="relative flex flex-col gap-8 md:flex-row">
+        {#each members as member}
+            <div
+                class="flex w-fit flex-row items-center gap-2 rounded px-4 py-4 shadow"
+            >
+                {#if member.avatar}
+                    <Image
+                        alt={member.name}
+                        image={member.avatar}
+                        size={48}
+                    />
+                {:else}
+                    <IconifyIcon
+                        icon="radix-icons:avatar"
+                        class="h-12 w-12"
+                    />
+                {/if}
+                <p class="text-lg">{member.name}</p>
+                <div class="py-2 pl-12">
+                    <a href="/admin/members/edit/{member.id}">
+                        <Icon
+                            icon="mingcute:edit-line"
+                            width="24"
+                            height="24"
+                        />
+                    </a>
+                </div>
+            </div>
+        {/each}
+    </div>
+</div>

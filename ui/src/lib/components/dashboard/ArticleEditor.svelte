@@ -1,9 +1,11 @@
 <script lang="ts">
     import Textarea from '$lib/components/common/Textarea.svelte'
     import Markdown from '@magidoc/plugin-svelte-marked'
-    import { tap } from 'rxjs'
+    import { finalize, tap } from 'rxjs'
     import Input from '$lib/components/common/Input.svelte'
     import { ArticleServices } from '$lib/services/article.service'
+    import Loading from '$lib/components/common/Loading.svelte'
+    import { startWithTap } from '$lib/utils'
 
     type EditorProps = {
         id?: string
@@ -18,6 +20,7 @@
         content: content ?? ''
     })
     let errorMsg = $state('')
+    let isLoading = $state(false)
 
     // handles content has been changed
     // it will update the preview zone automatically
@@ -62,6 +65,8 @@
             seq: 0
         })
             .pipe(
+                startWithTap(() => isLoading = true),
+                finalize(() => isLoading = false),
                 tap((resp) => {
                     if (resp.error) {
                         console.error('Error saving content:', resp.message)
@@ -73,14 +78,14 @@
     }
 </script>
 
-{#if errorMsg !== ''}
-    <div
-        class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800"
-        role="alert"
-    >
-        <p class="w-full text-center">{errorMsg}</p>
-    </div>
-{/if}
+<Loading show={isLoading} />
+<div
+    class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
+    role="alert"
+    class:show={errorMsg !== ''}
+>
+    <p class="w-full text-center">{errorMsg}</p>
+</div>
 <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
     <div class="flex-1">
         <div class="relative flex-row gap-x-4">

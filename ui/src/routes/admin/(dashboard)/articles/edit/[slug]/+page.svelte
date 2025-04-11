@@ -4,6 +4,7 @@
     import { ArticleServices } from '$lib/services/article.service'
     import ArticleEditor from '$lib/components/dashboard/ArticleEditor.svelte'
     import type { PageProps } from './$types'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     let { data }: PageProps = $props()
 
@@ -29,8 +30,5 @@
     $effect(() => fetchData())
 </script>
 
-{#if isLoading}
-    <p>Loading...</p>
-{:else}
-    <ArticleEditor id={data.id} {title} {content} />
-{/if}
+<Loading show={isLoading} />
+<ArticleEditor id={data.id} {title} {content} />

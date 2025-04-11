@@ -5,6 +5,7 @@
     import { MemberServices } from '$lib/services/member.service'
     import MemberEditor from '$lib/components/dashboard/MemberEditor.svelte'
     import type { ImageData, MemberData } from '$lib/types'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     let { data }: PageProps = $props()
 
@@ -36,8 +37,5 @@
     $effect(() => fetchData())
 </script>
 
-{#if isLoading}
-    <p>Loading...</p>
-{:else}
-    <MemberEditor id={data.id} {name} {description} avatarData={avatar} {seq} />
-{/if}
+<Loading show={isLoading} />
+<MemberEditor id={data.id} {name} {description} avatarData={avatar} {seq} />

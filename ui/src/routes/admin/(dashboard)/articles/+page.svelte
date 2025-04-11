@@ -4,6 +4,7 @@
     import type { Language, SimpleArticle } from '$lib/types'
     import Icon from '@iconify/svelte'
     import { ArticleServices } from '$lib/services/article.service'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     let articles: SimpleArticle[] = $state([])
     let isLoading = $state(false)
@@ -56,54 +57,52 @@
     })
 </script>
 
-{#if isLoading}
-    <p>Loading...</p>
-{:else}
-    <div class="relative">
-        <div class="relative my-4 flex flex-row justify-end px-2">
-            <a href="/admin/articles/edit">
-                <Icon icon="gridicons:create" width="24" height="24" />
-            </a>
-        </div>
-        <div class="relative flex flex-col gap-4">
-            {#each articles as article}
-                <div class="flex w-full flex-row overflow-clip rounded shadow">
-                    <div class="flex-auto">
-                        <p
-                            class="px-8 py-2 text-lg font-bold text-[var(--primary-color)]"
-                        >
-                            {article.title}
-                        </p>
-                    </div>
-                    <div class="px-2 py-2">
-                        <a href="/admin/articles/edit/{article.id}">
-                            <Icon
-                                icon="mingcute:edit-line"
-                                width="24"
-                                height="24"
-                            />
-                        </a>
-                    </div>
-                </div>
-            {/each}
-        </div>
-        <div
-            class="relative my-4 flex flex-row items-center justify-center gap-4"
-        >
-            <button
-                class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
-                onclick={onPreviousButtonClicked}
-                class:disabled={!hasPreviousPage}
-                disabled={!hasPreviousPage}
-            >Previous
-            </button>
-            <button
-                class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
-                onclick={onNextButtonClicked}
-                class:disabled={!hasNextPage}
-                disabled={!hasNextPage}
-            >Next
-            </button>
-        </div>
+<Loading show={isLoading} />
+
+<div class="relative">
+    <div class="relative my-4 flex flex-row justify-end px-2">
+        <a href="/admin/articles/edit">
+            <Icon icon="gridicons:create" width="24" height="24" />
+        </a>
     </div>
-{/if}
+    <div class="relative flex flex-col gap-4">
+        {#each articles as article}
+            <div class="flex w-full flex-row overflow-clip rounded shadow">
+                <div class="flex-auto">
+                    <p
+                        class="px-8 py-2 text-lg font-bold text-[var(--primary-color)]"
+                    >
+                        {article.title}
+                    </p>
+                </div>
+                <div class="px-2 py-2">
+                    <a href="/admin/articles/edit/{article.id}">
+                        <Icon
+                            icon="mingcute:edit-line"
+                            width="24"
+                            height="24"
+                        />
+                    </a>
+                </div>
+            </div>
+        {/each}
+    </div>
+    <div
+        class="relative my-4 flex flex-row items-center justify-center gap-4"
+    >
+        <button
+            class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
+            onclick={onPreviousButtonClicked}
+            class:disabled={!hasPreviousPage}
+            disabled={!hasPreviousPage}
+        >Previous
+        </button>
+        <button
+            class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
+            onclick={onNextButtonClicked}
+            class:disabled={!hasNextPage}
+            disabled={!hasNextPage}
+        >Next
+        </button>
+    </div>
+</div>

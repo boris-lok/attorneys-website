@@ -1,8 +1,10 @@
 <script lang="ts">
-    import { tap } from 'rxjs'
+    import { finalize, tap } from 'rxjs'
     import { CategoryService } from '$lib/services/category.service'
     import Input from '$lib/components/common/Input.svelte'
     import IconifyIcon from '@iconify/svelte'
+    import { startWithTap } from '$lib/utils'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     type EditorProps = {
         id?: string
@@ -18,6 +20,7 @@
         name: name ?? ''
     })
     let errorMsg = $state('')
+    let isLoading = $state(false)
 
     // handles name has been changed
     function onNameChanged(
@@ -61,6 +64,8 @@
             seq: 0
         })
             .pipe(
+                startWithTap(() => isLoading = true),
+                finalize(() => isLoading = false),
                 tap((resp) => {
                     if (resp.error) {
                         console.error('Error saving content:', resp.message)
@@ -72,14 +77,14 @@
     }
 </script>
 
-{#if errorMsg !== ''}
-    <div
-        class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800"
-        role="alert"
-    >
-        <p class="w-full text-center">{errorMsg}</p>
-    </div>
-{/if}
+<Loading show={isLoading} />
+<div
+    class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
+    role="alert"
+    class:show={errorMsg !== ''}
+>
+    <p class="w-full text-center">{errorMsg}</p>
+</div>
 <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
     <div class="flex-1">
         <div class="flex flex-col gap-x-1">

@@ -25,6 +25,9 @@
     <div
         class="flex flex-col h-0 overflow-y-hidden [.active]:h-48 [.active]:overflow-y-scroll transition-[height] duration-200 lg:h-fit lg:overflow-y-visible"
         class:active={isOpen}>
+        <button class="text-base w-36 cursor-pointer text-left hover:text-[var(--primary-color)] hover:text-xl"
+                onclick={() => selectCategory(null)}>全部
+        </button>
         {#each categories as category (category.id)}
             <button class="text-base w-36 cursor-pointer text-left hover:text-[var(--primary-color)] hover:text-xl"
                     onclick={() => selectCategory(category.id)}>{category.data.name}</button>

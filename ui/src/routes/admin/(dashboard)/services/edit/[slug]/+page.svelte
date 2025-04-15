@@ -11,6 +11,7 @@
     let isLoading = $state(false)
     let title = $state('')
     let content = $state('')
+    let icon = $state<string | undefined>(undefined)
 
     function fetchData() {
         ServiceServices.retrieve(data.id, 'zh')
@@ -20,6 +21,7 @@
                 tap((resp) => {
                     content = resp?.data.data ?? ''
                     title = resp?.data.title ?? ''
+                    icon = resp?.data.icon
                 })
             )
             .subscribe({
@@ -33,5 +35,5 @@
 {#if isLoading}
     <Loading />
 {:else}
-    <ServiceEditor data={content} id={data.id} {title} />
+    <ServiceEditor data={content} id={data.id} {title} {icon} />
 {/if}

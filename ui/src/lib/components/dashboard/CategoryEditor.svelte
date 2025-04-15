@@ -80,58 +80,62 @@
     }
 </script>
 
-<Loading show={isLoading} />
-<div
-    class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
-    class:show={errorMsg !== ''}
-    role="alert"
->
-    <p class="w-full text-center">{errorMsg}</p>
-</div>
-<div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
-    <div class="flex-1">
-        <div class="flex flex-col gap-x-1">
+{#if isLoading}
+    <Loading />
+{:else}
+    <div
+        class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
+        class:show={errorMsg !== ''}
+        role="alert"
+    >
+        <p class="w-full text-center">{errorMsg}</p>
+    </div>
+    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
+        <div class="flex-1">
+            <div class="flex flex-col gap-x-1">
+                <Input
+                    hasError={errorMsg !== ''}
+                    label="Category Icon"
+                    name="icon"
+                    onInput={onIconChanged}
+                    type="text"
+                    value={icon ?? ''}
+                />
+                <p class="mt-[-8px] text-gray-500 text-xs mb-2 px-2">Please find the icon from <a
+                    class="text-blue-600 underline hover:text-blue-800 visited:text-pink-600"
+                    href="https://icon-sets.iconify.design/"
+                    target="_blank"
+                >here</a></p>
+            </div>
             <Input
                 hasError={errorMsg !== ''}
-                label="Category Icon"
-                name="icon"
-                onInput={onIconChanged}
+                label="Category name"
+                name="name"
+                onInput={onNameChanged}
                 type="text"
-                value={icon ?? ''}
+                value={name ?? ''}
             />
-            <p class="mt-[-8px] text-gray-500 text-xs mb-2 px-2">Please find the icon from <a
-                class="text-blue-600 underline hover:text-blue-800 visited:text-pink-600"
-                href="https://icon-sets.iconify.design/"
-                target="_blank"
-            >here</a></p>
         </div>
-        <Input
-            hasError={errorMsg !== ''}
-            label="Category name"
-            name="name"
-            onInput={onNameChanged}
-            type="text"
-            value={name ?? ''}
-        />
+        <div class="flex-1">
+            <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
+            <div
+                class="flex flex-row gap-2 w-full rounded-lg bg-gray-100 px-4 py-4 items-center"
+            >
+                {#if data.icon}
+                    <IconifyIcon icon={data.icon} class="h-8 w-8" />
+                {/if}
+                <p class="inline-block h-fit">{data.name}</p>
+            </div>
+        </div>
     </div>
-    <div class="flex-1">
-        <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
-        <div
-            class="flex flex-row gap-2 w-full rounded-lg bg-gray-100 px-4 py-4 items-center"
+    <div class="relative flex flex-row justify-center gap-x-4">
+        <button
+            class="block cursor-pointer rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:cursor-auto disabled:bg-gray-500"
+            disabled={data.name.trim() === ''}
+            onclick={onSaveClicked}
         >
-            {#if data.icon}
-                <IconifyIcon icon={data.icon} class="h-8 w-8" />
-            {/if}
-            <p class="inline-block h-fit">{data.name}</p>
-        </div>
+            Save
+        </button>
     </div>
-</div>
-<div class="relative flex flex-row justify-center gap-x-4">
-    <button
-        class="block cursor-pointer rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:cursor-auto disabled:bg-gray-500"
-        disabled={data.name.trim() === ''}
-        onclick={onSaveClicked}
-    >
-        Save
-    </button>
-</div>
+
+{/if}

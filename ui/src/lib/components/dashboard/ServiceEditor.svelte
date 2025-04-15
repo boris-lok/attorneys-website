@@ -102,62 +102,66 @@
     }
 </script>
 
-<Loading show={isLoading} />
-<div
-    class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
-    class:show={errorMsg !== ''}
-    role="alert"
->
-    <p class="w-full text-center">{errorMsg}</p>
-</div>
-<div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
-    <div class="flex-1">
-        <div class="relative flex-row gap-x-4">
-            <div class="flex flex-col gap-x-1">
+{#if isLoading}
+    <Loading />
+{:else}
+    <div
+        class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
+        class:show={errorMsg !== ''}
+        role="alert"
+    >
+        <p class="w-full text-center">{errorMsg}</p>
+    </div>
+    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
+        <div class="flex-1">
+            <div class="relative flex-row gap-x-4">
+                <div class="flex flex-col gap-x-1">
+                    <Input
+                        hasError={errorMsg !== ''}
+                        label="Service Icon"
+                        name="icon"
+                        onInput={onIconChanged}
+                        type="text"
+                        value={icon ?? ''}
+                    />
+                    <p class="mt-[-8px] text-gray-500 text-xs mb-2 px-2">Please find the icon from <a
+                        class="text-blue-600 underline hover:text-blue-800 visited:text-pink-600"
+                        href="https://icon-sets.iconify.design/"
+                        target="_blank"
+                    >here</a></p>
+                </div>
+
                 <Input
                     hasError={errorMsg !== ''}
-                    label="Service Icon"
-                    name="icon"
-                    onInput={onIconChanged}
+                    label="Service Title"
+                    name="title"
+                    onInput={onTitleChanged}
                     type="text"
-                    value={icon ?? ''}
+                    value={title ?? ''}
                 />
-                <p class="mt-[-8px] text-gray-500 text-xs mb-2 px-2">Please find the icon from <a
-                    class="text-blue-600 underline hover:text-blue-800 visited:text-pink-600"
-                    href="https://icon-sets.iconify.design/"
-                    target="_blank"
-                >here</a></p>
+                <Textarea
+                    label="Service Content"
+                    name="service"
+                    onInput={onContentChanged}
+                    value={data ?? ''}
+                ></Textarea>
             </div>
-
-            <Input
-                hasError={errorMsg !== ''}
-                label="Service Title"
-                name="title"
-                onInput={onTitleChanged}
-                type="text"
-                value={title ?? ''}
-            />
-            <Textarea
-                label="Service Content"
-                name="service"
-                onInput={onContentChanged}
-                value={data ?? ''}
-            ></Textarea>
+        </div>
+        <div class="flex-1">
+            <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
+            <button onclick={onServiceBoxClicked}>
+                <ServiceBox active={show} content={newData.data} icon={newData.icon} title={newData.title} />
+            </button>
         </div>
     </div>
-    <div class="flex-1">
-        <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
-        <button onclick={onServiceBoxClicked}>
-            <ServiceBox active={show} content={newData.data} icon={newData.icon} title={newData.title} />
+    <div class="relative flex flex-row justify-center gap-x-4">
+        <button
+            class="block cursor-pointer rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:cursor-auto disabled:bg-gray-500"
+            disabled={newData.title === '' || newData.data === ''}
+            onclick={onSaveClicked}
+        >
+            Save
         </button>
     </div>
-</div>
-<div class="relative flex flex-row justify-center gap-x-4">
-    <button
-        class="block cursor-pointer rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:cursor-auto disabled:bg-gray-500"
-        disabled={newData.title === '' || newData.data === ''}
-        onclick={onSaveClicked}
-    >
-        Save
-    </button>
-</div>
+
+{/if}

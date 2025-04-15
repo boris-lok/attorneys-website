@@ -59,7 +59,7 @@
 <NavigateBar {items} rootUrl="/admin/dashboard"></NavigateBar>
 
 <main>
-    <div class="relative mx-4 my-8 max-w-[var(--max-screen-width)] md:mx-auto">
+    <div class="relative min-h-[calc(100vh-64px-48px)]">
         {@render children()}
     </div>
 </main>

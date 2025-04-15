@@ -4,7 +4,7 @@
     import type { CategoryData, Language, SimpleArticle } from '$lib/types'
     import { ArticleServices } from '$lib/services/article.service'
     import { startWithTap } from '$lib/utils'
-    import { BehaviorSubject, combineLatest, distinctUntilChanged, finalize, switchMap, tap } from 'rxjs'
+    import { finalize, tap } from 'rxjs'
     import { CategoryService } from '$lib/services/category.service'
     import CategorySelector from '$lib/components/CategorySelector.svelte'
     import PaginationComponent from '$lib/components/PaginationComponent.svelte'
@@ -13,8 +13,8 @@
     let articles: SimpleArticle[] = $state([])
     let categories: CategoryData[] = $state([])
     let lang: Language = $state('zh')
-    let page$ = new BehaviorSubject(0)
-    let selectedCategoryId$ = new BehaviorSubject<string | null>(null)
+    let page = $state(0)
+    let selectedCategoryId = $state<string | null>(null)
     let pageSize = 10
     let totalPages = $state(0)
 
@@ -41,11 +41,11 @@
     }
 
     function onCategoryChanged(categoryId: string | null) {
-        selectedCategoryId$.next(categoryId)
+        selectedCategoryId = categoryId
     }
 
     function onPageChanged(page: number) {
-        page$.next(page)
+        page = page
     }
 
     $effect(() => {
@@ -53,16 +53,7 @@
     })
 
     $effect(() => {
-        const disposer = combineLatest([page$, selectedCategoryId$])
-            .pipe(
-                distinctUntilChanged(),
-                switchMap(([page, categoryId]) => fetchArticlesObservable(lang, categoryId, page, pageSize))
-            )
-            .subscribe({ error: console.error })
-
-        return () => {
-            disposer.unsubscribe()
-        }
+        fetchArticlesObservable(lang, selectedCategoryId, page, pageSize).subscribe({ error: console.error })
     })
 </script>
 

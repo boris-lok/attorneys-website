@@ -1,110 +1,100 @@
 <script lang="ts">
     import { startWithTap } from '$lib/utils'
-    import { BehaviorSubject, distinctUntilChanged, finalize, switchMap, tap } from 'rxjs'
-    import type { Language, SimpleArticle } from '$lib/types'
+    import { finalize, tap } from 'rxjs'
+    import type { CategoryData, Language, SimpleArticle } from '$lib/types'
     import Icon from '@iconify/svelte'
     import { ArticleServices } from '$lib/services/article.service'
     import Loading from '$lib/components/common/Loading.svelte'
+    import { CategoryService } from '$lib/services/category.service'
+    import CategorySelector from '$lib/components/CategorySelector.svelte'
+    import ArticleCard from '$lib/components/ArticleCard.svelte'
+    import PaginationComponent from '$lib/components/PaginationComponent.svelte'
 
-    let articles: SimpleArticle[] = $state([])
     let isLoading = $state(false)
-    let pageSize = 10
+    let articles: SimpleArticle[] = $state([])
+    let categories: CategoryData[] = $state([])
+    let lang: Language = $state('zh')
     let page = $state(0)
-    // Observable for the current page number. We use BehaviorSubject to ensure that the page number is updated correctly when we navigate to a new page.
-    const page$ = new BehaviorSubject(0)
-    // The flag indicates that we have previous page
-    let hasPreviousPage = $state(false)
-    // The flag indicates that we have next page
-    let hasNextPage = $state(false)
+    let selectedCategoryId = $state<string | null>(null)
+    let pageSize = 10
+    let totalPages = $state(0)
 
-    function onPreviousButtonClicked() {
-        page = page - 1
-        page$.next(page)
+    function fetchArticlesObservable(lang: Language, categoryId: string | null, page: number, pageSize: number) {
+        return ArticleServices.list(lang, categoryId, page, pageSize)
+            .pipe(
+                startWithTap(() => isLoading = true),
+                finalize(() => isLoading = false),
+                tap(resp => {
+                    articles = resp.articles
+                    totalPages = Math.floor(resp.total / pageSize) + (resp.total % pageSize > 0 ? 1 : 0)
+                })
+            )
     }
 
-    function onNextButtonClicked() {
-        page = page + 1
-        page$.next(page)
+    function fetchCategoriesObservable(lang: Language) {
+        return CategoryService
+            .list(lang)
+            .pipe(
+                tap(resp => {
+                    categories = resp
+                })
+            )
     }
 
-    function fetchData(lang: Language, page: number, pageSize: number) {
-        return ArticleServices.list(lang, page, pageSize).pipe(
-            startWithTap(() => (isLoading = true)),
-            finalize(() => (isLoading = false)),
-            tap((resp) => {
-                console.log(resp)
-                articles = resp.articles
-                hasPreviousPage = page > 0
-                hasNextPage = resp.total - (page + 1) * pageSize > 0
-                console.log(hasNextPage, hasPreviousPage)
-            })
-        )
+    function onCategoryChanged(categoryId: string | null) {
+        selectedCategoryId = categoryId
+    }
+
+    function onPageChanged(page: number) {
+        page = page
     }
 
     $effect(() => {
-        const disposer = page$
-            .pipe(
-                distinctUntilChanged(),
-                switchMap((page) => {
-                    return fetchData('zh', page, pageSize)
-                })
-            )
-            .subscribe({ error: console.error })
+        fetchCategoriesObservable(lang).subscribe({ error: console.error })
+    })
 
-        return () => {
-            disposer.unsubscribe()
-        }
+    $effect(() => {
+        fetchArticlesObservable(lang, selectedCategoryId, page, pageSize).subscribe({ error: console.error })
     })
 </script>
 
 {#if isLoading}
     <Loading />
 {:else}
-    <div class="relative">
-        <div class="relative my-4 flex flex-row justify-end px-2">
-            <a href="/admin/articles/edit">
-                <Icon height="24" icon="gridicons:create" width="24" />
-            </a>
+    <div class="px-4 lg:px-16 mb-8">
+        <div class="mb-8">
+            <h1 class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16">
+                文章</h1>
         </div>
-        <div class="relative flex flex-col gap-4">
-            {#each articles as article}
-                <div class="flex w-full flex-row overflow-clip rounded shadow">
-                    <div class="flex-auto">
-                        <p
-                            class="px-8 py-2 text-lg font-bold text-[var(--primary-color)]"
-                        >
-                            {article.title}
-                        </p>
-                    </div>
-                    <div class="px-2 py-2">
-                        <a href="/admin/articles/edit/{article.id}">
-                            <Icon
-                                icon="mingcute:edit-line"
-                                width="24"
-                                height="24"
-                            />
-                        </a>
-                    </div>
+
+        <div class="flex flex-col-reverse lg:flex-row gap-4 lg:gap-8">
+            <div class="flex-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-8">
+                    {#each articles as article (article.id)}
+                        <div class="relative">
+                            <ArticleCard id={article.id} title={article.title} createdAt={article.createdAtString}
+                                         disabled={true} />
+                            <div class="absolute top-2 right-2">
+                                <a href="/admin/articles/edit/{article.id}">
+                                    <Icon
+                                        icon="mingcute:edit-line"
+                                        width="24"
+                                        height="24"
+                                    />
+                                </a>
+                            </div>
+                        </div>
+                    {/each}
                 </div>
-            {/each}
+            </div>
+
+            <div class="flex-1">
+                <CategorySelector categories={categories} onChanged={onCategoryChanged} />
+            </div>
         </div>
-        <div
-            class="relative my-4 flex flex-row items-center justify-center gap-4"
-        >
-            <button
-                class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
-                class:disabled={!hasPreviousPage}
-                disabled={!hasPreviousPage}
-                onclick={onPreviousButtonClicked}
-            >Previous
-            </button>
-            <button
-                class="cursor-pointer border-none bg-transparent underline [&.disabled]:cursor-default [&.disabled]:text-gray-500"
-                class:disabled={!hasNextPage}
-                disabled={!hasNextPage}
-                onclick={onNextButtonClicked}
-            >Next
-            </button>
+
+        <div class="lg:mt-16 mt-8">
+            <PaginationComponent totalPages={totalPages} onPageChanged={onPageChanged} />
         </div>
     </div>
 {/if}

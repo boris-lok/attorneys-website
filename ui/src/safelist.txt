@@ -12,4 +12,7 @@ text-8xl
 text-9xl
 
 text-justify
-font-mono
+
+m-0
+mt-0
+mb-0

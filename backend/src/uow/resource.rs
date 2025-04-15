@@ -60,6 +60,7 @@ pub trait IResourceUnitOfWork {
     async fn count_resources(
         &self,
         language: &Language,
+        filter_str: &Option<String>,
         resource_type: &ResourceType,
     ) -> anyhow::Result<usize>;
 
@@ -308,6 +309,7 @@ impl IResourceUnitOfWork for InMemory {
     async fn count_resources(
         &self,
         language: &Language,
+        _: &Option<String>,
         resource_type: &ResourceType,
     ) -> anyhow::Result<usize> {
         let contents = self
@@ -663,18 +665,25 @@ impl IResourceUnitOfWork for InDatabase<'_> {
     async fn count_resources(
         &self,
         language: &Language,
+        filter_str: &Option<String>,
         resource_type: &ResourceType,
     ) -> anyhow::Result<usize> {
-        let query = r#"select count(resource.id) as total
+        let filter_str = filter_str.clone().unwrap_or_default();
+        let filter_str = filter_str.as_str();
+        let query = format!(
+            r#"select count(resource.id) as total
                 from resource,
                     content
                 where resource.id = content.id
                 and content.language = $1
                 and resource.resource_type = $2
                 and resource.deleted_at is null
-                "#;
+                {}
+                "#,
+            filter_str
+        );
 
-        let count = sqlx::query(query)
+        let count = sqlx::query(&query)
             .bind(language.as_str())
             .bind(resource_type.as_str())
             .fetch_one(self.pool)

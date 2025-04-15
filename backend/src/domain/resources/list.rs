@@ -49,7 +49,7 @@ where
             Pagination::All => data.len(),
             Pagination::Single => data.len(),
             Pagination::Page(_) => lock
-                .count_resources(lang, resource_type)
+                .count_resources(lang, filter_str, resource_type)
                 .await
                 .map_err(|e| Error::Unknown(e.to_string()))?,
         };

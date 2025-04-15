@@ -1,11 +1,11 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit'
 
 export const load = ({ cookies }) => {
-	const token = cookies.get('token');
+    const token = cookies.get('token')
 
-	if (token) {
-		return redirect(302, '/admin/dashboard');
-	}
+    if (token) {
+        return redirect(302, '/admin/dashboard')
+    }
 
-	return {};
-};
+    return {}
+}

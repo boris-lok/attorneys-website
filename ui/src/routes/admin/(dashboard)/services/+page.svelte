@@ -3,12 +3,18 @@
     import { startWithTap } from '$lib/utils'
     import { finalize, tap } from 'rxjs'
     import type { ServiceData } from '$lib/types'
-    import Markdown from '@magidoc/plugin-svelte-marked'
     import Icon from '@iconify/svelte'
     import Loading from '$lib/components/common/Loading.svelte'
+    import ServiceBox from '$lib/components/ServiceBox.svelte'
 
     let services: ServiceData[] = $state([])
     let isLoading = $state(false)
+    let selectedServiceID = $state('')
+
+    // handles service block clicked.
+    function onServiceClicked(id: string) {
+        selectedServiceID = id
+    }
 
     function fetchData() {
         ServiceServices.list('zh')
@@ -37,22 +43,16 @@
                 <Icon height="24" icon="gridicons:create" width="24" />
             </a>
         </div>
-        <div class="relative grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2">
+        <div class="relative grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
             {#each services as service, i}
                 <div
-                    class="flex w-full flex-row overflow-clip rounded shadow-(--box-shadow)"
+                    class="w-fit relative"
                 >
-                    <div class="flex-auto">
-                        <p
-                            class="px-8 py-2 text-lg font-bold text-[var(--primary-color)]"
-                        >
-                            {service.data.title}
-                        </p>
-                        <div class="prose px-8 py-2">
-                            <Markdown source={service.data.data}></Markdown>
-                        </div>
-                    </div>
-                    <div class="px-2 py-2">
+                    <button onclick={() => onServiceClicked(service.id)}>
+                        <ServiceBox icon={service.data.icon} title={service.data.title}
+                                    content={service.data.data} active={service.id === selectedServiceID} />
+                    </button>
+                    <div class="absolute top-2 right-2 z-10">
                         <a href="/admin/services/edit/{service.id}">
                             <Icon
                                 icon="mingcute:edit-line"

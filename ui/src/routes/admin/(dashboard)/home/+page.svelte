@@ -54,7 +54,9 @@
                 </a>
             {/if}
         </div>
-        <div class="prose">
+        <div
+            class="prose w-full px-6 pt-16 md:min-w-2xl lg:min-w-3xl md:px-16 md:pt-0 mx-auto md:mt-16"
+        >
             <Markdown source={content}></Markdown>
         </div>
     </div>

@@ -49,41 +49,47 @@ function retrieve(id: string, language: Language) {
     })
 }
 
-function list(language: Language, page: number, pageSize: number) {
-    return fromFetch(
-        `${BASE_URL}/articles?page=${page}&page_size=${pageSize}`,
-        {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept-Language': language,
-            },
-            signal: AbortSignal.timeout(TIMEOUT),
-            selector: (resp) =>
-                resp.json().then((value) => {
-                    const articles = []
-
-                    if ('articles' in value && value.articles.length > 0) {
-                        for (const article of value.articles) {
-                            const date = new Date(article.created_at)
-                            articles.push({
-                                id: article.id,
-                                title: article.title,
-                                language: article.language,
-                                createdAt: date,
-                                createdAtString: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
-                                seq: article.seq,
-                            })
-                        }
-                    }
-
-                    return {
-                        articles: articles,
-                        total: value.total,
-                    }
-                }),
+function list(
+    language: Language,
+    categoryId: string | null,
+    page: number,
+    pageSize: number,
+) {
+    let url = `${BASE_URL}/articles?page=${page}&page_size=${pageSize}`
+    if (categoryId) {
+        url += `&category_id=${categoryId}`
+    }
+    return fromFetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept-Language': language,
         },
-    )
+        signal: AbortSignal.timeout(TIMEOUT),
+        selector: (resp) =>
+            resp.json().then((value) => {
+                const articles = []
+
+                if ('articles' in value && value.articles.length > 0) {
+                    for (const article of value.articles) {
+                        const date = new Date(article.created_at)
+                        articles.push({
+                            id: article.id,
+                            title: article.title,
+                            language: article.language,
+                            createdAt: date,
+                            createdAtString: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
+                            seq: article.seq,
+                        })
+                    }
+                }
+
+                return {
+                    articles: articles,
+                    total: value.total,
+                }
+            }),
+    })
 }
 
 export const ArticleServices = {

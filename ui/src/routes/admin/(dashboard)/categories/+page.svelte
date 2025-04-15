@@ -35,7 +35,7 @@
         <Icon height="24" icon="gridicons:create" width="24" />
     </a>
 </div>
-<div class="flex flex-wrap">
+<div class="flex flex-wrap gap-4 justify-around">
     {#each categories as category (category.id)}
         <div class="rounded border w-36 h-36 flex flex-col items-center justify-center relative">
             {#if category.data.icon}

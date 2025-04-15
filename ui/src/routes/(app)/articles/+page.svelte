@@ -77,12 +77,13 @@
             </div>
 
             <div class="flex-1">
-                <CategorySelector categories={categories} onChanged={onCategoryChanged} />
+                <CategorySelector categories={categories} onChanged={onCategoryChanged}
+                                  selectedCategoryId={selectedCategoryId} />
             </div>
         </div>
 
         <div class="lg:mt-16 mt-8">
-            <PaginationComponent totalPages={totalPages} onPageChanged={onPageChanged} />
+            <PaginationComponent totalPages={totalPages} onPageChanged={onPageChanged} currentPage={page} />
         </div>
 
     </div>

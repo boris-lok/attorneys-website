@@ -3,12 +3,12 @@
 
     type InputProps = {
         categories: CategoryData[]
+        selectedCategoryId: string | null
         onChanged: (categoryId: string | null) => void
     }
 
-    let { categories, onChanged }: InputProps = $props()
+    let { categories, selectedCategoryId, onChanged }: InputProps = $props()
 
-    let selectedCategoryId: string | null = $state(null)
     let isOpen = $state(false)
 
     function selectCategory(categoryId: string | null) {

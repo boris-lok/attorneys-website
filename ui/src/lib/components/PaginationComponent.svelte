@@ -2,12 +2,12 @@
     import IconifyIcon from '@iconify/svelte'
 
     type InputProps = {
+        currentPage: number
         totalPages: number
         onPageChanged: (page: number) => void
     }
 
-    let { totalPages, onPageChanged }: InputProps = $props()
-    let currentPage = $state(0)
+    let { totalPages, currentPage, onPageChanged }: InputProps = $props()
 
     function goToPage(page: number) {
         if (page >= 0 && page < totalPages && page !== currentPage) {

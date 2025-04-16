@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <div class="w-full overflow-clip rounded-xl md:h-96 md:flex-1">
+        <div class="w-full overflow-clip rounded-xl min-h-48 md:min-h-96 lg:min-h-96 md:flex-1 m-auto md:max-w-96 lg:max-w-[768px]">
             <iframe
                 allowfullscreen
                 loading="lazy"

@@ -49,3 +49,6 @@ logs/*
 **/*.njsproj
 **/*.sln
 **/*.sw?
+
+# ignore the cret
+data/certbot/*

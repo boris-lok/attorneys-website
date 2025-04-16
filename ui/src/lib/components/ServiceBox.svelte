@@ -30,7 +30,7 @@
     <div
         class="absolute inset-0 opacity-0 bg-white group-hover:block max-sm:[&.active]:block max-sm:group-[.active]:opacity-80 group-hover:opacity-80"></div>
     <div
-        class="prose absolute hidden p-4 group-hover:block max-sm:group-[.active]:block overflow-y-auto top-0 h-72 text-left"
+        class="prose absolute w-full hidden p-4 group-hover:block max-sm:group-[.active]:block overflow-y-auto top-0 h-72 text-left"
     >
         <Markdown source={content} />
     </div>

@@ -62,7 +62,7 @@ services:
       - app-network
     volumes:
       - upload_folder:/usr/local/uploads
-      - ./data/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./data/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
 

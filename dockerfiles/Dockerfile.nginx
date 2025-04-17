@@ -3,6 +3,10 @@ from nginx:alpine
 run rm /etc/nginx/conf.d/*
 copy ../config/nginx.conf /etc/nginx/conf.d/default.conf
 
-expose 80
+run mkdir /var/www/
+run mkdir /var/www/certbot/
+run mkdir /var/www/certbot/acme-challenge/
+
+expose 80 443
 
 cmd ["nginx", "-g", "daemon off;"]

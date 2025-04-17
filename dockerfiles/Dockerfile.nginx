@@ -5,7 +5,8 @@ copy ../config/nginx.conf /etc/nginx/conf.d/default.conf
 
 run mkdir /var/www/
 run mkdir /var/www/certbot/
-run mkdir /var/www/certbot/acme-challenge/
+run mkdir /var/www/certbot/.well-known/
+run mkdir /var/www/certbot/.well-known/acme-challenge/
 
 expose 80 443
 

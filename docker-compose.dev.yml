@@ -57,12 +57,16 @@ services:
       dockerfile: dockerfiles/Dockerfile.nginx
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - ui
     networks:
       - app-network
     volumes:
       - upload_folder:/usr/local/uploads
+      - ./data/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
 
 networks:
   app-network:

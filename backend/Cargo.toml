@@ -8,6 +8,10 @@ authors = ["Boris <boris.lok.tw@outlook.com>"]
 name = "backend"
 path = "src/lib.rs"
 
+[[bin]]
+name = "generate_sitemap"
+path = "src/bin/generate_sitemap.rs"
+
 [dependencies]
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"

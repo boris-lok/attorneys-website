@@ -1,0 +1,6 @@
+# robots.txt for https://www.chenwanglaw.com
+
+User-agent: *
+Disallow:
+
+Sitemap: https://www.chenwanglaw.com/sitemap.xml

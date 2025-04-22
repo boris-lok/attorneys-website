@@ -4,9 +4,9 @@ pub use telemetry::{get_subscriber, init_subscriber, spawn_blocking_with_tracing
 
 mod api;
 mod configuration;
-mod domain;
+pub mod domain;
 mod repositories;
 mod startup;
 mod telemetry;
-mod uow;
+pub mod uow;
 mod utils;

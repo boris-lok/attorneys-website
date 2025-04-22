@@ -7,15 +7,15 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 #[derive(Debug)]
-pub(crate) struct Request {
-    pub(crate) id: String,
-    pub(crate) resource_type: ResourceType,
-    pub(crate) language: String,
-    pub(crate) default_language: Language,
+pub struct Request {
+    pub id: String,
+    pub resource_type: ResourceType,
+    pub language: String,
+    pub default_language: Language,
 }
 
 #[derive(Debug)]
-pub(crate) enum Error {
+pub enum Error {
     BadRequest,
     NotFound,
     Unknown(String),

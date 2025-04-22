@@ -235,25 +235,29 @@ pub enum Resource {
     Category(CategoryData),
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum ResourceError {
+    #[error("Failed to validate resource")]
+    ValidationError,
+    #[error("Failed to serialize resource")]
+    SerializationError,
+}
+
 impl Resource {
-    /// Convert a Resource to resource type and content data
-    pub fn to_resource_type_and_content_data(&self) -> Result<(ResourceType, ContentData), ()> {
-        match self {
-            Resource::Member(_) => Ok((ResourceType::Member, ContentData::try_from(self.clone())?)),
-            Resource::Service(_) => {
-                Ok((ResourceType::Service, ContentData::try_from(self.clone())?))
-            }
-            Resource::Home(_) => Ok((ResourceType::Home, ContentData::try_from(self.clone())?)),
-            Resource::Contact(_) => {
-                Ok((ResourceType::Contact, ContentData::try_from(self.clone())?))
-            }
-            Resource::Article(_) => {
-                Ok((ResourceType::Article, ContentData::try_from(self.clone())?))
-            }
-            Resource::Category(_) => {
-                Ok((ResourceType::Category, ContentData::try_from(self.clone())?))
-            }
-        }
+    /// Converts resource into its type and content data
+    pub fn into_typed_content(self) -> Result<(ResourceType, ContentData), ResourceError> {
+        let resource_type = match self {
+            Resource::Member(_) => ResourceType::Member,
+            Resource::Service(_) => ResourceType::Service,
+            Resource::Home(_) => ResourceType::Home,
+            Resource::Contact(_) => ResourceType::Contact,
+            Resource::Article(_) => ResourceType::Article,
+            Resource::Category(_) => ResourceType::Category,
+        };
+
+        ContentData::try_from(self)
+            .map_err(|_| ResourceError::SerializationError)
+            .map(|content| (resource_type, content))
     }
 }
 

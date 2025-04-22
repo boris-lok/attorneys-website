@@ -4,4 +4,4 @@ pub use resource::InDatabase;
 #[cfg(test)]
 pub use resource::InMemory;
 
-mod resource;
+pub mod resource;

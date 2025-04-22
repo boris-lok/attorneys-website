@@ -1,10 +1,10 @@
-pub(crate) mod create;
-pub(crate) mod retrieve;
+pub mod create;
+pub mod retrieve;
 
-pub(crate) mod list;
+pub mod list;
 
-pub(crate) mod delete;
+pub mod delete;
 
-pub(crate) mod test_helpers;
+pub mod test_helpers;
 
-pub(crate) mod update;
+pub mod update;

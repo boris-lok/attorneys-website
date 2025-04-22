@@ -1,0 +1,7 @@
+routes:
+  - /
+  - services
+  - articles
+  - members
+  - contact_us
+base_url: https://www.chenwanglaw.com

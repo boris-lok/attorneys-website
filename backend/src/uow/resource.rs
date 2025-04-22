@@ -70,6 +70,7 @@ pub trait IResourceUnitOfWork {
     async fn rollback(mut self) -> anyhow::Result<()>;
 }
 
+#[derive(Default)]
 pub struct InMemory {
     error: bool,
     resource_repository: Option<InMemoryResourceRepository>,

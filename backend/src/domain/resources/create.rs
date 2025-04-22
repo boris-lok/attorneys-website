@@ -4,14 +4,14 @@ use crate::repositories::IResourceRepository;
 use crate::uow::IResourceUnitOfWork;
 use tokio::sync::Mutex;
 
-pub(crate) struct Request {
-    pub(crate) id: String,
-    pub(crate) data: Resource,
-    pub(crate) language: String,
-    pub(crate) seq: i32,
+pub struct Request {
+    pub id: String,
+    pub data: Resource,
+    pub language: String,
+    pub seq: i32,
 }
 
-pub(crate) enum Error {
+pub enum Error {
     BadRequest,
     Unknown(String),
 }
@@ -26,7 +26,7 @@ where
         // extract the resource and convert it to a resource type
         let (kind, data) = req
             .data
-            .to_resource_type_and_content_data()
+            .into_typed_content()
             .map_err(|_| Error::BadRequest)?;
 
         // parse the given id and language to the specified type for type safety

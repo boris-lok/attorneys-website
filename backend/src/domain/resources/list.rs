@@ -6,15 +6,16 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 #[derive(Debug)]
-pub(crate) struct Request {
-    pub(crate) filter_str: Option<String>,
-    pub(crate) resource_type: ResourceType,
-    pub(crate) language: String,
-    pub(crate) default_language: Language,
-    pub(crate) pagination: Pagination,
+pub struct Request {
+    pub filter_str: Option<String>,
+    pub resource_type: ResourceType,
+    pub language: String,
+    pub default_language: Language,
+    pub pagination: Pagination,
 }
 
-pub(crate) enum Error {
+#[derive(Debug)]
+pub enum Error {
     BadRequest,
     Unknown(String),
 }

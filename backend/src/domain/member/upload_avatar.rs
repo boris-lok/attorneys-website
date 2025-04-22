@@ -13,7 +13,7 @@ pub struct Request {
     pub(crate) data: Vec<u8>,
 }
 
-pub(crate) enum Error {
+pub enum Error {
     BadRequest,
     NotFound,
     ImageProcess,

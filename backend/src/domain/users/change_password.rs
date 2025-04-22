@@ -5,12 +5,12 @@ use argon2::password_hash::SaltString;
 use argon2::{Algorithm, Argon2, Params, PasswordHasher, Version};
 use secrecy::{ExposeSecret, SecretBox};
 
-pub(crate) struct Request {
-    pub(crate) user_id: UserID,
-    pub(crate) new_password: SecretBox<String>,
+pub struct Request {
+    pub user_id: UserID,
+    pub new_password: SecretBox<String>,
 }
 
-pub(crate) enum Error {
+pub enum Error {
     Unknown(String),
 }
 

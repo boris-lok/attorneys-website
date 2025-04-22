@@ -7,6 +7,8 @@ use backend::uow::InDatabase;
 use serde::Deserialize;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
+use std::fs::File;
+use std::io::Write;
 use tokio::sync::Mutex;
 
 #[derive(Debug, Deserialize)]
@@ -141,11 +143,9 @@ async fn main() -> anyhow::Result<()> {
 
     let xml = generate_sitemap_string(&base_url, static_routes, members, articles)?;
 
-    println!("{}", &xml);
+    let mut file = File::create("sitemap.xml")?;
+    file.write_all(xml.as_bytes())?;
 
-    // let mut file = File::create("sitemap.xml")?;
-    // file.write_all(xml.as_bytes())?;
-    //
-    // println!("sitemap.xml generated ✅");
+    println!("sitemap.xml generated ✅");
     Ok(())
 }

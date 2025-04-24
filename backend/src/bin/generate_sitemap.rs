@@ -4,7 +4,8 @@ use backend::domain::entities::{
 };
 use backend::get_configuration;
 use backend::uow::InDatabase;
-use serde::Deserialize;
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 use std::fs::File;
@@ -15,10 +16,16 @@ use tokio::sync::Mutex;
 struct Config {
     base_url: String,
     routes: Vec<String>,
+    #[serde(default = "default_xml_path")]
+    output_path: String,
 }
 
-fn get_config() -> Result<Config, config::ConfigError> {
-    let base_path = std::env::current_dir().expect("Failed to determine the current directory");
+fn default_xml_path() -> String {
+    "sitemap.xml".to_string()
+}
+
+fn get_config() -> anyhow::Result<Config> {
+    let base_path = std::env::current_dir()?;
     let configuration_directory = base_path.join("src/configuration");
 
     let routes = config::Config::builder()
@@ -27,7 +34,7 @@ fn get_config() -> Result<Config, config::ConfigError> {
         ))
         .build()?;
 
-    routes.try_deserialize::<Config>()
+    Ok(routes.try_deserialize::<Config>()?)
 }
 
 fn to_static_route(base_url: &str, s: &str) -> String {
@@ -86,51 +93,38 @@ fn generate_sitemap_string(
     Ok(xml)
 }
 
-async fn get_members(pool: &Pool<Postgres>) -> anyhow::Result<Vec<SimpleMemberEntity>> {
+async fn get_resources<T>(
+    pool: &Pool<Postgres>,
+    resource_type: ResourceType,
+    language: Language,
+) -> anyhow::Result<Vec<T>>
+where
+    T: DeserializeOwned + Serialize,
+{
     let uow = InDatabase::new(pool).await?;
     let uow = Mutex::new(uow);
 
     let req = domain::resources::list::Request {
         filter_str: None,
-        resource_type: ResourceType::Member,
-        language: "zh".to_string(),
+        resource_type: resource_type.clone(),
+        language: language.as_str().to_string(),
         default_language: Language::ZH,
         pagination: Pagination::All,
     };
-    let (members, total) = domain::resources::list::execute::<_, SimpleMemberEntity>(uow, req)
+    let (resources, total) = domain::resources::list::execute::<_, T>(uow, req)
         .await
         .map_err(|e| anyhow::anyhow!("{:?}", e))?;
 
-    println!("got {} members", total);
+    println!("got {} {resource_type:?}s", total);
 
-    Ok(members)
-}
-
-async fn get_articles(pool: &Pool<Postgres>) -> anyhow::Result<Vec<SimpleArticleEntity>> {
-    let uow = InDatabase::new(pool).await?;
-    let uow = Mutex::new(uow);
-
-    let req = domain::resources::list::Request {
-        filter_str: None,
-        resource_type: ResourceType::Article,
-        language: "zh".to_string(),
-        default_language: Language::ZH,
-        pagination: Pagination::All,
-    };
-    let (articles, total) = domain::resources::list::execute::<_, SimpleArticleEntity>(uow, req)
-        .await
-        .map_err(|e| anyhow::anyhow!("{:?}", e))?;
-
-    println!("got {} articles", total);
-
-    Ok(articles)
+    Ok(resources)
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let get_config = get_config()?;
-    let base_url = get_config.base_url;
-    let static_routes = get_config.routes;
+    let c = get_config()?;
+    let base_url = c.base_url;
+    let static_routes = c.routes;
     let configuration = get_configuration().expect("Can't get configuration");
     let database_connection = PgPoolOptions::new()
         .acquire_timeout(std::time::Duration::from_secs(
@@ -138,12 +132,22 @@ async fn main() -> anyhow::Result<()> {
         ))
         .connect_lazy_with(configuration.database.with_db());
 
-    let members = get_members(&database_connection).await?;
-    let articles = get_articles(&database_connection).await?;
+    let (members, articles) = tokio::try_join!(
+        get_resources::<SimpleMemberEntity>(
+            &database_connection,
+            ResourceType::Member,
+            Language::ZH
+        ),
+        get_resources::<SimpleArticleEntity>(
+            &database_connection,
+            ResourceType::Article,
+            Language::ZH
+        )
+    )?;
 
     let xml = generate_sitemap_string(&base_url, static_routes, members, articles)?;
 
-    let mut file = File::create("sitemap.xml")?;
+    let mut file = File::create(&c.output_path)?;
     file.write_all(xml.as_bytes())?;
 
     println!("sitemap.xml generated ✅");

@@ -76,11 +76,11 @@
 
             <!-- Menu Icon -->
             <div
-                class="relative flex h-6 w-6 items-center justify-center sm:hidden"
+                class="relative flex items-center justify-center sm:hidden"
             >
                 <button class="cursor-pointer" onclick={toggleMenu}>
                     <IconifyIcon
-                        class="h-6 w-6"
+                        class="h-6 w-6 m-2"
                         icon={show
                             ? 'material-symbols-light:close'
                             : 'ri:menu-3-fill'}
@@ -125,7 +125,7 @@
 
 <!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
 <div
-    class="absolute h-0 [&.show]:h-[calc(100vh-4rem)] bg-gray-300/95 w-full opacity-0 [&.show]:opacity-100 transition-[height,opacity] duration-300 z-50 overflow-hidden ease-in-out"
+    class="absolute max-h-0 [&.show]:max-h-[calc(100vh-4rem)] bg-gray-300/95 w-full opacity-100 transition-[max-height] duration-300 z-50 overflow-hidden ease-in-out"
     class:show>
 
     <!--Dropdown Navigate Item -->

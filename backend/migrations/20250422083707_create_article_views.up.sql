@@ -7,7 +7,7 @@ CREATE TABLE article_views
     viewer_ip  inet        NOT NULL,
     user_agent text,
     viewed_at  timestamptz NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (id),
+    PRIMARY KEY (id)
 );
 
 -- Create article_view_counts table for aggregated statistics
@@ -36,7 +36,7 @@ UPDATE SET
     FROM article_views
     WHERE article_id = NEW.article_id
     ),
-    last_updated_at = NOW();
+    updated_at = NOW();
 RETURN NEW;
 END;
 $$

@@ -26,7 +26,7 @@ tokio = { version = "1.44.2", features = ["full"] }
 thiserror = "2.0.12"
 tower = "0.5.2"
 tower-http = { version = "0.6.2", features = ["cors", "set-header"] }
-sqlx = { version = "0.8.5", features = ["chrono", "macros", "migrate", "postgres", "runtime-tokio-rustls", "uuid"] }
+sqlx = { version = "0.8.5", features = ["chrono", "macros", "migrate", "postgres", "runtime-tokio-rustls", "uuid", "ipnet"] }
 chrono = { version = "0.4.40", default-features = false, features = ["serde"] }
 image = "0.25.6"
 validator = { version = "0.20.0", features = ["derive"] }

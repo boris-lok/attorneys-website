@@ -18,6 +18,7 @@ use jsonwebtoken::{DecodingKey, EncodingKey};
 use secrecy::ExposeSecret;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
+use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
@@ -128,7 +129,11 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         )
         .with_state(state);
 
-    axum::serve(listener, app.into_make_service()).await
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
 }
 
 pub async fn get_database_connection(config: &DatabaseSettings) -> PgPool {

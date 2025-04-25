@@ -1,6 +1,9 @@
 pub use avatar_repository::IAvatarRepository;
 pub use avatar_repository::InMemoryAvatarRepository;
 pub use avatar_repository::SqlxAvatarRepository;
+use sqlx::{Pool, Postgres, Transaction};
+use std::sync::Weak;
+use tokio::sync::Mutex;
 
 pub use content_repository::IContentRepository;
 pub use content_repository::InMemoryContentRepository;
@@ -19,6 +22,12 @@ pub use article_views_repository::IArticleViewsRepository;
 #[cfg(test)]
 pub use article_views_repository::InMemoryArticleViewsRepository;
 pub use article_views_repository::SqlxArticleViewsRepository;
+
+#[derive(Debug)]
+pub enum Connection<'tx> {
+    Pool(Pool<Postgres>),
+    Transaction(Weak<Mutex<Transaction<'tx, Postgres>>>),
+}
 
 mod avatar_repository;
 

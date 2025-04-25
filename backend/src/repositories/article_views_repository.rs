@@ -1,7 +1,7 @@
+use crate::repositories::Connection;
 use anyhow::anyhow;
-use sqlx::{Acquire, Postgres, Transaction};
+use sqlx::{Acquire, PgConnection};
 use std::net::IpAddr;
-use std::sync::Weak;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -60,12 +60,12 @@ impl IArticleViewsRepository for InMemoryArticleViewsRepository {
 
 #[derive(Debug)]
 pub struct SqlxArticleViewsRepository<'tx> {
-    tx: Weak<Mutex<Transaction<'tx, Postgres>>>,
+    conn: Connection<'tx>,
 }
 
 impl<'tx> SqlxArticleViewsRepository<'tx> {
-    pub fn new(tx: Weak<Mutex<Transaction<'tx, Postgres>>>) -> Self {
-        Self { tx }
+    pub fn new(conn: Connection<'tx>) -> Self {
+        Self { conn }
     }
 }
 
@@ -77,22 +77,39 @@ impl IArticleViewsRepository for SqlxArticleViewsRepository<'_> {
         ip: IpAddr,
         user_agent: String,
     ) -> anyhow::Result<Uuid> {
-        let conn_ptr = self
-            .tx
-            .upgrade()
-            .ok_or_else(|| anyhow!("can't upgrade the transaction"))?;
-        let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await?;
+        match &self.conn {
+            Connection::Pool(pool) => {
+                let mut conn = pool.acquire().await?;
+                let conn = conn.as_mut();
+                let id = save(conn, article_id, ip, user_agent).await?;
+                Ok(id)
+            }
+            Connection::Transaction(tx) => {
+                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+                let mut lock = conn_ptr.lock().await;
+                let conn = lock.acquire().await?;
 
-        let id = sqlx::query_scalar::<_, Uuid>(
-            "insert into \"article_views\" (article_id, view_ip, user_agent) values ($1, $2, $3) returning id;",
-        )
+                let id = save(conn, article_id, ip, user_agent).await?;
+                Ok(id)
+            }
+        }
+    }
+}
+
+async fn save(
+    c: &mut PgConnection,
+    article_id: String,
+    ip: IpAddr,
+    user_agent: String,
+) -> anyhow::Result<Uuid> {
+    let id = sqlx::query_scalar::<_, Uuid>(
+        "insert into \"article_views\" (article_id, viewer_ip, user_agent) values ($1, $2, $3) returning id;",
+    )
         .bind(article_id.as_str())
-        .bind(ip.to_string())
+        .bind(ip)
         .bind(user_agent)
-        .fetch_one(conn)
+        .fetch_one(c)
         .await?;
 
-        Ok(id)
-    }
+    Ok(id)
 }

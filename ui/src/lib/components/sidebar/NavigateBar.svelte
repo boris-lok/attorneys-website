@@ -125,7 +125,7 @@
 
 <!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
 <div
-    class="absolute h-[calc(100vh-4rem)] translate-y-[-100vh] [&.show]:translate-y-0 bg-gray-300/95 w-full transition-[translate,z-index] duration-500 delay-[0s, 500ms] z-[-1] [&.show]:z-[49] overflow-hidden ease-in-out"
+    class="absolute h-[calc(100vh-4rem)] translate-y-[calc(-100vh+4rem)] [&.show]:translate-y-0 bg-gray-300/95 w-full transition-[translate,z-index,opacity] duration-500 z-[49] opacity-0 [&.show]:opacity-100 overflow-hidden ease-in-out"
     class:show>
 
     <!--Dropdown Navigate Item -->

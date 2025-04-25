@@ -7,7 +7,7 @@ use crate::api::{
     list_categories, list_contact, list_home, list_members, list_services, retrieve_article,
     retrieve_category, retrieve_contact, retrieve_home, retrieve_member, retrieve_service,
     update_article, update_category, update_contact, update_home, update_member, update_service,
-    upload_member_avatar,
+    upload_member_avatar, view_article,
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
@@ -80,6 +80,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/articles", post(create_article).put(update_article))
         .route("/articles/{id}", delete(delete_article));
     let article_routes = Router::new()
+        .route("/articles/{id}/view", post(view_article))
         .route("/articles/{id}", get(retrieve_article))
         .route("/articles", get(list_articles));
 

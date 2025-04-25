@@ -7,3 +7,5 @@ pub mod list;
 pub mod delete;
 
 pub mod update;
+
+pub mod view;

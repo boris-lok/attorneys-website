@@ -15,6 +15,11 @@ pub use user_repository::IUserRepository;
 pub use user_repository::InMemoryUserRepository;
 pub use user_repository::SqlxUserRepository;
 
+pub use article_views_repository::IArticleViewsRepository;
+#[cfg(test)]
+pub use article_views_repository::InMemoryArticleViewsRepository;
+pub use article_views_repository::SqlxArticleViewsRepository;
+
 mod avatar_repository;
 
 mod content_repository;
@@ -22,3 +27,5 @@ mod content_repository;
 mod resource_repository;
 
 mod user_repository;
+
+mod article_views_repository;

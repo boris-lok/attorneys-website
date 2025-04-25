@@ -20,7 +20,7 @@ anyhow = "1.0.97"
 ulid = "1.2.1"
 axum = { version = "0.8.3", features = ["multipart"] }
 axum-macros = "0.5.0"
-axum-extra = "0.10.1"
+axum-extra = { version = "0.10.1", features = ["typed-header"] }
 config = "0.15.11"
 tokio = { version = "1.44.2", features = ["full"] }
 thiserror = "2.0.12"

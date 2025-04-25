@@ -33,6 +33,7 @@ pub use article::delete::delete_article;
 pub use article::list::list_articles;
 pub use article::retrieve::retrieve_article;
 pub use article::update::update_article;
+pub use article::view::view_article;
 
 pub use categories::create::create_category;
 pub use categories::delete::delete_category;

@@ -12,7 +12,7 @@
 
     let { rootUrl, items }: InputProps = $props()
 
-    // The status of dropdown menu.
+    // The status of a dropdown menu.
     let show = $state(false)
     let innerWidth = $state(0)
 
@@ -22,7 +22,7 @@
         show = !show
     }
 
-    // remove the classes from body and set show to false
+    // remove the classes from the body and set show to false
     function disableDropdownNavigationBar() {
         show = false
         document.body?.classList.remove('overflow-hidden')
@@ -37,10 +37,10 @@
 
     $effect(() => {
         if (innerWidth > 768) {
-            // if user resizes the window and then
+            // if the user resizes the window and then
             // the window size is greater than 48rem(768px)
             // we need to hidden the dropdown navigation bar
-            // and remove the classes from body
+            // and remove the classes from the body
             disableDropdownNavigationBar()
         }
     })
@@ -125,7 +125,7 @@
 
 <!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
 <div
-    class="absolute h-[calc(100vh-4rem)] translate-y-[-100vh] [&.show]:translate-y-0 bg-gray-300/95 w-full transition-[translate,z-index] duration-500 delay-[0s, 500ms] z-[-1] [&.show]:z-50 overflow-hidden ease-in-out"
+    class="absolute h-[calc(100vh-4rem)] translate-y-[-100vh] [&.show]:translate-y-0 bg-gray-300/95 w-full transition-[translate,z-index] duration-500 delay-[0s, 500ms] z-[-1] [&.show]:z-[49] overflow-hidden ease-in-out"
     class:show>
 
     <!--Dropdown Navigate Item -->

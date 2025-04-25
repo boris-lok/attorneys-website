@@ -56,7 +56,7 @@
 
 <svelte:window bind:innerWidth={innerWidth} />
 
-<nav class="relative">
+<nav class="relative z-50">
     <div
         class="relative flex h-16 flex-row items-center gap-12 overflow-hidden bg-[var(--primary-color)] px-4 md:px-8"
     >
@@ -125,13 +125,12 @@
 
 <!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
 <div
-    class="absolute max-h-0 [&.show]:max-h-[calc(100vh-4rem)] bg-gray-300/95 w-full opacity-100 transition-[max-height] duration-300 z-50 overflow-hidden ease-in-out"
+    class="absolute h-[calc(100vh-4rem)] translate-y-[-100vh] [&.show]:translate-y-0 bg-gray-300/95 w-full transition-[translate,z-index] duration-500 delay-[0s, 500ms] z-[-1] [&.show]:z-50 overflow-hidden ease-in-out"
     class:show>
 
     <!--Dropdown Navigate Item -->
     <div
         class="relative w-screen overflow-y-scroll md:hidden h-[calc(100vh-4rem)]"
-        class:show
     >
         <div
             class="grid max-h-[calc(100vh-4rem)] w-full grid-cols-2 justify-items-center gap-y-8 overflow-x-hidden overflow-y-auto px-4 py-6"
@@ -141,9 +140,9 @@
                     <button
                         class="outline-none"
                         onclick={() => {
-                            show = false
-                            item.onClick()
-                        }}
+                                show = false
+                                item.onClick()
+                            }}
                     >
                         <NavigateItem
                             label={item.name}

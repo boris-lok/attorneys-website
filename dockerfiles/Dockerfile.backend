@@ -44,7 +44,9 @@ workdir /app
 run chown -R app_user:app_group /app
 
 # Copy the compiled binary from the build stage to the container
-copy --from=builder /app/target/release/backend .
+copy --from=builder /app/target/release/backend /usr/local/bin/
+copy --from=builder /app/target/release/generate_sitemap /usr/local/bin/
+copy --from=builder /app/target/release/create_user /usr/local/bin/
 copy ./backend/src/configuration ./src/configuration
 
 # create a upload directory
@@ -59,4 +61,4 @@ env APP_ENVIRONMENT production
 expose 8081
 
 # Set the entry point to the complied binary
-cmd ["./backend"]
+cmd ["backend"]

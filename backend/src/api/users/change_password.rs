@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
 use crate::domain::entities::UserID;
-use crate::repositories::SqlxUserRepository;
+use crate::repositories::{Connection, SqlxUserRepository};
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -9,7 +9,6 @@ use axum::Json;
 use axum_extra::extract::WithRejection;
 use secrecy::SecretBox;
 use serde::Deserialize;
-use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -30,13 +29,7 @@ pub async fn change_password(
         user_id,
         new_password: SecretBox::new(Box::new(req.new_password)),
     };
-    let tx = state
-        .pool
-        .begin()
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-    let tx = Arc::new(Mutex::new(tx));
-    let user_repo = SqlxUserRepository::new(Arc::downgrade(&tx));
+    let user_repo = SqlxUserRepository::new(Connection::Pool(state.pool.clone()));
 
     match crate::domain::users::change_password::execute(req, Mutex::new(user_repo)).await {
         Ok(_) => Ok(StatusCode::OK),

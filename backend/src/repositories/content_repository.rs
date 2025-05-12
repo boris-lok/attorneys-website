@@ -1,8 +1,8 @@
 use crate::domain::entities::{ContentData, ContentID, Language};
+use crate::repositories::Connection;
 use anyhow::anyhow;
-use sqlx::{Acquire, Postgres, Row, Transaction};
+use sqlx::{Acquire, PgConnection, Row};
 use std::collections::HashMap;
-use std::sync::Weak;
 use tokio::sync::Mutex;
 
 #[async_trait::async_trait]
@@ -28,6 +28,12 @@ pub trait IContentRepository {
 pub struct InMemoryContentRepository {
     error: bool,
     content: Mutex<HashMap<String, ContentData>>,
+}
+
+impl Default for InMemoryContentRepository {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl InMemoryContentRepository {
@@ -139,12 +145,12 @@ impl IContentRepository for InMemoryContentRepository {
 
 #[derive(Debug)]
 pub struct SqlxContentRepository<'tx> {
-    tx: Weak<Mutex<Transaction<'tx, Postgres>>>,
+    conn: Connection<'tx>,
 }
 
 impl<'tx> SqlxContentRepository<'tx> {
-    pub fn new(tx: Weak<Mutex<Transaction<'tx, Postgres>>>) -> Self {
-        Self { tx }
+    pub fn new(conn: Connection<'tx>) -> Self {
+        Self { conn }
     }
 }
 
@@ -156,20 +162,21 @@ impl IContentRepository for SqlxContentRepository<'_> {
         content: ContentData,
         language: Language,
     ) -> anyhow::Result<ContentID> {
-        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-        let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await?;
+        match &self.conn {
+            Connection::Pool(pool) => {
+                let mut conn = pool.acquire().await?;
+                let conn = conn.as_mut();
 
-        sqlx::query(
-            "INSERT INTO \"content\" (id, data, language, created_at, updated_at) VALUES ($1, $2, $3, now(), now());",
-        )
-            .bind(id.as_str())
-            .bind(content.as_json())
-            .bind(language.as_str())
-            .execute(conn)
-            .await?;
+                create(conn, id, content, language).await
+            }
+            Connection::Transaction(tx) => {
+                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+                let mut lock = conn_ptr.lock().await;
+                let conn = lock.acquire().await?;
 
-        Ok(id)
+                create(conn, id, content, language).await
+            }
+        }
     }
 
     async fn update(
@@ -178,39 +185,92 @@ impl IContentRepository for SqlxContentRepository<'_> {
         data: ContentData,
         language: Language,
     ) -> anyhow::Result<()> {
-        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-        let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await?;
+        match &self.conn {
+            Connection::Pool(pool) => {
+                let mut conn = pool.acquire().await?;
+                let conn = conn.as_mut();
 
-        sqlx::query(
-            "UPDATE \"content\" SET data = $1, updated_at = now() WHERE id = $2 AND language = $3;",
-        )
-        .bind(data.as_json())
+                update(conn, id, data, language).await
+            }
+            Connection::Transaction(tx) => {
+                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+                let mut lock = conn_ptr.lock().await;
+                let conn = lock.acquire().await?;
+
+                update(conn, id, data, language).await
+            }
+        }
+    }
+
+    async fn contains(&self, id: &ContentID, language: &Language) -> anyhow::Result<bool> {
+        match &self.conn {
+            Connection::Pool(pool) => {
+                let mut conn = pool.acquire().await?;
+                let conn = conn.as_mut();
+
+                contains(conn, id, language).await
+            }
+            Connection::Transaction(tx) => {
+                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+                let mut lock = conn_ptr.lock().await;
+                let conn = lock.acquire().await?;
+
+                contains(conn, id, language).await
+            }
+        }
+    }
+}
+
+async fn create(
+    conn: &mut PgConnection,
+    id: ContentID,
+    content: ContentData,
+    language: Language,
+) -> anyhow::Result<ContentID> {
+    sqlx::query(
+        "INSERT INTO \"content\" (id, data, language, created_at, updated_at) VALUES ($1, $2, $3, now(), now());",
+    )
         .bind(id.as_str())
+        .bind(content.as_json())
         .bind(language.as_str())
         .execute(conn)
         .await?;
 
-        Ok(())
-    }
+    Ok(id)
+}
 
-    async fn contains(&self, id: &ContentID, language: &Language) -> anyhow::Result<bool> {
-        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-        let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await?;
+async fn update(
+    conn: &mut PgConnection,
+    id: &ContentID,
+    data: ContentData,
+    language: Language,
+) -> anyhow::Result<()> {
+    sqlx::query(
+        "UPDATE \"content\" SET data = $1, updated_at = now() WHERE id = $2 AND language = $3;",
+    )
+    .bind(data.as_json())
+    .bind(id.as_str())
+    .bind(language.as_str())
+    .execute(conn)
+    .await?;
 
-        let query = "SELECT id FROM \"content\" WHERE id = $1 AND language = $2 limit 1";
+    Ok(())
+}
 
-        let res = sqlx::query(query)
-            .bind(id.as_str())
-            .bind(language.as_str())
-            .fetch_optional(conn)
-            .await
-            .map(|row| match row {
-                None => false,
-                Some(row) => row.len() > 0,
-            })?;
+async fn contains(
+    conn: &mut PgConnection,
+    id: &ContentID,
+    language: &Language,
+) -> anyhow::Result<bool> {
+    let res = sqlx::query("SELECT id FROM \"content\" WHERE id = $1 AND language = $2 limit 1;")
+        .bind(id.as_str())
+        .bind(language.as_str())
+        .fetch_optional(conn)
+        .await
+        .map(|row| match row {
+            None => false,
+            Some(row) => row.len() > 0,
+        })?;
 
-        Ok(res)
-    }
+    Ok(res)
 }

@@ -29,7 +29,14 @@ pub struct InMemoryUserRepository {
 }
 
 #[cfg(test)]
+impl Default for InMemoryUserRepository {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl InMemoryUserRepository {
+    #[cfg(test)]
     pub fn new() -> Self {
         Self {
             error: false,
@@ -37,6 +44,7 @@ impl InMemoryUserRepository {
         }
     }
 
+    #[cfg(test)]
     pub fn with_error(self) -> Self {
         Self {
             error: true,
@@ -44,6 +52,7 @@ impl InMemoryUserRepository {
         }
     }
 
+    #[cfg(test)]
     pub async fn add_credentials(&self, id: UserID, username: String, password: SecretBox<String>) {
         let mut lock = self.credentials.lock().await;
         lock.insert(id, (username, password));
@@ -164,7 +173,7 @@ impl IUserRepository for SqlxUserRepository<'_> {
                 let mut conn = pool.acquire().await?;
                 let conn = conn.as_mut();
 
-                let id = create_user(conn, username, password).await?;
+                let id = create(conn, username, password).await?;
                 Ok(UserID::from(id))
             }
             Connection::Transaction(tx) => {
@@ -172,7 +181,7 @@ impl IUserRepository for SqlxUserRepository<'_> {
                 let mut lock = conn_ptr.lock().await;
                 let conn = lock.acquire().await?;
 
-                let id = create_user(conn, username, password).await?;
+                let id = create(conn, username, password).await?;
                 Ok(UserID::from(id))
             }
         }
@@ -219,7 +228,7 @@ async fn change_password(
     Ok(())
 }
 
-async fn create_user(
+async fn create(
     conn: &mut PgConnection,
     username: String,
     password: SecretBox<String>,

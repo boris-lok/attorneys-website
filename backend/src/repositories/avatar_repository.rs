@@ -1,9 +1,9 @@
 use crate::domain::entities::ResourceID;
 use crate::domain::member::entities::AvatarJson;
+use crate::repositories::Connection;
 use anyhow::anyhow;
-use sqlx::{Acquire, Postgres, Transaction};
+use sqlx::{Acquire, PgConnection};
 use std::collections::HashMap;
-use std::sync::Weak;
 use tokio::sync::Mutex;
 
 #[derive(Debug)]
@@ -24,6 +24,12 @@ pub trait IAvatarRepository {
 pub struct InMemoryAvatarRepository {
     error: bool,
     content: Mutex<HashMap<String, AvatarJson>>,
+}
+
+impl Default for InMemoryAvatarRepository {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl InMemoryAvatarRepository {
@@ -80,12 +86,12 @@ impl IAvatarRepository for InMemoryAvatarRepository {
 
 #[derive(Debug)]
 pub struct SqlxAvatarRepository<'tx> {
-    tx: Weak<Mutex<Transaction<'tx, Postgres>>>,
+    conn: Connection<'tx>,
 }
 
 impl<'tx> SqlxAvatarRepository<'tx> {
-    pub fn new(tx: Weak<Mutex<Transaction<'tx, Postgres>>>) -> Self {
-        Self { tx }
+    pub fn new(conn: Connection<'tx>) -> Self {
+        Self { conn }
     }
 }
 
@@ -96,22 +102,39 @@ impl IAvatarRepository for SqlxAvatarRepository<'_> {
         id: ResourceID,
         avatar_json: AvatarJson,
     ) -> Result<ResourceID, InsertError> {
-        let conn_ptr = self.tx.upgrade().ok_or(InsertError::Unknown)?;
-        let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await.unwrap();
+        match &self.conn {
+            Connection::Pool(pool) => {
+                let mut conn = pool.acquire().await.map_err(|_| InsertError::Unknown)?;
+                let conn = conn.as_mut();
 
-        sqlx::query("insert into \"avatar\" (id, data) values ($1, $2) on conflict (id) do update set data = $3;")
-            .bind(id.as_str())
-            .bind(avatar_json.clone().get())
-            .bind(avatar_json.get())
-            .execute(conn)
-            .await
-            .map_err(|e| {
-                println!("Failed to insert avatar: {:?}", e);
+                create(conn, id, avatar_json)
+                    .await
+                    .map_err(|_| InsertError::Unknown)
+            }
+            Connection::Transaction(tx) => {
+                let conn_ptr = tx.upgrade().ok_or(InsertError::Unknown)?;
+                let mut lock = conn_ptr.lock().await;
+                let conn = lock.acquire().await.map_err(|_| InsertError::Unknown)?;
 
-                InsertError::Unknown
-            })?;
-
-        Ok(id)
+                create(conn, id, avatar_json)
+                    .await
+                    .map_err(|_| InsertError::Unknown)
+            }
+        }
     }
+}
+
+async fn create(
+    conn: &mut PgConnection,
+    id: ResourceID,
+    avatar_json: AvatarJson,
+) -> anyhow::Result<ResourceID> {
+    sqlx::query("insert into \"avatar\" (id, data) values ($1, $2) on conflict (id) do update set data = $3;")
+        .bind(id.as_str())
+        .bind(avatar_json.clone().get())
+        .bind(avatar_json.get())
+        .execute(conn)
+        .await?;
+
+    Ok(id)
 }

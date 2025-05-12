@@ -1,7 +1,7 @@
 use crate::domain::entities::{ResourceID, ResourceType};
+use crate::repositories::Connection;
 use anyhow::anyhow;
-use sqlx::{Acquire, Postgres, Row, Transaction};
-use std::sync::Weak;
+use sqlx::{Acquire, PgConnection, Row};
 use tokio::sync::Mutex;
 
 #[async_trait::async_trait]
@@ -28,6 +28,12 @@ pub trait IResourceRepository {
 pub struct InMemoryResourceRepository {
     error: bool,
     resources: Mutex<Vec<(ResourceID, ResourceType)>>,
+}
+
+impl Default for InMemoryResourceRepository {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl InMemoryResourceRepository {
@@ -120,12 +126,12 @@ impl IResourceRepository for InMemoryResourceRepository {
 
 #[derive(Debug)]
 pub struct SqlxResourceRepository<'tx> {
-    tx: Weak<Mutex<Transaction<'tx, Postgres>>>,
+    conn: Connection<'tx>,
 }
 
 impl<'tx> SqlxResourceRepository<'tx> {
-    pub fn new(tx: Weak<Mutex<Transaction<'tx, Postgres>>>) -> Self {
-        Self { tx }
+    pub fn new(conn: Connection<'tx>) -> Self {
+        Self { conn }
     }
 }
 
@@ -137,18 +143,21 @@ impl IResourceRepository for SqlxResourceRepository<'_> {
         resource_type: ResourceType,
         seq: i32,
     ) -> anyhow::Result<ResourceID> {
-        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-        let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await?;
+        match &self.conn {
+            Connection::Pool(pool) => {
+                let mut conn = pool.acquire().await?;
+                let conn = conn.as_mut();
 
-        sqlx::query("INSERT INTO \"resource\" (id, created_at, resource_type, seq) VALUES ($1, now(), $2, $3);")
-            .bind(id.as_str())
-            .bind(resource_type.as_str())
-            .bind(seq)
-            .execute(conn)
-            .await?;
+                create(conn, id, resource_type, seq).await
+            }
+            Connection::Transaction(tx) => {
+                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+                let mut lock = conn_ptr.lock().await;
+                let conn = lock.acquire().await?;
 
-        Ok(id)
+                create(conn, id, resource_type, seq).await
+            }
+        }
     }
 
     async fn contains(
@@ -156,13 +165,85 @@ impl IResourceRepository for SqlxResourceRepository<'_> {
         id: &ResourceID,
         resource_type: &ResourceType,
     ) -> anyhow::Result<bool> {
-        let query = "SELECT id FROM \"resource\" WHERE id = $1 and resource_type = $2 limit 1";
+        match &self.conn {
+            Connection::Pool(pool) => {
+                let mut conn = pool.acquire().await?;
+                let conn = conn.as_mut();
 
-        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-        let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await?;
+                contains(conn, id, resource_type).await
+            }
+            Connection::Transaction(tx) => {
+                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+                let mut lock = conn_ptr.lock().await;
+                let conn = lock.acquire().await?;
 
-        let res = sqlx::query(query)
+                contains(conn, id, resource_type).await
+            }
+        }
+    }
+
+    async fn delete(&self, id: &ResourceID, resource_type: &ResourceType) -> anyhow::Result<()> {
+        match &self.conn {
+            Connection::Pool(pool) => {
+                let mut conn = pool.acquire().await?;
+                let conn = conn.as_mut();
+
+                delete(conn, id, resource_type).await
+            }
+            Connection::Transaction(tx) => {
+                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+                let mut lock = conn_ptr.lock().await;
+                let conn = lock.acquire().await?;
+
+                delete(conn, id, resource_type).await
+            }
+        }
+    }
+
+    async fn update_seq(&self, id: &ResourceID, seq: i32) -> anyhow::Result<()> {
+        match &self.conn {
+            Connection::Pool(pool) => {
+                let mut conn = pool.acquire().await?;
+                let conn = conn.as_mut();
+
+                update_seq(conn, id, seq).await
+            }
+            Connection::Transaction(tx) => {
+                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
+                let mut lock = conn_ptr.lock().await;
+                let conn = lock.acquire().await?;
+
+                update_seq(conn, id, seq).await
+            }
+        }
+    }
+}
+
+async fn create(
+    conn: &mut PgConnection,
+    id: ResourceID,
+    resource_type: ResourceType,
+    seq: i32,
+) -> anyhow::Result<ResourceID> {
+    sqlx::query(
+        "INSERT INTO \"resource\" (id, created_at, resource_type, seq) VALUES ($1, now(), $2, $3);",
+    )
+    .bind(id.as_str())
+    .bind(resource_type.as_str())
+    .bind(seq)
+    .execute(conn)
+    .await?;
+
+    Ok(id)
+}
+
+async fn contains(
+    conn: &mut PgConnection,
+    id: &ResourceID,
+    resource_type: &ResourceType,
+) -> anyhow::Result<bool> {
+    let res =
+        sqlx::query("SELECT id FROM \"resource\" WHERE id = $1 and resource_type = $2 limit 1;")
             .bind(id.as_str())
             .bind(resource_type.as_str())
             .fetch_optional(conn)
@@ -172,39 +253,29 @@ impl IResourceRepository for SqlxResourceRepository<'_> {
                 Some(row) => row.len() > 0,
             })?;
 
-        Ok(res)
-    }
+    Ok(res)
+}
 
-    async fn delete(&self, id: &ResourceID, resource_type: &ResourceType) -> anyhow::Result<()> {
-        let query =
-            "UPDATE \"resource\" SET deleted_at = now() WHERE id = $1 and resource_type = $2";
+async fn delete(
+    conn: &mut PgConnection,
+    id: &ResourceID,
+    resource_type: &ResourceType,
+) -> anyhow::Result<()> {
+    sqlx::query("UPDATE \"resource\" SET deleted_at = now() WHERE id = $1 and resource_type = $2;")
+        .bind(id.as_str())
+        .bind(resource_type.as_str())
+        .execute(conn)
+        .await?;
 
-        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-        let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await?;
+    Ok(())
+}
 
-        sqlx::query(query)
-            .bind(id.as_str())
-            .bind(resource_type.as_str())
-            .execute(conn)
-            .await?;
+async fn update_seq(conn: &mut PgConnection, id: &ResourceID, seq: i32) -> anyhow::Result<()> {
+    sqlx::query("UPDATE \"resource\" SET seq = $2 WHERE id = $1;")
+        .bind(id.as_str())
+        .bind(seq)
+        .execute(conn)
+        .await?;
 
-        Ok(())
-    }
-
-    async fn update_seq(&self, id: &ResourceID, seq: i32) -> anyhow::Result<()> {
-        let query = "UPDATE \"resource\" SET seq = $2 WHERE id = $1";
-
-        let conn_ptr = self.tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-        let mut lock = conn_ptr.lock().await;
-        let conn = lock.acquire().await?;
-
-        sqlx::query(query)
-            .bind(id.as_str())
-            .bind(seq)
-            .execute(conn)
-            .await?;
-
-        Ok(())
-    }
+    Ok(())
 }

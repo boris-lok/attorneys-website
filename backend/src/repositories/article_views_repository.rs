@@ -20,6 +20,13 @@ pub struct InMemoryArticleViewsRepository {
     data: Mutex<Vec<(Uuid, String, IpAddr, String)>>,
 }
 
+#[cfg(test)]
+impl Default for InMemoryArticleViewsRepository {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl InMemoryArticleViewsRepository {
     #[cfg(test)]
     pub fn new() -> Self {

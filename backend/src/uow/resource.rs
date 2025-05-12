@@ -27,7 +27,7 @@ use tokio::sync::Mutex;
 */
 #[async_trait::async_trait]
 pub trait IResourceUnitOfWork {
-    /** Resource repository stores the data by different types (e.g. members, services, home, etc.) */
+    /** Resource repository stores the data by different types (e.g., members, services, home, etc.) */
     fn resource_repository(&mut self) -> &mut impl IResourceRepository;
 
     /** Content repository stores multiple language data */
@@ -382,7 +382,9 @@ impl<'tx> InDatabase<'tx> {
 impl IResourceUnitOfWork for InDatabase<'_> {
     fn resource_repository(&mut self) -> &mut impl IResourceRepository {
         if self.resource_repository.is_none() {
-            let resource_repo = SqlxResourceRepository::new(Arc::downgrade(&self.tx));
+            let resource_repo = SqlxResourceRepository::new(
+                crate::repositories::Connection::Transaction(Arc::downgrade(&self.tx)),
+            );
             self.resource_repository = Some(resource_repo);
         }
         self.resource_repository.as_mut().unwrap()
@@ -390,14 +392,16 @@ impl IResourceUnitOfWork for InDatabase<'_> {
 
     fn content_repository(&mut self) -> &mut impl IContentRepository {
         if self.content_repository.is_none() {
-            // Use Arc::downgrade to obtain a weak reference to the transaction
+            // Use Arc::downgrade to get a weak reference to the transaction
             // if we don't do this, when we call the commit/rollback method will fail.
             // It can't `try_unwrap` because there are at least two strong references, preventing
             // the use of `try_unwrap`.
             //
             // If we want to use strong references, then we need to drop the repository
             // when we try to call commit/rollback methods.
-            let content_repo = SqlxContentRepository::new(Arc::downgrade(&self.tx));
+            let content_repo = SqlxContentRepository::new(
+                crate::repositories::Connection::Transaction(Arc::downgrade(&self.tx)),
+            );
             self.content_repository = Some(content_repo);
         }
         self.content_repository.as_mut().unwrap()
@@ -405,7 +409,9 @@ impl IResourceUnitOfWork for InDatabase<'_> {
 
     fn avatar_repository(&mut self) -> &mut impl IAvatarRepository {
         if self.avatar_repository.is_none() {
-            let avatar_repo = SqlxAvatarRepository::new(Arc::downgrade(&self.tx));
+            let avatar_repo = SqlxAvatarRepository::new(
+                crate::repositories::Connection::Transaction(Arc::downgrade(&self.tx)),
+            );
             self.avatar_repository = Some(avatar_repo);
         }
         self.avatar_repository.as_mut().unwrap()

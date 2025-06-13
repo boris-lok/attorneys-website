@@ -1,7 +1,5 @@
 <script lang="ts">
     import type { PageProps } from './$types'
-    import { startWithTap } from '$lib/utils'
-    import { finalize, tap } from 'rxjs'
     import CategoryEditor from '$lib/components/dashboard/CategoryEditor.svelte'
     import { CategoryService } from '$lib/services/category.service'
     import Loading from '$lib/components/common/Loading.svelte'
@@ -12,22 +10,24 @@
     let icon: string | undefined = $state(undefined)
     let name = $state('')
 
-    function fetchData() {
-        CategoryService.retrieve(data.id, 'zh')
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                finalize(() => (isLoading = false)),
-                tap((resp) => {
-                    icon = resp?.data.icon
-                    name = resp?.data.name ?? ''
-                })
-            )
-            .subscribe({
-                error: console.error
-            })
+    async function fetchData() {
+        const resp = await CategoryService.retrieve(data.id, 'zh')
+        if (resp.error) {
+            console.error(resp.message)
+            return
+        }
+
+        icon = resp.category?.data.icon
+        name = resp.category?.data.name ?? ''
     }
 
-    $effect(() => fetchData())
+    $effect(() => {
+        (async () => {
+            isLoading = true
+            await fetchData()
+            isLoading = false
+        })()
+    })
 </script>
 
 {#if isLoading}

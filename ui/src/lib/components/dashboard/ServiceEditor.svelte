@@ -1,11 +1,9 @@
 <script lang="ts">
     import Textarea from '$lib/components/common/Textarea.svelte'
-    import { finalize, tap } from 'rxjs'
     import Input from '$lib/components/common/Input.svelte'
     import { ServiceServices } from '$lib/services/service.service'
     import ServiceBox from '$lib/components/ServiceBox.svelte'
     import Loading from '$lib/components/common/Loading.svelte'
-    import { startWithTap } from '$lib/utils'
 
     type EditorProps = {
         id?: string
@@ -74,7 +72,7 @@
     }
 
     // handles the save button has been clicked
-    function onSaveClicked() {
+    async function onSaveClicked() {
         errorMsg = ''
 
         if (!isValid()) {
@@ -82,23 +80,20 @@
             return
         }
 
-        ServiceServices.save({
+        isLoading = true
+        const resp = await ServiceServices.save({
             ...(id === undefined ? {} : { id: id }),
             ...newData,
             language: 'zh',
             seq: 0
         })
-            .pipe(
-                startWithTap(() => isLoading = true),
-                finalize(() => isLoading = false),
-                tap((resp) => {
-                    if (resp.error) {
-                        console.error('Error saving content:', resp.message)
-                        errorMsg = 'We got an error when saving content.'
-                    }
-                })
-            )
-            .subscribe()
+        isLoading = false
+
+        if (resp.error) {
+            console.error('Error saving content:', resp.message)
+            errorMsg = 'We got an error when saving content.'
+            return
+        }
     }
 </script>
 

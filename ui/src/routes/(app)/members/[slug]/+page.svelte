@@ -1,9 +1,7 @@
 <script lang="ts">
     import type { PageProps } from './$types'
-    import { startWithTap } from '$lib/utils'
-    import { finalize, tap } from 'rxjs'
     import { MemberServices } from '$lib/services/member.service'
-    import type { ImageData, MemberData } from '$lib/types'
+    import type { ImageData } from '$lib/types'
     import Markdown from '@magidoc/plugin-svelte-marked'
     import Image from '$lib/components/common/Image.svelte'
     import IconifyIcon from '@iconify/svelte'
@@ -23,25 +21,25 @@
         }
     }
 
-    function fetchData() {
-        MemberServices.retrieve(data.id, 'zh')
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                finalize(() => (isLoading = false)),
-                tap((resp: MemberData | null) => {
-                    if (resp) {
-                        name = resp.data.name ?? ''
-                        description = resp.data.description ?? ''
-                        avatar = resp.avatar
-                    }
-                })
-            )
-            .subscribe({
-                error: console.error
-            })
+    async function fetchData() {
+        const resp = await MemberServices.retrieve(data.id, 'zh')
+        if (resp.error) {
+            console.error(resp.message)
+            return
+        }
+
+        name = resp.member?.data.name ?? ''
+        description = resp.member?.data.description ?? ''
+        avatar = resp.member?.avatar
     }
 
-    $effect(() => fetchData())
+    $effect(() => {
+        (async () => {
+            isLoading = true
+            await fetchData()
+            isLoading = false
+        })()
+    })
 </script>
 
 {#if isLoading}

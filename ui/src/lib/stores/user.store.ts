@@ -16,7 +16,7 @@ const createWritableStore = (key: string, initialValue: any) => {
             subscribe((current) => {
                 Cookies.set(key, JSON.stringify(current), {
                     expires: 14,
-                    path: '/'
+                    path: '/',
                 })
             })
         },
@@ -26,7 +26,7 @@ const createWritableStore = (key: string, initialValue: any) => {
         },
         get: () => {
             return get(user)
-        }
+        },
     }
 }
 

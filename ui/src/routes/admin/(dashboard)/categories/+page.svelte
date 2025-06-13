@@ -1,8 +1,6 @@
 <script lang="ts">
 
     import type { CategoryData, Language } from '$lib/types'
-    import { startWithTap } from '$lib/utils'
-    import { finalize, tap } from 'rxjs'
     import { CategoryService } from '$lib/services/category.service'
     import Loading from '$lib/components/common/Loading.svelte'
     import Icon from '@iconify/svelte'
@@ -12,21 +10,23 @@
     let isLoading = $state(false)
     let language: Language = 'zh'
 
-    function fetchData() {
-        CategoryService.list(language)
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                finalize(() => (isLoading = false)),
-                tap((resp) => {
-                    categories = resp
-                })
-            )
-            .subscribe({
-                error: console.error
-            })
+    async function fetchData() {
+        const resp = await CategoryService.list(language)
+        if (resp.error) {
+            console.error(resp.message)
+            return
+        }
+
+        categories = resp.categories ?? []
     }
 
-    $effect(() => fetchData())
+    $effect(() => {
+        (async () => {
+            isLoading = true
+            await fetchData()
+            isLoading = false
+        })()
+    })
 </script>
 
 {#if isLoading}

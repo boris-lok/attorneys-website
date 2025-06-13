@@ -1,7 +1,5 @@
 <script lang="ts">
     import { ArticleServices } from '$lib/services/article.service'
-    import { startWithTap } from '$lib/utils'
-    import { finalize, tap } from 'rxjs'
     import Markdown from '@magidoc/plugin-svelte-marked'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/common/Loading.svelte'
@@ -20,24 +18,34 @@
         content: ''
     })
 
-    function fetchData() {
-        ArticleServices.retrieve(id, 'zh')
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                finalize(() => (isLoading = false)),
-                tap((resp) => {
-                    data = {
-                        title: resp?.data.title ?? '',
-                        content: resp?.data.content ?? ''
-                    }
-                })
-            )
-            .subscribe({
-                error: console.error
-            })
+    async function fetchData() {
+        const resp = await ArticleServices.retrieve(id, 'zh')
+
+        if (resp.error) {
+            console.error(resp.message)
+            return
+        }
+
+        return {
+            title: resp.article?.data.title ?? '',
+            content: resp.article?.data.content ?? ''
+        }
     }
 
-    $effect(() => fetchData())
+    $effect(() => {
+        (async () => {
+            isLoading = true
+
+            try {
+                const resp = await fetchData()
+                if (resp) {
+                    data = resp
+                }
+            } finally {
+                isLoading = false
+            }
+        })()
+    })
 </script>
 
 {#if isLoading}

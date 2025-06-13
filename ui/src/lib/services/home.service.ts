@@ -1,78 +1,120 @@
 import type { CreateHomeRequest, HomeData, Language, UpdateHomeRequest } from '$lib/types'
-import { fromFetch } from 'rxjs/fetch'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
-import { map } from 'rxjs'
 
 /**
- * The API endpoint of saving the content of home page
- * @param req
+ * Sends a request to save a home entity. If the request contains an "id" property,
+ * it performs an update (PUT request). Otherwise, it creates a new entity (POST request).
+ *
+ * @param {CreateHomeRequest|UpdateHomeRequest} req - The request object containing the home details to create or update.
+ * @return {Promise<{error: boolean, message?: string}>} A promise that resolves to an object indicating if the operation was successful or not.
  */
-function save(req: CreateHomeRequest | UpdateHomeRequest) {
-    let method = 'id' in req ? 'PUT' : 'POST'
-
-    return fromFetch(`${ADMIN_URL}/home`, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: getToken()
-        },
-        body: JSON.stringify(req),
-        signal: AbortSignal.timeout(TIMEOUT)
-    }).pipe(
-        map((resp) => {
-            if (!resp.ok) {
-                return { error: true, message: `Error: ${resp.status}` }
-            }
-            return { error: false }
+async function save(
+    req: CreateHomeRequest | UpdateHomeRequest,
+): Promise<{ error: boolean; message?: string }> {
+    try {
+        const resp = await fetch(`${ADMIN_URL}/home`, {
+            method: 'id' in req ? 'PUT' : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: getToken(),
+            },
+            body: JSON.stringify(req),
+            signal: AbortSignal.timeout(TIMEOUT),
         })
-    )
+
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+
+        return { error: false }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
 }
 
 /**
- * The API endpoint of retrieving the content of home page.
- * @param id The id of the Home data
- * @param language The language of the data
+ * Retrieves home data from the specified endpoint using the provided ID and language.
+ *
+ * @param {string} id - The unique identifier for the home resource to retrieve.
+ * @param {Language} language - The language preference for the response.
+ * @return {Promise<{error: boolean, home?: HomeData, message?: string}>} A promise that resolves to an object containing the error status, home data if successful, or an error message if an issue occurs.
  */
-function retrieve(id: string, language: Language) {
-    return fromFetch(`${BASE_URL}/home/${id}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept-Language': language
-        },
-        signal: AbortSignal.timeout(TIMEOUT),
-        selector: (resp) =>
-            resp.json().then((json) => {
-                return 'home' in json ? (json.home as HomeData) : null
-            })
-    })
+async function retrieve(
+    id: string,
+    language: Language,
+): Promise<{ error: boolean; home?: HomeData; message?: string }> {
+    try {
+        const resp = await fetch(`${BASE_URL}/home/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Language': language,
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+        const json = await resp.json()
+        if ('home' in json) {
+            return { error: false, home: json.home as HomeData }
+        } else {
+            return { error: true, message: `Error: can't decode json: ${json}` }
+        }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
 }
 
 /**
- * The API endpoint of list all home
- * @param language the language of the data
+ * Fetches data from the home endpoint using the specified language.
+ *
+ * @param {Language} language - The language preference for the request headers.
+ * @return {Promise<{error: boolean, message?: string, home?: HomeData[]}>} - A promise that resolves to an object containing either the fetched data or an error message.
  */
-function list(language: Language) {
-    return fromFetch(`${BASE_URL}/home`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept-Language': language
-        },
-        signal: AbortSignal.timeout(TIMEOUT),
-        selector: (resp) =>
-            resp.json().then((value) => {
-                return 'home' in value ? (value.home as HomeData[]) : []
-            })
-    })
+async function list(
+    language: Language,
+): Promise<{ error: boolean; message?: string; home?: HomeData[] }> {
+    try {
+        const resp = await fetch(`${BASE_URL}/home`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Language': language,
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+        const json = await resp.json()
+        if ('home' in json) {
+            return { error: false, home: json.home as HomeData[] }
+        } else {
+            return { error: true, message: `Error: can't decode json: ${json}` }
+        }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
 }
 
+/**
+ * HomeServices
+ *
+ * An object that provides a collection of methods for managing home-related services.
+ *
+ * Properties:
+ * - save: Function that handles saving or storing data related to home services.
+ * - retrieve: Function that retrieves specific data or details related to home services.
+ * - list: Function that lists or provides an overview of all home services.
+ *
+ * Use this object to interact with and manage home service-related operations through its functions.
+ */
 export const HomeServices = {
-    // save the content of home page.
     save: save,
-    // retrieve the home
     retrieve: retrieve,
-    // list all home
-    list: list
+    list: list,
 }

@@ -1,11 +1,9 @@
 <script lang="ts">
     import Textarea from '$lib/components/common/Textarea.svelte'
     import Markdown from '@magidoc/plugin-svelte-marked'
-    import { finalize, tap } from 'rxjs'
     import Input from '$lib/components/common/Input.svelte'
     import { ArticleServices } from '$lib/services/article.service'
     import Loading from '$lib/components/common/Loading.svelte'
-    import { startWithTap } from '$lib/utils'
     import type { CategoryData } from '$lib/types'
 
     type EditorProps = {
@@ -67,7 +65,7 @@
     }
 
     // handles the save button has been clicked
-    function onSaveClicked() {
+    async function onSaveClicked() {
         errorMsg = ''
 
         if (!isValid()) {
@@ -75,23 +73,24 @@
             return
         }
 
-        ArticleServices.save({
-            ...(id === undefined ? {} : { id: id }),
-            ...newData,
-            language: 'zh',
-            seq: 0
-        })
-            .pipe(
-                startWithTap(() => isLoading = true),
-                finalize(() => isLoading = false),
-                tap((resp) => {
-                    if (resp.error) {
-                        console.error('Error saving content:', resp.message)
-                        errorMsg = 'We got an error when saving content.'
-                    }
-                })
-            )
-            .subscribe()
+        isLoading = true
+
+        try {
+            const resp = await ArticleServices.save({
+                ...(id === undefined ? {} : { id: id }),
+                ...newData,
+                language: 'zh',
+                seq: 0
+            })
+
+            if (resp.error) {
+                console.error('Error saving content:', resp.message)
+                errorMsg = `We got an error when saving content. error: ${resp.message}`
+            }
+
+        } finally {
+            isLoading = false
+        }
     }
 </script>
 

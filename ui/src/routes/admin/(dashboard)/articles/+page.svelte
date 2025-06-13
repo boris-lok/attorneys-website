@@ -1,11 +1,8 @@
 <script lang="ts">
-    import { startWithTap } from '$lib/utils'
-    import { finalize, tap } from 'rxjs'
     import type { CategoryData, Language, SimpleArticle } from '$lib/types'
     import Icon from '@iconify/svelte'
     import { ArticleServices } from '$lib/services/article.service'
     import Loading from '$lib/components/common/Loading.svelte'
-    import { CategoryService } from '$lib/services/category.service'
     import CategorySelector from '$lib/components/CategorySelector.svelte'
     import ArticleCard from '$lib/components/ArticleCard.svelte'
     import PaginationComponent from '$lib/components/PaginationComponent.svelte'
@@ -19,26 +16,40 @@
     let pageSize = 10
     let totalPages = $state(0)
 
-    function fetchArticlesObservable(lang: Language, categoryId: string | null, page: number, pageSize: number) {
-        return ArticleServices.list(lang, categoryId, page, pageSize)
-            .pipe(
-                startWithTap(() => isLoading = true),
-                finalize(() => isLoading = false),
-                tap(resp => {
-                    articles = resp.articles
-                    totalPages = Math.floor(resp.total / pageSize) + (resp.total % pageSize > 0 ? 1 : 0)
-                })
-            )
+    async function fetchArticlesObservable(lang: Language, categoryId: string | null, page: number, pageSize: number) {
+        const resp = await ArticleServices.list(lang, categoryId, page, pageSize)
+
+        if (resp.error) {
+            console.error(resp.message)
+            return {
+                articles: [],
+                totalPages: 0
+            }
+        }
+
+        return {
+            articles: resp.articles ?? [],
+            totalPages: Math.floor((resp.total ?? 0) / pageSize) + ((resp.total ?? 0) % pageSize > 0 ? 1 : 0)
+        }
+        // return ArticleServices.list(lang, categoryId, page, pageSize)
+        //     .pipe(
+        //         startWithTap(() => isLoading = true),
+        //         finalize(() => isLoading = false),
+        //         tap(resp => {
+        //             articles = resp.articles
+        //             totalPages = Math.floor(resp.total / pageSize) + (resp.total % pageSize > 0 ? 1 : 0)
+        //         })
+        //     )
     }
 
     function fetchCategoriesObservable(lang: Language) {
-        return CategoryService
-            .list(lang)
-            .pipe(
-                tap(resp => {
-                    categories = resp
-                })
-            )
+        // return CategoryService
+        //     .list(lang)
+        //     .pipe(
+        //         tap(resp => {
+        //             categories = resp
+        //         })
+        //     )
     }
 
     function onCategoryChanged(categoryId: string | null) {
@@ -49,12 +60,18 @@
         page = page
     }
 
-    $effect(() => {
-        fetchCategoriesObservable(lang).subscribe({ error: console.error })
-    })
+    // $effect(() => {
+    //     fetchCategoriesObservable(lang).subscribe({ error: console.error })
+    // })
 
     $effect(() => {
-        fetchArticlesObservable(lang, selectedCategoryId, page, pageSize).subscribe({ error: console.error })
+        (async (lang: Language, selectedCategoryId: string | null, page: number, pageSize: number) => {
+            const resp = await fetchArticlesObservable(lang, selectedCategoryId, page, pageSize)
+
+            articles = resp.articles
+            totalPages = resp.totalPages
+
+        })(lang, selectedCategoryId, page, pageSize)
     })
 </script>
 

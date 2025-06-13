@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { BehaviorSubject } from 'rxjs'
     import type { ImageData } from '$lib/types'
     import { iterate } from 'iterare'
     import Image from '$lib/components/common/Image.svelte'
@@ -23,21 +22,11 @@
     // The flag is used to indicate that user has selected an image
     let hasImage = $state(false)
     // The file selected by the user
-    let file = new BehaviorSubject<File | undefined>(undefined)
+    let file: File | undefined = $state(undefined)
 
     $effect(() => {
-        const disposer = file.subscribe({
-            next: (f) => {
-                console.log('file has been changed')
-                console.log(f)
-                hasImage = !!f
-                onChange?.(f)
-            }
-        })
-
-        return () => {
-            disposer.unsubscribe()
-        }
+        hasImage = !!file
+        onChange?.(file)
     })
 
     // Handle file drop
@@ -79,6 +68,7 @@
     function onInputChanged(e: Event) {
         const files = (e.target as HTMLInputElement)?.files ?? ([] as File[])
         const newFile = handleInputFiles(files)
+        file = newFile
         if (newFile) {
             generatePreview(newFile)
         }
@@ -89,13 +79,12 @@
         if (files.length > 0) {
             newFile = iterate(files).find((e) => e.type.startsWith('image/'))
         }
-        file.next(newFile)
         return newFile
     }
 
     // delete the image that user has selected
     function onDeleteClicked() {
-        file.next(undefined)
+        file = undefined
     }
 </script>
 

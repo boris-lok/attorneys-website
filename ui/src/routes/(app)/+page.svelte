@@ -1,8 +1,6 @@
 <script lang="ts">
     import Markdown from '@magidoc/plugin-svelte-marked'
     import { HomeServices } from '$lib/services/home.service'
-    import { startWithTap } from '$lib/utils'
-    import { finalize, tap } from 'rxjs'
     import Loading from '$lib/components/common/Loading.svelte'
 
     // The content of home page
@@ -11,27 +9,22 @@
     let isLoading = $state(false)
 
     // fetch the content from API.
-    function fetchData() {
-        HomeServices.list('zh')
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                finalize(() => (isLoading = false)),
-                tap((resp) => {
-                    if (resp.length === 0) {
-                        content = ''
-                    } else {
-                        content = resp[0].data.data
-                    }
-                    console.log(resp)
-                })
-            )
-            .subscribe({
-                error: console.error
-            })
+    async function fetchData() {
+        const resp = await HomeServices.list('zh')
+        if (resp.error) {
+            console.error(resp.message)
+            return
+        }
+
+        content = (resp.home ?? []).length === 0 ? '' : resp.home![0].data.data
     }
 
     $effect(() => {
-        fetchData()
+        (async () => {
+            isLoading = true
+            await fetchData()
+            isLoading = false
+        })()
     })
 </script>
 

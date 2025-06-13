@@ -1,8 +1,6 @@
 <script lang="ts">
     import Input from '$lib/components/common/Input.svelte'
     import { UserService } from '$lib/services/user.service'
-    import { startWithTap } from '$lib/utils'
-    import { finalize } from 'rxjs'
     import { goto } from '$app/navigation'
     import { user } from '$lib/stores/user.store'
     import Loading from '$lib/components/common/Loading.svelte'
@@ -34,26 +32,21 @@
         }
     }
 
-    function onSubmitClicked() {
+    async function onSubmitClicked() {
         if (data.username === '' || data.password === '') {
             return
         }
+        isLoading = true
+        const resp = await UserService.login(data)
+        isLoading = false
 
-        UserService.login(data)
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                finalize(() => (isLoading = false))
-            )
-            .subscribe({
-                next: (resp: unknown) => {
-                    if (typeof resp === 'object' && resp && 'error' in resp && resp.error) {
-                        console.error(`login failed: ${JSON.stringify(resp)}`)
-                    } else if (typeof resp === 'object' && resp && 'data' in resp) {
-                        user.set(resp.data)
-                        goto('/admin/dashboard')
-                    }
-                }
-            })
+        if (resp.error) {
+            console.error(`login failed: ${JSON.stringify(resp)}`)
+            return
+        }
+
+        user.set(resp.data)
+        await goto('/admin/dashboard')
     }
 </script>
 

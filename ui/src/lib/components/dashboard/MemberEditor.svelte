@@ -5,8 +5,6 @@
     import Textarea from '$lib/components/common/Textarea.svelte'
     import Markdown from '@magidoc/plugin-svelte-marked'
     import { MemberServices } from '$lib/services/member.service'
-    import { startWithTap } from '$lib/utils'
-    import { concatMap, finalize, of, tap } from 'rxjs'
     import Loading from '$lib/components/common/Loading.svelte'
 
     type InputProps = {
@@ -68,7 +66,7 @@
     }
 
     // An handler handles the submit button has been clicked
-    function onSaveClicked() {
+    async function onSaveClicked() {
         if (isLoading) {
             return
         }
@@ -77,38 +75,31 @@
             return
         }
 
-        MemberServices.save({
+        isLoading = true
+        const resp = await MemberServices.save({
             ...(_in.id === undefined ? {} : { id: _in.id }),
             name: name!,
             description: description!,
             seq: 0,
             language: 'zh'
         })
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                concatMap((resp) => {
-                    if ('error' in resp && resp.error) {
-                        return of(resp)
-                    } else if (
-                        newAvatar &&
-                        newAvatar instanceof File &&
-                        'id' in resp
-                    ) {
-                        console.log('saving avatar...')
-                        return MemberServices.saveAvatar(resp.id, newAvatar)
-                    }
 
-                    return of({ error: false })
-                }),
-                finalize(() => (isLoading = false)),
-                tap((resp) => {
-                    if ('message' in resp) {
-                        console.error('Error saving content:', resp.message)
-                        errorMsg = 'We got an error when saving content.'
-                    }
-                })
-            )
-            .subscribe()
+        if (resp.error) {
+            isLoading = false
+            console.error('Error saving content:', resp.message)
+            return
+        }
+
+        if (newAvatar && newAvatar instanceof File && 'id' in resp) {
+            const r = await MemberServices.saveAvatar(resp.id!, newAvatar)
+            if (r.error) {
+                isLoading = false
+                console.error('Error saving avatar:', r.message)
+                return
+            }
+        }
+
+        isLoading = false
     }
 </script>
 

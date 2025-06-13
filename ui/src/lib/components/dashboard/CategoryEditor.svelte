@@ -1,9 +1,7 @@
 <script lang="ts">
-    import { finalize, tap } from 'rxjs'
     import { CategoryService } from '$lib/services/category.service'
     import Input from '$lib/components/common/Input.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import { startWithTap } from '$lib/utils'
     import Loading from '$lib/components/common/Loading.svelte'
 
     type EditorProps = {
@@ -52,7 +50,7 @@
     }
 
     // handles the save button has been clicked
-    function onSaveClicked() {
+    async function onSaveClicked() {
         errorMsg = ''
 
         if (!isValid()) {
@@ -60,23 +58,22 @@
             return
         }
 
-        CategoryService.save({
+        isLoading = true
+
+        const resp = await CategoryService.save({
             ...(id === undefined ? {} : { id: id }),
-            language: 'zh',
+            language: 'en',
             ...data,
             seq: 0
         })
-            .pipe(
-                startWithTap(() => isLoading = true),
-                finalize(() => isLoading = false),
-                tap((resp) => {
-                    if (resp.error) {
-                        console.error('Error saving content:', resp.message)
-                        errorMsg = 'We got an error when saving content.'
-                    }
-                })
-            )
-            .subscribe()
+
+        isLoading = false
+
+        if (resp.error) {
+            console.error('Error saving content:', resp.message)
+            errorMsg = 'We got an error when saving content.'
+            return
+        }
     }
 </script>
 

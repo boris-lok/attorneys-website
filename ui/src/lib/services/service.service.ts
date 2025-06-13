@@ -1,76 +1,117 @@
 import type { CreateServiceRequest, Language, ServiceData, UpdateServiceRequest } from '$lib/types'
-import { fromFetch } from 'rxjs/fetch'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
-import { map } from 'rxjs'
 
 /**
- * The API endpoint of saving service
- * @param req
+ * Sends a request to save a service. Determines whether to create or update based on the presence of an `id` in the request object.
+ *
+ * @param {CreateServiceRequest | UpdateServiceRequest} req The service request object. If an `id` property exists, it updates the service; otherwise, it creates a new service.
+ * @return {Promise<{error: boolean, message?: string}>} A promise that resolves to an object indicating the success or failure of the save operation. If an error occurs, the object includes an error message.
  */
-function save(req: CreateServiceRequest | UpdateServiceRequest) {
-    let method = 'id' in req ? 'PUT' : 'POST'
-
-    return fromFetch(`${ADMIN_URL}/services`, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: getToken()
-        },
-        body: JSON.stringify(req),
-        signal: AbortSignal.timeout(TIMEOUT)
-    }).pipe(
-        map((resp) => {
-            if (!resp.ok) {
-                return { error: true, message: `Error: ${resp.status}` }
-            }
-            return { error: false }
+async function save(
+    req: CreateServiceRequest | UpdateServiceRequest,
+): Promise<{ error: boolean; message?: string }> {
+    try {
+        const resp = await fetch(`${ADMIN_URL}/services`, {
+            method: 'id' in req ? 'PUT' : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: getToken(),
+            },
+            body: JSON.stringify(req),
+            signal: AbortSignal.timeout(TIMEOUT),
         })
-    )
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+        return { error: false }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
 }
 
 /**
- * The API endpoint of retrieving the service by id and language
- * @param id the ID of service
- * @param language the language
+ * Retrieves service data for a given service ID and language.
+ *
+ * @param {string} id - The unique identifier of the service to be retrieved.
+ * @param {Language} language - The language in which the data should be retrieved.
+ * @return {Promise<{ error: boolean, message?: string, service?: ServiceData }>}
+ * A promise that resolves to an object containing an error flag and either the service data
+ * or an error message.
  */
-function retrieve(id: string, language: Language) {
-    return fromFetch(`${BASE_URL}/services/${id}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept-Language': language
-        },
-        signal: AbortSignal.timeout(TIMEOUT),
-        selector: (resp) =>
-            resp.json().then((json) => {
-                return 'service' in json ? (json.service as ServiceData) : null
-            })
-    })
+async function retrieve(
+    id: string,
+    language: Language,
+): Promise<{ error: boolean; message?: string; service?: ServiceData }> {
+    try {
+        const resp = await fetch(`${BASE_URL}/services/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Language': language,
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+
+        const json = await resp.json()
+        if ('service' in json) {
+            return { error: false, service: json.service as ServiceData }
+        } else {
+            return { error: true, message: `Error: can't decode json: ${json}` }
+        }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
 }
 
-function list(language: Language) {
-    return fromFetch(`${BASE_URL}/services`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept-Language': language
-        },
-        signal: AbortSignal.timeout(TIMEOUT),
-        selector: (resp) =>
-            resp.json().then((value) => {
-                return 'services' in value
-                    ? (value.services as ServiceData[])
-                    : []
-            })
-    })
+/**
+ * Fetches a list of services from the server based on the provided language.
+ *
+ * @param {Language} language - The language code to retrieve services with the appropriate language settings.
+ * @return {Promise<{ error: boolean, services?: ServiceData[], message?: string }>}
+ * Returns a promise that resolves with an object containing:
+ * - `error` (boolean): Indicates whether the operation failed.
+ * - `services` (optional array of ServiceData): The list of retrieved services if operation is successful.
+ * - `message` (optional string): An error message if the operation fails.
+ */
+async function list(
+    language: Language,
+): Promise<{ error: boolean; services?: ServiceData[]; message?: string }> {
+    try {
+        const resp = await fetch(`${BASE_URL}/services`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Language': language,
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+        const json = await resp.json()
+        if ('services' in json) {
+            return { error: false, services: json.services as ServiceData[] }
+        } else {
+            return { error: true, message: `Error: can't decode json: ${json}` }
+        }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
 }
 
+/**
+ * An object that provides methods for service operations such as saving, retrieving, and listing.
+ *
+ * @property {Function} save - A method used to save a service object.
+ * @property {Function} retrieve - A method used to retrieve a specific service object.
+ * @property {Function} list - A method used to list all available service objects.
+ */
 export const ServiceServices = {
-    // save the content of service page.
     save: save,
-    // retrieve the service
     retrieve: retrieve,
-    // list all services
-    list: list
+    list: list,
 }

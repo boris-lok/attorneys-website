@@ -1,7 +1,5 @@
 <script lang="ts">
     import { ServiceServices } from '$lib/services/service.service'
-    import { startWithTap } from '$lib/utils'
-    import { finalize, tap } from 'rxjs'
     import type { ServiceData } from '$lib/types'
     import ServiceBox from '$lib/components/ServiceBox.svelte'
     import Loading from '$lib/components/common/Loading.svelte'
@@ -15,23 +13,24 @@
         selectedServiceID = id
     }
 
-    function fetchData() {
-        ServiceServices.list('zh')
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                finalize(() => (isLoading = false)),
-                tap((resp) => {
-                    services = resp
-                    console.log(services)
-                })
-            )
-            .subscribe({
-                error: console.error
-            })
+    async function fetchData() {
+        const resp = await ServiceServices.list('zh')
+        if (resp.error) {
+            console.error(resp.message)
+            return
+        }
+
+        services = resp.services ?? []
     }
 
 
-    $effect(() => fetchData())
+    $effect(() => {
+        (async () => {
+            isLoading = true
+            await fetchData()
+            isLoading = false
+        })()
+    })
 </script>
 
 {#if isLoading}

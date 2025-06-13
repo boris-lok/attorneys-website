@@ -2,8 +2,6 @@
     import Textarea from '$lib/components/common/Textarea.svelte'
     import Markdown from '@magidoc/plugin-svelte-marked'
     import { HomeServices } from '$lib/services/home.service'
-    import { finalize, tap } from 'rxjs'
-    import { startWithTap } from '$lib/utils'
     import Loading from '$lib/components/common/Loading.svelte'
 
     type EditorProps = {
@@ -35,7 +33,7 @@
     }
 
     // handles the save button has been clicked
-    function onSaveClicked() {
+    async function onSaveClicked() {
         errorMsg = ''
 
         if (!isValid()) {
@@ -43,23 +41,20 @@
             return
         }
 
-        HomeServices.save({
+        isLoading = true
+        const resp = await HomeServices.save({
             ...(id === undefined ? {} : { id: id }),
             data: content,
             language: 'zh',
             seq: 0
         })
-            .pipe(
-                startWithTap(() => isLoading = true),
-                finalize(() => isLoading = false),
-                tap((resp) => {
-                    if (resp.error) {
-                        console.error('Error saving content:', resp.message)
-                        errorMsg = 'We got an error when saving content.'
-                    }
-                })
-            )
-            .subscribe()
+        isLoading = false
+
+        if (resp.error) {
+            console.error('Error saving content:', resp.message)
+            errorMsg = 'We got an error when saving content.'
+            return
+        }
     }
 </script>
 

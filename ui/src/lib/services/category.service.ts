@@ -1,98 +1,153 @@
 import type { CategoryData, CreateCategoryRequest, Language, UpdateCategoryRequest } from '$lib/types'
-import { fromFetch } from 'rxjs/fetch'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
-import { map } from 'rxjs'
 
 /**
- * The API endpoint of saving category
- * @param req
+ * Saves a category by sending either a creation or an update request to the server.
+ * The HTTP method is determined based on whether the request contains an `id` property.
+ *
+ * @param {CreateCategoryRequest|UpdateCategoryRequest} req - The request object containing category data.
+ * For a new category, provide a `CreateCategoryRequest`. For updating an existing category, provide an `UpdateCategoryRequest`.
+ * @return {Promise<{error: boolean, message?: string}>} A promise that resolves to an object indicating the success or failure of the operation.
+ * The `error` property is `true` if the save operation failed and `false` if it succeeded.
+ * The `message` property is included in case of an error.
  */
-function save(req: CreateCategoryRequest | UpdateCategoryRequest) {
-    let method = 'id' in req ? 'PUT' : 'POST'
-
-    return fromFetch(`${ADMIN_URL}/categories`, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: getToken()
-        },
-        body: JSON.stringify(req),
-        signal: AbortSignal.timeout(TIMEOUT)
-    }).pipe(
-        map((resp) => {
-            if (!resp.ok) {
-                return { error: true, message: `Error: ${resp.status}` }
-            }
-            return { error: false }
+async function save(
+    req: CreateCategoryRequest | UpdateCategoryRequest,
+): Promise<{ error: boolean; message?: string }> {
+    try {
+        const resp = await fetch(`${ADMIN_URL}/categories`, {
+            method: 'id' in req ? 'PUT' : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: getToken(),
+            },
+            body: JSON.stringify(req),
+            signal: AbortSignal.timeout(TIMEOUT),
         })
-    )
-}
 
-function list(language: Language) {
-    return fromFetch(`${BASE_URL}/categories`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept-Language': language
-        },
-        signal: AbortSignal.timeout(TIMEOUT),
-        selector: (resp) =>
-            resp.json().then((value) => {
-                return 'categories' in value
-                    ? (value.categories as CategoryData[])
-                    : []
-            })
-    })
-}
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
 
-function del(id: string) {
-    return fromFetch(`${ADMIN_URL}/categories/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: getToken()
-        },
-        signal: AbortSignal.timeout(TIMEOUT)
-    }).pipe(
-        map((resp) => {
-            if (!resp.ok) {
-                return { error: true, message: `Error: ${resp.status}` }
-            }
-            return { error: false }
-        })
-    )
+        return { error: false }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
 }
 
 /**
- * The API endpoint of retrieving the category by id and language
- * @param id the ID of service
- * @param language the language
+ * Fetches a list of categories from the server based on the provided language.
+ *
+ * @param {Language} language - The language to use for the request.
+ * @return {Promise<{ error: boolean, categories?: CategoryData[], message?: string }>}
+ * A promise that resolves to an object containing either the list of categories or an error message.
  */
-function retrieve(id: string, language: Language) {
-    return fromFetch(`${BASE_URL}/categories/${id}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept-Language': language
-        },
-        signal: AbortSignal.timeout(TIMEOUT),
-        selector: (resp) =>
-            resp.json().then((json) => {
-                return 'category' in json
-                    ? (json.category as CategoryData)
-                    : null
-            })
-    })
+async function list(
+    language: Language,
+): Promise<{ error: boolean; categories?: CategoryData[]; message?: string }> {
+    try {
+        const resp = await fetch(`${BASE_URL}/categories`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Language': language,
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+
+        const json = await resp.json()
+        if ('categories' in json) {
+            return {
+                error: false,
+                categories: json.categories as CategoryData[],
+            }
+        } else {
+            return { error: true, message: `Error: can't decode json: ${json}` }
+        }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
 }
 
+/**
+ * Deletes a category resource on the server based on the provided ID.
+ *
+ * @param {string} id The unique identifier of the category to be deleted.
+ * @return {Promise<{error: boolean, message?: string}>} A promise that resolves to an object containing:
+ *   - `error`: A boolean indicating whether there was an error.
+ *   - `message`: A string containing an error message if an error occurred.
+ */
+async function del(id: string): Promise<{ error: boolean; message?: string }> {
+    try {
+        const resp = await fetch(`${ADMIN_URL}/categories/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: getToken(),
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+        return { error: false }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
+}
+
+/**
+ * Fetches category data by its identifier and language preference.
+ *
+ * @param {string} id - The identifier of the category to retrieve.
+ * @param {Language} language - The language in which the data should be fetched.
+ * @return {Promise<{error: boolean, message?: string, category?: CategoryData}>} A promise that resolves with the category data or an error object.
+ */
+async function retrieve(
+    id: string,
+    language: Language,
+): Promise<{ error: boolean; message?: string; category?: CategoryData }> {
+    try {
+        const resp = await fetch(`${BASE_URL}/categories/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Language': language,
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+        const json = await resp.json()
+        if ('category' in json) {
+            return { error: false, category: json.category as CategoryData }
+        } else {
+            return { error: true, message: `Error: can't decode json: ${json}` }
+        }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
+}
+
+/**
+ * CategoryService is an object that provides methods for managing categories.
+ * It includes functionalities to save, list, delete, and retrieve category data.
+ *
+ * Methods:
+ * - save: Function to save a new category or update an existing category.
+ * - list: Function to retrieve a list of all categories.
+ * - delete: Function to delete a specific category.
+ * - retrieve: Function to retrieve details of a specific category by its identifier.
+ */
 export const CategoryService = {
-    // save the content of category.
     save: save,
-    // list all categories
     list: list,
-    // delete the category
     delete: del,
-    // retrieve the category
-    retrieve: retrieve
+    retrieve: retrieve,
 }

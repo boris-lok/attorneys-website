@@ -1,10 +1,8 @@
 <script lang="ts">
     import type { PageProps } from './$types'
-    import { startWithTap } from '$lib/utils'
-    import { finalize, tap } from 'rxjs'
     import { MemberServices } from '$lib/services/member.service'
     import MemberEditor from '$lib/components/dashboard/MemberEditor.svelte'
-    import type { ImageData, MemberData } from '$lib/types'
+    import type { ImageData } from '$lib/types'
     import Loading from '$lib/components/common/Loading.svelte'
 
     let { data }: PageProps = $props()
@@ -15,26 +13,26 @@
     let avatar: ImageData | undefined = $state(undefined)
     let seq = $state(0)
 
-    function fetchData() {
-        MemberServices.retrieve(data.id, 'zh')
-            .pipe(
-                startWithTap(() => (isLoading = true)),
-                finalize(() => (isLoading = false)),
-                tap((resp: MemberData | null) => {
-                    if (resp) {
-                        name = resp.data.name ?? ''
-                        description = resp.data.description ?? ''
-                        avatar = resp.avatar
-                        seq = resp.seq ?? 0
-                    }
-                })
-            )
-            .subscribe({
-                error: console.error
-            })
+    async function fetchData() {
+        const resp = await MemberServices.retrieve(data.id, 'zh')
+        if (resp.error) {
+            console.error(resp.message)
+            return
+        }
+
+        name = resp.member?.data.name ?? ''
+        description = resp.member?.data.description ?? ''
+        avatar = resp.member?.avatar
+        seq = resp.member?.seq ?? 0
     }
 
-    $effect(() => fetchData())
+    $effect(() => {
+        (async () => {
+            isLoading = true
+            await fetchData()
+            isLoading = false
+        })()
+    })
 </script>
 
 {#if isLoading}

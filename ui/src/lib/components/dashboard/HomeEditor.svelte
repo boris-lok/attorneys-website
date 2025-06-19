@@ -9,31 +9,40 @@
         data?: string
     }
 
-    let { id, data }: EditorProps = $props()
-    let content: string = $state('')
-    $effect(() => {
-        // init the state by props
-        content = data ?? ''
-    })
+    let { id, data = '' }: EditorProps = $props()
+    let content: string = $state(data)
     let errorMsg = $state('')
     let isLoading = $state(false)
 
-    // handles content has been changed
-    // it will update the preview zone automatically
+    /**
+     * Handles the content change event triggered by a textarea element.
+     *
+     * @param {Event & { currentTarget: EventTarget & HTMLTextAreaElement }} e - The event triggered when the content of the textarea changes. It includes the current target which is the HTMLTextAreaElement instance.
+     * @return {void} This function does not return a value. It updates the content variable with the trimmed value from the textarea.
+     */
     function onContentChanged(
         e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
-    ) {
+    ): void {
         content = (e.currentTarget as HTMLTextAreaElement).value.trim()
     }
 
-    // checks if content is not empty
-    // if it is, returns false. Otherwise, returns true
-    function isValid() {
+    /**
+     * Checks if the content is valid by verifying that it is not an empty string after trimming.
+     *
+     * @return {boolean} Returns true if the trimmed content is not an empty string, otherwise false.
+     */
+    function isValid(): boolean {
         return content.trim() !== ''
     }
 
-    // handles the save button has been clicked
-    async function onSaveClicked() {
+    /**
+     * Handles the save button click event. Validates the input content
+     * and sends it to the save service. Displays an error message if
+     * the validation fails or the save process encounters an error.
+     *
+     * @return {Promise<void>} A promise that resolves after the save process is completed or an error occurs.
+     */
+    async function onSaveClicked(): Promise<void> {
         errorMsg = ''
 
         if (!isValid()) {
@@ -43,7 +52,7 @@
 
         isLoading = true
         const resp = await HomeServices.save({
-            ...(id === undefined ? {} : { id: id }),
+            ...(id ? { id } : {}),
             data: content,
             language: 'zh',
             seq: 0
@@ -62,10 +71,10 @@
     <Loading />
 {:else}
     <div
-        class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
+        class="mb-2 flex rounded-lg bg-red-50 p-4 hidden [.show]:block"
         role="alert"
     >
-        <p class="w-full text-center">{errorMsg}</p>
+        <p class="w-full text-center text-red-800 text-sm">{errorMsg}</p>
     </div>
     <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
         <div class="flex-1">

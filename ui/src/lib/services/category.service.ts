@@ -1,4 +1,11 @@
-import type { CategoryData, CreateCategoryRequest, Language, UpdateCategoryRequest } from '$lib/types'
+import type {
+    APIError,
+    APIResponse,
+    CategoryData,
+    CreateCategoryRequest,
+    Language,
+    UpdateCategoryRequest
+} from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 
@@ -8,13 +15,13 @@ import { getToken } from '$lib/utils'
  *
  * @param {CreateCategoryRequest|UpdateCategoryRequest} req - The request object containing category data.
  * For a new category, provide a `CreateCategoryRequest`. For updating an existing category, provide an `UpdateCategoryRequest`.
- * @return {Promise<{error: boolean, message?: string}>} A promise that resolves to an object indicating the success or failure of the operation.
+ * @return {Promise<APIError | APIResponse<void>>} A promise that resolves to an object indicating the success or failure of the operation.
  * The `error` property is `true` if the save operation failed and `false` if it succeeded.
  * The `message` property is included in case of an error.
  */
 async function save(
     req: CreateCategoryRequest | UpdateCategoryRequest,
-): Promise<{ error: boolean; message?: string }> {
+): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/categories`, {
             method: 'id' in req ? 'PUT' : 'POST',
@@ -40,12 +47,12 @@ async function save(
  * Fetches a list of categories from the server based on the provided language.
  *
  * @param {Language} language - The language to use for the request.
- * @return {Promise<{ error: boolean, categories?: CategoryData[], message?: string }>}
+ * @return {Promise<APIError | APIResponse<{categories: CategoryData[]}>>}
  * A promise that resolves to an object containing either the list of categories or an error message.
  */
 async function list(
     language: Language,
-): Promise<{ error: boolean; categories?: CategoryData[]; message?: string }> {
+): Promise<APIError | APIResponse<{ categories: CategoryData[] }>> {
     try {
         const resp = await fetch(`${BASE_URL}/categories`, {
             method: 'GET',
@@ -82,7 +89,7 @@ async function list(
  *   - `error`: A boolean indicating whether there was an error.
  *   - `message`: A string containing an error message if an error occurred.
  */
-async function del(id: string): Promise<{ error: boolean; message?: string }> {
+async function del(id: string): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/categories/${id}`, {
             method: 'DELETE',
@@ -106,12 +113,12 @@ async function del(id: string): Promise<{ error: boolean; message?: string }> {
  *
  * @param {string} id - The identifier of the category to retrieve.
  * @param {Language} language - The language in which the data should be fetched.
- * @return {Promise<{error: boolean, message?: string, category?: CategoryData}>} A promise that resolves with the category data or an error object.
+ * @return {Promise<APIError | APIResponse<{category: CategoryData}>>} A promise that resolves with the category data or an error object.
  */
 async function retrieve(
     id: string,
     language: Language,
-): Promise<{ error: boolean; message?: string; category?: CategoryData }> {
+): Promise<APIError | APIResponse<{ category: CategoryData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/categories/${id}`, {
             method: 'GET',

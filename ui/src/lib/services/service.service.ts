@@ -1,4 +1,11 @@
-import type { CreateServiceRequest, Language, ServiceData, UpdateServiceRequest } from '$lib/types'
+import type {
+    APIError,
+    APIResponse,
+    CreateServiceRequest,
+    Language,
+    ServiceData,
+    UpdateServiceRequest
+} from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 
@@ -6,11 +13,11 @@ import { getToken } from '$lib/utils'
  * Sends a request to save a service. Determines whether to create or update based on the presence of an `id` in the request object.
  *
  * @param {CreateServiceRequest | UpdateServiceRequest} req The service request object. If an `id` property exists, it updates the service; otherwise, it creates a new service.
- * @return {Promise<{error: boolean, message?: string}>} A promise that resolves to an object indicating the success or failure of the save operation. If an error occurs, the object includes an error message.
+ * @return {Promise<APIError | APIResponse<void>>} A promise that resolves to an object indicating the success or failure of the save operation. If an error occurs, the object includes an error message.
  */
 async function save(
     req: CreateServiceRequest | UpdateServiceRequest,
-): Promise<{ error: boolean; message?: string }> {
+): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/services`, {
             method: 'id' in req ? 'PUT' : 'POST',
@@ -35,14 +42,14 @@ async function save(
  *
  * @param {string} id - The unique identifier of the service to be retrieved.
  * @param {Language} language - The language in which the data should be retrieved.
- * @return {Promise<{ error: boolean, message?: string, service?: ServiceData }>}
+ * @return {Promise<APIError | APIResponse<{service: ServiceData}>>}
  * A promise that resolves to an object containing an error flag and either the service data
  * or an error message.
  */
 async function retrieve(
     id: string,
     language: Language,
-): Promise<{ error: boolean; message?: string; service?: ServiceData }> {
+): Promise<APIError | APIResponse<{ service: ServiceData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/services/${id}`, {
             method: 'GET',
@@ -71,7 +78,7 @@ async function retrieve(
  * Fetches a list of services from the server based on the provided language.
  *
  * @param {Language} language - The language code to retrieve services with the appropriate language settings.
- * @return {Promise<{ error: boolean, services?: ServiceData[], message?: string }>}
+ * @return {Promise<APIError | APIResponse<{services: ServiceData[]}>>}
  * Returns a promise that resolves with an object containing:
  * - `error` (boolean): Indicates whether the operation failed.
  * - `services` (optional array of ServiceData): The list of retrieved services if operation is successful.
@@ -79,7 +86,7 @@ async function retrieve(
  */
 async function list(
     language: Language,
-): Promise<{ error: boolean; services?: ServiceData[]; message?: string }> {
+): Promise<APIError | APIResponse<{ services: ServiceData[] }>> {
     try {
         const resp = await fetch(`${BASE_URL}/services`, {
             method: 'GET',

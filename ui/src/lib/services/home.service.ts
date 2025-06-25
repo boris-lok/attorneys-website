@@ -1,4 +1,4 @@
-import type { CreateHomeRequest, HomeData, Language, UpdateHomeRequest } from '$lib/types'
+import type { APIError, APIResponse, CreateHomeRequest, HomeData, Language, UpdateHomeRequest } from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 
@@ -7,11 +7,11 @@ import { getToken } from '$lib/utils'
  * it performs an update (PUT request). Otherwise, it creates a new entity (POST request).
  *
  * @param {CreateHomeRequest|UpdateHomeRequest} req - The request object containing the home details to create or update.
- * @return {Promise<{error: boolean, message?: string}>} A promise that resolves to an object indicating if the operation was successful or not.
+ * @return {Promise<APIError | APIResponse<void>>} A promise that resolves to an object indicating if the operation was successful or not.
  */
 async function save(
     req: CreateHomeRequest | UpdateHomeRequest,
-): Promise<{ error: boolean; message?: string }> {
+): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/home`, {
             method: 'id' in req ? 'PUT' : 'POST',
@@ -38,12 +38,12 @@ async function save(
  *
  * @param {string} id - The unique identifier for the home resource to retrieve.
  * @param {Language} language - The language preference for the response.
- * @return {Promise<{error: boolean, home?: HomeData, message?: string}>} A promise that resolves to an object containing the error status, home data if successful, or an error message if an issue occurs.
+ * @return {Promise<APIError | APIResponse<{home: HomeData}>>} A promise that resolves to an object containing the error status, home data if successful, or an error message if an issue occurs.
  */
 async function retrieve(
     id: string,
     language: Language,
-): Promise<{ error: boolean; home?: HomeData; message?: string }> {
+): Promise<APIError | APIResponse<{ home: HomeData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/home/${id}`, {
             method: 'GET',
@@ -72,11 +72,11 @@ async function retrieve(
  * Fetches data from the home endpoint using the specified language.
  *
  * @param {Language} language - The language preference for the request headers.
- * @return {Promise<{error: boolean, message?: string, home?: HomeData[]}>} - A promise that resolves to an object containing either the fetched data or an error message.
+ * @return {Promise<APIError | APIResponse<{home: HomeData[]>}>} - A promise that resolves to an object containing either the fetched data or an error message.
  */
 async function list(
     language: Language,
-): Promise<{ error: boolean; message?: string; home?: HomeData[] }> {
+): Promise<APIError | APIResponse<{ home: HomeData[] }>> {
     try {
         const resp = await fetch(`${BASE_URL}/home`, {
             method: 'GET',

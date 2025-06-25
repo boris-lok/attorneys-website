@@ -1,4 +1,12 @@
-import type { CreateMemberRequest, Language, MemberData, SimpleMember, UpdateMemberRequest } from '$lib/types'
+import type {
+    APIError,
+    APIResponse,
+    CreateMemberRequest,
+    Language,
+    MemberData,
+    SimpleMember,
+    UpdateMemberRequest
+} from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT, UPLOAD_IMAGE_TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 
@@ -7,13 +15,13 @@ import { getToken } from '$lib/utils'
  *
  * @param {CreateMemberRequest | UpdateMemberRequest} req The request object containing the data for creating or updating a member.
  *        Pass `CreateMemberRequest` to create a new member or `UpdateMemberRequest` to update an existing member.
- * @return {Promise<{ error: boolean, message?: string, id?: string }>} A promise that resolves with an object indicating the success or failure of the operation.
+ * @return {Promise<APIError | APIResponse<{id: string}>>} A promise that resolves with an object indicating the success or failure of the operation.
  *         On success, the object contains `error: false` and the `id` of the member.
  *         On failure, the object contains `error: true` and an error `message`.
  */
 async function save(
     req: CreateMemberRequest | UpdateMemberRequest,
-): Promise<{ error: boolean; message?: string; id?: string }> {
+): Promise<APIError | APIResponse<{ id: string }>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/members`, {
             method: 'id' in req ? 'PUT' : 'POST',
@@ -45,13 +53,13 @@ async function save(
  *
  * @param {string} id - The unique identifier of the member to be retrieved.
  * @param {Language} language - The preferred language to be included in the request headers.
- * @return {Promise<{error: boolean, message?: string, member?: MemberData}>} - A promise that resolves to an object indicating success or failure.
+ * @return {Promise<APIError | APIResponse<{member: MemberData}>>} - A promise that resolves to an object indicating success or failure.
  * If successful, the object contains the member data. If unsuccessful, an error flag and message are provided.
  */
 async function retrieve(
     id: string,
     language: Language,
-): Promise<{ error: boolean; message?: string; member?: MemberData }> {
+): Promise<APIError | APIResponse<{ member: MemberData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/members/${id}`, {
             method: 'GET',
@@ -80,11 +88,11 @@ async function retrieve(
  * Fetches a list of members from a remote server.
  *
  * @param {Language} language - The preferred language for the response, used to set the Accept-Language header.
- * @return {Promise<{ error: boolean, message?: string, members?: SimpleMember[] }>} A promise that resolves to an object containing a list of members or an error message.
+ * @return {Promise<APIError | APIResponse<{members: SimpleMember[]}>>} A promise that resolves to an object containing a list of members or an error message.
  */
 async function list(
     language: Language,
-): Promise<{ error: boolean; message?: string; members?: SimpleMember[] }> {
+): Promise<APIError | APIResponse<{ members: SimpleMember[] }>> {
     try {
         const resp = await fetch(`${BASE_URL}/members`, {
             method: 'GET',
@@ -114,12 +122,12 @@ async function list(
  *
  * @param {string} id - The unique identifier of the member whose avatar is being updated.
  * @param {File} file - The avatar image file to upload.
- * @return {Promise<{error: boolean, message?: string}>} A promise that resolves to an object indicating the success or failure of the upload. If the upload fails, the object contains an error message.
+ * @return {Promise<APIError | APIResponse<void>>} A promise that resolves to an object indicating the success or failure of the upload. If the upload fails, the object contains an error message.
  */
 async function saveAvatar(
     id: string,
     file: File,
-): Promise<{ error: boolean; message?: string }> {
+): Promise<APIError | APIResponse<void>> {
     try {
         const formData = new FormData()
         formData.append('avatar', file)

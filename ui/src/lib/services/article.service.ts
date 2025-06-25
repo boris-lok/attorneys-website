@@ -1,4 +1,11 @@
-import type { ArticleData, CreateArticleRequest, Language, UpdateArticleRequest } from '$lib/types'
+import type {
+    APIError,
+    APIResponse,
+    ArticleData,
+    CreateArticleRequest,
+    Language,
+    UpdateArticleRequest
+} from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 
@@ -9,12 +16,12 @@ import { getToken } from '$lib/utils'
  * @param {CreateArticleRequest | UpdateArticleRequest} req The request object containing article data.
  * If it includes an `id`, the article will be updated; otherwise, a new article will be created.
  *
- * @return {Promise<{ error: boolean; message?: string }>} A promise that resolves to an object indicating success or failure.
+ * @return {Promise<APIError | APIResponse<void>> A promise that resolves to an object indicating success or failure.
  * The `error` field is true if an error occurs, and `message` provides details about the error when applicable.
  */
 async function save(
     req: CreateArticleRequest | UpdateArticleRequest,
-): Promise<{ error: boolean; message?: string }> {
+): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/articles`, {
             method: 'id' in req ? 'PUT' : 'POST',
@@ -47,7 +54,7 @@ async function save(
 async function retrieve(
     id: string,
     language: Language,
-): Promise<{ error: boolean; article?: ArticleData; message?: string }> {
+): Promise<APIError | APIResponse<{ article: ArticleData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/articles/${id}`, {
             method: 'GET',
@@ -80,7 +87,7 @@ async function retrieve(
  * @param {string | null} categoryId - The ID of the category to filter articles by, or null if no category filter is needed.
  * @param {number} page - The page number to retrieve.
  * @param {number} pageSize - The number of articles to retrieve per page.
- * @return {Promise<{ error: boolean, articles?: Array<{ id: string, title: string, language: string, createdAt: Date, createdAtString: string, seq: number }>, total?: number, message?: string }>}
+ * @return {Promise<APIError | APIResponse<{articles: {id: string, title: string, language: Language, createdAt: Date, createdAtString: string, seq: number}, total: number}>>}
  *         A promise that resolves to an object containing either the list of articles and total count if successful, or an error message if an error occurs.
  */
 async function list(
@@ -88,19 +95,20 @@ async function list(
     categoryId: string | null,
     page: number,
     pageSize: number,
-): Promise<{
-    error: boolean
-    articles?: Array<{
-        id: string
-        title: string
-        language: Language
-        createdAt: Date
-        createdAtString: string
-        seq: number
-    }>
-    total?: number
-    message?: string
-}> {
+): Promise<
+    | APIError
+    | APIResponse<{
+          articles: {
+              id: string
+              title: string
+              language: Language
+              createdAt: Date
+              createdAtString: string
+              seq: number
+          }
+          total: number
+      }>
+> {
     let url = `${BASE_URL}/articles?page=${page}&page_size=${pageSize}`
     if (categoryId) {
         url += `&category_id=${categoryId}`

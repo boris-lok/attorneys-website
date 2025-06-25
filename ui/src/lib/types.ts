@@ -142,3 +142,12 @@ export type CreateCategoryRequest = {
 
 // The request of updating article content
 export type UpdateCategoryRequest = { id: string } & CreateCategoryRequest
+
+export type APIError = {
+    error: true
+    message: string
+}
+
+export type APIResponse<T> = T extends void
+    ? { error: false }
+    : { error: false } & T

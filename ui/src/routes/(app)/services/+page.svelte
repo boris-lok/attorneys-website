@@ -1,58 +1,14 @@
 <script lang="ts">
-    import { ServiceServices } from '$lib/services/service.service'
-    import type { ServiceData } from '$lib/types'
-    import ServiceBox from '$lib/components/ServiceBox.svelte'
-    import Loading from '$lib/components/common/Loading.svelte'
-
-    let services: ServiceData[] = $state([])
-    let isLoading = $state(false)
-    let selectedServiceID = $state('')
-
-    // handles service block clicked.
-    function onServiceClicked(id: string) {
-        selectedServiceID = id
-    }
-
-    async function fetchData() {
-        const resp = await ServiceServices.list('zh')
-        if (resp.error) {
-            console.error(resp.message)
-            return
-        }
-
-        services = resp.services ?? []
-    }
-
-
-    $effect(() => {
-        (async () => {
-            isLoading = true
-            await fetchData()
-            isLoading = false
-        })()
-    })
+    import ServiceList from '$lib/components/ServiceList.svelte'
 </script>
 
-{#if isLoading}
-    <Loading />
-{:else}
-    <div class="relative flex flex-col md:flex-row md:items-center">
-        <div class="relative flex w-full flex-col md:max-w-6xl mx-auto">
-            <p
-                class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16"
-            >
-                法律服務項目
-            </p>
-            <div
-                class="relative mb-16 flex w-full flex-col items-center justify-center gap-x-16 gap-y-8 px-16 md:flex-row md:flex-wrap"
-            >
-                {#each services as service}
-                    <button onclick={() => onServiceClicked(service.id)}>
-                        <ServiceBox icon={service.data.icon} title={service.data.title}
-                                    content={service.data.data} active={service.id === selectedServiceID} />
-                    </button>
-                {/each}
-            </div>
-        </div>
+<div class="relative flex flex-col md:flex-row md:items-center">
+    <div class="relative flex w-full flex-col md:max-w-6xl mx-auto">
+        <p
+            class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16"
+        >
+            法律服務項目
+        </p>
+        <ServiceList isAdmin={false} />
     </div>
-{/if}
+</div>

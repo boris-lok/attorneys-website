@@ -1,69 +1,13 @@
 <script lang="ts">
-    import { ServiceServices } from '$lib/services/service.service'
-    import type { ServiceData } from '$lib/types'
     import Icon from '@iconify/svelte'
-    import Loading from '$lib/components/common/Loading.svelte'
-    import ServiceBox from '$lib/components/ServiceBox.svelte'
-
-    let services: ServiceData[] = $state([])
-    let isLoading = $state(false)
-    let selectedServiceID = $state('')
-
-    // handles service block clicked.
-    function onServiceClicked(id: string) {
-        selectedServiceID = id
-    }
-
-    async function fetchData() {
-        const resp = await ServiceServices.list('zh')
-        if (resp.error) {
-            console.error(resp.message)
-            return
-        }
-
-        services = resp.services ?? []
-    }
-
-
-    $effect(() => {
-        (async () => {
-            isLoading = true
-            await fetchData()
-            isLoading = false
-        })()
-    })
+    import ServiceList from '$lib/components/ServiceList.svelte'
 </script>
 
-{#if isLoading}
-    <Loading />
-{:else}
-    <div>
-        <div class="relative my-4 flex flex-row justify-end px-2">
-            <a href="/admin/services/edit">
-                <Icon height="24" icon="gridicons:create" width="24" />
-            </a>
-        </div>
-        <div class="relative grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
-            {#each services as service, i}
-                <div
-                    class="w-fit relative"
-                >
-                    <button onclick={() => onServiceClicked(service.id)}>
-                        <ServiceBox icon={service.data.icon} title={service.data.title}
-                                    content={service.data.data} active={service.id === selectedServiceID} />
-                    </button>
-                    <div class="absolute top-2 right-2 z-10">
-                        <a href="/admin/services/edit/{service.id}">
-                            <Icon
-                                icon="mingcute:edit-line"
-                                width="24"
-                                height="24"
-                            />
-                        </a>
-                    </div>
-                </div>
-            {/each}
-        </div>
+<div>
+    <div class="relative my-4 flex flex-row justify-end px-2">
+        <a href="/admin/services/edit">
+            <Icon height="24" icon="gridicons:create" width="24" />
+        </a>
     </div>
-
-{/if}
+    <ServiceList isAdmin={true} />
+</div>

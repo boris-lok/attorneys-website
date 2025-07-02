@@ -52,7 +52,8 @@
                                 content={service.data.data} active={service.id === selectedServiceId} />
                 </button>
                 {#if isAdmin}
-                    <div class="absolute top-2 right-2 z-10 hover:bg-gray-400/20 p-1 rounded opacity-10 hover:opacity-100">
+                    <div
+                        class="absolute top-2 right-2 z-10 hover:bg-gray-400/20 p-1 rounded opacity-10 hover:opacity-100">
                         <a href="/admin/services/edit/{service.id}">
                             <Icon
                                 icon="mingcute:edit-line"

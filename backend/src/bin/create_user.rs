@@ -33,9 +33,15 @@ async fn main() -> anyhow::Result<()> {
 
     reader.read_line(&mut password).await?;
 
+    let mut nickname = String::new();
+    println!("Enter nickname: ");
+    io::stdout().flush()?;
+    reader.read_line(&mut nickname).await?;
+
     let req = users::create_user::Request {
         username: username.trim().to_string(),
         password: SecretBox::new(Box::new(password.trim().to_string())),
+        nickname: nickname.trim().to_string(),
     };
 
     match users::create_user::execute(req, Mutex::new(user_repo)).await {

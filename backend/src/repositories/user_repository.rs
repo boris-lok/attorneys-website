@@ -3,8 +3,6 @@ use crate::repositories::Connection;
 use anyhow::anyhow;
 use secrecy::{ExposeSecret, SecretBox};
 use sqlx::{Acquire, PgConnection, Row};
-use std::collections::HashMap;
-use tokio::sync::Mutex;
 use uuid::Uuid;
 
 #[async_trait::async_trait]
@@ -20,9 +18,16 @@ pub trait IUserRepository {
         &self,
         username: String,
         password: SecretBox<String>,
+        nickname: String,
     ) -> anyhow::Result<UserID>;
 }
 
+#[cfg(test)]
+use std::collections::HashMap;
+#[cfg(test)]
+use tokio::sync::Mutex;
+
+#[cfg(test)]
 pub struct InMemoryUserRepository {
     error: bool,
     credentials: Mutex<HashMap<UserID, (String, SecretBox<String>)>>,
@@ -35,6 +40,7 @@ impl Default for InMemoryUserRepository {
     }
 }
 
+#[cfg(test)]
 impl InMemoryUserRepository {
     #[cfg(test)]
     pub fn new() -> Self {
@@ -60,6 +66,7 @@ impl InMemoryUserRepository {
 }
 
 #[async_trait::async_trait]
+#[cfg(test)]
 impl IUserRepository for InMemoryUserRepository {
     async fn get_credentials(
         &self,
@@ -98,6 +105,7 @@ impl IUserRepository for InMemoryUserRepository {
         &self,
         username: String,
         password: SecretBox<String>,
+        _: String,
     ) -> anyhow::Result<UserID> {
         if self.error {
             return Err(anyhow!("Internal Server Error"));
@@ -167,13 +175,14 @@ impl IUserRepository for SqlxUserRepository<'_> {
         &self,
         username: String,
         password: SecretBox<String>,
+        nickname: String,
     ) -> anyhow::Result<UserID> {
         match &self.conn {
             Connection::Pool(pool) => {
                 let mut conn = pool.acquire().await?;
                 let conn = conn.as_mut();
 
-                let id = create(conn, username, password).await?;
+                let id = create(conn, username, password, nickname).await?;
                 Ok(UserID::from(id))
             }
             Connection::Transaction(tx) => {
@@ -181,7 +190,7 @@ impl IUserRepository for SqlxUserRepository<'_> {
                 let mut lock = conn_ptr.lock().await;
                 let conn = lock.acquire().await?;
 
-                let id = create(conn, username, password).await?;
+                let id = create(conn, username, password, nickname).await?;
                 Ok(UserID::from(id))
             }
         }
@@ -232,14 +241,16 @@ async fn create(
     conn: &mut PgConnection,
     username: String,
     password: SecretBox<String>,
+    nickname: String,
 ) -> anyhow::Result<Uuid> {
     let uuid = Uuid::new_v4();
     let id = sqlx::query_scalar::<_, Uuid>(
-        "insert into \"users\" (id, username, password_hash) values ($1, $2, $3) returning id;",
+        "insert into \"users\" (id, username, nickname, password_hash) values ($1, $2, $3, $4) returning id;",
     )
     .bind(uuid)
     .bind(username)
     .bind(password.expose_secret().to_string())
+    .bind(nickname)
     .fetch_one(conn)
     .await?;
 

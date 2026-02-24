@@ -9,6 +9,7 @@ use secrecy::{ExposeSecret, SecretBox};
 pub struct Request {
     pub username: String,
     pub password: SecretBox<String>,
+    pub nickname: String,
 }
 
 #[derive(Debug)]
@@ -31,7 +32,11 @@ pub async fn execute(
     .to_string();
 
     let lock = user_repo.lock().await;
-    lock.create_user(req.username, SecretBox::new(Box::new(password_hash)))
-        .await
-        .map_err(|e| Error::Unknown(e.to_string()))
+    lock.create_user(
+        req.username,
+        SecretBox::new(Box::new(password_hash)),
+        req.nickname,
+    )
+    .await
+    .map_err(|e| Error::Unknown(e.to_string()))
 }

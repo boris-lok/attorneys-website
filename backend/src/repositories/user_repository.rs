@@ -1,8 +1,7 @@
 use crate::domain::entities::UserID;
-use crate::repositories::Connection;
-use anyhow::anyhow;
 use secrecy::{ExposeSecret, SecretBox};
-use sqlx::{Acquire, PgConnection, Row};
+use sqlx::{PgConnection, Row};
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
 #[async_trait::async_trait]
@@ -12,10 +11,10 @@ pub trait IUserRepository {
         username: &str,
     ) -> anyhow::Result<Option<(UserID, SecretBox<String>)>>;
 
-    async fn change_password(&self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()>;
+    async fn change_password(&mut self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()>;
 
     async fn create_user(
-        &self,
+        &mut self,
         username: String,
         password: SecretBox<String>,
         nickname: String,
@@ -23,9 +22,9 @@ pub trait IUserRepository {
 }
 
 #[cfg(test)]
-use std::collections::HashMap;
+use anyhow::anyhow;
 #[cfg(test)]
-use tokio::sync::Mutex;
+use std::collections::HashMap;
 
 #[cfg(test)]
 pub struct InMemoryUserRepository {
@@ -89,7 +88,7 @@ impl IUserRepository for InMemoryUserRepository {
         }))
     }
 
-    async fn change_password(&self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()> {
+    async fn change_password(&mut self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()> {
         if self.error {
             return Err(anyhow!("Internal Server Error"));
         }
@@ -102,7 +101,7 @@ impl IUserRepository for InMemoryUserRepository {
     }
 
     async fn create_user(
-        &self,
+        &mut self,
         username: String,
         password: SecretBox<String>,
         _: String,
@@ -121,11 +120,11 @@ impl IUserRepository for InMemoryUserRepository {
 
 #[derive(Debug)]
 pub struct SqlxUserRepository<'tx> {
-    conn: Connection<'tx>,
+    conn: Mutex<&'tx mut PgConnection>,
 }
 
 impl<'tx> SqlxUserRepository<'tx> {
-    pub fn new(conn: Connection<'tx>) -> Self {
+    pub fn new(conn: Mutex<&'tx mut PgConnection>) -> Self {
         Self { conn }
     }
 }
@@ -136,78 +135,14 @@ impl IUserRepository for SqlxUserRepository<'_> {
         &self,
         username: &str,
     ) -> anyhow::Result<Option<(UserID, SecretBox<String>)>> {
-        match &self.conn {
-            Connection::Pool(pool) => {
-                let mut conn = pool.acquire().await?;
-                let conn = conn.as_mut();
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
 
-                Ok(get_credentials(conn, username).await?)
-            }
-            Connection::Transaction(tx) => {
-                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-                let mut lock = conn_ptr.lock().await;
-                let conn = lock.acquire().await?;
+        let query = "select id, password_hash from \"users\" where username = $1";
 
-                Ok(get_credentials(conn, username).await?)
-            }
-        }
-    }
+        let res = sqlx::query(query).bind(username).fetch_optional(conn).await;
 
-    async fn change_password(&self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()> {
-        match &self.conn {
-            Connection::Pool(pool) => {
-                let mut conn = pool.acquire().await?;
-                let conn = conn.as_mut();
-
-                Ok(change_password(conn, id, password).await?)
-            }
-            Connection::Transaction(tx) => {
-                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-                let mut lock = conn_ptr.lock().await;
-                let conn = lock.acquire().await?;
-
-                Ok(change_password(conn, id, password).await?)
-            }
-        }
-    }
-
-    async fn create_user(
-        &self,
-        username: String,
-        password: SecretBox<String>,
-        nickname: String,
-    ) -> anyhow::Result<UserID> {
-        match &self.conn {
-            Connection::Pool(pool) => {
-                let mut conn = pool.acquire().await?;
-                let conn = conn.as_mut();
-
-                let id = create(conn, username, password, nickname).await?;
-                Ok(UserID::from(id))
-            }
-            Connection::Transaction(tx) => {
-                let conn_ptr = tx.upgrade().ok_or(anyhow!("Internal Server Error"))?;
-                let mut lock = conn_ptr.lock().await;
-                let conn = lock.acquire().await?;
-
-                let id = create(conn, username, password, nickname).await?;
-                Ok(UserID::from(id))
-            }
-        }
-    }
-}
-
-async fn get_credentials(
-    conn: &mut PgConnection,
-    username: &str,
-) -> anyhow::Result<Option<(UserID, SecretBox<String>)>> {
-    let query = "select id, password_hash from \"users\" where username = $1";
-
-    let res = sqlx::query(query)
-        .bind(username)
-        .fetch_optional(conn)
-        .await
-        .map(|e| match e {
+        Ok(res.map(|e| match e {
             None => None,
             Some(row) => {
                 let id = row.get::<uuid::Uuid, usize>(0);
@@ -216,43 +151,45 @@ async fn get_credentials(
 
                 Some((id, SecretBox::new(Box::new(password_hash))))
             }
-        })?;
+        })?)
+    }
 
-    Ok(res)
-}
+    async fn change_password(&mut self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
 
-async fn change_password(
-    conn: &mut PgConnection,
-    id: UserID,
-    password: SecretBox<String>,
-) -> anyhow::Result<()> {
-    let query = "UPDATE \"users\" SET password_hash = $1 WHERE id = $2";
+        let query = "UPDATE \"users\" SET password_hash = $1 WHERE id = $2";
 
-    sqlx::query(query)
-        .bind(password.expose_secret().to_string().as_str())
-        .bind(id.to_string().as_str())
-        .execute(conn)
-        .await?;
+        sqlx::query(query)
+            .bind(password.expose_secret().to_string().as_str())
+            .bind(id.to_string().as_str())
+            .execute(conn)
+            .await?;
 
-    Ok(())
-}
+        Ok(())
+    }
 
-async fn create(
-    conn: &mut PgConnection,
-    username: String,
-    password: SecretBox<String>,
-    nickname: String,
-) -> anyhow::Result<Uuid> {
-    let uuid = Uuid::new_v4();
-    let id = sqlx::query_scalar::<_, Uuid>(
-        "insert into \"users\" (id, username, nickname, password_hash) values ($1, $2, $3, $4) returning id;",
-    )
-    .bind(uuid)
-    .bind(username)
-    .bind(password.expose_secret().to_string())
-    .bind(nickname)
-    .fetch_one(conn)
-    .await?;
+    async fn create_user(
+        &mut self,
+        username: String,
+        password: SecretBox<String>,
+        nickname: String,
+    ) -> anyhow::Result<UserID> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
 
-    Ok(id)
+        let uuid = Uuid::new_v4();
+
+        let id = sqlx::query_scalar::<_, Uuid>(
+            "insert into \"users\" (id, username, nickname, password_hash) values ($1, $2, $3, $4) returning id;",
+        )
+            .bind(uuid)
+            .bind(username)
+            .bind(password.expose_secret().to_string())
+            .bind(nickname)
+            .fetch_one(conn)
+            .await?;
+
+        Ok(UserID::from(id))
+    }
 }

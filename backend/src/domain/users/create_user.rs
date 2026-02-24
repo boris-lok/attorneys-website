@@ -31,7 +31,7 @@ pub async fn execute(
     .unwrap()
     .to_string();
 
-    let lock = user_repo.lock().await;
+    let mut lock = user_repo.lock().await;
     lock.create_user(
         req.username,
         SecretBox::new(Box::new(password_hash)),

@@ -14,11 +14,18 @@ pub use user_repository::IUserRepository;
 #[cfg(test)]
 pub use user_repository::InMemoryUserRepository;
 pub use user_repository::SqlxUserRepository;
+pub use user_repository::User;
 
 pub use article_views_repository::IArticleViewsRepository;
 #[cfg(test)]
 pub use article_views_repository::InMemoryArticleViewsRepository;
 pub use article_views_repository::SqlxArticleViewsRepository;
+
+pub use roles_repository::IRolesRepository;
+pub use roles_repository::SqlxRolesRepository;
+
+pub use user_roles_repository::IUserRolesRepository;
+pub use user_roles_repository::SqlxUserRolesRepository;
 
 use sqlx::{Pool, Postgres, Transaction};
 use std::sync::Weak;
@@ -39,3 +46,7 @@ mod resource_repository;
 mod user_repository;
 
 mod article_views_repository;
+
+mod roles_repository;
+
+mod user_roles_repository;

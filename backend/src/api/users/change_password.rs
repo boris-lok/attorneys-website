@@ -9,6 +9,7 @@ use axum::Json;
 use axum_extra::extract::WithRejection;
 use secrecy::SecretBox;
 use serde::Deserialize;
+use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -35,7 +36,7 @@ pub async fn change_password(
         user_id,
         new_password: SecretBox::new(Box::new(req.new_password)),
     };
-    let user_repo = SqlxUserRepository::new(Mutex::new(conn.as_mut()));
+    let user_repo = SqlxUserRepository::new(Arc::new(Mutex::new(conn.as_mut())));
 
     match crate::domain::users::change_password::execute(req, Mutex::new(user_repo)).await {
         Ok(_) => Ok(StatusCode::OK),

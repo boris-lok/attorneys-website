@@ -37,7 +37,7 @@ pub async fn login(
         .acquire()
         .await
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-    let user_repo = SqlxUserRepository::new(Mutex::new(conn.as_mut()));
+    let user_repo = SqlxUserRepository::new(Arc::new(Mutex::new(conn.as_mut())));
 
     let credentials = Credentials {
         username: req.username.clone(),

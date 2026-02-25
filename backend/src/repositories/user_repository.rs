@@ -4,6 +4,33 @@ use sqlx::{PgConnection, Row};
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
+#[derive(Debug)]
+pub struct User {
+    pub id: UserID,
+    pub username: String,
+    pub nickname: String,
+    pub roles: Vec<String>,
+}
+
+#[derive(sqlx::FromRow, Debug)]
+pub struct UserFromSQLx {
+    pub id: Uuid,
+    pub username: String,
+    pub nickname: String,
+    pub roles: Vec<String>,
+}
+
+impl From<UserFromSQLx> for User {
+    fn from(value: UserFromSQLx) -> Self {
+        Self {
+            id: UserID::from(value.id),
+            username: value.username,
+            nickname: value.nickname,
+            roles: value.roles,
+        }
+    }
+}
+
 #[async_trait::async_trait]
 pub trait IUserRepository {
     async fn get_credentials(
@@ -23,12 +50,17 @@ pub trait IUserRepository {
         password: SecretBox<String>,
         nickname: String,
     ) -> anyhow::Result<UserID>;
+
+    async fn list_users(&self) -> anyhow::Result<Vec<User>>;
+
+    async fn delete_user(&self, id: UserID) -> anyhow::Result<()>;
 }
 
 #[cfg(test)]
 use anyhow::anyhow;
 #[cfg(test)]
 use std::collections::HashMap;
+use std::sync::Arc;
 
 #[cfg(test)]
 pub struct InMemoryUserRepository {
@@ -124,15 +156,23 @@ impl IUserRepository for InMemoryUserRepository {
         lock.insert(id.clone(), (username, password));
         Ok(id)
     }
+
+    async fn list_users(&self) -> anyhow::Result<Vec<User>> {
+        todo!()
+    }
+
+    async fn delete_user(&self, id: UserID) -> anyhow::Result<()> {
+        todo!()
+    }
 }
 
 #[derive(Debug)]
 pub struct SqlxUserRepository<'tx> {
-    conn: Mutex<&'tx mut PgConnection>,
+    conn: Arc<Mutex<&'tx mut PgConnection>>,
 }
 
 impl<'tx> SqlxUserRepository<'tx> {
-    pub fn new(conn: Mutex<&'tx mut PgConnection>) -> Self {
+    pub fn new(conn: Arc<Mutex<&'tx mut PgConnection>>) -> Self {
         Self { conn }
     }
 }
@@ -146,7 +186,7 @@ impl IUserRepository for SqlxUserRepository<'_> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
-        let query = "select id, password_hash from \"users\" where username = $1";
+        let query = "select id, password_hash from \"users\" where username = $1 where deleted_at is null;";
 
         let res = sqlx::query(query).bind(username).fetch_optional(conn).await;
 
@@ -197,11 +237,41 @@ impl IUserRepository for SqlxUserRepository<'_> {
         )
             .bind(uuid)
             .bind(username)
-            .bind(password.expose_secret().to_string())
             .bind(nickname)
+            .bind(password.expose_secret().to_string())
             .fetch_one(conn)
             .await?;
 
         Ok(UserID::from(id))
+    }
+
+    async fn list_users(&self) -> anyhow::Result<Vec<User>> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = r"
+        select u.id, u.username, u.nickname, array_agg(r.name) as roles 
+        from users u
+        left join user_roles ur on u.id = ur.user_id
+        left join roles r on ur.role_id = r.id
+        group by u.id
+        ";
+
+        let res = sqlx::query_as::<_, UserFromSQLx>(query)
+            .fetch_all(conn)
+            .await?;
+        Ok(res.into_iter().map(Into::into).collect())
+    }
+
+    async fn delete_user(&self, id: UserID) -> anyhow::Result<()> {
+        let id = Uuid::parse_str(id.to_string().as_str())?;
+
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = "update \"users\" set deleted_at = NOW() where id = $1";
+
+        sqlx::query(query).bind(id).execute(conn).await?;
+        Ok(())
     }
 }

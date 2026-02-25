@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
 use crate::domain::entities::UserID;
-use crate::repositories::{Connection, SqlxUserRepository};
+use crate::repositories::SqlxUserRepository;
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -22,6 +22,12 @@ pub async fn change_password(
     state: State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<ChangePasswordRequest>, ApiError>,
 ) -> Result<StatusCode, ApiError> {
+    let mut conn = state
+        .pool
+        .acquire()
+        .await
+        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+
     let user_id = Uuid::parse_str(&claims.sub).map_err(|_| ApiError::BadRequest)?;
     let user_id = UserID::from(user_id);
 
@@ -29,7 +35,7 @@ pub async fn change_password(
         user_id,
         new_password: SecretBox::new(Box::new(req.new_password)),
     };
-    let user_repo = SqlxUserRepository::new(Connection::Pool(state.pool.clone()));
+    let user_repo = SqlxUserRepository::new(Mutex::new(conn.as_mut()));
 
     match crate::domain::users::change_password::execute(req, Mutex::new(user_repo)).await {
         Ok(_) => Ok(StatusCode::OK),

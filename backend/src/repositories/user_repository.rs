@@ -11,7 +11,11 @@ pub trait IUserRepository {
         username: &str,
     ) -> anyhow::Result<Option<(UserID, SecretBox<String>)>>;
 
-    async fn change_password(&mut self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()>;
+    async fn change_password(
+        &mut self,
+        id: UserID,
+        password: SecretBox<String>,
+    ) -> anyhow::Result<()>;
 
     async fn create_user(
         &mut self,
@@ -88,7 +92,11 @@ impl IUserRepository for InMemoryUserRepository {
         }))
     }
 
-    async fn change_password(&mut self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()> {
+    async fn change_password(
+        &mut self,
+        id: UserID,
+        password: SecretBox<String>,
+    ) -> anyhow::Result<()> {
         if self.error {
             return Err(anyhow!("Internal Server Error"));
         }
@@ -154,7 +162,11 @@ impl IUserRepository for SqlxUserRepository<'_> {
         })?)
     }
 
-    async fn change_password(&mut self, id: UserID, password: SecretBox<String>) -> anyhow::Result<()> {
+    async fn change_password(
+        &mut self,
+        id: UserID,
+        password: SecretBox<String>,
+    ) -> anyhow::Result<()> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 

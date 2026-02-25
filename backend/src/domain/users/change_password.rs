@@ -28,7 +28,7 @@ pub async fn execute(
     .unwrap()
     .to_string();
 
-    let lock = user_repo.lock().await;
+    let mut lock = user_repo.lock().await;
     lock.change_password(req.user_id, SecretBox::new(Box::new(password_hash)))
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;

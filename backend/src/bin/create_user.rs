@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use backend::domain::users;
 use backend::get_configuration;
-use backend::repositories::{Connection, SqlxUserRepository};
+use backend::repositories::SqlxUserRepository;
 use secrecy::SecretBox;
 use sqlx::postgres::PgPoolOptions;
 use std::io;
@@ -17,7 +17,8 @@ async fn main() -> anyhow::Result<()> {
             configuration.database.timeout,
         ))
         .connect_lazy_with(configuration.database.with_db());
-    let user_repo = SqlxUserRepository::new(Connection::Pool(database_connection));
+    let mut conn = database_connection.acquire().await?;
+    let user_repo = SqlxUserRepository::new(Mutex::new(conn.as_mut()));
 
     let mut reader = BufReader::new(stdin());
     let mut username = String::new();

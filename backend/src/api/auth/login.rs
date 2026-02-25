@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
 use crate::domain::users::authentication::{validate_credentials, Credentials, Error};
-use crate::repositories::{Connection, SqlxUserRepository};
+use crate::repositories::SqlxUserRepository;
 use crate::startup::AppState;
 use anyhow::Context;
 use axum::extract::State;
@@ -32,7 +32,12 @@ pub async fn login(
     Extension(redis_client): Extension<Arc<redis::Client>>,
     WithRejection(Json(req), _): WithRejection<Json<LoginRequest>, ApiError>,
 ) -> Result<Json<LoginResponse>, ApiError> {
-    let user_repo = SqlxUserRepository::new(Connection::Pool(state.pool));
+    let mut conn = state
+        .pool
+        .acquire()
+        .await
+        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let user_repo = SqlxUserRepository::new(Mutex::new(conn.as_mut()));
 
     let credentials = Credentials {
         username: req.username.clone(),

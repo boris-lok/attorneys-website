@@ -27,6 +27,11 @@ pub use roles_repository::SqlxRolesRepository;
 pub use user_roles_repository::IUserRolesRepository;
 pub use user_roles_repository::SqlxUserRolesRepository;
 
+pub use work_logs_repository::IWorkLogsRepository;
+pub use work_logs_repository::SqlxWorkLogsRepository;
+pub use work_logs_repository::WorkLog;
+pub use work_logs_repository::WorkLogStatus;
+
 use sqlx::{Pool, Postgres, Transaction};
 use std::sync::Weak;
 use tokio::sync::Mutex;
@@ -37,16 +42,11 @@ pub enum Connection<'tx> {
     Transaction(Weak<Mutex<Transaction<'tx, Postgres>>>),
 }
 
-mod avatar_repository;
-
-mod content_repository;
-
-mod resource_repository;
-
-mod user_repository;
-
 mod article_views_repository;
-
+mod avatar_repository;
+mod content_repository;
+mod resource_repository;
 mod roles_repository;
-
+mod user_repository;
 mod user_roles_repository;
+mod work_logs_repository;

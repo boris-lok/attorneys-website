@@ -186,7 +186,8 @@ impl IUserRepository for SqlxUserRepository<'_> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
-        let query = "select id, password_hash from \"users\" where username = $1 where deleted_at is null;";
+        let query =
+            "select id, password_hash from \"users\" where username = $1 where deleted_at is null;";
 
         let res = sqlx::query(query).bind(username).fetch_optional(conn).await;
 

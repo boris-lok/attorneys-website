@@ -34,6 +34,7 @@ pub use work_logs_repository::WorkLogStatus;
 
 pub use case_repository::CaseID;
 pub use case_repository::ICaseRepository;
+pub use case_repository::SQLxCaseRepository;
 
 use sqlx::{Pool, Postgres, Transaction};
 use std::sync::Weak;

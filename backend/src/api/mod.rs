@@ -45,23 +45,18 @@ pub use auth::login;
 pub use auth::logout;
 pub use users::change_password;
 
+pub use cases::create::create_case;
+
 mod api_error;
-
-mod health;
-
-mod home;
-
-mod member;
-
-mod service;
-
 mod article;
-
-mod contact;
-
 mod auth;
-
+mod cases;
 mod categories;
+mod contact;
+mod health;
+mod home;
+mod member;
+mod service;
 mod users;
 
 /// A handler for updating the resource

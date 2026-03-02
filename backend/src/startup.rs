@@ -2,12 +2,12 @@ use crate::api::change_password::change_password;
 use crate::api::login::login;
 use crate::api::logout::logout;
 use crate::api::{
-    create_article, create_category, create_contact, create_home, create_member, create_service,
-    delete_article, delete_category, delete_member, delete_service, health_check, list_articles,
-    list_categories, list_contact, list_home, list_members, list_services, retrieve_article,
-    retrieve_category, retrieve_contact, retrieve_home, retrieve_member, retrieve_service,
-    update_article, update_category, update_contact, update_home, update_member, update_service,
-    upload_member_avatar, view_article,
+    create_article, create_case, create_category, create_contact, create_home, create_member,
+    create_service, delete_article, delete_category, delete_member, delete_service, health_check,
+    list_articles, list_categories, list_contact, list_home, list_members, list_services,
+    retrieve_article, retrieve_category, retrieve_contact, retrieve_home, retrieve_member,
+    retrieve_service, update_article, update_category, update_contact, update_home, update_member,
+    update_service, upload_member_avatar, view_article,
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
@@ -97,6 +97,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/logout", post(logout))
         .route("/password", put(change_password));
 
+    let admin_case_routes = Router::new().route("/cases", post(create_case));
+
     let admin_routes = Router::new()
         .merge(admin_member_routes)
         .merge(admin_home_routes)
@@ -104,7 +106,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .merge(admin_contact_routes)
         .merge(admin_article_routes)
         .merge(admin_category_routes)
-        .merge(admin_user_routes);
+        .merge(admin_user_routes)
+        .merge(admin_case_routes);
 
     let routes = Router::new()
         .merge(member_routes)

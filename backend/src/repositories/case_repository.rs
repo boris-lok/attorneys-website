@@ -10,9 +10,30 @@ impl From<CaseID> for String {
     }
 }
 
+impl From<CaseID> for Uuid {
+    fn from(value: CaseID) -> Self {
+        value.0
+    }
+}
+
+impl TryFrom<String> for CaseID {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        let uuid = Uuid::parse_str(&value).map_err(|_| String::from("invalid id"))?;
+        Ok(CaseID(uuid))
+    }
+}
+
 #[async_trait::async_trait]
 pub trait ICaseRepository {
     async fn create_case(&mut self, name: &str, estimated_minutes: i32) -> anyhow::Result<CaseID>;
+    async fn update_case(
+        &mut self,
+        id: CaseID,
+        name: Option<String>,
+        estimated_minutes: Option<i32>,
+    ) -> anyhow::Result<()>;
 }
 
 pub struct SQLxCaseRepository<'tx> {
@@ -43,5 +64,31 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
             .await?;
 
         Ok(CaseID(id))
+    }
+
+    async fn update_case(
+        &mut self,
+        id: CaseID,
+        name: Option<String>,
+        estimated_minutes: Option<i32>,
+    ) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = r"
+    UPDATE case
+    SET estimated_minutes = COALESCE($1, estimated_minutes),
+        name = COALESCE($2, name)
+    WHERE id = $3
+";
+
+        sqlx::query(query)
+            .bind(estimated_minutes) // Option<i32> or similar
+            .bind(name) // Option<String>
+            .bind(Uuid::from(id))
+            .execute(conn)
+            .await?;
+
+        Ok(())
     }
 }

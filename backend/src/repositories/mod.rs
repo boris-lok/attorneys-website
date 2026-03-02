@@ -32,6 +32,9 @@ pub use work_logs_repository::SqlxWorkLogsRepository;
 pub use work_logs_repository::WorkLog;
 pub use work_logs_repository::WorkLogStatus;
 
+pub use case_repository::CaseID;
+pub use case_repository::ICaseRepository;
+
 use sqlx::{Pool, Postgres, Transaction};
 use std::sync::Weak;
 use tokio::sync::Mutex;
@@ -44,6 +47,7 @@ pub enum Connection<'tx> {
 
 mod article_views_repository;
 mod avatar_repository;
+mod case_repository;
 mod content_repository;
 mod resource_repository;
 mod roles_repository;

@@ -64,6 +64,7 @@ pub trait ICaseRepository {
         estimated_minutes: Option<i32>,
     ) -> anyhow::Result<()>;
     async fn list_cases(&self) -> anyhow::Result<Vec<Case>>;
+    async fn delete(&mut self, id: CaseID) -> anyhow::Result<()>;
 }
 
 pub struct SQLxCaseRepository<'tx> {
@@ -134,5 +135,19 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
             .await?;
 
         Ok(rows.into_iter().map(Case::from).collect())
+    }
+
+    async fn delete(&mut self, id: CaseID) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = r"update case set deleted_at = now() where id = $1";
+
+        sqlx::query(query)
+            .bind(Uuid::from(id))
+            .execute(conn)
+            .await?;
+
+        Ok(())
     }
 }

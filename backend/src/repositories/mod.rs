@@ -1,40 +1,24 @@
-pub use avatar_repository::IAvatarRepository;
-pub use avatar_repository::InMemoryAvatarRepository;
-pub use avatar_repository::SqlxAvatarRepository;
+pub use article_views_repository::{IArticleViewsRepository, SqlxArticleViewsRepository};
+pub use avatar_repository::{IAvatarRepository, InMemoryAvatarRepository, SqlxAvatarRepository};
+pub use case_repository::{Case, CaseID, ICaseRepository, SQLxCaseRepository};
+pub use content_repository::{
+    IContentRepository, InMemoryContentRepository, SqlxContentRepository,
+};
+pub use resource_repository::{
+    IResourceRepository, InMemoryResourceRepository, SqlxResourceRepository,
+};
+pub use roles_repository::{IRolesRepository, SqlxRolesRepository};
+pub use user_repository::{IUserRepository, SqlxUserRepository, User};
+pub use user_roles_repository::{IUserRolesRepository, SqlxUserRolesRepository};
+pub use work_logs_repository::{
+    IWorkLogsRepository, SqlxWorkLogsRepository, WorkLog, WorkLogStatus,
+};
 
-pub use content_repository::IContentRepository;
-pub use content_repository::InMemoryContentRepository;
-pub use content_repository::SqlxContentRepository;
-
-pub use resource_repository::IResourceRepository;
-pub use resource_repository::InMemoryResourceRepository;
-pub use resource_repository::SqlxResourceRepository;
-
-pub use user_repository::IUserRepository;
 #[cfg(test)]
-pub use user_repository::InMemoryUserRepository;
-pub use user_repository::SqlxUserRepository;
-pub use user_repository::User;
-
-pub use article_views_repository::IArticleViewsRepository;
-#[cfg(test)]
-pub use article_views_repository::InMemoryArticleViewsRepository;
-pub use article_views_repository::SqlxArticleViewsRepository;
-
-pub use roles_repository::IRolesRepository;
-pub use roles_repository::SqlxRolesRepository;
-
-pub use user_roles_repository::IUserRolesRepository;
-pub use user_roles_repository::SqlxUserRolesRepository;
-
-pub use work_logs_repository::IWorkLogsRepository;
-pub use work_logs_repository::SqlxWorkLogsRepository;
-pub use work_logs_repository::WorkLog;
-pub use work_logs_repository::WorkLogStatus;
-
-pub use case_repository::CaseID;
-pub use case_repository::ICaseRepository;
-pub use case_repository::SQLxCaseRepository;
+pub use {
+    article_views_repository::InMemoryArticleViewsRepository,
+    user_repository::InMemoryUserRepository,
+};
 
 use sqlx::{Pool, Postgres, Transaction};
 use std::sync::Weak;

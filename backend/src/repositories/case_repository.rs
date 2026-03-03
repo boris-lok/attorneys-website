@@ -1,8 +1,9 @@
+use serde::Serialize;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct CaseID(Uuid);
 
 impl From<CaseID> for String {
@@ -26,6 +27,33 @@ impl TryFrom<String> for CaseID {
     }
 }
 
+#[derive(Debug, Serialize)]
+pub struct Case {
+    pub id: CaseID,
+    pub name: String,
+    pub estimated_minutes: i32,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct CaseFromSQLx {
+    pub id: Uuid,
+    pub name: String,
+    pub estimated_minutes: i32,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+impl From<CaseFromSQLx> for Case {
+    fn from(value: CaseFromSQLx) -> Self {
+        Self {
+            id: CaseID(value.id),
+            name: value.name,
+            estimated_minutes: value.estimated_minutes,
+            created_at: value.created_at,
+        }
+    }
+}
+
 #[async_trait::async_trait]
 pub trait ICaseRepository {
     async fn create_case(&mut self, name: &str, estimated_minutes: i32) -> anyhow::Result<CaseID>;
@@ -35,6 +63,7 @@ pub trait ICaseRepository {
         name: Option<String>,
         estimated_minutes: Option<i32>,
     ) -> anyhow::Result<()>;
+    async fn list_cases(&self) -> anyhow::Result<Vec<Case>>;
 }
 
 pub struct SQLxCaseRepository<'tx> {
@@ -91,5 +120,19 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
             .await?;
 
         Ok(())
+    }
+
+    async fn list_cases(&self) -> anyhow::Result<Vec<Case>> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query =
+            r"select id, name, estimated_minutes, created_at from case where deleted_at is null";
+
+        let rows = sqlx::query_as::<_, CaseFromSQLx>(query)
+            .fetch_all(conn)
+            .await?;
+
+        Ok(rows.into_iter().map(Case::from).collect())
     }
 }

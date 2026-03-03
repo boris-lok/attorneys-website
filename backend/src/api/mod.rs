@@ -46,6 +46,7 @@ pub use auth::logout;
 pub use users::change_password;
 
 pub use cases::create::create_case;
+pub use cases::list::list_cases;
 pub use cases::update::update_case;
 
 pub use work_logs::create::create_work_log;

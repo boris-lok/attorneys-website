@@ -34,7 +34,7 @@ sqlx = { version = "0.8.6", features = ["chrono", "macros", "migrate", "postgres
 chrono = { version = "0.4.43", default-features = false, features = ["serde"] }
 image = "0.25.9"
 validator = { version = "0.20.0", features = ["derive"] }
-uuid = { version = "1.21.0", features = ["v4"] }
+uuid = { version = "1.21.0", features = ["v4", "serde"] }
 secrecy = { version = "0.10.3", features = ["serde"] }
 argon2 = { version = "0.5.3", features = ["std"] }
 rand = "0.10.0"

@@ -47,6 +47,8 @@ pub use users::change_password;
 
 pub use cases::create::create_case;
 
+pub use work_logs::create::create_work_log;
+
 mod api_error;
 mod article;
 mod auth;
@@ -58,6 +60,7 @@ mod home;
 mod member;
 mod service;
 mod users;
+mod work_logs;
 
 /// A handler for updating the resource
 async fn update_resource_handler(

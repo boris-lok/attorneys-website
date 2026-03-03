@@ -1,5 +1,6 @@
 use crate::domain::entities::UserID;
 use crate::repositories::{CaseID, IWorkLogsRepository, WorkLog, WorkLogStatus};
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -40,8 +41,8 @@ pub enum Error {
 }
 
 pub async fn execute(
+    repo: Arc<tokio::sync::Mutex<impl IWorkLogsRepository + Sync + Send>>,
     req: Request,
-    repo: tokio::sync::Mutex<impl IWorkLogsRepository + Sync + Send>,
 ) -> Result<(), Error> {
     let collaborators = req.collaborators.clone().unwrap_or_default();
 

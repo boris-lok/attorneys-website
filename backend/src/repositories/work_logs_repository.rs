@@ -1,3 +1,4 @@
+use crate::repositories::CaseID;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
@@ -21,7 +22,7 @@ impl<'tx> SqlxWorkLogsRepository<'tx> {
 pub struct WorkLog {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub case_id: Uuid,
+    pub case_id: CaseID,
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub ended_at: chrono::DateTime<chrono::Utc>,
     pub description: String,
@@ -53,7 +54,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         sqlx::query(query)
             .bind(work_log.id)
             .bind(work_log.user_id)
-            .bind(work_log.case_id)
+            .bind(Uuid::from(work_log.case_id))
             .bind(work_log.started_at)
             .bind(work_log.ended_at)
             .bind(work_log.description)

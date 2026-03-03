@@ -2,6 +2,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
+#[derive(Debug, Clone)]
 pub struct CaseID(Uuid);
 
 impl From<CaseID> for String {

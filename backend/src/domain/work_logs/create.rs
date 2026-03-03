@@ -1,5 +1,5 @@
 use crate::domain::entities::UserID;
-use crate::repositories::{IWorkLogsRepository, WorkLog, WorkLogStatus};
+use crate::repositories::{CaseID, IWorkLogsRepository, WorkLog, WorkLogStatus};
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -12,26 +12,30 @@ pub struct Request {
     pub collaborators: Option<Vec<UserID>>,
 }
 
-impl From<Request> for WorkLog {
-    fn from(value: Request) -> Self {
-        let user_id = Uuid::parse_str(&value.creator_id.to_string()).unwrap();
+impl TryFrom<Request> for WorkLog {
+    type Error = String;
 
-        Self {
+    fn try_from(value: Request) -> Result<Self, Self::Error> {
+        let user_id = Uuid::parse_str(&value.creator_id.to_string()).unwrap();
+        let case_id = CaseID::try_from(value.case_id.to_string())?;
+
+        Ok(Self {
             id: Uuid::new_v4(),
             user_id,
-            case_id: value.case_id,
+            case_id,
             started_at: value.started_at,
             ended_at: value.started_at + value.duration,
             description: value.description,
             is_collaborative: value.collaborators.is_some(),
             parent_id: None,
             status: WorkLogStatus::Approved,
-        }
+        })
     }
 }
 
 #[derive(Debug)]
 pub enum Error {
+    InvalidCaseID,
     Unknown(String),
 }
 
@@ -41,8 +45,7 @@ pub async fn execute(
 ) -> Result<(), Error> {
     let collaborators = req.collaborators.clone().unwrap_or_default();
 
-    let work_log = WorkLog::from(req);
-
+    let work_log = WorkLog::try_from(req).map_err(|_| Error::InvalidCaseID)?;
     let mut lock = repo.lock().await;
 
     lock.create_work_log(work_log.clone())

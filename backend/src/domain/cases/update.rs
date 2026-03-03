@@ -15,8 +15,8 @@ pub enum Error {
 }
 
 pub async fn execute(
-    req: Request,
     repo: Arc<Mutex<impl ICaseRepository + Sync + Send>>,
+    req: Request,
 ) -> Result<(), Error> {
     let id = CaseID::try_from(req.id).map_err(Error::Unknown)?;
     let mut lock = repo.lock().await;

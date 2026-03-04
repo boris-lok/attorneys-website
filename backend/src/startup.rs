@@ -8,7 +8,7 @@ use crate::api::{
     list_home, list_members, list_services, list_work_logs, retrieve_article, retrieve_category,
     retrieve_contact, retrieve_home, retrieve_member, retrieve_service, update_article,
     update_case, update_category, update_contact, update_home, update_member, update_service,
-    upload_member_avatar, view_article,
+    update_work_log_status, upload_member_avatar, view_article,
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
@@ -103,7 +103,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/cases/{id}", delete(delete_case));
     let admin_work_log_routes = Router::new()
         .route("/work_logs", post(create_work_log))
-        .route("/{id}/work_logs", get(list_work_logs));
+        .route("/{id}/work_logs", get(list_work_logs))
+        .route("/work_logs/{id}/status", put(update_work_log_status));
 
     let admin_routes = Router::new()
         .merge(admin_member_routes)

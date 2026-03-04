@@ -20,6 +20,8 @@ pub enum ApiError {
     MissingBearer,
     #[error("credentials is expired")]
     ExpiredCredentials,
+    #[error("permission denied")]
+    PermissionDenied,
 }
 
 impl IntoResponse for ApiError {
@@ -35,6 +37,7 @@ impl IntoResponse for ApiError {
             ApiError::InvalidCredentials => (StatusCode::FORBIDDEN, self.to_string()),
             ApiError::MissingBearer => (StatusCode::FORBIDDEN, self.to_string()),
             ApiError::ExpiredCredentials => (StatusCode::FORBIDDEN, self.to_string()),
+            ApiError::PermissionDenied => (StatusCode::FORBIDDEN, self.to_string()),
         };
 
         let payload = json!({

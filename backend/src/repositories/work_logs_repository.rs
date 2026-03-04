@@ -1,5 +1,7 @@
+use crate::domain::entities::UserID;
 use crate::repositories::{Case, CaseID};
 use serde::Serialize;
+use sqlx::Row;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
@@ -8,6 +10,10 @@ use uuid::Uuid;
 pub trait IWorkLogsRepository {
     async fn create_work_log(&mut self, work_log: CreateWorkLog) -> anyhow::Result<()>;
     async fn list_work_logs(&self, case_id: &CaseID) -> anyhow::Result<Vec<WorkLog>>;
+    async fn update_work_log(&mut self, req: UpdateWorkLog) -> anyhow::Result<()>;
+    async fn is_creator(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool>;
+    async fn is_collaborator_work_log(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool>;
+    async fn is_work_log_exist(&self, id: &Uuid) -> anyhow::Result<bool>;
 }
 
 pub struct SqlxWorkLogsRepository<'tx> {
@@ -18,6 +24,14 @@ impl<'tx> SqlxWorkLogsRepository<'tx> {
     pub fn new(conn: Arc<Mutex<&'tx mut sqlx::PgConnection>>) -> Self {
         Self { conn }
     }
+}
+
+pub struct UpdateWorkLog {
+    pub id: Uuid,
+    pub started_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub description: Option<String>,
+    pub status: Option<WorkLogStatus>,
 }
 
 #[derive(Debug, Clone)]
@@ -39,6 +53,19 @@ pub enum WorkLogStatus {
     Pending,
     Rejected,
     Approved,
+}
+
+impl TryFrom<String> for WorkLogStatus {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "pending" => Ok(WorkLogStatus::Pending),
+            "rejected" => Ok(WorkLogStatus::Rejected),
+            "approved" => Ok(WorkLogStatus::Approved),
+            _ => Err(format!("Invalid work log status: {}", value)),
+        }
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -170,5 +197,71 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
             .await?;
 
         Ok(rows.into_iter().map(WorkLog::from).collect())
+    }
+
+    async fn update_work_log(&mut self, req: UpdateWorkLog) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = r"
+        update work_logs
+        set status = coalesce($1, status),
+        started_at = coalesce($2, started_at),
+        ended_at = coalesce($3, ended_at),
+        description = coalesce($4, description)
+        where id = $5;
+        ";
+
+        sqlx::query(query)
+            .bind(req.status)
+            .bind(req.started_at)
+            .bind(req.ended_at)
+            .bind(req.description)
+            .bind(req.id)
+            .execute(conn)
+            .await?;
+
+        Ok(())
+    }
+
+    async fn is_creator(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = r"select wl.id from work_logs where user_id = $1 and id = $2";
+
+        let row = sqlx::query(query)
+            .bind(user_id.to_string())
+            .bind(id)
+            .fetch_one(conn)
+            .await?;
+
+        Ok(!row.is_empty())
+    }
+
+    async fn is_collaborator_work_log(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = r"select is_collaborator from work_logs where id = $1 and user_id = $2";
+
+        let is_collaborator: bool = sqlx::query_scalar(query)
+            .bind(id)
+            .bind(user_id.to_string())
+            .fetch_one(conn)
+            .await?;
+
+        Ok(is_collaborator)
+    }
+
+    async fn is_work_log_exist(&self, id: &Uuid) -> anyhow::Result<bool> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = r"select wl.id from work_logs where id = $1";
+
+        let row = sqlx::query(query).bind(id).fetch_one(conn).await?;
+
+        Ok(!row.is_empty())
     }
 }

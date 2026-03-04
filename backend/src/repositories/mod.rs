@@ -11,7 +11,8 @@ pub use roles_repository::{IRolesRepository, SqlxRolesRepository};
 pub use user_repository::{IUserRepository, SqlxUserRepository, User};
 pub use user_roles_repository::{IUserRolesRepository, SqlxUserRolesRepository};
 pub use work_logs_repository::{
-    CreateWorkLog, IWorkLogsRepository, SqlxWorkLogsRepository, WorkLog, WorkLogStatus,
+    CreateWorkLog, IWorkLogsRepository, SqlxWorkLogsRepository, UpdateWorkLog, WorkLog,
+    WorkLogStatus,
 };
 
 #[cfg(test)]

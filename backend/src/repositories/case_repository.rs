@@ -18,6 +18,12 @@ impl From<CaseID> for Uuid {
     }
 }
 
+impl From<Uuid> for CaseID {
+    fn from(value: Uuid) -> Self {
+        Self(value)
+    }
+}
+
 impl TryFrom<String> for CaseID {
     type Error = String;
 

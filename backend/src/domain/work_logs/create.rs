@@ -1,5 +1,5 @@
 use crate::domain::entities::UserID;
-use crate::repositories::{CaseID, IWorkLogsRepository, WorkLog, WorkLogStatus};
+use crate::repositories::{CaseID, CreateWorkLog, IWorkLogsRepository, WorkLogStatus};
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -13,7 +13,7 @@ pub struct Request {
     pub collaborators: Option<Vec<UserID>>,
 }
 
-impl TryFrom<Request> for WorkLog {
+impl TryFrom<Request> for CreateWorkLog {
     type Error = String;
 
     fn try_from(value: Request) -> Result<Self, Self::Error> {
@@ -46,7 +46,7 @@ pub async fn execute(
 ) -> Result<(), Error> {
     let collaborators = req.collaborators.clone().unwrap_or_default();
 
-    let work_log = WorkLog::try_from(req).map_err(|_| Error::InvalidCaseID)?;
+    let work_log = CreateWorkLog::try_from(req).map_err(|_| Error::InvalidCaseID)?;
     let mut lock = repo.lock().await;
 
     lock.create_work_log(work_log.clone())
@@ -63,8 +63,8 @@ pub async fn execute(
     Ok(())
 }
 
-fn create_a_collaborator_work_log(work_log: WorkLog, collaborator: UserID) -> WorkLog {
-    WorkLog {
+fn create_a_collaborator_work_log(work_log: CreateWorkLog, collaborator: UserID) -> CreateWorkLog {
+    CreateWorkLog {
         parent_id: Some(work_log.id),
         id: Uuid::new_v4(),
         status: WorkLogStatus::Pending,

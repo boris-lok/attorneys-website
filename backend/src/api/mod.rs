@@ -51,6 +51,7 @@ pub use cases::list::list_cases;
 pub use cases::update::update_case;
 
 pub use work_logs::create::create_work_log;
+pub use work_logs::list::list_work_logs;
 
 mod api_error;
 mod article;

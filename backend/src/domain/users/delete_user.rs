@@ -11,5 +11,5 @@ pub async fn execute(
     req: Request,
     user_repo: Mutex<impl IUserRepository + Sync + Send>,
 ) -> anyhow::Result<()> {
-    user_repo.lock().await.delete_user(req.id).await
+    user_repo.lock().await.delete_user(&req.id).await
 }

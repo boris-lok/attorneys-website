@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
 use crate::domain::users::authentication::{validate_credentials, Credentials, Error};
-use crate::repositories::SqlxUserRepository;
+use crate::repositories::{IUserRepository, SqlxUserRepository};
 use crate::startup::AppState;
 use anyhow::Context;
 use axum::extract::State;
@@ -38,13 +38,14 @@ pub async fn login(
         .await
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
     let user_repo = SqlxUserRepository::new(Arc::new(Mutex::new(conn.as_mut())));
+    let user_repo = Arc::new(Mutex::new(user_repo));
 
     let credentials = Credentials {
         username: req.username.clone(),
         password: SecretBox::new(Box::new(req.password)),
     };
 
-    let res = validate_credentials(credentials, Mutex::new(user_repo)).await;
+    let res = validate_credentials(credentials, user_repo.clone()).await;
 
     match res {
         Ok(id) => {
@@ -60,9 +61,16 @@ pub async fn login(
                 .context("Failed to set a user to session storage.")
                 .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 
+            let lock = user_repo.lock().await;
+            let roles = lock
+                .get_user_roles(&id)
+                .await
+                .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+
             let claims = Claims {
                 sub: user_id.clone(),
                 exp: exp.timestamp() as usize,
+                roles,
             };
 
             let token = jsonwebtoken::encode(

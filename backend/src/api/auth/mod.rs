@@ -16,6 +16,7 @@ pub mod logout;
 pub struct Claims {
     pub sub: String,
     pub exp: usize,
+    pub roles: Vec<String>,
 }
 
 impl<S> FromRequestParts<S> for Claims

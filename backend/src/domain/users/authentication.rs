@@ -3,6 +3,7 @@ use crate::repositories::IUserRepository;
 use anyhow::{anyhow, Context};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use secrecy::{ExposeSecret, SecretBox};
+use std::sync::Arc;
 use tokio::sync::Mutex;
 
 pub struct Credentials {
@@ -17,7 +18,7 @@ pub enum Error {
 
 pub async fn validate_credentials(
     credentials: Credentials,
-    user_repo: Mutex<impl IUserRepository + Sync + Send>,
+    user_repo: Arc<Mutex<impl IUserRepository + Sync + Send>>,
 ) -> Result<UserID, Error> {
     let mut id = None;
     let mut expected_password_hash = SecretBox::new(Box::new(
@@ -101,7 +102,7 @@ mod tests {
     #[tokio::test]
     async fn it_should_be_valid_password_otherwise() {
         let (repo, user_id, username, password) = helper().await;
-        let repo = Mutex::new(repo);
+        let repo = Arc::new(Mutex::new(repo));
 
         let credentials = Credentials {
             username: username.clone(),
@@ -121,7 +122,7 @@ mod tests {
     #[tokio::test]
     async fn it_should_be_invalid_password_otherwise() {
         let (repo, _, username, _) = helper().await;
-        let repo = Mutex::new(repo);
+        let repo = Arc::new(Mutex::new(repo));
 
         let credentials = Credentials {
             username: username.clone(),
@@ -139,7 +140,7 @@ mod tests {
     #[tokio::test]
     async fn it_should_return_an_unknown_error_when_unexpected_error_encountered() {
         let (repo, _, username, password) = helper().await;
-        let repo = Mutex::new(repo.with_error());
+        let repo = Arc::new(Mutex::new(repo.with_error()));
 
         let credentials = Credentials {
             username: username.clone(),

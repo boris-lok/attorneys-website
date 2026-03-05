@@ -37,13 +37,11 @@ pub trait IUserRepository {
         &self,
         username: &str,
     ) -> anyhow::Result<Option<(UserID, SecretBox<String>)>>;
-
     async fn change_password(
         &mut self,
         id: UserID,
         password: SecretBox<String>,
     ) -> anyhow::Result<()>;
-
     async fn create_user(
         &mut self,
         username: String,
@@ -52,12 +50,13 @@ pub trait IUserRepository {
     ) -> anyhow::Result<UserID>;
 
     async fn list_users(&self) -> anyhow::Result<Vec<User>>;
-
-    async fn delete_user(&self, id: UserID) -> anyhow::Result<()>;
+    async fn delete_user(&self, id: &UserID) -> anyhow::Result<()>;
+    async fn get_user_roles(&self, id: &UserID) -> anyhow::Result<Vec<String>>;
 }
 
 #[cfg(test)]
 use anyhow::anyhow;
+use sqlx::postgres::PgRow;
 #[cfg(test)]
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -161,7 +160,11 @@ impl IUserRepository for InMemoryUserRepository {
         todo!()
     }
 
-    async fn delete_user(&self, id: UserID) -> anyhow::Result<()> {
+    async fn delete_user(&self, id: &UserID) -> anyhow::Result<()> {
+        todo!()
+    }
+
+    async fn get_user_roles(&self, id: &UserID) -> anyhow::Result<Vec<String>> {
         todo!()
     }
 }
@@ -187,7 +190,7 @@ impl IUserRepository for SqlxUserRepository<'_> {
         let conn = &mut **conn;
 
         let query =
-            "select id, password_hash from \"users\" where username = $1 where deleted_at is null;";
+            "select id, password_hash from \"users\" where username = $1 and deleted_at is null;";
 
         let res = sqlx::query(query).bind(username).fetch_optional(conn).await;
 
@@ -264,8 +267,8 @@ impl IUserRepository for SqlxUserRepository<'_> {
         Ok(res.into_iter().map(Into::into).collect())
     }
 
-    async fn delete_user(&self, id: UserID) -> anyhow::Result<()> {
-        let id = Uuid::parse_str(id.to_string().as_str())?;
+    async fn delete_user(&self, id: &UserID) -> anyhow::Result<()> {
+        let id = Uuid::from(id);
 
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
@@ -274,5 +277,17 @@ impl IUserRepository for SqlxUserRepository<'_> {
 
         sqlx::query(query).bind(id).execute(conn).await?;
         Ok(())
+    }
+
+    async fn get_user_roles(&self, id: &UserID) -> anyhow::Result<Vec<String>> {
+        let id = Uuid::from(id);
+
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = "select roles.name from user_roles, roles where user_roles.user_id = $1";
+
+        let res = sqlx::query(query).bind(id).fetch_all(conn).await?;
+        Ok(res.into_iter().map(|row: PgRow| row.get(0)).collect())
     }
 }

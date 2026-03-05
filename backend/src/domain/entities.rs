@@ -547,8 +547,8 @@ impl From<Uuid> for UserID {
     }
 }
 
-impl From<UserID> for Uuid {
-    fn from(value: UserID) -> Self {
+impl From<&UserID> for Uuid {
+    fn from(value: &UserID) -> Self {
         value.0
     }
 }

@@ -8,8 +8,18 @@ use tracing::log;
 async fn main() {
     let configuration = get_configuration().expect("Can't get configuration");
 
-    let file = File::create(&configuration.application.log_file).unwrap();
-    let subscriber = get_subscriber(Mutex::new(file));
+    let writer: Mutex<Box<dyn std::io::Write + Send>> =
+        match File::create(&configuration.application.log_file) {
+            Ok(file) => Mutex::new(Box::new(file)),
+            Err(e) => {
+                eprintln!(
+                    "Failed to create log file '{}': {e}. Falling back to stdout.",
+                    &configuration.application.log_file
+                );
+                Mutex::new(Box::new(std::io::stdout()))
+            }
+        };
+    let subscriber = get_subscriber(writer);
     init_subscriber(subscriber);
     log::info!("configuration: {:?}", &configuration);
 

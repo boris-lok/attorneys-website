@@ -285,7 +285,15 @@ impl IUserRepository for SqlxUserRepository<'_> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
-        let query = "select roles.name from user_roles, roles where user_roles.user_id = $1";
+        let query = r"
+        select
+          roles.name
+        from
+          user_roles, roles
+        where
+          roles.id = user_roles.role_id
+          and user_roles.user_id = $1;
+        ";
 
         let res = sqlx::query(query).bind(id).fetch_all(conn).await?;
         Ok(res.into_iter().map(|row: PgRow| row.get(0)).collect())

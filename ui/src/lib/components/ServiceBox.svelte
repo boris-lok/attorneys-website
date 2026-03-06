@@ -3,10 +3,10 @@
     import Markdown from '@magidoc/plugin-svelte-marked'
 
     type InputProps = {
-        title: string,
-        icon?: string,
-        content: string,
-        active: boolean,
+        title: string
+        icon?: string
+        content: string
+        active: boolean
     }
 
     let { title, icon, content, active }: InputProps = $props()
@@ -18,19 +18,20 @@
         class="relative h-full w-full rounded-xl border border-[var(--primary-color)] p-4 transition-[width,height]"
     >
         <div
-            class="flex flex-col h-full w-full gap-2 items-center justify-center text-2xl font-bold text-[var(--primary-color)] max-sm:group-[.active]:opacity-20 group-hover:opacity-20"
+            class="flex h-full w-full flex-col items-center justify-center gap-2 text-2xl font-bold text-[var(--primary-color)] group-hover:opacity-20 max-sm:group-[.active]:opacity-20"
         >
             {#if icon}
-                <IconifyIcon icon={icon} class="h-12 w-12" />
+                <IconifyIcon {icon} class="h-12 w-12" />
             {/if}
             <p>{title}</p>
         </div>
     </div>
 
     <div
-        class="absolute inset-0 opacity-0 bg-white group-hover:block max-sm:[&.active]:block max-sm:group-[.active]:opacity-80 group-hover:opacity-80"></div>
+        class="absolute inset-0 bg-white opacity-0 group-hover:block group-hover:opacity-80 max-sm:group-[.active]:opacity-80 max-sm:[&.active]:block"
+    ></div>
     <div
-        class="prose absolute w-full hidden p-4 group-hover:block max-sm:group-[.active]:block overflow-y-auto top-0 h-72 text-left"
+        class="prose absolute top-0 hidden h-72 w-full overflow-y-auto p-4 text-left group-hover:block max-sm:group-[.active]:block"
     >
         <Markdown source={content} />
     </div>

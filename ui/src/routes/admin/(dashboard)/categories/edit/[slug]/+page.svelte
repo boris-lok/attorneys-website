@@ -22,7 +22,7 @@
     }
 
     $effect(() => {
-        (async () => {
+        ;(async () => {
             isLoading = true
             await fetchData()
             isLoading = false
@@ -33,5 +33,5 @@
 {#if isLoading}
     <Loading />
 {:else}
-    <CategoryEditor icon={icon} name={name} />
+    <CategoryEditor {icon} {name} />
 {/if}

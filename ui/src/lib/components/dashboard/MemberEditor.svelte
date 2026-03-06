@@ -40,14 +40,14 @@
 
     // handles the name has been changed
     function onNameChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement }
+        e: Event & { currentTarget: EventTarget & HTMLInputElement },
     ) {
         name = (e.target as HTMLInputElement).value.trim()
     }
 
     // handles the description has been changed
     function onDescriptionChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
+        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
     ) {
         description = (e.target as HTMLTextAreaElement).value.trim()
     }
@@ -81,7 +81,7 @@
             name: name!,
             description: description!,
             seq: 0,
-            language: 'zh'
+            language: 'zh',
         })
 
         if (resp.error) {
@@ -107,13 +107,15 @@
     <Loading />
 {:else}
     <div
-        class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
-        class:show={errorMsg!==''}
+        class="mb-2 flex hidden rounded-lg bg-red-50 p-4 text-sm text-red-800 [.show]:block"
+        class:show={errorMsg !== ''}
         role="alert"
     >
         <p class="w-full text-center">{errorMsg}</p>
     </div>
-    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
+    <div
+        class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4"
+    >
         <div class="flex-1">
             <div class="relative flex flex-col gap-4">
                 <UploadImage imageData={avatarData} onChange={onImageChanged} />

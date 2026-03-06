@@ -11,12 +11,12 @@
     }
 
     let { id, icon, name }: EditorProps = $props()
-    let data: { icon: string, name: string } = $state({ icon: '', name: '' })
+    let data: { icon: string; name: string } = $state({ icon: '', name: '' })
     $effect(() => {
         // init the state by props
         data = {
             icon: icon ?? '',
-            name: name ?? ''
+            name: name ?? '',
         }
     })
 
@@ -25,21 +25,21 @@
 
     // handles name has been changed
     function onNameChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement }
+        e: Event & { currentTarget: EventTarget & HTMLInputElement },
     ) {
         data = {
             ...data,
-            name: (e.currentTarget as HTMLInputElement).value.trim()
+            name: (e.currentTarget as HTMLInputElement).value.trim(),
         }
     }
 
     // handles icon has been changed
     function onIconChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement }
+        e: Event & { currentTarget: EventTarget & HTMLInputElement },
     ) {
         data = {
             ...data,
-            icon: (e.currentTarget as HTMLInputElement).value.trim()
+            icon: (e.currentTarget as HTMLInputElement).value.trim(),
         }
     }
 
@@ -64,7 +64,7 @@
             ...(id === undefined ? {} : { id: id }),
             language: 'en',
             ...data,
-            seq: 0
+            seq: 0,
         })
 
         isLoading = false
@@ -81,13 +81,15 @@
     <Loading />
 {:else}
     <div
-        class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
+        class="mb-2 flex hidden rounded-lg bg-red-50 p-4 text-sm text-red-800 [.show]:block"
         class:show={errorMsg !== ''}
         role="alert"
     >
         <p class="w-full text-center">{errorMsg}</p>
     </div>
-    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
+    <div
+        class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4"
+    >
         <div class="flex-1">
             <div class="flex flex-col gap-x-1">
                 <Input
@@ -98,11 +100,13 @@
                     type="text"
                     value={icon ?? ''}
                 />
-                <p class="mt-[-8px] text-gray-500 text-xs mb-2 px-2">Please find the icon from <a
-                    class="text-blue-600 underline hover:text-blue-800 visited:text-pink-600"
-                    href="https://icon-sets.iconify.design/"
-                    target="_blank"
-                >here</a></p>
+                <p class="mt-[-8px] mb-2 px-2 text-xs text-gray-500">
+                    Please find the icon from <a
+                        class="text-blue-600 underline visited:text-pink-600 hover:text-blue-800"
+                        href="https://icon-sets.iconify.design/"
+                        target="_blank">here</a
+                    >
+                </p>
             </div>
             <Input
                 hasError={errorMsg !== ''}
@@ -116,7 +120,7 @@
         <div class="flex-1">
             <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
             <div
-                class="flex flex-row gap-2 w-full rounded-lg bg-gray-100 px-4 py-4 items-center"
+                class="flex w-full flex-row items-center gap-2 rounded-lg bg-gray-100 px-4 py-4"
             >
                 {#if data.icon}
                     <IconifyIcon icon={data.icon} class="h-8 w-8" />
@@ -134,5 +138,4 @@
             Save
         </button>
     </div>
-
 {/if}

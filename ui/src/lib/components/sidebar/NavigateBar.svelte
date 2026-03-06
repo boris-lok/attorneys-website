@@ -16,7 +16,6 @@
     let show = $state(false)
     let innerWidth = $state(0)
 
-
     // handle the menu button clicked.
     function toggleMenu() {
         show = !show
@@ -54,7 +53,7 @@
     })
 </script>
 
-<svelte:window bind:innerWidth={innerWidth} />
+<svelte:window bind:innerWidth />
 
 <nav class="relative z-50">
     <div
@@ -67,20 +66,17 @@
             <div>
                 <a href={rootUrl}>
                     <picture>
-                        <source media="(min-width: 768px)" srcset={logo}>
+                        <source media="(min-width: 768px)" srcset={logo} />
                         <img alt="logo" class="h-14 md:h-16" src={smLogo} />
                     </picture>
-
                 </a>
             </div>
 
             <!-- Menu Icon -->
-            <div
-                class="relative flex items-center justify-center sm:hidden"
-            >
+            <div class="relative flex items-center justify-center sm:hidden">
                 <button class="cursor-pointer" onclick={toggleMenu}>
                     <IconifyIcon
-                        class="h-6 w-6 m-2"
+                        class="m-2 h-6 w-6"
                         icon={show
                             ? 'material-symbols-light:close'
                             : 'ri:menu-3-fill'}
@@ -89,9 +85,7 @@
             </div>
 
             <!-- Top Bar Navigate Item -->
-            <div
-                class="relative flex flex-row max-sm:hidden gap-8"
-            >
+            <div class="relative flex flex-row gap-8 max-sm:hidden">
                 {#each items as item (item.name)}
                     {#if 'onClick' in item}
                         <button
@@ -120,17 +114,16 @@
             </div>
         </div>
     </div>
-
 </nav>
 
 <!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
 <div
-    class="absolute h-[calc(100vh-4rem)] translate-y-[calc(-100vh+4rem)] [&.show]:translate-y-0 bg-gray-300/95 w-full transition-[translate,z-index,opacity] duration-500 z-[49] opacity-0 [&.show]:opacity-100 overflow-hidden ease-in-out"
-    class:show>
-
+    class="absolute z-[49] h-[calc(100vh-4rem)] w-full translate-y-[calc(-100vh+4rem)] overflow-hidden bg-gray-300/95 opacity-0 transition-[translate,z-index,opacity] duration-500 ease-in-out [&.show]:translate-y-0 [&.show]:opacity-100"
+    class:show
+>
     <!--Dropdown Navigate Item -->
     <div
-        class="relative w-screen overflow-y-scroll md:hidden h-[calc(100vh-4rem)]"
+        class="relative h-[calc(100vh-4rem)] w-screen overflow-y-scroll md:hidden"
     >
         <div
             class="grid max-h-[calc(100vh-4rem)] w-full grid-cols-2 justify-items-center gap-y-8 overflow-x-hidden overflow-y-auto px-4 py-6"
@@ -140,9 +133,9 @@
                     <button
                         class="outline-none"
                         onclick={() => {
-                                show = false
-                                item.onClick()
-                            }}
+                            show = false
+                            item.onClick()
+                        }}
                     >
                         <NavigateItem
                             label={item.name}

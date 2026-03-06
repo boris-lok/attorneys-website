@@ -6,5 +6,5 @@
 </script>
 
 <div class="md:animate-[--right-to-left_1s_ease-in-out]">
-    <HomeContent language={language} />
+    <HomeContent {language} />
 </div>

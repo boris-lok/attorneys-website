@@ -14,12 +14,12 @@
 
     let data: Data = {
         username: '',
-        password: ''
+        password: '',
     }
 
     function onDataChanged<K extends keyof Data>(
         key: K,
-        e: Event & { currentTarget: EventTarget & HTMLInputElement }
+        e: Event & { currentTarget: EventTarget & HTMLInputElement },
     ) {
         if (!e.target) {
             return
@@ -28,7 +28,7 @@
         const { value } = e.target as HTMLInputElement
         data = {
             ...data,
-            [key]: value.trim()
+            [key]: value.trim(),
         }
     }
 
@@ -45,8 +45,12 @@
             return
         }
 
-        user.set(resp.data)
-        await goto('/admin/dashboard')
+        user.set(resp.credential)
+        if (resp.credential.roles.some((r) => r.toLowerCase() === 'lawyer')) {
+            await goto(`/b/dashboard`)
+        } else {
+            await goto('/admin/dashboard')
+        }
     }
 </script>
 
@@ -77,9 +81,8 @@
                 class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:bg-gray-500"
                 disabled={isLoading}
                 onclick={onSubmitClicked}
-            >Login
+                >Login
             </button>
         </div>
     </div>
-
 {/if}

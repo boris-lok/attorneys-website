@@ -18,7 +18,7 @@
     }
 
     $effect(() => {
-        (async () => {
+        ;(async () => {
             isLoading = true
             await fetchCategories()
             isLoading = false
@@ -30,5 +30,4 @@
     <Loading />
 {:else}
     <ArticleEditor {categories} />
-
 {/if}

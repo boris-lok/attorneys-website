@@ -1,4 +1,11 @@
-import type { APIError, APIResponse, CreateHomeRequest, HomeData, Language, UpdateHomeRequest } from '$lib/types'
+import type {
+    APIError,
+    APIResponse,
+    CreateHomeRequest,
+    HomeData,
+    Language,
+    UpdateHomeRequest,
+} from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 

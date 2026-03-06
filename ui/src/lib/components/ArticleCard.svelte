@@ -11,26 +11,28 @@
 
 {#if disabled}
     <div
-        class="flex flex-col bg-white rounded-lg shadow px-8 py-6 justify-around"
+        class="flex flex-col justify-around rounded-lg bg-white px-8 py-6 shadow"
     >
         <h2 class="text-xl font-semibold text-gray-800">
             {title}
         </h2>
 
-        <p class="text-gray-500 text-xs mt-4">
+        <p class="mt-4 text-xs text-gray-500">
             發佈時間: {createdAt}
         </p>
     </div>
 {:else}
     <a
-        class="group flex flex-col bg-white rounded-lg shadow hover:shadow-xl px-8 py-6 transition duration-200 cursor-pointer justify-around"
+        class="group flex cursor-pointer flex-col justify-around rounded-lg bg-white px-8 py-6 shadow transition duration-200 hover:shadow-xl"
         href="/articles/{id}"
     >
-        <h2 class="text-xl font-semibold text-gray-800 group-hover:text-[var(--primary-color)] transition">
+        <h2
+            class="text-xl font-semibold text-gray-800 transition group-hover:text-[var(--primary-color)]"
+        >
             {title}
         </h2>
 
-        <p class="text-gray-500 text-xs mt-4">
+        <p class="mt-4 text-xs text-gray-500">
             發佈時間: {createdAt}
         </p>
     </a>

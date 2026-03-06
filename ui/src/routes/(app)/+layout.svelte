@@ -10,23 +10,23 @@
         {
             icon: 'lsicon:list-outline',
             name: '服務項目',
-            url: '/services'
+            url: '/services',
         },
         {
             icon: 'lineicons:books-2',
             name: '文章',
-            url: '/articles'
+            url: '/articles',
         },
         {
             icon: 'tdesign:member',
             name: '專業團隊',
-            url: '/members'
+            url: '/members',
         },
         {
             icon: 'hugeicons:contact-02',
             name: '聯絡我們',
-            url: '/contact_us'
-        }
+            url: '/contact_us',
+        },
     ]
 </script>
 

@@ -26,12 +26,12 @@
 
         return {
             id: resp.home?.[0]?.id,
-            content: resp.home?.[0]?.data?.data || ''
+            content: resp.home?.[0]?.data?.data || '',
         }
     }
 
     $effect(() => {
-        (async () => {
+        ;(async () => {
             isLoading = true
             const c = await fetchContent()
             content = c.content
@@ -48,7 +48,9 @@
     {#if errorMessage}
         <div>{errorMessage}</div>
     {/if}
-    <div class="prose mx-auto my-6 md:my-16 px-6 w-full md:px-16 md:min-w-2xl lg:min-w-3xl">
+    <div
+        class="prose mx-auto my-6 w-full px-6 md:my-16 md:min-w-2xl md:px-16 lg:min-w-3xl"
+    >
         <Markdown source={content}></Markdown>
     </div>
 {/if}

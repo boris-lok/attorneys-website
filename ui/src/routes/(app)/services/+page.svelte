@@ -3,7 +3,7 @@
 </script>
 
 <div class="relative flex flex-col md:flex-row md:items-center">
-    <div class="relative flex w-full flex-col md:max-w-6xl mx-auto">
+    <div class="relative mx-auto flex w-full flex-col md:max-w-6xl">
         <p
             class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16"
         >

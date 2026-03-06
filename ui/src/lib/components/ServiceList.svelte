@@ -15,7 +15,6 @@
     let isLoading = $state(false)
     let selectedServiceId: string | null = $state(null)
 
-
     function onServiceClicked(id: string) {
         selectedServiceId = id
     }
@@ -31,7 +30,7 @@
     }
 
     $effect(() => {
-        (async () => {
+        ;(async () => {
             isLoading = true
             services = await fetchServices()
             isLoading = false
@@ -48,12 +47,17 @@
         {#each services as service (service.id)}
             <div class="relative">
                 <button onclick={() => onServiceClicked(service.id)}>
-                    <ServiceBox icon={service.data.icon} title={service.data.title}
-                                content={service.data.data} active={service.id === selectedServiceId} />
+                    <ServiceBox
+                        icon={service.data.icon}
+                        title={service.data.title}
+                        content={service.data.data}
+                        active={service.id === selectedServiceId}
+                    />
                 </button>
                 {#if isAdmin}
                     <div
-                        class="absolute top-2 right-2 z-10 hover:bg-gray-400/20 p-1 rounded opacity-10 hover:opacity-100">
+                        class="absolute top-2 right-2 z-10 rounded p-1 opacity-10 hover:bg-gray-400/20 hover:opacity-100"
+                    >
                         <a href="/admin/services/edit/{service.id}">
                             <Icon
                                 icon="mingcute:edit-line"

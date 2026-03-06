@@ -1,5 +1,4 @@
 <script lang="ts">
-
     import type { CategoryData, Language } from '$lib/types'
     import { CategoryService } from '$lib/services/category.service'
     import Loading from '$lib/components/common/Loading.svelte'
@@ -21,7 +20,7 @@
     }
 
     $effect(() => {
-        (async () => {
+        ;(async () => {
             isLoading = true
             await fetchData()
             isLoading = false
@@ -37,14 +36,16 @@
             <Icon height="24" icon="gridicons:create" width="24" />
         </a>
     </div>
-    <div class="flex flex-wrap gap-4 justify-around">
+    <div class="flex flex-wrap justify-around gap-4">
         {#each categories as category (category.id)}
-            <div class="rounded border w-36 h-36 flex flex-col items-center justify-center relative">
+            <div
+                class="relative flex h-36 w-36 flex-col items-center justify-center rounded border"
+            >
                 {#if category.data.icon}
-                    <IconifyIcon icon={category.data.icon} class="w-8 h-8" />
+                    <IconifyIcon icon={category.data.icon} class="h-8 w-8" />
                 {/if}
                 <p>{category.data.name}</p>
-                <div class="absolute p-2 top-0 right-0">
+                <div class="absolute top-0 right-0 p-2">
                     <a href="/admin/categories/edit/{category.id}">
                         <Icon
                             icon="mingcute:edit-line"

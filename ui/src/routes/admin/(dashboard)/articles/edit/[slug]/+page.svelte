@@ -24,7 +24,7 @@
         return {
             title: resp.article?.data.title ?? '',
             content: resp.article?.data.content ?? '',
-            categoryId: resp.article?.data.category_id
+            categoryId: resp.article?.data.category_id,
         }
         // forkJoin({
         //     article: ArticleServices.retrieve(data.id, 'zh'),
@@ -49,11 +49,10 @@
     }
 
     $effect(() => {
-        (async () => {
+        ;(async () => {
             isLoading = true
             const language = 'zh'
             try {
-
                 let article = await fetchArticle(data.id, language)
                 if (article) {
                     title = article.title
@@ -63,7 +62,6 @@
 
                 const resp = await fetchCategories(language)
                 categories = resp
-
             } finally {
                 isLoading = false
             }

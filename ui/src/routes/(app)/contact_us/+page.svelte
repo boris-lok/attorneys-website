@@ -20,8 +20,9 @@
     <div
         class="relative flex flex-col md:mx-auto md:mt-12 md:w-full md:max-w-4xl md:flex-col md:gap-8"
     >
-
-        <div class="flex flex-col gap-4 px-4 py-4 md:flex-1 md:justify-evenly items-center">
+        <div
+            class="flex flex-col items-center gap-4 px-4 py-4 md:flex-1 md:justify-evenly"
+        >
             <div class="flex flex-row items-center gap-2">
                 <IconifyIcon
                     class="h-12 w-12"
@@ -36,7 +37,8 @@
         </div>
 
         <div
-            class="w-full overflow-clip rounded-xl min-h-48 md:min-h-96 lg:min-h-96 md:flex-1 m-auto md:max-w-96 lg:max-w-[768px]">
+            class="m-auto min-h-48 w-full overflow-clip rounded-xl md:min-h-96 md:max-w-96 md:flex-1 lg:min-h-96 lg:max-w-[768px]"
+        >
             <iframe
                 allowfullscreen
                 loading="lazy"

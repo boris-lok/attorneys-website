@@ -9,31 +9,6 @@
 
     let items: NavigationItem[] = [
         {
-            icon: 'iconoir:home',
-            name: '首頁',
-            url: '/admin/home',
-        },
-        {
-            icon: 'lsicon:list-outline',
-            name: '服務',
-            url: '/admin/services',
-        },
-        {
-            icon: 'ph:books-light',
-            name: '文章分類',
-            url: '/admin/categories',
-        },
-        {
-            icon: 'lineicons:books-2',
-            name: '文章',
-            url: '/admin/articles',
-        },
-        {
-            icon: 'tdesign:member',
-            name: '專業團隊',
-            url: '/admin/members',
-        },
-        {
             icon: 'tabler:logout',
             name: '登出',
             onClick: async () => {
@@ -43,8 +18,8 @@
                 }
                 user.remove()
                 await goto('/admin/login')
-            },
-        },
+            }
+        }
     ]
 </script>
 

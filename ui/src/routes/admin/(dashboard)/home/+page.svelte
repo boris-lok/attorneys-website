@@ -23,6 +23,6 @@
     </div>
 
     <div>
-        <HomeContent language={language} onReady={(e) => id = e} />
+        <HomeContent {language} onReady={(e) => (id = e)} />
     </div>
 </div>

@@ -24,7 +24,7 @@
     }
 
     $effect(() => {
-        (async () => {
+        ;(async () => {
             isLoading = true
             await fetchData()
             isLoading = false

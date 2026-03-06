@@ -34,7 +34,7 @@
     }
 
     $effect(() => {
-        (async () => {
+        ;(async () => {
             isLoading = true
             await fetchData()
             isLoading = false
@@ -45,7 +45,7 @@
 {#if isLoading}
     <Loading />
 {:else}
-    <div class="px-4 my-8 md:px-8 md:my-16 md:max-w-5xl md:mx-auto">
+    <div class="my-8 px-4 md:mx-auto md:my-16 md:max-w-5xl md:px-8">
         <div
             class="relative flex flex-col items-center justify-between md:flex-row"
         >
@@ -60,16 +60,16 @@
                 <IconifyIcon icon="radix-icons:avatar" class="h-48 w-48" />
             {/if}
         </div>
-        <div class="prose max-w-2xl md:max-w-3xl lg:max-w-4xl mt-4">
+        <div class="prose mt-4 max-w-2xl md:max-w-3xl lg:max-w-4xl">
             <Markdown source={description ?? ''}></Markdown>
         </div>
 
-        <div class="relative flex flex-row justify-center items-center">
+        <div class="relative flex flex-row items-center justify-center">
             <button
-                class="rounded border w-36 h-10 hover:border-[var(--primary-color)] cursor-pointer hover:bg-[var(--primary-color)] hover:text-white transition-[background-color,font-size] duration-500 hover:text-lg"
-                onclick={onBackClicked}>返回
+                class="h-10 w-36 cursor-pointer rounded border transition-[background-color,font-size] duration-500 hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] hover:text-lg hover:text-white"
+                onclick={onBackClicked}
+                >返回
             </button>
         </div>
     </div>
-
 {/if}

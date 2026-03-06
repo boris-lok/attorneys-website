@@ -4,7 +4,7 @@
     let {
         icon,
         label,
-        topBar
+        topBar,
     }: {
         icon: string
         label: string
@@ -18,7 +18,10 @@
     >
         <IconifyIcon {icon} class="h-6 w-6" />
         <p
-            class="hidden whitespace-nowrap text-base absolute lg:relative lg:block group-hover:block max-lg:group-hover:top-5">{label}</p>
+            class="absolute hidden text-base whitespace-nowrap group-hover:block max-lg:group-hover:top-5 lg:relative lg:block"
+        >
+            {label}
+        </p>
     </div>
 {:else}
     <div

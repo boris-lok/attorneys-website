@@ -14,17 +14,17 @@
 
     let { id, data, title, icon }: EditorProps = $props()
 
-    let newData: { icon: string, title: string, data: string } = $state({
+    let newData: { icon: string; title: string; data: string } = $state({
         icon: '',
         title: '',
-        data: ''
+        data: '',
     })
     $effect(() => {
         // init the state by props
         newData = {
             icon: icon ?? '',
             title: title ?? '',
-            data: data ?? ''
+            data: data ?? '',
         }
     })
     let errorMsg = $state('')
@@ -34,29 +34,31 @@
     // handles content has been changed
     // it will update the preview zone automatically
     function onContentChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
+        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
     ) {
         newData = {
             ...newData,
-            data: (e.currentTarget as HTMLTextAreaElement).value.trim()
+            data: (e.currentTarget as HTMLTextAreaElement).value.trim(),
         }
     }
 
     // handles title has been changed
     function onTitleChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement }
+        e: Event & { currentTarget: EventTarget & HTMLInputElement },
     ) {
         newData = {
             ...newData,
-            title: (e.currentTarget as HTMLInputElement).value.trim()
+            title: (e.currentTarget as HTMLInputElement).value.trim(),
         }
     }
 
     // handles icon has been changed
-    function onIconChanged(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+    function onIconChanged(
+        e: Event & { currentTarget: EventTarget & HTMLInputElement },
+    ) {
         newData = {
             ...newData,
-            icon: (e.currentTarget as HTMLInputElement).value.trim()
+            icon: (e.currentTarget as HTMLInputElement).value.trim(),
         }
     }
 
@@ -68,7 +70,11 @@
     // checks if content is not empty
     // if it is, returns false. Otherwise, returns true
     function isValid() {
-        return newData.title.trim() !== '' && newData.data !== '' && newData.icon.trim() !== ''
+        return (
+            newData.title.trim() !== '' &&
+            newData.data !== '' &&
+            newData.icon.trim() !== ''
+        )
     }
 
     // handles the save button has been clicked
@@ -85,7 +91,7 @@
             ...(id === undefined ? {} : { id: id }),
             ...newData,
             language: 'zh',
-            seq: 0
+            seq: 0,
         })
         isLoading = false
 
@@ -101,13 +107,15 @@
     <Loading />
 {:else}
     <div
-        class="mb-2 flex rounded-lg bg-red-50 p-4 text-sm text-red-800 hidden [.show]:block"
+        class="mb-2 flex hidden rounded-lg bg-red-50 p-4 text-sm text-red-800 [.show]:block"
         class:show={errorMsg !== ''}
         role="alert"
     >
         <p class="w-full text-center">{errorMsg}</p>
     </div>
-    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
+    <div
+        class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4"
+    >
         <div class="flex-1">
             <div class="relative flex-row gap-x-4">
                 <div class="flex flex-col gap-x-1">
@@ -119,11 +127,13 @@
                         type="text"
                         value={icon ?? ''}
                     />
-                    <p class="mt-[-8px] text-gray-500 text-xs mb-2 px-2">Please find the icon from <a
-                        class="text-blue-600 underline hover:text-blue-800 visited:text-pink-600"
-                        href="https://icon-sets.iconify.design/"
-                        target="_blank"
-                    >here</a></p>
+                    <p class="mt-[-8px] mb-2 px-2 text-xs text-gray-500">
+                        Please find the icon from <a
+                            class="text-blue-600 underline visited:text-pink-600 hover:text-blue-800"
+                            href="https://icon-sets.iconify.design/"
+                            target="_blank">here</a
+                        >
+                    </p>
                 </div>
 
                 <Input
@@ -145,7 +155,12 @@
         <div class="flex-1">
             <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
             <button onclick={onServiceBoxClicked}>
-                <ServiceBox active={show} content={newData.data} icon={newData.icon} title={newData.title} />
+                <ServiceBox
+                    active={show}
+                    content={newData.data}
+                    icon={newData.icon}
+                    title={newData.title}
+                />
             </button>
         </div>
     </div>
@@ -158,5 +173,4 @@
             Save
         </button>
     </div>
-
 {/if}

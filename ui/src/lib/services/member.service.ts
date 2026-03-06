@@ -5,9 +5,14 @@ import type {
     Language,
     MemberData,
     SimpleMember,
-    UpdateMemberRequest
+    UpdateMemberRequest,
 } from '$lib/types'
-import { ADMIN_URL, BASE_URL, TIMEOUT, UPLOAD_IMAGE_TIMEOUT } from '$lib/constant'
+import {
+    ADMIN_URL,
+    BASE_URL,
+    TIMEOUT,
+    UPLOAD_IMAGE_TIMEOUT,
+} from '$lib/constant'
 import { getToken } from '$lib/utils'
 
 /**

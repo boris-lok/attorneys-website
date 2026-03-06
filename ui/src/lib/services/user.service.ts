@@ -2,6 +2,13 @@ import { ADMIN_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 import type { APIError, APIResponse } from '$lib/types'
 
+export type Credential = {
+    userId: string
+    username: string
+    token: string
+    roles: string[]
+}
+
 /**
  * Authenticates a user by sending their credentials to the login endpoint.
  *
@@ -15,8 +22,7 @@ async function login(req: {
     username: string
     password: string
 }): Promise<
-    | APIError
-    | APIResponse<{ data: { userId: string; username: string; token: string } }>
+    APIError | APIResponse<{ error: boolean; credential: Credential }>
 > {
     try {
         const resp = await fetch(`${ADMIN_URL}/login`, {
@@ -31,13 +37,19 @@ async function login(req: {
         }
 
         const json = await resp.json()
-        if ('token' in json && 'user_id' in json && 'username' in json) {
+        if (
+            'token' in json &&
+            'user_id' in json &&
+            'username' in json &&
+            'roles' in json
+        ) {
             return {
                 error: false,
-                data: {
+                credential: {
                     userId: json.user_id,
                     username: json.username,
                     token: json.token,
+                    roles: json.roles,
                 },
             }
         }

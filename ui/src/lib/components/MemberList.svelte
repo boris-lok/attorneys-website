@@ -27,7 +27,7 @@
     }
 
     $effect(() => {
-        (async () => {
+        ;(async () => {
             isLoading = true
             members = await fetchMembers()
             isLoading = false
@@ -40,31 +40,27 @@
 {:else}
     {#each members as member (member.id)}
         <div
-            class="flex h-36 flex-row justify-between w-full rounded px-4 py-4 shadow-md md:w-84 lg:w-96"
+            class="flex h-36 w-full flex-row justify-between rounded px-4 py-4 shadow-md md:w-84 lg:w-96"
         >
-            <a href="/members/{member.id}" class="flex flex-row items-center gap-4">
+            <a
+                href="/members/{member.id}"
+                class="flex flex-row items-center gap-4"
+            >
                 {#if member.avatar}
                     <div class="h-24 w-24">
-                        <Image
-                            alt={member.name}
-                            image={member.avatar}
-                        />
+                        <Image alt={member.name} image={member.avatar} />
                     </div>
                 {:else}
-                    <IconifyIcon
-                        icon="radix-icons:avatar"
-                        class="h-24 w-24"
-                    />
+                    <IconifyIcon icon="radix-icons:avatar" class="h-24 w-24" />
                 {/if}
                 <p class="text-2xl">{member.name}</p>
             </a>
             {#if isAdmin}
-                <a href="/admin/members/edit/{member.id}" class="inline-block w-6 h-6">
-                    <Icon
-                        icon="mingcute:edit-line"
-                        width="24"
-                        height="24"
-                    />
+                <a
+                    href="/admin/members/edit/{member.id}"
+                    class="inline-block h-6 w-6"
+                >
+                    <Icon icon="mingcute:edit-line" width="24" height="24" />
                 </a>
             {/if}
         </div>

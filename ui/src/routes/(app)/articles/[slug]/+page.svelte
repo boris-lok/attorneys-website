@@ -14,9 +14,10 @@
 
 <Article id={data.id} />
 
-<div class="relative flex flex-row justify-center items-center my-8">
+<div class="relative my-8 flex flex-row items-center justify-center">
     <button
-        class="rounded border w-36 h-10 hover:border-[var(--primary-color)] cursor-pointer hover:bg-[var(--primary-color)] hover:text-white transition-[background-color,font-size] duration-500 hover:text-lg"
-        onclick={onBackClicked}>返回
+        class="h-10 w-36 cursor-pointer rounded border transition-[background-color,font-size] duration-500 hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] hover:text-lg hover:text-white"
+        onclick={onBackClicked}
+        >返回
     </button>
 </div>

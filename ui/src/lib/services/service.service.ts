@@ -4,7 +4,7 @@ import type {
     CreateServiceRequest,
     Language,
     ServiceData,
-    UpdateServiceRequest
+    UpdateServiceRequest,
 } from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'

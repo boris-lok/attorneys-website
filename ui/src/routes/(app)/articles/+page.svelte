@@ -15,20 +15,32 @@
     let pageSize = 10
     let totalPages = $state(0)
 
-    async function fetchArticlesObservable(lang: Language, categoryId: string | null, page: number, pageSize: number) {
-        const resp = await ArticleServices.list(lang, categoryId, page, pageSize)
+    async function fetchArticlesObservable(
+        lang: Language,
+        categoryId: string | null,
+        page: number,
+        pageSize: number,
+    ) {
+        const resp = await ArticleServices.list(
+            lang,
+            categoryId,
+            page,
+            pageSize,
+        )
 
         if (resp.error) {
             console.error(resp.message)
             return {
                 articles: [],
-                totalPages: 0
+                totalPages: 0,
             }
         }
 
         return {
             articles: resp.articles ?? [],
-            totalPages: Math.floor((resp.total ?? 0) / pageSize) + ((resp.total ?? 0) % pageSize > 0 ? 1 : 0)
+            totalPages:
+                Math.floor((resp.total ?? 0) / pageSize) +
+                ((resp.total ?? 0) % pageSize > 0 ? 1 : 0),
         }
     }
 
@@ -50,47 +62,68 @@
         page = page
     }
 
-
     $effect(() => {
-        (async (lang: Language, selectedCategoryId: string | null, page: number, pageSize: number) => {
-            const resp = await fetchArticlesObservable(lang, selectedCategoryId, page, pageSize)
+        ;(async (
+            lang: Language,
+            selectedCategoryId: string | null,
+            page: number,
+            pageSize: number,
+        ) => {
+            const resp = await fetchArticlesObservable(
+                lang,
+                selectedCategoryId,
+                page,
+                pageSize,
+            )
 
             articles = resp.articles
             totalPages = resp.totalPages
-
         })(lang, selectedCategoryId, page, pageSize)
     })
 </script>
 
 {#if isLoading}
     <Loading />
-
 {:else}
-    <div class="px-4 lg:px-16 mb-8">
+    <div class="mb-8 px-4 lg:px-16">
         <div class="mb-8">
-            <h1 class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16">
-                文章</h1>
+            <h1
+                class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16"
+            >
+                文章
+            </h1>
         </div>
 
-        <div class="flex flex-col-reverse lg:flex-row gap-4 lg:gap-8">
+        <div class="flex flex-col-reverse gap-4 lg:flex-row lg:gap-8">
             <div class="flex-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-8">
+                <div
+                    class="grid grid-cols-1 gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3"
+                >
                     {#each articles as article (article.id)}
-                        <ArticleCard id={article.id} title={article.title} createdAt={article.createdAtString} />
+                        <ArticleCard
+                            id={article.id}
+                            title={article.title}
+                            createdAt={article.createdAtString}
+                        />
                     {/each}
                 </div>
             </div>
 
             <div class="flex-1">
-                <CategorySelector categories={categories} onChanged={onCategoryChanged}
-                                  selectedCategoryId={selectedCategoryId} />
+                <CategorySelector
+                    {categories}
+                    onChanged={onCategoryChanged}
+                    {selectedCategoryId}
+                />
             </div>
         </div>
 
-        <div class="lg:mt-16 mt-8">
-            <PaginationComponent totalPages={totalPages} onPageChanged={onPageChanged} currentPage={page} />
+        <div class="mt-8 lg:mt-16">
+            <PaginationComponent
+                {totalPages}
+                {onPageChanged}
+                currentPage={page}
+            />
         </div>
-
     </div>
-
 {/if}

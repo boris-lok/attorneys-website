@@ -25,6 +25,7 @@ pub struct LoginResponse {
     user_id: String,
     username: String,
     token: String,
+    roles: Vec<String>,
 }
 
 pub async fn login(
@@ -70,7 +71,7 @@ pub async fn login(
             let claims = Claims {
                 sub: user_id.clone(),
                 exp: exp.timestamp() as usize,
-                roles,
+                roles: roles.clone(),
             };
 
             let token = jsonwebtoken::encode(
@@ -84,6 +85,7 @@ pub async fn login(
                 user_id,
                 username: req.username,
                 token,
+                roles,
             }))
         }
         Err(Error::InvalidCredentials) => Err(ApiError::InvalidCredentials),

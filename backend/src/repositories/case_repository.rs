@@ -91,7 +91,8 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
-        let query = r"insert into case (id, name, estimated_minutes) values ($1, $2, $3)";
+        let query = r"insert into cases (id, name, estimated_minutes) values ($1, $2, $3)";
+        dbg!(query, id, name, estimated_minutes);
 
         sqlx::query(query)
             .bind(id)
@@ -113,7 +114,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         let conn = &mut **conn;
 
         let query = r"
-    UPDATE case
+    UPDATE cases
     SET estimated_minutes = COALESCE($1, estimated_minutes),
         name = COALESCE($2, name)
     WHERE id = $3
@@ -134,7 +135,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         let conn = &mut **conn;
 
         let query =
-            r"select id, name, estimated_minutes, created_at from case where deleted_at is null";
+            r"select id, name, estimated_minutes, created_at from cases where deleted_at is null";
 
         let rows = sqlx::query_as::<_, CaseFromSQLx>(query)
             .fetch_all(conn)
@@ -147,7 +148,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
-        let query = r"update case set deleted_at = now() where id = $1";
+        let query = r"update cases set deleted_at = now() where id = $1";
 
         sqlx::query(query)
             .bind(Uuid::from(id))

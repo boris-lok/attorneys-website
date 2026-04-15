@@ -41,7 +41,7 @@
         isLoading = false
 
         if (resp.error) {
-            console.error(`login failed: ${JSON.stringify(resp)}`)
+            console.error(`login failed: ${resp}`)
             return
         }
 

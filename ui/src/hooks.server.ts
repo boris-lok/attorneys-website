@@ -1,34 +1,43 @@
 import { redirect } from '@sveltejs/kit'
 import type { Credential } from '$lib/services/user.service'
 
+type ValidateRoute = {
+    start: string
+    excludes: string[]
+    roles: string[]
+}
+
+const validateRoute: ValidateRoute[] = [
+    {
+        start: '/admin',
+        excludes: ['login'],
+        roles: ['admin'],
+    },
+    {
+        start: '/b',
+        excludes: [],
+        roles: ['admin', 'lawyer'],
+    },
+]
+
 export const handle = async ({ event, resolve }) => {
     const user: Partial<Credential> = JSON.parse(
         event.cookies.get('user') || '{}',
     )
 
-    if (
-        event.url.pathname.startsWith('/admin') &&
-        !event.url.pathname.includes('login')
-    ) {
-        if (!user.token) {
-            throw redirect(302, '/admin/login')
-        }
+    for (const e of validateRoute) {
+        if (event.url.pathname.startsWith(e.start)) {
+            if (e.excludes.some(elem => event.url.pathname.includes(elem))) {
+                break
+            }
 
-        if (!checkRole(user.roles ?? [], 'admin')) {
-            throw redirect(302, '/permission_denied')
-        }
-    }
+            if (!user.token) {
+                throw redirect(302, '/admin/login')
+            }
 
-    if (event.url.pathname.startsWith('/b')) {
-        if (!user.token) {
-            throw redirect(302, '/admin/login')
-        }
-
-        if (
-            !checkRole(user.roles ?? [], 'admin') &&
-            !checkRole(user.roles ?? [], 'lawyer')
-        ) {
-            throw redirect(302, '/permission_denied')
+            if (!e.roles.some(role => checkRole(user.roles ?? [], role))) {
+                throw redirect(302, '/error/permission_denied')
+            }
         }
     }
 
@@ -39,6 +48,6 @@ export const handle = async ({ event, resolve }) => {
 //
 // return true, if exist
 // return false, if not exist
-const checkRole = (roles: string[], role: string) => {
+export const checkRole = (roles: string[], role: string) => {
     return roles.some((e) => e.toLowerCase() === role)
 }

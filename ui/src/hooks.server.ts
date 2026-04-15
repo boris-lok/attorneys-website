@@ -27,7 +27,7 @@ export const handle = async ({ event, resolve }) => {
 
     for (const e of validateRoute) {
         if (event.url.pathname.startsWith(e.start)) {
-            if (e.excludes.some(elem => event.url.pathname.includes(elem))) {
+            if (e.excludes.some((elem) => event.url.pathname.includes(elem))) {
                 break
             }
 
@@ -35,7 +35,7 @@ export const handle = async ({ event, resolve }) => {
                 throw redirect(302, '/admin/login')
             }
 
-            if (!e.roles.some(role => checkRole(user.roles ?? [], role))) {
+            if (!e.roles.some((role) => checkRole(user.roles ?? [], role))) {
                 throw redirect(302, '/error/permission_denied')
             }
         }

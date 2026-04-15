@@ -151,3 +151,21 @@ export type APIError = {
 export type APIResponse<T> = T extends void
     ? { error: false }
     : { error: false } & T
+
+// The request of creating case content
+export type CreateCaseRequest = {
+    name: string
+    estimated_minutes: number
+}
+
+// The request of updating case content
+export type UpdateCaseRequest = CreateCaseRequest & { id: string }
+
+// The data structure of case
+export type CaseData = {
+    id: string
+    name: string
+    estimatedMinutes: number
+    createdAt: Date
+    createdAtString: string
+}

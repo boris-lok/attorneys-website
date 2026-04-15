@@ -54,7 +54,10 @@ async function login(req: {
             }
         }
 
-        return { error: true, message: `Unknown error: ${JSON.stringify(json)}` }
+        return {
+            error: true,
+            message: `Unknown error: ${JSON.stringify(json)}`,
+        }
     } catch (error) {
         return { error: true, message: `Error: ${error}` }
     }

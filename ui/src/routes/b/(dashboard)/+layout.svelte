@@ -18,8 +18,8 @@
                 }
                 user.remove()
                 await goto('/admin/login')
-            }
-        }
+            },
+        },
     ]
 </script>
 

@@ -9,6 +9,12 @@ export type Credential = {
     roles: string[]
 }
 
+export type SimpleUser = {
+    id: string
+    nickname: string
+    roles: string[]
+}
+
 /**
  * Authenticates a user by sending their credentials to the login endpoint.
  *
@@ -92,6 +98,42 @@ async function logout(): Promise<APIError | APIResponse<void>> {
     }
 }
 
+async function list(): Promise<
+    APIError | APIResponse<{ users: SimpleUser[] }>
+> {
+    let url = `${ADMIN_URL}/users`
+
+    try {
+        const resp = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: getToken(),
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+
+        const json = await resp.json()
+        let users = []
+
+        if ('users' in json && json.users.length > 0) {
+            users = json.users.map(
+                (e: { id: string; nickname: string; roles: string[] }) => {
+                    return {
+                        id: e.id,
+                        nickname: e.nickname,
+                        roles: e.roles,
+                    }
+                },
+            )
+        }
+
+        return { error: false, users: users }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
+}
+
 /**
  * UserService provides methods for handling user authentication operations.
  *
@@ -100,4 +142,5 @@ async function logout(): Promise<APIError | APIResponse<void>> {
 export const UserService = {
     login: login,
     logout: logout,
+    list: list,
 }

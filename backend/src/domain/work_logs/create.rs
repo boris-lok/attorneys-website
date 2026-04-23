@@ -10,7 +10,7 @@ pub struct Request {
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub duration: chrono::Duration,
     pub description: String,
-    pub collaborators: Option<Vec<UserID>>,
+    pub collaborator_ids: Option<Vec<UserID>>,
 }
 
 impl TryFrom<Request> for CreateWorkLog {
@@ -27,7 +27,7 @@ impl TryFrom<Request> for CreateWorkLog {
             started_at: value.started_at,
             ended_at: value.started_at + value.duration,
             description: value.description,
-            is_collaborative: value.collaborators.is_some(),
+            is_collaborative: value.collaborator_ids.is_some(),
             parent_id: None,
             status: WorkLogStatus::Approved,
         })
@@ -44,7 +44,7 @@ pub async fn execute(
     repo: Arc<tokio::sync::Mutex<impl IWorkLogsRepository + Sync + Send>>,
     req: Request,
 ) -> Result<Uuid, Error> {
-    let collaborators = req.collaborators.clone().unwrap_or_default();
+    let collaborators = req.collaborator_ids.clone().unwrap_or_default();
 
     let work_log = CreateWorkLog::try_from(req).map_err(|_| Error::InvalidCaseID)?;
     let mut lock = repo.lock().await;

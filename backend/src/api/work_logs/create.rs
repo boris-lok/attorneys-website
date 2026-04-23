@@ -17,7 +17,7 @@ pub struct CreateWorkLogRequest {
     started_at: chrono::DateTime<chrono::Utc>,
     duration: i64,
     description: String,
-    collaborators: Option<Vec<String>>,
+    collaborator_ids: Option<Vec<String>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -33,7 +33,7 @@ pub async fn create_work_log(
     let creator_id = Uuid::parse_str(claims.sub.as_str()).unwrap();
     let creator_id = UserID::from(creator_id);
     let case_id = Uuid::parse_str(req.case_id.as_str()).map_err(|_| ApiError::BadRequest)?;
-    let collaborators = req.collaborators.map(|c| {
+    let collaborators = req.collaborator_ids.map(|c| {
         c.iter()
             .filter_map(|id| {
                 let id = Uuid::parse_str(id.as_str());
@@ -48,7 +48,7 @@ pub async fn create_work_log(
         started_at: req.started_at,
         duration: chrono::Duration::minutes(req.duration),
         description: req.description,
-        collaborators,
+        collaborator_ids: collaborators,
     };
 
     let mut conn = state

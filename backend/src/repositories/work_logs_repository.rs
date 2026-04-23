@@ -71,8 +71,6 @@ impl TryFrom<String> for WorkLogStatus {
 #[derive(Debug, Serialize)]
 pub struct WorkLog {
     pub id: Uuid,
-    pub user_id: Uuid,
-    pub case: Case,
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub duration: i32,
     pub description: String,
@@ -89,12 +87,6 @@ pub struct Collaborator {
 #[derive(Debug, sqlx::FromRow)]
 pub struct WorkLogFromSQLx {
     id: Uuid,
-    user_id: Uuid,
-    creator_name: String,
-    case_id: Uuid,
-    case_name: String,
-    case_estimated_minutes: i32,
-    case_created_at: chrono::DateTime<chrono::Utc>,
     started_at: chrono::DateTime<chrono::Utc>,
     duration: i32,
     description: String,
@@ -106,15 +98,8 @@ impl From<WorkLogFromSQLx> for WorkLog {
     fn from(value: WorkLogFromSQLx) -> Self {
         Self {
             id: value.id,
-            user_id: value.user_id,
-            case: Case {
-                id: CaseID::from(value.case_id),
-                name: value.case_name,
-                estimated_minutes: value.case_estimated_minutes,
-                created_at: value.case_created_at,
-            },
             started_at: value.started_at,
-            duration: value.duration,
+            duration: value.duration / 60,
             description: value.description,
             is_collaborative: value.collaborator_ids.is_some(),
             collaborators: value
@@ -165,28 +150,22 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         let query = r"
         select
           wl.id,
-          wl.user_id,
-          u.name as creator_name,
           wl.case_id,
-          c.name as case_name,
-          c.estimated_minutes as case_estimated_minutes,
-          c.created_at as case_created_at,
           wl.started_at,
-          extract(epoch from wl.ended_at - wl.started_at) as duration,
+          extract(epoch from wl.ended_at - wl.started_at)::INT4 as duration,
           wl.description,
           array_agg(distinct child.user_id) filter (where child.parent_id is not null and child.status = 'approved' and child.user_id is not null) as collaborator_ids,
-          array_agg(distinct cu.name) filter (where child.parent_id is not null and child.status = 'approved' and child.user_id is not null) as collaborator_names
+          array_agg(distinct cu.nickname) filter (where child.parent_id is not null and child.status = 'approved' and child.user_id is not null) as collaborator_names
         from work_logs wl
-        join cases c on c.id = wl.case_id
         join users u on u.id = wl.user_id
         left join work_logs child on child.parent_id = wl.id
         left join users cu on cu.id = child.user_id
         where
-          c.id = $1
+          wl.case_id = $1
           and wl.deleted_at is null
           and wl.parent_id is null
         group by
-          wl.id, wl.user_id, u.name, c.id
+          wl.id, wl.user_id
         order by
           wl.started_at;
         ";

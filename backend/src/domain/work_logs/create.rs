@@ -43,7 +43,7 @@ pub enum Error {
 pub async fn execute(
     repo: Arc<tokio::sync::Mutex<impl IWorkLogsRepository + Sync + Send>>,
     req: Request,
-) -> Result<(), Error> {
+) -> Result<Uuid, Error> {
     let collaborators = req.collaborators.clone().unwrap_or_default();
 
     let work_log = CreateWorkLog::try_from(req).map_err(|_| Error::InvalidCaseID)?;
@@ -60,7 +60,7 @@ pub async fn execute(
             .map_err(|e| Error::Unknown(e.to_string()))?;
     }
 
-    Ok(())
+    Ok(work_log.id)
 }
 
 fn create_a_collaborator_work_log(work_log: CreateWorkLog, collaborator: UserID) -> CreateWorkLog {

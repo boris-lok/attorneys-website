@@ -44,6 +44,7 @@ pub use categories::update::update_category;
 pub use auth::login;
 pub use auth::logout;
 pub use users::change_password;
+pub use users::list::list_users;
 
 pub use cases::create::create_case;
 pub use cases::delete::delete_case;

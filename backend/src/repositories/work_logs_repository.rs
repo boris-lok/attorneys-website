@@ -1,5 +1,5 @@
 use crate::domain::entities::UserID;
-use crate::repositories::{Case, CaseID};
+use crate::repositories::CaseID;
 use serde::Serialize;
 use sqlx::Row;
 use std::sync::Arc;
@@ -206,11 +206,12 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
     async fn is_creator(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
+        let user_id = Uuid::from(user_id);
 
-        let query = r"select wl.id from work_logs where user_id = $1 and id = $2";
+        let query = r"select id from work_logs where user_id = $1 and id = $2";
 
         let row = sqlx::query(query)
-            .bind(user_id.to_string())
+            .bind(user_id)
             .bind(id)
             .fetch_one(conn)
             .await?;
@@ -221,12 +222,13 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
     async fn is_collaborator_work_log(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
+        let user_id = Uuid::from(user_id);
 
-        let query = r"select is_collaborator from work_logs where id = $1 and user_id = $2";
+        let query = r"select is_collaborative from work_logs where id = $1 and user_id = $2";
 
         let is_collaborator: bool = sqlx::query_scalar(query)
             .bind(id)
-            .bind(user_id.to_string())
+            .bind(user_id)
             .fetch_one(conn)
             .await?;
 
@@ -237,7 +239,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
-        let query = r"select wl.id from work_logs where id = $1";
+        let query = r"select id from work_logs where id = $1";
 
         let row = sqlx::query(query).bind(id).fetch_one(conn).await?;
 

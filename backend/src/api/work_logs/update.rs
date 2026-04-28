@@ -18,7 +18,7 @@ pub struct UpdateRequest {
     pub status: Option<String>,
     pub description: Option<String>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub duration: Option<i64>,
 }
 
 pub async fn update_work_log_status(
@@ -29,13 +29,17 @@ pub async fn update_work_log_status(
     let user_id = claims.sub;
     let user_id = UserID::try_from(user_id).map_err(|_| ApiError::BadRequest)?;
 
+    let ended_at = req
+        .started_at
+        .map(|started_at| started_at + chrono::Duration::minutes(req.duration.unwrap_or(0)));
+
     let req = Request {
         id: req.id,
         user_id,
         status: req.status,
         description: req.description,
         started_at: req.started_at,
-        ended_at: req.ended_at,
+        ended_at,
         force: false,
     };
 

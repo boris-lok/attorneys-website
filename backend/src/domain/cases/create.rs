@@ -6,6 +6,8 @@ use tokio::sync::Mutex;
 pub struct Request {
     pub name: String,
     pub estimated_minutes: i32,
+    pub started_at: chrono::DateTime<chrono::Utc>,
+    pub ended_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug)]
@@ -20,7 +22,12 @@ pub async fn execute(
     let mut lock = repo.lock().await;
 
     let id = lock
-        .create_case(&req.name, req.estimated_minutes)
+        .create_case(
+            &req.name,
+            req.estimated_minutes,
+            req.started_at,
+            req.ended_at,
+        )
         .await
         .map_err(|e| {
             Error::Unknown(format!(

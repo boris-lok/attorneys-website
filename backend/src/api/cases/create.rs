@@ -13,6 +13,8 @@ use tokio::sync::Mutex;
 pub struct CreateCaseRequest {
     name: String,
     estimated_minutes: i32,
+    started_at: chrono::DateTime<chrono::Utc>,
+    ended_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, Serialize)]
@@ -28,6 +30,8 @@ pub async fn create_case(
     let req = crate::domain::cases::create::Request {
         name: req.name,
         estimated_minutes: req.estimated_minutes,
+        started_at: req.started_at,
+        ended_at: req.ended_at,
     };
 
     let mut conn = state

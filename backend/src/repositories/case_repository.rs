@@ -62,7 +62,13 @@ impl From<CaseFromSQLx> for Case {
 
 #[async_trait::async_trait]
 pub trait ICaseRepository {
-    async fn create_case(&mut self, name: &str, estimated_minutes: i32) -> anyhow::Result<CaseID>;
+    async fn create_case(
+        &mut self,
+        name: &str,
+        estimated_minutes: i32,
+        started_at: chrono::DateTime<chrono::Utc>,
+        ended_at: chrono::DateTime<chrono::Utc>,
+    ) -> anyhow::Result<CaseID>;
     async fn update_case(
         &mut self,
         id: CaseID,
@@ -85,19 +91,26 @@ impl<'tx> SQLxCaseRepository<'tx> {
 
 #[async_trait::async_trait]
 impl ICaseRepository for SQLxCaseRepository<'_> {
-    async fn create_case(&mut self, name: &str, estimated_minutes: i32) -> anyhow::Result<CaseID> {
+    async fn create_case(
+        &mut self,
+        name: &str,
+        estimated_minutes: i32,
+        started_at: chrono::DateTime<chrono::Utc>,
+        ended_at: chrono::DateTime<chrono::Utc>,
+    ) -> anyhow::Result<CaseID> {
         let id = Uuid::new_v4();
 
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
-        let query = r"insert into cases (id, name, estimated_minutes) values ($1, $2, $3)";
-        dbg!(query, id, name, estimated_minutes);
+        let query = r"insert into cases (id, name, estimated_minutes, started_at, ended_at) values ($1, $2, $3, $4, $5)";
 
         sqlx::query(query)
             .bind(id)
             .bind(name)
             .bind(estimated_minutes)
+            .bind(started_at)
+            .bind(ended_at)
             .execute(conn)
             .await?;
 

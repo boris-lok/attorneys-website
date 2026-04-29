@@ -156,6 +156,8 @@ export type APIResponse<T> = T extends void
 export type CreateCaseRequest = {
     name: string
     estimated_minutes: number
+    started_at: Date
+    ended_at: Date
 }
 
 // The request of updating case content
@@ -165,9 +167,11 @@ export type UpdateCaseRequest = CreateCaseRequest & { id: string }
 export type CaseData = {
     id: string
     name: string
+    usedMinutes: number
     estimatedMinutes: number
     createdAt: Date
-    createdAtString: string
+    startedAt: Date
+    endedAt: Date
 }
 
 

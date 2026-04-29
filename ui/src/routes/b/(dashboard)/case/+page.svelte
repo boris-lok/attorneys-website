@@ -47,7 +47,7 @@
 
 <main>
     {#if isCreated}
-        <div>
+        <div class="flex items-center justify-center px-8 my-4 shadow rounded mx-4">
             <CaseEditor
                 onClosed={() => (isCreated = false)}
                 onSaved={appendCase}
@@ -66,22 +66,18 @@
         </div>
     {/if}
 
-    <div class="px-2">
-        <div
-            class="mt-2 flex w-full flex-row items-center justify-between gap-2 rounded-t border-t border-r border-l border-gray-300 bg-gray-300 px-4 py-2"
-        >
-            <p class="flex-4/6 text-sm font-bold">Case</p>
-            <p class="flex-1/6 text-sm font-bold">Duration</p>
-            <p>&nbsp;</p>
+    <div class="md:rounded md:shadow md:m-4">
+        <div class="hidden md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300 rounded-t">
+            <p class="flex-6/12  text-left px-2 text-md py-3 font-bold">Case Name</p>
+            <p class="flex-2/12 text-left px-2 text-md py-3 font-bold">Period</p>
+            <p class="flex-2/12 text-left px-2 text-md py-3 font-bold">Used Hrs</p>
+            <p class="flex-auto text-left px-2 text-md py-3 font-bold">&nbsp;</p>
         </div>
-        <div class="border-r border-b border-l border-gray-300">
-            {#each cases as c (c.id)}
-                <Case
-                    id={c.id}
-                    name={c.name}
-                    estimatedMinutes={c.estimatedMinutes}
-                />
-            {/each}
-        </div>
+        {#each cases as c, i (c.id)}
+            <Case {...c} onSaved={() => (cases[i] = c)} />
+            {#if i < cases.length - 1}
+                <div class="hidden md:block bg-gray-200 mx-2 h-[1px]">&nbsp;</div>
+            {/if}
+        {/each}
     </div>
 </main>

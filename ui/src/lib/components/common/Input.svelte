@@ -26,7 +26,7 @@
 
 <div class="mb-4">
     {#if label}
-        <label class="mb-2 block text-sm font-bold text-gray-700" for={name}
+        <label class="block text-sm font-bold text-gray-700" for={name}
             >{label}</label
         >
     {/if}

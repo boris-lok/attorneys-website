@@ -4,21 +4,30 @@
     import { CaseServices } from '$lib/services/case.service'
     import Loading from '$lib/components/common/Loading.svelte'
     import type { CaseData } from '$lib/types'
+    import DateTimePicker from '$lib/components/DateTimePicker.svelte'
+    import ProgressBar from '$lib/components/ProgressBar.svelte'
 
     type Props = {
         id: string
         name: string
         hrs: number
+        startedAt: Date
+        endedAt: Date
+    }
+    type Output = {
         onClosed?: () => void
         onSaved?: (props: CaseData) => void
     }
-    type PartialProps = Partial<Props>
+    type PartialProps = Partial<Props> & Output
 
-    let { id, name, hrs, onClosed, onSaved }: PartialProps = $props()
+    let { onClosed, onSaved, ...rest }: PartialProps = $props()
+    const now = new Date()
     let copiedData: Props = $state({
-        id: id ?? '',
-        name: name ?? '',
-        hrs: hrs ?? 0,
+        id: rest.id ?? '',
+        name: rest.name ?? '',
+        hrs: rest.hrs ?? 0,
+        startedAt: rest.startedAt ?? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0),
+        endedAt: rest.endedAt ?? new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59)
     })
     let errMsg = $state('')
     let isLoading = $state(false)
@@ -36,14 +45,26 @@
         }
     }
 
-    async function onSave() {
+    function onDateChanged(key: 'startedAt' | 'endedAt', newValue: Date) {
+        console.log(key, newValue, 'onDateChanged')
+        if (key === 'startedAt') {
+            copiedData = { ...copiedData, startedAt: newValue }
+        } else if (key === 'endedAt') {
+            copiedData = { ...copiedData, endedAt: newValue }
+        }
+    }
+
+    async function _onSaved(e: Event) {
+        e.preventDefault()
+        e.stopPropagation()
         errMsg = ''
+        console.log(copiedData)
         const validate = () => {
             if (copiedData.name === '') {
-                errMsg = 'Please enter a name'
+                errMsg = 'Please enter a case name'
                 return false
             }
-            if (copiedData.hrs <= 0) {
+            if ((copiedData.hrs ?? 0) <= 0) {
                 errMsg = 'Please enter a valid number'
                 return false
             }
@@ -57,26 +78,34 @@
         isLoading = true
         const resp = await CaseServices.save({
             ...(copiedData.id === '' ? {} : { id: copiedData.id }),
-            name: copiedData.name,
-            estimated_minutes: copiedData.hrs * 60,
+            name: copiedData.name!,
+            estimated_minutes: copiedData.hrs! * 60,
+            started_at: copiedData.startedAt,
+            ended_at: copiedData.endedAt
         })
 
         if (resp.error) {
             errMsg = resp.message
         } else {
-            name = copiedData.name
-            hrs = copiedData.hrs
             onClosed?.()
             onSaved?.({
                 id: resp.id,
-                name: name,
-                estimatedMinutes: hrs * 60,
-                createdAt: new Date(),
-                createdAtString: '',
+                name: copiedData.name!,
+                usedMinutes: 0,
+                estimatedMinutes: copiedData.hrs! * 60,
+                createdAt: now,
+                startedAt: copiedData.startedAt,
+                endedAt: copiedData.endedAt
             })
         }
 
         isLoading = false
+    }
+
+    function _onClosed(e: Event) {
+        e.preventDefault()
+        e.stopPropagation()
+        onClosed?.()
     }
 </script>
 
@@ -85,11 +114,12 @@
 {/if}
 
 <div
-    class="mt-2 flex h-16 w-full flex-row items-center justify-between gap-2 px-4"
->
-    <div class="flex-4/6">
+    class="w-full md:flex md:flex-row md:items-center md:gap-4 p-4 md:p-2 shadow rounded m-4 md:m-0 md:rounded-none md:shadow-none md:min-h-12">
+
+    <div class="font-semibold md:font-medium text-nowrap flex-6/12 my-2 md:my-0">
         <Input
             value={copiedData.name}
+            label="Case Name"
             name="name"
             type="text"
             variant="outlined"
@@ -97,9 +127,16 @@
         />
     </div>
 
-    <div class="flex-1/6">
+    <div class="text-sm text-gray-500 md:text-gray-700 flex-2/12 my-1 md:my-0 flex flex-row md:flex-col items-center">
+        <DateTimePicker date={copiedData.startedAt} onChanged={e => onDateChanged('startedAt', e) } dateOnly={true} />
+        <span>~</span>
+        <DateTimePicker date={copiedData.endedAt} onChanged={e => onDateChanged('endedAt', e) } dateOnly={true} />
+    </div>
+
+    <div class="text-sm flex-2/12">
         <Input
             value={copiedData.hrs}
+            label="Hrs"
             name="hrs"
             type="text"
             variant="outlined"
@@ -107,24 +144,19 @@
         />
     </div>
 
-    <div class="flex h-fit flex-row gap-0.5">
-        <button class="cursor-pointer md:m-2" onclick={onSave}>
+    <div class="flex h-fit flex-row gap-2 flex-auto md:justify-end justify-center">
+        <button class="cursor-pointer md:m-0.5" onclick={_onSaved}>
             <IconifyIcon
-                class="h-4 w-4 text-green-500 md:h-6 md:w-6"
+                class="h-6 w-6 text-green-500"
                 icon="charm:square-tick"
             />
         </button>
-        <button class="cursor-pointer md:m-2" onclick={onClosed}>
+        <button class="cursor-pointer md:m-0.5" onclick={_onClosed}>
             <IconifyIcon
-                class="h-4 w-4 text-red-500 md:h-6 md:w-6"
+                class="h-6 w-6 text-red-500"
                 icon="line-md:close-square"
             />
         </button>
     </div>
 </div>
 
-{#if errMsg}
-    <div class="px-4">
-        <p class="mt-[-1rem] text-sm font-semibold text-red-500">{errMsg}</p>
-    </div>
-{/if}

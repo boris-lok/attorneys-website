@@ -64,17 +64,20 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
                 (e: {
                     id: string
                     name: string
+                    used_minutes: number
                     estimated_minutes: number
                     created_at: string
+                    started_at: string
+                    ended_at: string
                 }) => {
-                    const date = new Date(e.created_at)
-
                     return {
                         id: e.id,
                         name: e.name,
+                        usedMinutes: e.used_minutes,
                         estimatedMinutes: e.estimated_minutes,
-                        createdAt: date,
-                        createdAtString: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
+                        createdAt: new Date(e.created_at),
+                        startedAt: new Date(e.started_at),
+                        endedAt: new Date(e.ended_at),
                     }
                 },
             )

@@ -18,6 +18,7 @@
         description?: string
         duration?: number
         collaboratorIds?: string[]
+        hideShare?: boolean
         onClosed?: () => void
         onSaved?: (log: WorkLog) => void
     }
@@ -29,6 +30,7 @@
         description = '',
         duration = 0,
         collaboratorIds = [],
+        hideShare = false,
         onSaved,
         onClosed
     }: Props = $props()
@@ -153,25 +155,27 @@
                   height="h-36" />
     </div>
 
-    <label class="inline-flex items-center cursor-pointer">
-        <input type="checkbox" value="" class="sr-only peer" onclick={onShareChanged}>
-        <div
-            class="relative w-9 h-5 bg-gray-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
-        <span class="select-none ms-3 text-sm font-medium text-heading">Share</span>
-    </label>
+    {#if !hideShare}
+        <label class="inline-flex items-center cursor-pointer">
+            <input type="checkbox" value="" class="sr-only peer" onclick={onShareChanged}>
+            <div
+                class="relative w-9 h-5 bg-gray-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+            <span class="select-none ms-3 text-sm font-medium text-heading">Share</span>
+        </label>
 
 
-    {#if share}
-        <div class="flex gap-4 flex-row flex-wrap py-2">
-            {#each users as user (user.id)}
-                <label for={user.id} class="cursor-pointer text-md font-medium">
-                    <input type="checkbox" id={user.id} value={user.id} class="mr-2"
-                           checked={collaboratorIds.includes(user.id)} onchange={e => {
+        {#if share}
+            <div class="flex gap-4 flex-row flex-wrap py-2">
+                {#each users as user (user.id)}
+                    <label for={user.id} class="cursor-pointer text-md font-medium">
+                        <input type="checkbox" id={user.id} value={user.id} class="mr-2"
+                               checked={collaboratorIds.includes(user.id)} onchange={e => {
                                onCollaboratorIdsChanged(user.id, e.currentTarget.checked)
                            }} />{ user.nickname}
-                </label>
-            {/each}
-        </div>
+                    </label>
+                {/each}
+            </div>
+        {/if}
     {/if}
 
     <div class="flex h-fit flex-row gap-0.5">

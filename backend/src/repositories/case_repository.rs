@@ -165,7 +165,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
   c.started_at,
   c.ended_at,
   COALESCE(
-    SUM(EXTRACT(EPOCH FROM (wl.ended_at - wl.started_at))) / 60,
+    SUM(wl.duration_minutes) FILTER (WHERE wl.status = 'approved') ,
     0
   )::INT4 AS used_minutes
 FROM cases c

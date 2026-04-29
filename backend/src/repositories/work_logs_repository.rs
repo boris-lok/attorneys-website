@@ -152,7 +152,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
           wl.id,
           wl.case_id,
           wl.started_at,
-          extract(epoch from wl.ended_at - wl.started_at)::INT4 as duration,
+          wl.duration_minutes as duration,
           wl.description,
           array_agg(distinct child.user_id) filter (where child.parent_id is not null and child.status = 'approved' and child.user_id is not null) as collaborator_ids,
           array_agg(distinct cu.nickname) filter (where child.parent_id is not null and child.status = 'approved' and child.user_id is not null) as collaborator_names

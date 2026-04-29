@@ -19,6 +19,9 @@ impl TryFrom<Request> for CreateWorkLog {
     fn try_from(value: Request) -> Result<Self, Self::Error> {
         let user_id = Uuid::parse_str(&value.creator_id.to_string()).unwrap();
         let case_id = CaseID::try_from(value.case_id.to_string())?;
+        let is_collaborative = value.collaborator_ids
+            .map(|e| !e.is_empty())
+            .unwrap_or(false);
 
         Ok(Self {
             id: Uuid::new_v4(),
@@ -27,7 +30,7 @@ impl TryFrom<Request> for CreateWorkLog {
             started_at: value.started_at,
             ended_at: value.started_at + value.duration,
             description: value.description,
-            is_collaborative: value.collaborator_ids.is_some(),
+            is_collaborative,
             parent_id: None,
             status: WorkLogStatus::Approved,
         })

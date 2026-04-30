@@ -34,7 +34,7 @@
         onSaved,
         onClosed
     }: Props = $props()
-    const everyFifteen = Array.from({ length: 20 }, (_, i) => (i + 1) * 15)
+    const everyFifteen = Array.from({ length: 48 }, (_, i) => (i + 1) * 0.25)
     let users: SimpleUser[] = $state([])
     let loaded = false
     let share = $state(false)
@@ -53,9 +53,9 @@
     }
 
     function onDurationChanged(newDuration: string) {
-        const n = parseInt(newDuration)
+        const n = parseFloat(newDuration)
         if (isNaN(n)) return
-        req = { ...req, duration: n }
+        req = { ...req, duration: n * 60 }
     }
 
     function onDescriptionChanged(e: Event & { currentTarget: HTMLTextAreaElement }) {
@@ -147,7 +147,7 @@
                key: m.toString(),
                value: m.toString(),
            }))
-       }} value={duration.toString()} label="Duration" onBlur={onDurationChanged}
+       }} value={duration.toString()} label="Duration (hrs)" onBlur={onDurationChanged}
                        onSelect={e => onDurationChanged(e.key)} />
 
     <div>

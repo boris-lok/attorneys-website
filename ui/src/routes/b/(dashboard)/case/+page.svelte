@@ -74,7 +74,7 @@
             <p class="flex-auto text-left px-2 text-md py-3 font-bold">&nbsp;</p>
         </div>
         {#each cases as c, i (c.id)}
-            <Case {...c} onSaved={() => (cases[i] = c)} />
+            <Case {...c} onSaved={(e) => (cases[i] = e)} />
             {#if i < cases.length - 1}
                 <div class="hidden md:block bg-gray-200 mx-2 h-[1px]">&nbsp;</div>
             {/if}

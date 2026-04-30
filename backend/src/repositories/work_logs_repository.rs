@@ -31,6 +31,7 @@ pub struct UpdateWorkLog {
     pub id: Uuid,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub deleted_at: Option<chrono::DateTime<chrono::Utc>>,
     pub description: Option<String>,
     pub status: Option<WorkLogStatus>,
 }
@@ -230,7 +231,8 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         started_at = coalesce($2, started_at),
         ended_at = coalesce($3, ended_at),
         description = coalesce($4, description)
-        where id = $5;
+        deleted_at = coalesce($5, deleted_at)
+        where id = $6;
         ";
 
         sqlx::query(query)
@@ -238,6 +240,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
             .bind(req.started_at)
             .bind(req.ended_at)
             .bind(req.description)
+            .bind(req.deleted_at)
             .bind(req.id)
             .execute(conn)
             .await?;

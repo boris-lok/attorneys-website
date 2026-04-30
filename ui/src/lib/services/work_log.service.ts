@@ -18,11 +18,20 @@ export type WorkLog = {
     description: string
     isCollaborative: boolean
     collaborators: Collaborator[]
+    user: SimpleUser
+    status: string
+}
+
+export type SimpleUser = {
+    id: string
+    name: string
 }
 
 export type Collaborator = {
-    id: string
+    parentId: string
+    userId: string
     name: string
+    status: string
 }
 
 // The request of updating work log
@@ -68,7 +77,9 @@ async function save(
     }
 }
 
-async function list(caseId: string): Promise<APIError | APIResponse<{ logs: WorkLog[] }>> {
+async function list(
+    caseId: string,
+): Promise<APIError | APIResponse<{ logs: WorkLog[] }>> {
     let url = `${ADMIN_URL}/work_logs?case_id=${caseId}`
 
     try {
@@ -88,11 +99,18 @@ async function list(caseId: string): Promise<APIError | APIResponse<{ logs: Work
             workLogs = json.work_logs.map(
                 (e: {
                     id: string
-                    started_at:string
+                    started_at: string
                     duration: number
                     description: string
                     is_collaborative: boolean
-                    collaborators: { user_id: string; name: string }[]
+                    collaborators: {
+                        parent_id: string
+                        user_id: string
+                        name: string
+                        status: string
+                    }[]
+                    user: { user_id: string; name: string }
+                    status: string
                 }) => {
                     return {
                         id: e.id,
@@ -101,9 +119,16 @@ async function list(caseId: string): Promise<APIError | APIResponse<{ logs: Work
                         description: e.description,
                         isCollaborative: e.is_collaborative,
                         collaborators: e.collaborators.map((collaborator) => ({
-                            id: collaborator.user_id,
+                            parentId: collaborator.parent_id,
+                            userId: collaborator.user_id,
                             name: collaborator.name,
+                            status: collaborator.status,
                         })),
+                        user: {
+                            id: e.user.user_id,
+                            name: e.user.name,
+                        },
+                        status: e.status,
                     } as WorkLog
                 },
             )

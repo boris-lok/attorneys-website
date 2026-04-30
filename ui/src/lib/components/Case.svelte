@@ -16,7 +16,6 @@
     const usedPercentage = $derived(roundTo(copiedData.usedMinutes * 100 / copiedData.estimatedMinutes, 0))
     const usedHrs = $derived(roundTo(copiedData.usedMinutes / 60, 2))
 
-
     function formater(date: Date) {
         return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
     }
@@ -27,12 +26,17 @@
         isEditMode = true
     }
 
+    function _onSaved(data: CaseData) {
+        data.usedMinutes = copiedData.usedMinutes
+        onSaved(data)
+    }
+
     let isEditMode = $state(false)
 </script>
 
 {#if isEditMode}
     <CaseEditor id={copiedData.id} name={copiedData.name} hrs={hrs} startedAt={copiedData.startedAt}
-                endedAt={copiedData.endedAt} onSaved={onSaved} onClosed={() => isEditMode = false} />
+                endedAt={copiedData.endedAt} onSaved={_onSaved} onClosed={() => isEditMode = false} />
 {:else}
     <a href={`/b/case/${copiedData.id}`}>
         <div

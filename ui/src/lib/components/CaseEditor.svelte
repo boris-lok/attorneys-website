@@ -5,7 +5,6 @@
     import Loading from '$lib/components/common/Loading.svelte'
     import type { CaseData } from '$lib/types'
     import DateTimePicker from '$lib/components/DateTimePicker.svelte'
-    import ProgressBar from '$lib/components/ProgressBar.svelte'
 
     type Props = {
         id: string

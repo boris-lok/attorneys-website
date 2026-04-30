@@ -12,6 +12,7 @@ pub struct Request {
     pub description: Option<String>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub deleted_at: Option<chrono::DateTime<chrono::Utc>>,
     /// force update, ignore the following checking
     ///
     /// - check the work_log's creator is an owner.
@@ -88,6 +89,7 @@ pub async fn execute(
         description: req.description,
         started_at: req.started_at,
         ended_at: req.ended_at,
+        deleted_at: None,
     };
 
     lock.update_work_log(req)

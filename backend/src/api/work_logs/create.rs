@@ -7,6 +7,7 @@ use axum::extract::State;
 use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
+use sqlx::Acquire;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
@@ -56,10 +57,18 @@ pub async fn create_work_log(
         .acquire()
         .await
         .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
+    let mut tx = conn
+        .begin()
+        .await
+        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
 
-    let repo = SqlxWorkLogsRepository::new(Arc::new(Mutex::new(&mut *conn)));
+    let repo = SqlxWorkLogsRepository::new(Arc::new(Mutex::new(&mut tx)));
 
     let res = crate::domain::work_logs::create::execute(Arc::new(Mutex::new(repo)), req).await;
+
+    tx.commit()
+        .await
+        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
 
     match res {
         Ok(id) => Ok(Json(CreateWorkLogResponse { id: id.to_string() })),

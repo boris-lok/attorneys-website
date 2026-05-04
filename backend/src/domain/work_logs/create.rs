@@ -19,7 +19,8 @@ impl TryFrom<Request> for CreateWorkLog {
     fn try_from(value: Request) -> Result<Self, Self::Error> {
         let user_id = Uuid::parse_str(&value.creator_id.to_string()).unwrap();
         let case_id = CaseID::try_from(value.case_id.to_string())?;
-        let is_collaborative = value.collaborator_ids
+        let is_collaborative = value
+            .collaborator_ids
             .map(|e| !e.is_empty())
             .unwrap_or(false);
 
@@ -31,8 +32,6 @@ impl TryFrom<Request> for CreateWorkLog {
             ended_at: value.started_at + value.duration,
             description: value.description,
             is_collaborative,
-            parent_id: None,
-            status: WorkLogStatus::Approved,
         })
     }
 }
@@ -50,28 +49,18 @@ pub async fn execute(
     let collaborators = req.collaborator_ids.clone().unwrap_or_default();
 
     let work_log = CreateWorkLog::try_from(req).map_err(|_| Error::InvalidCaseID)?;
+    let id = work_log.id;
     let mut lock = repo.lock().await;
 
-    lock.create_work_log(work_log.clone())
+    lock.create_work_log(work_log)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 
-    for collaborator in collaborators {
-        let collaborator_work_log = create_a_collaborator_work_log(work_log.clone(), collaborator);
-        lock.create_work_log(collaborator_work_log)
+    if !collaborators.is_empty() {
+        lock.create_work_log_mapping(id, collaborators)
             .await
             .map_err(|e| Error::Unknown(e.to_string()))?;
     }
 
-    Ok(work_log.id)
-}
-
-fn create_a_collaborator_work_log(work_log: CreateWorkLog, collaborator: UserID) -> CreateWorkLog {
-    CreateWorkLog {
-        parent_id: Some(work_log.id),
-        id: Uuid::new_v4(),
-        status: WorkLogStatus::Pending,
-        user_id: Uuid::parse_str(&collaborator.to_string()).unwrap(),
-        ..work_log
-    }
+    Ok(id)
 }

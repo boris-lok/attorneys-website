@@ -1,8 +1,8 @@
-use std::collections::HashMap;
 use crate::domain::entities::UserID;
 use crate::repositories::CaseID;
 use serde::Serialize;
-use sqlx::Row;
+use sqlx::{Postgres, Row};
+use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
@@ -10,6 +10,12 @@ use uuid::Uuid;
 #[async_trait::async_trait]
 pub trait IWorkLogsRepository {
     async fn create_work_log(&mut self, work_log: CreateWorkLog) -> anyhow::Result<()>;
+    async fn create_work_log_mapping(
+        &mut self,
+        id: Uuid,
+        user_ids: Vec<UserID>,
+    ) -> anyhow::Result<()>;
+    async fn delete_work_log(&mut self, id: Uuid) -> anyhow::Result<()>;
     async fn list_work_logs(&self, case_id: &CaseID) -> anyhow::Result<Vec<WorkLog>>;
     async fn update_work_log(&mut self, req: UpdateWorkLog) -> anyhow::Result<()>;
     async fn is_creator(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool>;
@@ -45,8 +51,6 @@ pub struct CreateWorkLog {
     pub ended_at: chrono::DateTime<chrono::Utc>,
     pub description: String,
     pub is_collaborative: bool,
-    pub parent_id: Option<Uuid>,
-    pub status: WorkLogStatus,
 }
 
 #[derive(sqlx::Type, Clone, Debug)]
@@ -84,12 +88,12 @@ impl From<WorkLogStatus> for String {
 pub struct WorkLog {
     pub id: Uuid,
     pub started_at: chrono::DateTime<chrono::Utc>,
+    pub ended_at: chrono::DateTime<chrono::Utc>,
     pub user: SimpleUser,
     pub duration: i32,
     pub description: String,
     pub is_collaborative: bool,
     pub collaborators: Vec<Collaborator>,
-    pub status: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -110,13 +114,16 @@ pub struct Collaborator {
 pub struct WorkLogFromSQLx {
     id: Uuid,
     started_at: chrono::DateTime<chrono::Utc>,
+    ended_at: chrono::DateTime<chrono::Utc>,
     user_id: Uuid,
     username: String,
     duration: i32,
     description: String,
     is_collaborative: bool,
-    status: WorkLogStatus,
+    status: Option<WorkLogStatus>,
     parent_id: Option<Uuid>,
+    collaborator_user_id: Option<Uuid>,
+    collaborator_name: Option<String>,
 }
 
 #[async_trait::async_trait]
@@ -126,8 +133,8 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         let conn = &mut **conn;
 
         let query = r"
-        insert into work_logs (id, user_id, case_id, started_at, ended_at, description, is_collaborative, parent_id, status)
-        values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        insert into work_logs (id, user_id, case_id, started_at, ended_at, description, is_collaborative)
+        values ($1, $2, $3, $4, $5, $6, $7)
         returning id;
         ";
 
@@ -139,10 +146,48 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
             .bind(work_log.ended_at)
             .bind(work_log.description)
             .bind(work_log.is_collaborative)
-            .bind(work_log.parent_id)
-            .bind(work_log.status)
             .execute(conn)
             .await?;
+
+        Ok(())
+    }
+
+    async fn create_work_log_mapping(
+        &mut self,
+        id: Uuid,
+        user_ids: Vec<UserID>,
+    ) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let mut qb = sqlx::QueryBuilder::<Postgres>::new(
+            "insert into work_logs_mapping (parent_id, user_id, status)",
+        );
+
+        qb.push_values(user_ids, |mut b, user_id| {
+            let user_id = Uuid::from(&user_id);
+            b.push_bind(id)
+                .push_bind(user_id)
+                .push_bind(WorkLogStatus::Pending);
+        });
+
+        let query = qb.build();
+        query.execute(conn).await?;
+
+        Ok(())
+    }
+
+    async fn delete_work_log(&mut self, id: Uuid) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = r"
+        update work_logs
+        set deleted_at = now(),
+        where id = $1;
+        ";
+
+        sqlx::query(query).bind(id).execute(conn).await?;
 
         Ok(())
     }
@@ -156,16 +201,20 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
           wl.id,
           wl.case_id,
           wl.started_at,
+          wl.ended_at,
           wl.user_id,
           u.nickname as username,
           wl.duration_minutes as duration,
           wl.description,
           wl.is_collaborative,
-          wl.status,
-          wl.parent_id
+          wlm.status,
+          wlm.parent_id,
+          wlm.user_id as collaborator_user_id,
+          cu.nickname as collaborator_name
         from work_logs wl
         join users u on u.id = wl.user_id
-        left join work_logs child on child.parent_id = wl.id
+        left join work_logs_mapping wlm on wlm.parent_id = wl.id
+        left join users cu on wlm.user_id = cu.id
         where
           wl.case_id = $1
           and wl.deleted_at is null
@@ -178,47 +227,38 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
             .fetch_all(conn)
             .await?;
 
-        let (parents, childs): (Vec<_>, Vec<_>) =
-            rows.into_iter().partition(|row| row.parent_id.is_none());
+        let mut res: HashMap<_, _> = HashMap::new();
+        for row in rows {
+            // Ensure parent WorkLog exists
+            res.entry(row.id).or_insert_with(|| WorkLog {
+                id: row.id,
+                started_at: row.started_at,
+                ended_at: row.ended_at,
+                user: SimpleUser {
+                    id: row.user_id,
+                    name: row.username,
+                },
+                duration: row.duration,
+                description: row.description,
+                is_collaborative: row.is_collaborative,
+                collaborators: vec![],
+            });
 
-        // 1. Group children by parent_id
-        let mut grouped: HashMap<_, Vec<_>> = HashMap::new();
-        for child in childs {
-            if let Some(pid) = child.parent_id {
-                grouped.entry(pid).or_default().push(child);
+            // Attach collaborator if present
+            if let Some(parent_id) = row.parent_id {
+                if let Some(parent) = res.get_mut(&parent_id) {
+                    parent.collaborators.push(Collaborator {
+                        parent_id,
+                        user_id: row.collaborator_user_id.unwrap(),
+                        name: row.collaborator_name.unwrap(),
+                        status: row.status.unwrap().into(),
+                    });
+                }
             }
         }
 
-        // 2. Build result
-        let res: Vec<_> = parents.into_iter().map(|parent| {
-            let collaborators = grouped
-                .remove(&parent.id)
-                .unwrap_or_default()
-                .into_iter()
-                .map(|child| Collaborator {
-                    parent_id: parent.id,
-                    user_id: child.user_id,
-                    name: child.username,          // no clone
-                    status: child.status.into(),   // no clone
-                })
-                .collect();
 
-            WorkLog {
-                id: parent.id,
-                started_at: parent.started_at,
-                user: SimpleUser {
-                    id: parent.user_id,
-                    name: parent.username,
-                },
-                duration: parent.duration,
-                description: parent.description,
-                is_collaborative: parent.is_collaborative,
-                collaborators,
-                status: parent.status.into(),
-            }
-        }).collect();
-
-        Ok(res)
+        Ok(res.into_values().collect())
     }
 
     async fn update_work_log(&mut self, req: UpdateWorkLog) -> anyhow::Result<()> {

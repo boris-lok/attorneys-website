@@ -40,7 +40,6 @@ pub async fn update_work_log(
         description: req.description,
         started_at: req.started_at,
         ended_at,
-        deleted_at: None,
         force: false,
     };
 

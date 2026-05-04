@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
 use crate::domain::entities::UserID;
-use crate::domain::work_logs::update::{execute, Error, Request};
+use crate::domain::work_logs::delete::{execute, Error, Request};
 use crate::repositories::SqlxWorkLogsRepository;
 use crate::startup::AppState;
 use axum::extract::{Path, State};
@@ -19,16 +19,7 @@ pub async fn delete_work_log(
     let user_id = UserID::try_from(user_id).map_err(|_| ApiError::BadRequest)?;
 
     let id = params.get("id").ok_or(ApiError::BadRequest)?;
-    let req = Request {
-        id: id.to_string(),
-        user_id,
-        status: None,
-        description: None,
-        started_at: None,
-        ended_at: None,
-        deleted_at: Some(chrono::Utc::now()),
-        force: false,
-    };
+    let req = Request { id: id.to_string() };
 
     let mut conn = state
         .pool
@@ -44,8 +35,5 @@ pub async fn delete_work_log(
         Ok(_) => Ok(StatusCode::OK),
         Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
         Err(Error::InvalidID) => Err(ApiError::BadRequest),
-        Err(Error::InvalidStatus(_)) => Err(ApiError::BadRequest),
-        Err(Error::PermissionDenied) => Err(ApiError::PermissionDenied),
-        Err(Error::NotFound) => Err(ApiError::NotFound),
     }
 }

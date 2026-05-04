@@ -12,7 +12,6 @@ pub struct Request {
     pub description: Option<String>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub deleted_at: Option<chrono::DateTime<chrono::Utc>>,
     /// force update, ignore the following checking
     ///
     /// - check the work_log's creator is an owner.

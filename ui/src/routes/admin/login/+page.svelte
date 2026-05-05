@@ -61,7 +61,6 @@
         class="mx-auto mt-[10%] mb-4 w-11/12 rounded bg-white px-8 pt-6 pb-8 shadow-md md:w-96"
     >
         <Input
-            hasError={false}
             label="Username"
             name="username"
             onInput={(e) => onDataChanged('username', e)}
@@ -69,7 +68,6 @@
             value=""
         />
         <Input
-            hasError={false}
             label="Password"
             name="password"
             onInput={(e) => onDataChanged('password', e)}

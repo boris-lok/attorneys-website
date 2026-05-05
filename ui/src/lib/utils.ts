@@ -21,6 +21,14 @@ export function getSelfId() {
     return u.userId
 }
 
+export function getSelfName() {
+    const u = user.get()
+    if (!u) {
+        return ''
+    }
+    return u.nickname
+}
+
 export function formatDateTime(date: Date): string {
     const pad = (n: number) => String(n).padStart(2, '0')
     const y = date.getFullYear()

@@ -1,7 +1,7 @@
 <script lang="ts">
     import DateTimePicker from '$lib/components/DateTimePicker.svelte'
     import { type SimpleUser, UserService } from '$lib/services/user.service'
-    import { getSelfId } from '$lib/utils'
+    import { getSelfId, getSelfName } from '$lib/utils'
     import {
         type Collaborator,
         type WorkLog,
@@ -53,9 +53,8 @@
         _s.setSeconds(0)
         _s.setMilliseconds(0)
 
-        return ((_e.getTime() - _s.getTime()) / 1000 / 60 )
+        return ((_e.getTime() - _s.getTime()) / 1000 / 60)
     })
-    let creator: SimpleUser | undefined;
 
     function onDateChanged(key: 'startedAt' | 'endedAt', newDate: Date) {
         console.log('onDateChanged', key, newDate)
@@ -91,8 +90,6 @@
             return
         }
         const selfId = getSelfId()
-        creator = resp.users.find(e => e.id === selfId)
-        console.log('creator', creator)
 
         users = resp
             .users
@@ -172,7 +169,7 @@
             collaborators: collaborators,
             user: {
                 id: getSelfId(),
-                name: creator?.nickname ?? 'Unknown'
+                name: getSelfName()
             }
         })
     }

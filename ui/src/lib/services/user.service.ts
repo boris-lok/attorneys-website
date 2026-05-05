@@ -5,6 +5,7 @@ import type { APIError, APIResponse } from '$lib/types'
 export type Credential = {
     userId: string
     username: string
+    nickname: string
     token: string
     roles: string[]
 }
@@ -47,6 +48,7 @@ async function login(req: {
             'token' in json &&
             'user_id' in json &&
             'username' in json &&
+            'nickname' in json &&
             'roles' in json
         ) {
             return {
@@ -54,6 +56,7 @@ async function login(req: {
                 credential: {
                     userId: json.user_id,
                     username: json.username,
+                    nickname: json.nickname,
                     token: json.token,
                     roles: json.roles,
                 },

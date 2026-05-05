@@ -86,7 +86,7 @@
             </p>
         </div>
         {#each cases as c, i (c.id)}
-            <Case {...c} onSaved={(e) => (cases[i] = e)} />
+            <Case {...c} onSaved={(e) => (cases[i] = e)} onDeleted={() => cases.splice(i, 1)} />
             {#if i < cases.length - 1}
                 <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">
                     &nbsp;

@@ -39,6 +39,7 @@ pub struct Case {
     pub name: String,
     pub used_minutes: i32,
     pub estimated_minutes: i32,
+    pub pending_logs: i32,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub ended_at: chrono::DateTime<chrono::Utc>,
@@ -50,6 +51,7 @@ struct CaseFromSQLx {
     pub name: String,
     pub used_minutes: i32,
     pub estimated_minutes: i32,
+    pub pending_logs: i32,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub ended_at: chrono::DateTime<chrono::Utc>,
@@ -65,6 +67,7 @@ impl From<CaseFromSQLx> for Case {
             created_at: value.created_at,
             started_at: value.started_at,
             ended_at: value.ended_at,
+            pending_logs: value.pending_logs,
         }
     }
 }
@@ -157,22 +160,46 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         let conn = &mut **conn;
 
         let query = r"
-            SELECT
-  c.id,
-  c.name,
-  c.estimated_minutes,
-  c.created_at,
-  c.started_at,
-  c.ended_at,
-  COALESCE(
-    SUM(wl.duration_minutes) FILTER (WHERE wl.status = 'approved') ,
-    0
-  )::INT4 AS used_minutes
+SELECT
+    c.id,
+    c.name,
+    c.estimated_minutes,
+    c.created_at,
+    c.started_at,
+    c.ended_at,
+
+    COALESCE(
+        SUM(
+            wl.duration_minutes * (1 + COALESCE(cnt.approved_cnt, 0))
+        ),
+        0
+    )::INT4 AS used_minutes,
+
+    COALESCE(
+        SUM(cnt.pending_cnt),
+        0
+    )::INT4 AS pending_logs
+
 FROM cases c
-LEFT JOIN work_logs wl ON c.id = wl.case_id
-WHERE c.deleted_at IS NULL
+
+LEFT JOIN work_logs wl
+    ON c.id = wl.case_id
+    AND wl.deleted_at IS NULL
+
+LEFT JOIN (
+    SELECT
+        parent_id,
+        COUNT(*) FILTER (WHERE status = 'approved') AS approved_cnt,
+        COUNT(*) FILTER (WHERE status = 'pending') AS pending_cnt
+    FROM work_logs_mapping
+    GROUP BY parent_id
+) cnt ON cnt.parent_id = wl.id
+
+WHERE
+    c.deleted_at IS NULL
+
 GROUP BY
-  c.id;
+    c.id;
             ";
 
         let rows = sqlx::query_as::<_, CaseFromSQLx>(query)

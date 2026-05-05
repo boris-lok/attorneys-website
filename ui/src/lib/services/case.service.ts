@@ -69,6 +69,7 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
                     created_at: string
                     started_at: string
                     ended_at: string
+                    pending_logs: number
                 }) => {
                     return {
                         id: e.id,
@@ -78,6 +79,7 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
                         createdAt: new Date(e.created_at),
                         startedAt: new Date(e.started_at),
                         endedAt: new Date(e.ended_at),
+                        pendingLogs: e.pending_logs,
                     }
                 },
             )
@@ -89,7 +91,27 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
     }
 }
 
+async function del(id: string): Promise<APIError | APIResponse<void>> {
+    try {
+        const resp = await fetch(`${ADMIN_URL}/cases/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: getToken(),
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+        return { error: false }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
+}
+
 export const CaseServices = {
     save: save,
     list: list,
+    delete: del,
 }

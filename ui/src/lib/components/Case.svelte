@@ -4,20 +4,22 @@
     import { roundTo } from '$lib/utils'
     import type { CaseData } from '$lib/types'
     import ProgressBar from '$lib/components/ProgressBar.svelte'
+    import { CaseServices } from '$lib/services/case.service'
 
     type Props = CaseData & {
         onSaved: (data: CaseData) => void
+        onDeleted: () => void
     }
 
-    let { onSaved, ...rest }: Props = $props()
+    let { onSaved, onDeleted, ...rest }: Props = $props()
     let copiedData = $state<CaseData>(rest)
 
     const hrs = $derived(roundTo(copiedData.estimatedMinutes / 60, 2))
     const usedPercentage = $derived(
         roundTo(
             (copiedData.usedMinutes * 100) / copiedData.estimatedMinutes,
-            0,
-        ),
+            0
+        )
     )
     const usedHrs = $derived(roundTo(copiedData.usedMinutes / 60, 2))
 
@@ -25,7 +27,7 @@
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
-            day: 'numeric',
+            day: 'numeric'
         })
     }
 
@@ -33,6 +35,26 @@
         e.preventDefault()
         e.stopPropagation()
         isEditMode = true
+    }
+
+    async function onDeleteClicked(e: Event) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const confirmed = confirm(
+            'Are you sure you want to delete this case? This action cannot be undone.'
+        )
+
+        if (confirmed) {
+            const resp = await CaseServices.delete(copiedData.id)
+            if (resp.error) {
+                alert(resp.message)
+                return
+            }
+
+            alert('Case deleted successfully')
+            onDeleted()
+        }
     }
 
     function _onSaved(data: CaseData) {
@@ -61,6 +83,11 @@
             <div
                 class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium"
             >
+                {#if copiedData.pendingLogs > 0}
+                    <div class="text-sm rounded-[50%] border w-4 h-4 inline-block text-center bg-red-500">
+                        <p class="text-xs text-white">{copiedData.pendingLogs}</p>
+                    </div>
+                {/if}
                 {copiedData.name}
             </div>
 
@@ -68,8 +95,8 @@
                 class="my-1 flex-2/12 text-sm text-gray-500 md:my-0 md:text-gray-700"
             >
                 {formater(copiedData.startedAt)} -> {formater(
-                    copiedData.endedAt,
-                )}
+                copiedData.endedAt,
+            )}
             </div>
 
             <div class="flex-2/12 text-sm md:text-right">
@@ -102,6 +129,17 @@
                         icon="lucide:edit"
                     />
                     <span class="md:hidden">Edit</span>
+                </button>
+
+                <button
+                    class="mt-4 cursor-pointer md:mt-0"
+                    onclick={onDeleteClicked}
+                >
+                    <IconifyIcon
+                        class="hidden h-4 w-4 hover:text-red-500 md:block md:h-6 md:w-6"
+                        icon="mi:delete"
+                    />
+                    <span class="md:hidden">Delete</span>
                 </button>
             </div>
         </div>

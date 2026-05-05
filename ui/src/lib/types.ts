@@ -172,4 +172,5 @@ export type CaseData = {
     createdAt: Date
     startedAt: Date
     endedAt: Date
+    pendingLogs: number
 }

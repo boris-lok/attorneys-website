@@ -5,16 +5,22 @@
         value: string
         height?: string
         onInput?: (
-            e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
+            e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
         ) => void
     }
 
-    let { label, name, value, onInput, height = 'h-96' }: TextareaProps = $props()
+    let {
+        label,
+        name,
+        value,
+        onInput,
+        height = 'h-96',
+    }: TextareaProps = $props()
 </script>
 
 <div>
     <label class="mb-2 block text-sm font-medium text-gray-900" for={name}
-    >{label}</label
+        >{label}</label
     >
     <textarea
         bind:value

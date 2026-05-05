@@ -1,5 +1,4 @@
 <script lang="ts">
-
     export type Option = {
         key: string
         value: string
@@ -18,14 +17,23 @@
         onBlur?: (s: string) => void
     }
 
-    let { label, name, value = '', keywordFilter, options, onInput, onBlur, onSelect }: Props = $props()
+    let {
+        label,
+        name,
+        value = '',
+        keywordFilter,
+        options,
+        onInput,
+        onBlur,
+        onSelect,
+    }: Props = $props()
     let inputValue = $state(value)
 
     let opts: Options = $state([])
     let keyword = $state(value)
     let filteredOpts: Options = $derived.by(() => {
         if (keywordFilter) {
-            return opts.filter(opt => keywordFilter(keyword, opt))
+            return opts.filter((opt) => keywordFilter(keyword, opt))
         }
 
         return opts
@@ -61,14 +69,13 @@
         optsLoaded = true
         opts = await options()
     }
-
 </script>
 
 {#if label}
-    <label for={name} class="cursor-pointer font-medium text-md">{label}</label>
+    <label for={name} class="text-md cursor-pointer font-medium">{label}</label>
 {/if}
 
-<div class="relative w-full h-fit">
+<div class="relative h-fit w-full">
     <input
         id={name}
         {name}
@@ -76,13 +83,12 @@
         type="text"
         onblur={_onBlur}
         onfocus={_onFocus}
-        class="border-b border-gray-300 focus:border-blue-500 focus:outline-none px-2 w-full py-1 leading-tight text-gray-700 h-8"
+        class="h-8 w-full border-b border-gray-300 px-2 py-1 leading-tight text-gray-700 focus:border-blue-500 focus:outline-none"
         bind:value={inputValue}
     />
 
-
     <div
-        class="min-w-16 h-fit z-10 bg-white overflow-y-auto overflow-clip px-2 duration-200 transition-[max-height] absolute left-0 right-0 shadow rounded top-9"
+        class="absolute top-9 right-0 left-0 z-10 h-fit min-w-16 overflow-clip overflow-y-auto rounded bg-white px-2 shadow transition-[max-height] duration-200"
         role="listbox"
         class:max-h-0={!open}
         class:max-h-30={open}
@@ -94,9 +100,12 @@
                 aria-selected={opt.key === keyword}
                 tabindex="-1"
                 onpointerdown={(e) => {
-                e.preventDefault()
-                _onSelect?.(opt)
-            }}>{opt.value}</div>
+                    e.preventDefault()
+                    _onSelect?.(opt)
+                }}
+            >
+                {opt.value}
+            </div>
         {/each}
     </div>
 </div>

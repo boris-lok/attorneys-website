@@ -22,7 +22,11 @@
     const hrs = $derived(roundTo(copiedData.duration / 60, 2))
 
     function formater(date: Date) {
-        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        })
     }
 
     function onEditClicked(e: Event) {
@@ -30,72 +34,80 @@
         e.stopPropagation()
         isEditMode = true
     }
-
 </script>
 
 {#if isEditMode}
     <div class="p-4">
         <WorkLogEditor
             id={log.id}
-            caseId={caseId}
+            {caseId}
             startedAt={log.startedAt}
             endedAt={log.endedAt}
             description={log.description}
-            collaboratorIds={log.collaborators.map(collaborator => collaborator.userId)}
+            collaboratorIds={log.collaborators.map(
+                (collaborator) => collaborator.userId,
+            )}
             onClosed={() => (isEditMode = false)}
             hideShare={true}
-            onSaved={onSaved}
+            {onSaved}
         />
     </div>
-
 {:else}
     <div
-        class="md:flex md:flex-row md:items-center md:gap-4 p-4 md:p-2 md:hover:bg-gray-50 shadow rounded m-4 md:m-0 md:rounded-none md:shadow-none md:min-h-12">
-        <div class="font-semibold md:font-medium text-nowrap flex-5/12 my-2 md:my-0">
+        class="m-4 rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50"
+    >
+        <div
+            class="my-2 flex-5/12 font-semibold text-nowrap md:my-0 md:font-medium"
+        >
             {copiedData.description}
         </div>
 
-        <div class="text-sm text-gray-500 md:text-gray-700 flex-2/12 my-1 md:my-0">
+        <div
+            class="my-1 flex-2/12 text-sm text-gray-500 md:my-0 md:text-gray-700"
+        >
             {formater(copiedData.startedAt)}
         </div>
 
-        <div class="text-sm flex-1/12">
-            <span class="md:hidden text-gray-600">Duration: </span>
+        <div class="flex-1/12 text-sm">
+            <span class="text-gray-600 md:hidden">Duration: </span>
             <span>{hrs} hrs</span>
         </div>
 
-        <div class="text-sm flex-2/12">
-            <span class="md:hidden text-gray-600">Participants: </span>
+        <div class="flex-2/12 text-sm">
+            <span class="text-gray-600 md:hidden">Participants: </span>
             <span>{copiedData.user.name}</span>
             {#if copiedData.collaborators.length > 0}
                 {#each copiedData.collaborators as collaborator (collaborator.userId)}
                     {#if collaborator.status !== 'rejected'}
                         <span>, </span>
                         <span
-                            class:text-amber-600={collaborator.status === 'pending'}
+                            class:text-amber-600={collaborator.status ===
+                                'pending'}
                         >
-                        {collaborator.name}
-                    </span>
+                            {collaborator.name}
+                        </span>
                     {/if}
                 {/each}
             {/if}
         </div>
 
         {#if !copiedData.isCollaborative}
-            <div class="flex h-fit flex-row gap-2 flex-1/12 justify-end">
+            <div class="flex h-fit flex-1/12 flex-row justify-end gap-2">
                 <button
-                    class="cursor-pointer mt-4 md:mt-0"
+                    class="mt-4 cursor-pointer md:mt-0"
                     onclick={onEditClicked}
                 >
                     <IconifyIcon
-                        class="h-4 w-4 md:h-6 md:w-6 hidden md:block hover:text-green-400"
+                        class="hidden h-4 w-4 hover:text-green-400 md:block md:h-6 md:w-6"
                         icon="lucide:edit"
                     />
                     <span class="md:hidden">Edit</span>
                 </button>
             </div>
         {:else}
-            <div class="flex h-fit flex-row gap-2 flex-1/12 justify-end">&nbsp;</div>
+            <div class="flex h-fit flex-1/12 flex-row justify-end gap-2">
+                &nbsp;
+            </div>
         {/if}
     </div>
 {/if}

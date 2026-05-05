@@ -1,5 +1,4 @@
 <script lang="ts">
-
     import AutoCompleteInput from '$lib/components/common/AutoCompleteInput.svelte'
 
     type Props = {
@@ -23,7 +22,10 @@
     const days = $derived(new Date(year, month, 0).getDate())
     const dayOptions = $derived(Array.from({ length: days }, (_, i) => i + 1))
 
-    function onChange(key: 'year' | 'month' | 'day' | 'hour' | 'minute', value: string) {
+    function onChange(
+        key: 'year' | 'month' | 'day' | 'hour' | 'minute',
+        value: string,
+    ) {
         switch (key) {
             case 'year':
                 year = parseInt(value)
@@ -46,55 +48,54 @@
     }
 </script>
 
-<div class="flex gap-1 flex-wrap items-center">
-
+<div class="flex flex-wrap items-center gap-1">
     <span class="w-14">
-       <AutoCompleteInput
-           name="year"
-           options={async () => {
-           return years.map(y => ({
-               key: y.toString(),
-               value: y.toString(),
-           }))
-       }}
-           value={year.toString()}
-           onBlur={e => onChange('year', e)}
-           onSelect={opt => onChange('year', opt.key)}
-       />
+        <AutoCompleteInput
+            name="year"
+            options={async () => {
+                return years.map((y) => ({
+                    key: y.toString(),
+                    value: y.toString(),
+                }))
+            }}
+            value={year.toString()}
+            onBlur={(e) => onChange('year', e)}
+            onSelect={(opt) => onChange('year', opt.key)}
+        />
     </span>
 
     <span class="text-gray-500">/</span>
 
     <span class="w-8">
-       <AutoCompleteInput
-           name="month"
-           options={async () => {
-           return months.map(m => ({
-               key: m.toString(),
-               value: m.toString(),
-           }))
-       }}
-           value={month.toString()}
-           onBlur={e => onChange('month', e)}
-           onSelect={opt => onChange('month', opt.key)}
-       />
+        <AutoCompleteInput
+            name="month"
+            options={async () => {
+                return months.map((m) => ({
+                    key: m.toString(),
+                    value: m.toString(),
+                }))
+            }}
+            value={month.toString()}
+            onBlur={(e) => onChange('month', e)}
+            onSelect={(opt) => onChange('month', opt.key)}
+        />
     </span>
 
     <span class="text-gray-500">/</span>
 
     <span class="w-8">
-       <AutoCompleteInput
-           name="day"
-           options={async () => {
-           return dayOptions.map(d => ({
-               key: d.toString(),
-               value: d.toString(),
-           }))
-       }}
-           value={day.toString()}
-           onBlur={e => onChange('day', e)}
-           onSelect={opt => onChange('day', opt.key)}
-       />
+        <AutoCompleteInput
+            name="day"
+            options={async () => {
+                return dayOptions.map((d) => ({
+                    key: d.toString(),
+                    value: d.toString(),
+                }))
+            }}
+            value={day.toString()}
+            onBlur={(e) => onChange('day', e)}
+            onSelect={(opt) => onChange('day', opt.key)}
+        />
     </span>
 
     {#if !dateOnly}
@@ -104,34 +105,32 @@
             <AutoCompleteInput
                 name="hour"
                 options={async () => {
-           return hours.map(h => ({
-               key: h.toString(),
-               value: h.toString(),
-           }))
-       }}
+                    return hours.map((h) => ({
+                        key: h.toString(),
+                        value: h.toString(),
+                    }))
+                }}
                 value={hour.toString()}
-                onBlur={e => onChange('hour', e)}
-                onSelect={opt => onChange('hour', opt.key)}
+                onBlur={(e) => onChange('hour', e)}
+                onSelect={(opt) => onChange('hour', opt.key)}
             />
-    </span>
+        </span>
 
         <span class="text-gray-500">:</span>
 
         <span class="w-8">
-       <AutoCompleteInput
-           name="minute"
-           options={async () => {
-           return minutes.map(m => ({
-               key: m.toString(),
-               value: m.toString(),
-           }))
-       }}
-           value={minute.toString()}
-
-           onBlur={e => onChange('minute', e)}
-           onSelect={opt => onChange('minute', opt.key)}
-       />
-    </span>
+            <AutoCompleteInput
+                name="minute"
+                options={async () => {
+                    return minutes.map((m) => ({
+                        key: m.toString(),
+                        value: m.toString(),
+                    }))
+                }}
+                value={minute.toString()}
+                onBlur={(e) => onChange('minute', e)}
+                onSelect={(opt) => onChange('minute', opt.key)}
+            />
+        </span>
     {/if}
-
 </div>

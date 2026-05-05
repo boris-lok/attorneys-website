@@ -1,8 +1,10 @@
 <script lang="ts">
-
     import type { PageProps } from './$types'
     import WorkLogEditor from '$lib/components/WorkLogEditor.svelte'
-    import { type WorkLog as WorkLogType, WorkLogServices } from '$lib/services/work_log.service'
+    import {
+        type WorkLog as WorkLogType,
+        WorkLogServices,
+    } from '$lib/services/work_log.service'
     import WorkLog from '$lib/components/WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/common/Loading.svelte'
@@ -60,21 +62,28 @@
             </button>
         </div>
     {/if}
-
 </main>
 
-<div class="md:rounded md:shadow md:m-4">
-    <div class="hidden md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300 rounded-t">
-        <p class="flex-5/12  text-left px-2 text-md py-3 font-bold">Description</p>
-        <p class="flex-2/12 text-left px-2 text-md py-3 font-bold">Started At</p>
-        <p class="flex-1/12 text-left px-2 text-md py-3 font-bold">Used Hrs</p>
-        <p class="flex-2/12 text-left px-2 text-md py-3 font-bold">Participants</p>
-        <p class="flex-1/12 text-left px-2 text-md py-3 font-bold">&nbsp;</p>
+<div class="md:m-4 md:rounded md:shadow">
+    <div
+        class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
+    >
+        <p class="text-md flex-5/12 px-2 py-3 text-left font-bold">
+            Description
+        </p>
+        <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
+            Started At
+        </p>
+        <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">Used Hrs</p>
+        <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
+            Participants
+        </p>
+        <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">&nbsp;</p>
     </div>
     {#each logs as log, i (log.id)}
-        <WorkLog caseId={id} log={log} onSaved={e => logs[i] = e} />
+        <WorkLog caseId={id} {log} onSaved={(e) => (logs[i] = e)} />
         {#if i < logs.length - 1}
-            <div class="hidden md:block bg-gray-200 mx-2 h-[1px]">&nbsp;</div>
+            <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">&nbsp;</div>
         {/if}
     {/each}
 </div>

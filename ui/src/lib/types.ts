@@ -173,5 +173,3 @@ export type CaseData = {
     startedAt: Date
     endedAt: Date
 }
-
-

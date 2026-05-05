@@ -25,8 +25,19 @@
         id: rest.id ?? '',
         name: rest.name ?? '',
         hrs: rest.hrs ?? 0,
-        startedAt: rest.startedAt ?? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0),
-        endedAt: rest.endedAt ?? new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59)
+        startedAt:
+            rest.startedAt ??
+            new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0),
+        endedAt:
+            rest.endedAt ??
+            new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate() + 1,
+                23,
+                59,
+                59,
+            ),
     })
     let errMsg = $state('')
     let isLoading = $state(false)
@@ -80,7 +91,7 @@
             name: copiedData.name!,
             estimated_minutes: copiedData.hrs! * 60,
             started_at: copiedData.startedAt,
-            ended_at: copiedData.endedAt
+            ended_at: copiedData.endedAt,
         })
 
         if (resp.error) {
@@ -94,7 +105,7 @@
                 estimatedMinutes: copiedData.hrs! * 60,
                 createdAt: now,
                 startedAt: copiedData.startedAt,
-                endedAt: copiedData.endedAt
+                endedAt: copiedData.endedAt,
             })
         }
 
@@ -113,9 +124,11 @@
 {/if}
 
 <div
-    class="w-full md:flex md:flex-row md:items-center md:gap-4 p-4 md:p-2 shadow rounded m-4 md:m-0 md:rounded-none md:shadow-none md:min-h-12">
-
-    <div class="font-semibold md:font-medium text-nowrap flex-6/12 my-2 md:my-0">
+    class="m-4 w-full rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none"
+>
+    <div
+        class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium"
+    >
         <Input
             value={copiedData.name}
             label="Case Name"
@@ -126,13 +139,23 @@
         />
     </div>
 
-    <div class="text-sm text-gray-500 md:text-gray-700 flex-2/12 my-1 md:my-0 flex flex-row md:flex-col items-center">
-        <DateTimePicker date={copiedData.startedAt} onChanged={e => onDateChanged('startedAt', e) } dateOnly={true} />
+    <div
+        class="my-1 flex flex-2/12 flex-row items-center text-sm text-gray-500 md:my-0 md:flex-col md:text-gray-700"
+    >
+        <DateTimePicker
+            date={copiedData.startedAt}
+            onChanged={(e) => onDateChanged('startedAt', e)}
+            dateOnly={true}
+        />
         <span>~</span>
-        <DateTimePicker date={copiedData.endedAt} onChanged={e => onDateChanged('endedAt', e) } dateOnly={true} />
+        <DateTimePicker
+            date={copiedData.endedAt}
+            onChanged={(e) => onDateChanged('endedAt', e)}
+            dateOnly={true}
+        />
     </div>
 
-    <div class="text-sm flex-2/12">
+    <div class="flex-2/12 text-sm">
         <Input
             value={copiedData.hrs}
             label="Hrs"
@@ -143,7 +166,9 @@
         />
     </div>
 
-    <div class="flex h-fit flex-row gap-2 flex-auto md:justify-end justify-center">
+    <div
+        class="flex h-fit flex-auto flex-row justify-center gap-2 md:justify-end"
+    >
         <button class="cursor-pointer md:m-0.5" onclick={_onSaved}>
             <IconifyIcon
                 class="h-6 w-6 text-green-500"
@@ -158,4 +183,3 @@
         </button>
     </div>
 </div>
-

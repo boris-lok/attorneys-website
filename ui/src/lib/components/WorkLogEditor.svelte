@@ -5,7 +5,7 @@
     import {
         type Collaborator,
         type WorkLog,
-        WorkLogServices
+        WorkLogServices,
     } from '$lib/services/work_log.service'
     import Textarea from '$lib/components/common/Textarea.svelte'
     import IconifyIcon from '@iconify/svelte'
@@ -32,7 +32,7 @@
         collaboratorIds = [],
         hideShare = false,
         onSaved,
-        onClosed
+        onClosed,
     }: Props = $props()
     let users: SimpleUser[] = $state([])
     let loaded = false
@@ -53,7 +53,7 @@
         _s.setSeconds(0)
         _s.setMilliseconds(0)
 
-        return ((_e.getTime() - _s.getTime()) / 1000 / 60)
+        return (_e.getTime() - _s.getTime()) / 1000 / 60
     })
 
     function onDateChanged(key: 'startedAt' | 'endedAt', newDate: Date) {
@@ -65,7 +65,9 @@
         }
     }
 
-    function onDescriptionChanged(e: Event & { currentTarget: HTMLTextAreaElement }) {
+    function onDescriptionChanged(
+        e: Event & { currentTarget: HTMLTextAreaElement },
+    ) {
         _description = e.currentTarget.value
     }
 
@@ -74,7 +76,7 @@
         if (checked) {
             newIds = [...newIds, id]
         } else {
-            newIds = newIds.filter(e => e !== id)
+            newIds = newIds.filter((e) => e !== id)
         }
         _collaboratorIds = newIds
     }
@@ -91,10 +93,9 @@
         }
         const selfId = getSelfId()
 
-        users = resp
-            .users
-            .filter(e => e.id !== selfId)
-            .filter(e => e.roles.includes('Lawyer'))
+        users = resp.users
+            .filter((e) => e.id !== selfId)
+            .filter((e) => e.roles.includes('Lawyer'))
     }
 
     async function onShareChanged(e: Event) {
@@ -105,14 +106,13 @@
 
         share = elem.checked
         if (share) {
-            _collaboratorIds = users.map(e => e.id)
+            _collaboratorIds = users.map((e) => e.id)
         } else {
             _collaboratorIds = []
         }
     }
 
     async function onSave() {
-
         const validate = () => {
             if (!_startedAt) {
                 errMsg = 'Please select start time'
@@ -145,7 +145,7 @@
             collaboratorIds: _collaboratorIds,
             description: _description,
             duration: duration,
-            startedAt: _startedAt
+            startedAt: _startedAt,
         })
         isLoading = false
 
@@ -154,10 +154,14 @@
             return
         }
 
-        let collaborators: Collaborator[] =
-            users
-                .filter(e => _collaboratorIds.includes(e.id))
-                .map(e => ({ parentId: resp.id, userId: e.id, name: e.nickname, status: 'pending' }))
+        let collaborators: Collaborator[] = users
+            .filter((e) => _collaboratorIds.includes(e.id))
+            .map((e) => ({
+                parentId: resp.id,
+                userId: e.id,
+                name: e.nickname,
+                status: 'pending',
+            }))
 
         onSaved?.({
             id: resp.id,
@@ -169,15 +173,17 @@
             collaborators: collaborators,
             user: {
                 id: getSelfId(),
-                name: getSelfName()
-            }
+                name: getSelfName(),
+            },
         })
     }
 </script>
 
 {#if errMsg}
     <div class="px-4">
-        <p class="mt-1 text-sm font-semibold text-red-500 text-center">{errMsg}</p>
+        <p class="mt-1 text-center text-sm font-semibold text-red-500">
+            {errMsg}
+        </p>
     </div>
 {/if}
 
@@ -186,60 +192,91 @@
 {/if}
 
 <div class="flex flex-col gap-4">
-
-    <div class="flex flex-row items-center justify-between md:justify-normal md:gap-4">
-        <div class="flex flex-col md:flex-row md:gap-2 md:items-center gap-1">
+    <div
+        class="flex flex-row items-center justify-between md:justify-normal md:gap-4"
+    >
+        <div class="flex flex-col gap-1 md:flex-row md:items-center md:gap-2">
             <span class="text-sm font-semibold">Working Time: </span>
-            <DateTimePicker date={startedAt} onChanged={e => onDateChanged('startedAt', e) } />
+            <DateTimePicker
+                date={startedAt}
+                onChanged={(e) => onDateChanged('startedAt', e)}
+            />
             <span class="text-center"> ~ </span>
-            <DateTimePicker date={endedAt} onChanged={e => onDateChanged('endedAt', e) } />
+            <DateTimePicker
+                date={endedAt}
+                onChanged={(e) => onDateChanged('endedAt', e)}
+            />
         </div>
 
         <span class="h-fit"> ({duration} min)</span>
     </div>
 
     <div>
-        <Textarea label="Description" name="description" value={description} onInput={onDescriptionChanged}
-                  height="h-36" />
+        <Textarea
+            label="Description"
+            name="description"
+            value={description}
+            onInput={onDescriptionChanged}
+            height="h-36"
+        />
     </div>
 
     {#if !hideShare}
-        <label class="inline-flex items-center cursor-pointer">
-            <input type="checkbox" value="" class="sr-only peer" onclick={onShareChanged}>
+        <label class="inline-flex cursor-pointer items-center">
+            <input
+                type="checkbox"
+                value=""
+                class="peer sr-only"
+                onclick={onShareChanged}
+            />
             <div
-                class="relative w-9 h-5 bg-gray-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
-            <span class="select-none ms-3 text-sm font-medium text-heading">Share</span>
+                class="peer relative h-5 w-9 rounded-full bg-gray-500 peer-checked:bg-blue-500 peer-focus:outline-none after:absolute after:start-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
+            ></div>
+            <span class="text-heading ms-3 text-sm font-medium select-none"
+                >Share</span
+            >
         </label>
 
-
         {#if share}
-            <div class="flex gap-4 flex-row flex-wrap px-2 rounded bg-gray-100 mx-2 my-1 py-2">
+            <div
+                class="mx-2 my-1 flex flex-row flex-wrap gap-4 rounded bg-gray-100 px-2 py-2"
+            >
                 {#each users as user (user.id)}
-                    <label for={user.id} class="cursor-pointer text-md font-medium">
-                        <input type="checkbox" id={user.id} value={user.id} class="mr-2"
-                               checked={_collaboratorIds.includes(user.id)} onchange={e => {
-                               onCollaboratorIdsChanged(user.id, e.currentTarget.checked)
-                           }} />{ user.nickname}
+                    <label
+                        for={user.id}
+                        class="text-md cursor-pointer font-medium"
+                    >
+                        <input
+                            type="checkbox"
+                            id={user.id}
+                            value={user.id}
+                            class="mr-2"
+                            checked={_collaboratorIds.includes(user.id)}
+                            onchange={(e) => {
+                                onCollaboratorIdsChanged(
+                                    user.id,
+                                    e.currentTarget.checked,
+                                )
+                            }}
+                        />{user.nickname}
                     </label>
                 {/each}
             </div>
         {/if}
     {/if}
 
-    <div class="flex h-fit flex-row gap-0.5 justify-center">
+    <div class="flex h-fit flex-row justify-center gap-0.5">
         <button class="cursor-pointer md:m-2" onclick={onSave}>
             <IconifyIcon
-                class=" text-green-500 h-6 w-6"
+                class=" h-6 w-6 text-green-500"
                 icon="charm:square-tick"
             />
         </button>
         <button class="cursor-pointer md:m-2" onclick={onClosed}>
             <IconifyIcon
-                class="text-red-500 h-6 w-6"
+                class="h-6 w-6 text-red-500"
                 icon="line-md:close-square"
             />
         </button>
     </div>
-
 </div>
-

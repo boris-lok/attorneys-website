@@ -52,6 +52,7 @@ pub trait IUserRepository {
     async fn list_users(&self) -> anyhow::Result<Vec<User>>;
     async fn delete_user(&self, id: &UserID) -> anyhow::Result<()>;
     async fn get_user_roles(&self, id: &UserID) -> anyhow::Result<Vec<String>>;
+    async fn get_user_nickname(&self, id: &UserID) -> anyhow::Result<String>;
 }
 
 #[cfg(test)]
@@ -165,6 +166,10 @@ impl IUserRepository for InMemoryUserRepository {
     }
 
     async fn get_user_roles(&self, id: &UserID) -> anyhow::Result<Vec<String>> {
+        todo!()
+    }
+
+    async fn get_user_nickname(&self, id: &UserID) -> anyhow::Result<String> {
         todo!()
     }
 }
@@ -297,5 +302,16 @@ impl IUserRepository for SqlxUserRepository<'_> {
 
         let res = sqlx::query(query).bind(id).fetch_all(conn).await?;
         Ok(res.into_iter().map(|row: PgRow| row.get(0)).collect())
+    }
+
+    async fn get_user_nickname(&self, id: &UserID) -> anyhow::Result<String> {
+        let id = Uuid::from(id);
+
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = "select nickname from users where id = $1";
+        let res = sqlx::query(query).bind(id).fetch_one(conn).await?;
+        Ok(res.get(0))
     }
 }

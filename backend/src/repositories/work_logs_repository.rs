@@ -257,7 +257,6 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
             }
         }
 
-
         Ok(res.into_values().collect())
     }
 

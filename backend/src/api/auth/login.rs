@@ -24,6 +24,7 @@ pub struct LoginRequest {
 pub struct LoginResponse {
     user_id: String,
     username: String,
+    nickname: String,
     token: String,
     roles: Vec<String>,
 }
@@ -67,6 +68,10 @@ pub async fn login(
                 .get_user_roles(&id)
                 .await
                 .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+            let nickname = lock
+                .get_user_nickname(&id)
+                .await
+                .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 
             let claims = Claims {
                 sub: user_id.clone(),
@@ -84,6 +89,7 @@ pub async fn login(
             Ok(Json(LoginResponse {
                 user_id,
                 username: req.username,
+                nickname,
                 token,
                 roles,
             }))

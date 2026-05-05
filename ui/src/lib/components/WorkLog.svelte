@@ -1,22 +1,50 @@
 <script lang="ts">
-    import type { WorkLog } from '$lib/services/work_log.service'
+    import {
+        type WorkLog,
+        WorkLogServices,
+    } from '$lib/services/work_log.service'
     import WorkLogEditor from '$lib/components/WorkLogEditor.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import { roundTo } from '$lib/utils'
+    import { getSelfId, roundTo } from '$lib/utils'
+    import { CaseServices } from '$lib/services/case.service'
 
     type Props = {
         log: WorkLog
         caseId: string
         onSaved: (data: WorkLog) => void
+        onDeleted: () => void
     }
 
-    let { log, caseId }: Props = $props()
+    let { log, caseId, onSaved, onDeleted }: Props = $props()
     let isEditMode = $state(false)
     let copiedData = $state(log)
+    const selfId = getSelfId()
 
-    function onSaved(newValue: WorkLog) {
+    function _onSaved(newValue: WorkLog) {
         copiedData = newValue
         isEditMode = false
+
+        onSaved(newValue)
+    }
+
+    async function onDeleteClicked(e: Event) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const confirmed = confirm(
+            'Are you sure you want to delete this work log? This action cannot be undone.',
+        )
+
+        if (confirmed) {
+            const resp = await WorkLogServices.delete(copiedData.id)
+            if (resp.error) {
+                alert(resp.message)
+                return
+            }
+
+            alert('Work log has been deleted successfully')
+            onDeleted()
+        }
     }
 
     const hrs = $derived(roundTo(copiedData.duration / 60, 2))
@@ -49,7 +77,7 @@
             )}
             onClosed={() => (isEditMode = false)}
             hideShare={true}
-            {onSaved}
+            onSaved={_onSaved}
         />
     </div>
 {:else}
@@ -91,8 +119,8 @@
             {/if}
         </div>
 
-        {#if !copiedData.isCollaborative}
-            <div class="flex h-fit flex-1/12 flex-row justify-end gap-2">
+        <div class="flex h-fit flex-1/12 flex-row justify-end gap-2">
+            {#if !copiedData.isCollaborative}
                 <button
                     class="mt-4 cursor-pointer md:mt-0"
                     onclick={onEditClicked}
@@ -103,11 +131,23 @@
                     />
                     <span class="md:hidden">Edit</span>
                 </button>
-            </div>
-        {:else}
+            {/if}
+            {#if copiedData.user.id === selfId}
+                <button
+                    class="mt-4 cursor-pointer md:mt-0"
+                    onclick={onDeleteClicked}
+                >
+                    <IconifyIcon
+                        class="hidden h-4 w-4 hover:text-red-500 md:block md:h-6 md:w-6"
+                        icon="mi:delete"
+                    />
+                    <span class="md:hidden">Delete</span>
+                </button>
+            {/if}
+
             <div class="flex h-fit flex-1/12 flex-row justify-end gap-2">
                 &nbsp;
             </div>
-        {/if}
+        </div>
     </div>
 {/if}

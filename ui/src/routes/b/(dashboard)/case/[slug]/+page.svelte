@@ -81,7 +81,12 @@
         <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">&nbsp;</p>
     </div>
     {#each logs as log, i (log.id)}
-        <WorkLog caseId={id} {log} onSaved={(e) => (logs[i] = e)} />
+        <WorkLog
+            caseId={id}
+            {log}
+            onSaved={(e) => (logs[i] = e)}
+            onDeleted={() => (logs = logs.filter((l) => l.id !== log.id))}
+        />
         {#if i < logs.length - 1}
             <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">&nbsp;</div>
         {/if}

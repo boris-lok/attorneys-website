@@ -139,7 +139,28 @@ async function list(
         return { error: true, message: `Error: ${error}` }
     }
 }
+
+async function del(id: string): Promise<APIError | APIResponse<void>> {
+    try {
+        const resp = await fetch(`${ADMIN_URL}/work_logs/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: getToken(),
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+        return { error: false }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
+}
+
 export const WorkLogServices = {
     save: save,
     list: list,
+    delete: del,
 }

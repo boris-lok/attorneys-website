@@ -18,8 +18,8 @@
     const usedPercentage = $derived(
         roundTo(
             (copiedData.usedMinutes * 100) / copiedData.estimatedMinutes,
-            0
-        )
+            0,
+        ),
     )
     const usedHrs = $derived(roundTo(copiedData.usedMinutes / 60, 2))
 
@@ -27,7 +27,7 @@
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
-            day: 'numeric'
+            day: 'numeric',
         })
     }
 
@@ -42,7 +42,7 @@
         e.stopPropagation()
 
         const confirmed = confirm(
-            'Are you sure you want to delete this case? This action cannot be undone.'
+            'Are you sure you want to delete this case? This action cannot be undone.',
         )
 
         if (confirmed) {
@@ -84,8 +84,12 @@
                 class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium"
             >
                 {#if copiedData.pendingLogs > 0}
-                    <div class="text-sm rounded-[50%] border w-4 h-4 inline-block text-center bg-red-500">
-                        <p class="text-xs text-white">{copiedData.pendingLogs}</p>
+                    <div
+                        class="inline-block h-4 w-4 rounded-[50%] border bg-red-500 text-center text-sm"
+                    >
+                        <p class="text-xs text-white">
+                            {copiedData.pendingLogs}
+                        </p>
                     </div>
                 {/if}
                 {copiedData.name}
@@ -95,8 +99,8 @@
                 class="my-1 flex-2/12 text-sm text-gray-500 md:my-0 md:text-gray-700"
             >
                 {formater(copiedData.startedAt)} -> {formater(
-                copiedData.endedAt,
-            )}
+                    copiedData.endedAt,
+                )}
             </div>
 
             <div class="flex-2/12 text-sm md:text-right">

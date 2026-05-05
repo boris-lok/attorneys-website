@@ -182,9 +182,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         let conn = &mut **conn;
 
         let query = r"
-        update work_logs
-        set deleted_at = now(),
-        where id = $1;
+        update work_logs set deleted_at = now() where id = $1;
         ";
 
         sqlx::query(query).bind(id).execute(conn).await?;

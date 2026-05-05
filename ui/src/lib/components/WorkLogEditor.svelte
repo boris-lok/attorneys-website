@@ -1,9 +1,9 @@
 <script lang="ts">
     import DateTimePicker from '$lib/components/DateTimePicker.svelte'
-    import AutoCompleteInput from '$lib/components/common/AutoCompleteInput.svelte'
     import { type SimpleUser, UserService } from '$lib/services/user.service'
     import { getSelfId } from '$lib/utils'
     import {
+        type Collaborator,
         type WorkLog,
         WorkLogServices
     } from '$lib/services/work_log.service'
@@ -14,9 +14,9 @@
     type Props = {
         id?: string
         caseId: string
-        date?: Date
+        startedAt?: Date
+        endedAt?: Date
         description?: string
-        duration?: number
         collaboratorIds?: string[]
         hideShare?: boolean
         onClosed?: () => void
@@ -26,53 +26,58 @@
     let {
         id,
         caseId,
-        date = new Date(),
+        startedAt = new Date(),
+        endedAt = new Date(),
         description = '',
-        duration = 0,
         collaboratorIds = [],
         hideShare = false,
         onSaved,
         onClosed
     }: Props = $props()
-    const everyFifteen = Array.from({ length: 48 }, (_, i) => (i + 1) * 0.25)
     let users: SimpleUser[] = $state([])
     let loaded = false
     let share = $state(false)
-    let req = {
-        startedAt: date,
-        caseId,
-        duration,
-        collaboratorIds,
-        description
-    }
+    let _startedAt = $state(startedAt)
+    let _endedAt = $state(endedAt)
+    let _description = $state(description)
+    let _collaboratorIds = $state(collaboratorIds)
     let errMsg = $state('')
     let isLoading = $state(false)
+    let duration = $derived.by(() => {
+        const _e = new Date(_endedAt)
+        const _s = new Date(_startedAt)
 
-    function onDateChanged(newDate: Date) {
-        req = { ...req, startedAt: newDate }
-    }
+        // ignore time part
+        _e.setSeconds(0)
+        _e.setMilliseconds(0)
+        _s.setSeconds(0)
+        _s.setMilliseconds(0)
 
-    function onDurationChanged(newDuration: string) {
-        const n = parseFloat(newDuration)
-        if (isNaN(n)) return
-        req = { ...req, duration: n * 60 }
+        return ((_e.getTime() - _s.getTime()) / 1000 / 60 )
+    })
+    let creator: SimpleUser | undefined;
+
+    function onDateChanged(key: 'startedAt' | 'endedAt', newDate: Date) {
+        console.log('onDateChanged', key, newDate)
+        if (key === 'startedAt') {
+            _startedAt = newDate
+        } else {
+            _endedAt = newDate
+        }
     }
 
     function onDescriptionChanged(e: Event & { currentTarget: HTMLTextAreaElement }) {
-        req = { ...req, description: e.currentTarget.value }
+        _description = e.currentTarget.value
     }
 
     function onCollaboratorIdsChanged(id: string, checked: boolean) {
-        let newIds = [...req.collaboratorIds]
+        let newIds = [...collaboratorIds]
         if (checked) {
             newIds = [...newIds, id]
         } else {
             newIds = newIds.filter(e => e !== id)
         }
-        req = {
-            ...req,
-            collaboratorIds: newIds
-        }
+        _collaboratorIds = newIds
     }
 
     async function fetchUsers() {
@@ -86,6 +91,8 @@
             return
         }
         const selfId = getSelfId()
+        creator = resp.users.find(e => e.id === selfId)
+        console.log('creator', creator)
 
         users = resp
             .users
@@ -100,13 +107,48 @@
         }
 
         share = elem.checked
+        if (share) {
+            _collaboratorIds = users.map(e => e.id)
+        } else {
+            _collaboratorIds = []
+        }
     }
 
     async function onSave() {
+
+        const validate = () => {
+            if (!_startedAt) {
+                errMsg = 'Please select start time'
+                return false
+            }
+            if (!_endedAt) {
+                errMsg = 'Please select end time'
+                return false
+            }
+            if (!_description) {
+                errMsg = 'Please enter description'
+                return false
+            }
+            if (duration <= 0) {
+                errMsg = 'Ended date must be later than start date'
+                return false
+            }
+
+            return true
+        }
+
+        if (!validate()) {
+            return
+        }
+
         isLoading = true
         const resp = await WorkLogServices.save({
             ...(id ? { id: id } : {}),
-            ...req
+            caseId: caseId,
+            collaboratorIds: _collaboratorIds,
+            description: _description,
+            duration: duration,
+            startedAt: _startedAt
         })
         isLoading = false
 
@@ -115,22 +157,30 @@
             return
         }
 
+        let collaborators: Collaborator[] =
+            users
+                .filter(e => _collaboratorIds.includes(e.id))
+                .map(e => ({ parentId: resp.id, userId: e.id, name: e.nickname, status: 'pending' }))
+
         onSaved?.({
             id: resp.id,
-            startedAt: req.startedAt,
-            duration: req.duration,
-            description: req.description,
+            startedAt: _startedAt,
+            endedAt: _endedAt,
+            duration: duration,
+            description: _description,
             isCollaborative: share,
-            collaborators: users
-                .filter(e => req.collaboratorIds.includes(e.id))
-                .map(e => ({ id: e.id, name: e.nickname }))
+            collaborators: collaborators,
+            user: {
+                id: getSelfId(),
+                name: creator?.nickname ?? 'Unknown'
+            }
         })
     }
 </script>
 
 {#if errMsg}
     <div class="px-4">
-        <p class="mt-[-1rem] text-sm font-semibold text-red-500">{errMsg}</p>
+        <p class="mt-1 text-sm font-semibold text-red-500 text-center">{errMsg}</p>
     </div>
 {/if}
 
@@ -140,15 +190,16 @@
 
 <div class="flex flex-col gap-4">
 
-    <DateTimePicker date={date} onChanged={onDateChanged} />
+    <div class="flex flex-row items-center justify-between md:justify-normal md:gap-4">
+        <div class="flex flex-col md:flex-row md:gap-2 md:items-center gap-1">
+            <span class="text-sm font-semibold">Working Time: </span>
+            <DateTimePicker date={startedAt} onChanged={e => onDateChanged('startedAt', e) } />
+            <span class="text-center"> ~ </span>
+            <DateTimePicker date={endedAt} onChanged={e => onDateChanged('endedAt', e) } />
+        </div>
 
-    <AutoCompleteInput name="duration" options={async () => {
-           return everyFifteen.map(m => ({
-               key: m.toString(),
-               value: m.toString(),
-           }))
-       }} value={duration.toString()} label="Duration (hrs)" onBlur={onDurationChanged}
-                       onSelect={e => onDurationChanged(e.key)} />
+        <span class="h-fit"> ({duration} min)</span>
+    </div>
 
     <div>
         <Textarea label="Description" name="description" value={description} onInput={onDescriptionChanged}
@@ -165,11 +216,11 @@
 
 
         {#if share}
-            <div class="flex gap-4 flex-row flex-wrap py-2">
+            <div class="flex gap-4 flex-row flex-wrap px-2 rounded bg-gray-100 mx-2 my-1 py-2">
                 {#each users as user (user.id)}
                     <label for={user.id} class="cursor-pointer text-md font-medium">
                         <input type="checkbox" id={user.id} value={user.id} class="mr-2"
-                               checked={collaboratorIds.includes(user.id)} onchange={e => {
+                               checked={_collaboratorIds.includes(user.id)} onchange={e => {
                                onCollaboratorIdsChanged(user.id, e.currentTarget.checked)
                            }} />{ user.nickname}
                     </label>
@@ -178,16 +229,16 @@
         {/if}
     {/if}
 
-    <div class="flex h-fit flex-row gap-0.5">
+    <div class="flex h-fit flex-row gap-0.5 justify-center">
         <button class="cursor-pointer md:m-2" onclick={onSave}>
             <IconifyIcon
-                class="h-4 w-4 text-green-500 md:h-6 md:w-6"
+                class=" text-green-500 h-6 w-6"
                 icon="charm:square-tick"
             />
         </button>
         <button class="cursor-pointer md:m-2" onclick={onClosed}>
             <IconifyIcon
-                class="h-4 w-4 text-red-500 md:h-6 md:w-6"
+                class="text-red-500 h-6 w-6"
                 icon="line-md:close-square"
             />
         </button>

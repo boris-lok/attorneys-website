@@ -38,9 +38,9 @@
         <WorkLogEditor
             id={log.id}
             caseId={caseId}
-            date={log.startedAt}
+            startedAt={log.startedAt}
+            endedAt={log.endedAt}
             description={log.description}
-            duration={log.duration}
             collaboratorIds={log.collaborators.map(collaborator => collaborator.userId)}
             onClosed={() => (isEditMode = false)}
             hideShare={true}

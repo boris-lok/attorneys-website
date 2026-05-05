@@ -14,12 +14,12 @@ export type CreateWorkLogRequest = {
 export type WorkLog = {
     id: string
     startedAt: Date
+    endedAt: Date
     duration: number
     description: string
     isCollaborative: boolean
     collaborators: Collaborator[]
     user: SimpleUser
-    status: string
 }
 
 export type SimpleUser = {
@@ -100,6 +100,7 @@ async function list(
                 (e: {
                     id: string
                     started_at: string
+                    ended_at: string
                     duration: number
                     description: string
                     is_collaborative: boolean
@@ -109,12 +110,12 @@ async function list(
                         name: string
                         status: string
                     }[]
-                    user: { user_id: string; name: string }
-                    status: string
+                    user: { id: string; name: string }
                 }) => {
                     return {
                         id: e.id,
                         startedAt: new Date(e.started_at),
+                        endedAt: new Date(e.ended_at),
                         duration: e.duration,
                         description: e.description,
                         isCollaborative: e.is_collaborative,
@@ -125,10 +126,9 @@ async function list(
                             status: collaborator.status,
                         })),
                         user: {
-                            id: e.user.user_id,
+                            id: e.user.id,
                             name: e.user.name,
                         },
-                        status: e.status,
                     } as WorkLog
                 },
             )

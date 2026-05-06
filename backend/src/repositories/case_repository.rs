@@ -1,3 +1,4 @@
+use crate::domain::entities::UserID;
 use serde::Serialize;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -87,7 +88,7 @@ pub trait ICaseRepository {
         name: Option<String>,
         estimated_minutes: Option<i32>,
     ) -> anyhow::Result<()>;
-    async fn list_cases(&self) -> anyhow::Result<Vec<Case>>;
+    async fn list_cases(&self, user_id: &UserID) -> anyhow::Result<Vec<Case>>;
     async fn delete(&mut self, id: CaseID) -> anyhow::Result<()>;
 }
 
@@ -155,7 +156,9 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         Ok(())
     }
 
-    async fn list_cases(&self) -> anyhow::Result<Vec<Case>> {
+    async fn list_cases(&self, user_id: &UserID) -> anyhow::Result<Vec<Case>> {
+        let user_id = Uuid::from(user_id);
+
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
@@ -190,7 +193,7 @@ LEFT JOIN (
     SELECT
         parent_id,
         COUNT(*) FILTER (WHERE status = 'approved') AS approved_cnt,
-        COUNT(*) FILTER (WHERE status = 'pending') AS pending_cnt
+        COUNT(*) FILTER (WHERE status = 'pending' and user_id = $1) AS pending_cnt
     FROM work_logs_mapping
     GROUP BY parent_id
 ) cnt ON cnt.parent_id = wl.id
@@ -203,6 +206,7 @@ GROUP BY
             ";
 
         let rows = sqlx::query_as::<_, CaseFromSQLx>(query)
+            .bind(user_id)
             .fetch_all(conn)
             .await?;
 

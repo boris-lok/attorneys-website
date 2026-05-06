@@ -1,6 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
-use crate::domain::cases::list::{execute, Error};
+use crate::domain::cases::list::{execute, Error, Request};
 use crate::repositories::{Case, SQLxCaseRepository};
 use crate::startup::AppState;
 use axum::extract::State;
@@ -15,7 +15,7 @@ pub struct ListCasesResponse {
 }
 
 pub async fn list_cases(
-    _: Claims,
+    c: Claims,
     State(state): State<AppState>,
 ) -> Result<Json<ListCasesResponse>, ApiError> {
     let mut conn = state
@@ -26,7 +26,11 @@ pub async fn list_cases(
 
     let repo = SQLxCaseRepository::new(Arc::new(Mutex::new(&mut *conn)));
 
-    let res = execute(Arc::new(Mutex::new(repo))).await;
+    let req = Request {
+        user_id: c.sub.clone(),
+    };
+
+    let res = execute(Arc::new(Mutex::new(repo)), req).await;
 
     match res {
         Ok(cases) => Ok(Json(ListCasesResponse { cases })),

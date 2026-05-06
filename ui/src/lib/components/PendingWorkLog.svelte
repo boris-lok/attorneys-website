@@ -4,7 +4,7 @@
     import IconifyIcon from '@iconify/svelte'
 
     type Props = PendingWorkLog & {
-        onDone?: () => void
+        onDone?: (status: 'accepted' | 'rejected') => void
     }
 
     let { onDone, ...rest }: Props = $props()
@@ -12,11 +12,11 @@
     const hrs = roundTo(copiedData.duration / 60, 2)
 
     function onAcceptClicked() {
-        onDone?.()
+        onDone?.('accepted')
     }
 
     function onRejectClicked() {
-        onDone?.()
+        onDone?.('rejected')
     }
 </script>
 
@@ -46,7 +46,7 @@
             />
         </button>
 
-        <button class="cursor-pointer" onclick={onAcceptClicked}>
+        <button class="cursor-pointer" onclick={onRejectClicked}>
             <IconifyIcon
                 class="h-4 w-4 text-red-500 md:h-6 md:w-6"
                 icon="iconamoon:file-close-light"

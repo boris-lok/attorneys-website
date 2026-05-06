@@ -4,12 +4,12 @@
     import {
         type PendingWorkLog as PendingWorkLogType,
         type WorkLog as WorkLogType,
-        WorkLogServices,
+        WorkLogServices
     } from '$lib/services/work_log.service'
     import WorkLog from '$lib/components/WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/common/Loading.svelte'
-    import { getSelfId, getSelfName, sleep } from '$lib/utils'
+    import { getSelfId, getSelfName } from '$lib/utils'
     import PendingWorkLog from '$lib/components/PendingWorkLog.svelte'
 
     const selfId = getSelfId()
@@ -24,7 +24,7 @@
                 const collaborators = log.collaborators.filter(
                     (collaborator) =>
                         collaborator.status === 'pending' &&
-                        collaborator.userId === selfId,
+                        collaborator.userId === selfId
                 )
                 return collaborators.length > 0
             })
@@ -37,8 +37,8 @@
                     description: log.description,
                     user: {
                         id: selfId,
-                        name: selfName,
-                    },
+                        name: selfName
+                    }
                 }
 
                 return p
@@ -62,6 +62,16 @@
         }
 
         logs = resp.logs
+    }
+
+    function editStatus(id: string, status: 'accepted' | 'pending' | 'rejected') {
+        let c = logs.find(l => l.id === id)
+        if (!c) return
+        let collaborators = [...c.collaborators]
+        let collaborator = collaborators.find(collaborator => collaborator.userId === selfId)
+        if (!collaborator) return
+        collaborator.status = status
+        c.collaborators = collaborators
     }
 
     $effect(() => {
@@ -99,24 +109,24 @@
         <p class="px-5 text-xl font-semibold">Pending Logs</p>
         <div class="md:m-4 md:rounded md:shadow">
             <div
-                class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-orange-300"
+                class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-orange-300 px-4"
             >
-                <p class="text-md flex-5/12 px-2 py-3 text-left font-bold">
+                <p class="text-md flex-5/12 py-3 text-left font-bold">
                     Description
                 </p>
-                <p class="text-md flex-4/12 px-2 py-3 text-left font-bold">
+                <p class="text-md flex-4/12 py-3 text-left font-bold">
                     Period
                 </p>
-                <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">
+                <p class="text-md flex-1/12 py-3 text-left font-bold">
                     Used Hrs
                 </p>
-                <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
+                <p class="text-md flex-2/12 py-3 text-left font-bold">
                     &nbsp;
                 </p>
             </div>
             <div class="h-fit max-h-96 w-full overflow-y-auto">
                 {#each pendingLogs as log, i (log.id)}
-                    <PendingWorkLog {...log} />
+                    <PendingWorkLog {...log} onDone={(e) => editStatus(log.id, e)} />
                     {#if i < logs.length - 1}
                         <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">
                             &nbsp;
@@ -131,21 +141,21 @@
         <p class="mt-16 px-5 text-xl font-semibold">Work Logs</p>
         <div class="md:m-4 md:rounded md:shadow">
             <div
-                class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
+                class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300 px-4"
             >
-                <p class="text-md flex-5/12 px-2 py-3 text-left font-bold">
+                <p class="text-md flex-5/12 py-3 text-left font-bold">
                     Description
                 </p>
-                <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
+                <p class="text-md flex-2/12 py-3 text-left font-bold">
                     Period
                 </p>
-                <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">
+                <p class="text-md flex-1/12 py-3 text-left font-bold">
                     Used Hrs
                 </p>
-                <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
+                <p class="text-md flex-2/12 py-3 text-left font-bold">
                     Participants
                 </p>
-                <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">
+                <p class="text-md flex-1/12 py-3 text-left font-bold">
                     &nbsp;
                 </p>
             </div>

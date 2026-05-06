@@ -1,33 +1,28 @@
 use crate::domain::entities::UserID;
-use crate::repositories::IWorkLogsRepository;
+use crate::repositories::{IWorkLogsRepository, WorkLogStatus};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
-#[derive(Debug)]
 pub struct Request {
     pub id: String,
     pub user_id: String,
-    pub force: bool,
+    pub status: String,
 }
 
-#[derive(Debug)]
 pub enum Error {
     InvalidID,
     NotFound,
-    PermissionDenied,
+    InvalidStatus,
     Unknown(String),
 }
 
 /// validate and check permission, if force is true, ignore the permission checking
 ///
 /// - validate the work log exists.
-/// - check if the creator is an owner.
 async fn validate(
     repo: Arc<Mutex<impl IWorkLogsRepository + Send + Sync>>,
     id: &Uuid,
-    user_id: &UserID,
-    force: bool,
 ) -> Result<(), Error> {
     let lock = repo.lock().await;
 
@@ -37,17 +32,6 @@ async fn validate(
         .map_err(|e| Error::Unknown(e.to_string()))?;
     if !is_exist {
         return Err(Error::NotFound);
-    }
-
-    if !force {
-        let is_creator = lock
-            .is_creator(id, user_id)
-            .await
-            .map_err(|e| Error::Unknown(e.to_string()))?;
-
-        if !is_creator {
-            return Err(Error::PermissionDenied);
-        }
     }
 
     Ok(())
@@ -61,11 +45,13 @@ pub async fn execute(
     let user_id =
         UserID::try_from(req.user_id).map_err(|_| Error::Unknown("Invalid user id".to_string()))?;
 
-    validate(repo.clone(), &work_log_id, &user_id, req.force).await?;
+    let status = WorkLogStatus::try_from(req.status).map_err(|_| Error::InvalidStatus)?;
+
+    validate(repo.clone(), &work_log_id).await?;
 
     let mut lock = repo.lock().await;
 
-    lock.delete(work_log_id)
+    lock.update_status(&work_log_id, &user_id, status)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 

@@ -14,6 +14,12 @@ pub trait IWorkLogsRepository {
     async fn delete(&mut self, id: Uuid) -> anyhow::Result<()>;
     async fn list(&self, case_id: &CaseID) -> anyhow::Result<Vec<WorkLog>>;
     async fn update(&mut self, req: UpdateWorkLog) -> anyhow::Result<()>;
+    async fn update_status(
+        &mut self,
+        id: &Uuid,
+        user_id: &UserID,
+        status: WorkLogStatus,
+    ) -> anyhow::Result<()>;
     async fn is_creator(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool>;
     async fn is_collaborator_work_log(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool>;
     async fn is_work_log_exist(&self, id: &Uuid) -> anyhow::Result<bool>;
@@ -35,7 +41,6 @@ pub struct UpdateWorkLog {
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
     pub deleted_at: Option<chrono::DateTime<chrono::Utc>>,
     pub description: Option<String>,
-    pub status: Option<WorkLogStatus>,
 }
 
 #[derive(Debug, Clone)]
@@ -256,22 +261,46 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         let conn = &mut **conn;
 
         let query = r"
-        update work_logs
-        set status = coalesce($1, status),
-        started_at = coalesce($2, started_at),
-        ended_at = coalesce($3, ended_at),
-        description = coalesce($4, description)
-        deleted_at = coalesce($5, deleted_at)
-        where id = $6;
+        update work_logs set
+        started_at = coalesce($1, started_at),
+        ended_at = coalesce($2, ended_at),
+        description = coalesce($3, description),
+        deleted_at = coalesce($4, deleted_at)
+        where id = $5;
         ";
 
         sqlx::query(query)
-            .bind(req.status)
             .bind(req.started_at)
             .bind(req.ended_at)
             .bind(req.description)
             .bind(req.deleted_at)
             .bind(req.id)
+            .execute(conn)
+            .await?;
+
+        Ok(())
+    }
+
+    async fn update_status(
+        &mut self,
+        id: &Uuid,
+        user_id: &UserID,
+        status: WorkLogStatus,
+    ) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+        let user_id = Uuid::from(user_id);
+
+        let query = r"
+        update work_logs_mapping
+        set status = $1
+        where parent_id = $2 and user_id = $3;
+        ";
+
+        sqlx::query(query)
+            .bind(status)
+            .bind(id)
+            .bind(user_id)
             .execute(conn)
             .await?;
 

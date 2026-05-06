@@ -171,8 +171,33 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
     }
 }
 
+async function updateStatus(
+    id: string,
+    status: 'approved' | 'rejected' | 'pending',
+): Promise<APIError | APIResponse<void>> {
+    try {
+        const resp = await fetch(`${ADMIN_URL}/work_logs/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: getToken(),
+            },
+            body: JSON.stringify({ id: id, status: status }),
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
+        }
+        return { error: false }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
+}
+
 export const WorkLogServices = {
     save: save,
     list: list,
     delete: del,
+    accept: (id: string) => updateStatus(id, 'approved'),
+    reject: (id: string) => updateStatus(id, 'rejected'),
 }

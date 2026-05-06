@@ -55,6 +55,7 @@ pub use work_logs::create::create_work_log;
 pub use work_logs::delete::delete_work_log;
 pub use work_logs::list::list_work_logs;
 pub use work_logs::update::update_work_log;
+pub use work_logs::update_status::update_work_log_status;
 
 mod api_error;
 mod article;

@@ -1,7 +1,11 @@
 <script lang="ts">
-    import type { PendingWorkLog } from '$lib/services/work_log.service'
+    import {
+        type PendingWorkLog,
+        WorkLogServices,
+    } from '$lib/services/work_log.service'
     import { dateRangeFormatter, roundTo } from '$lib/utils'
     import IconifyIcon from '@iconify/svelte'
+    import Loading from '$lib/components/common/Loading.svelte'
 
     type Props = PendingWorkLog & {
         onDone?: (status: 'accepted' | 'rejected') => void
@@ -10,15 +14,24 @@
     let { onDone, ...rest }: Props = $props()
     let copiedData: PendingWorkLog = $state({ ...rest })
     const hrs = roundTo(copiedData.duration / 60, 2)
+    let isLoading = $state(false)
 
-    function onAcceptClicked() {
-        onDone?.('accepted')
-    }
+    async function onClicked(status: 'accepted' | 'rejected') {
+        isLoading = true
+        if (status === 'accepted') {
+            await WorkLogServices.accept(copiedData.id)
+        } else {
+            await WorkLogServices.reject(copiedData.id)
+        }
+        isLoading = false
 
-    function onRejectClicked() {
-        onDone?.('rejected')
+        onDone?.(status)
     }
 </script>
+
+{#if isLoading}
+    <Loading />
+{/if}
 
 <div
     class="m-4 rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50"
@@ -39,14 +52,14 @@
     </div>
 
     <div class="flex h-fit flex-2/12 flex-row justify-end gap-2">
-        <button class="cursor-pointer" onclick={onAcceptClicked}>
+        <button class="cursor-pointer" onclick={() => onClicked('accepted')}>
             <IconifyIcon
                 class="h-4 w-4 text-green-500 md:h-6 md:w-6"
                 icon="mdi:clipboard-tick-outline"
             />
         </button>
 
-        <button class="cursor-pointer" onclick={onRejectClicked}>
+        <button class="cursor-pointer" onclick={() => onClicked('rejected')}>
             <IconifyIcon
                 class="h-4 w-4 text-red-500 md:h-6 md:w-6"
                 icon="iconamoon:file-close-light"

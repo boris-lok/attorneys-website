@@ -1,5 +1,5 @@
 use crate::domain::entities::UserID;
-use crate::repositories::{IWorkLogsRepository, UpdateWorkLog, WorkLogStatus};
+use crate::repositories::{IWorkLogsRepository, UpdateWorkLog};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
@@ -8,7 +8,6 @@ use uuid::Uuid;
 pub struct Request {
     pub id: String,
     pub user_id: UserID,
-    pub status: Option<String>,
     pub description: Option<String>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -33,7 +32,7 @@ pub enum Error {
 /// - validate the work log exists.
 /// - check if the creator is an owner.
 /// - check the work_log is co-operate with others.
-async fn validate_and_check_permission(
+async fn validate(
     repo: Arc<Mutex<impl IWorkLogsRepository + Send + Sync>>,
     id: &Uuid,
     user_id: &UserID,
@@ -73,18 +72,12 @@ pub async fn execute(
     req: Request,
 ) -> Result<(), Error> {
     let work_log_id = Uuid::parse_str(&req.id).map_err(|_| Error::InvalidID)?;
-    let status = req
-        .status
-        .map(WorkLogStatus::try_from)
-        .transpose()
-        .map_err(Error::InvalidStatus)?;
 
-    validate_and_check_permission(repo.clone(), &work_log_id, &req.user_id, req.force).await?;
+    validate(repo.clone(), &work_log_id, &req.user_id, req.force).await?;
 
     let mut lock = repo.lock().await;
     let req = UpdateWorkLog {
         id: work_log_id,
-        status,
         description: req.description,
         started_at: req.started_at,
         ended_at: req.ended_at,

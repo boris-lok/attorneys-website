@@ -1,7 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
-use crate::domain::entities::UserID;
-use crate::domain::work_logs::update::{execute, Error, Request};
+use crate::domain::work_logs::update_status::{execute, Error, Request};
 use crate::repositories::SqlxWorkLogsRepository;
 use crate::startup::AppState;
 use axum::extract::State;
@@ -13,32 +12,22 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 #[derive(Debug, Deserialize)]
-pub struct UpdateRequest {
+pub struct UpdateStatusRequest {
     pub id: String,
-    pub description: Option<String>,
-    pub started_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub duration: Option<i64>,
+    pub status: String,
 }
 
-pub async fn update_work_log(
+pub async fn update_work_log_status(
     claims: Claims,
     State(state): State<AppState>,
-    WithRejection(Json(req), _): WithRejection<Json<UpdateRequest>, ApiError>,
+    WithRejection(Json(req), _): WithRejection<Json<UpdateStatusRequest>, ApiError>,
 ) -> Result<StatusCode, ApiError> {
     let user_id = claims.sub;
-    let user_id = UserID::try_from(user_id).map_err(|_| ApiError::BadRequest)?;
-
-    let ended_at = req
-        .started_at
-        .map(|started_at| started_at + chrono::Duration::minutes(req.duration.unwrap_or(0)));
 
     let req = Request {
         id: req.id,
         user_id,
-        description: req.description,
-        started_at: req.started_at,
-        ended_at,
-        force: false,
+        status: req.status,
     };
 
     let mut conn = state
@@ -53,10 +42,9 @@ pub async fn update_work_log(
 
     match res {
         Ok(_) => Ok(StatusCode::OK),
-        Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
         Err(Error::InvalidID) => Err(ApiError::BadRequest),
-        Err(Error::InvalidStatus(_)) => Err(ApiError::BadRequest),
-        Err(Error::PermissionDenied) => Err(ApiError::PermissionDenied),
         Err(Error::NotFound) => Err(ApiError::NotFound),
+        Err(Error::InvalidStatus) => Err(ApiError::BadRequest),
+        Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
     }
 }

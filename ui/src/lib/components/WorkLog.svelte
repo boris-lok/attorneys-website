@@ -49,12 +49,47 @@
 
     const hrs = $derived(roundTo(copiedData.duration / 60, 2))
 
-    function formater(date: Date) {
-        return date.toLocaleDateString('en-US', {
+    function formater(startedAt: Date, endedAt: Date) {
+        const st = startedAt.toLocaleString('en-US', {
             year: 'numeric',
-            month: 'short',
-            day: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
         })
+
+        let year: '2-digit' | undefined =
+            startedAt.getFullYear() === endedAt.getFullYear()
+                ? undefined
+                : '2-digit'
+        let month: '2-digit' | undefined =
+            startedAt.getMonth() === endedAt.getMonth() ? undefined : '2-digit'
+        let day: '2-digit' | undefined =
+            startedAt.getDate() === endedAt.getDate() ? undefined : '2-digit'
+
+        let ed = ''
+        if (year === undefined && month === undefined && day === undefined) {
+            ed = endedAt.toLocaleString('en-US', {
+                year,
+                month,
+                day,
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            })
+        } else {
+            ed = endedAt.toLocaleString('en-US', {
+                year: '2-digit',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            })
+        }
+
+        return `${st} ~ ${ed}`
     }
 
     function onEditClicked(e: Event) {
@@ -93,7 +128,7 @@
         <div
             class="my-1 flex-2/12 text-sm text-gray-500 md:my-0 md:text-gray-700"
         >
-            {formater(copiedData.startedAt)}
+            <p>{formater(copiedData.startedAt, copiedData.endedAt)}</p>
         </div>
 
         <div class="flex-1/12 text-sm">

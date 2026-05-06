@@ -34,6 +34,18 @@ export type Collaborator = {
     status: string
 }
 
+export type PendingWorkLog = {
+    id: string
+    startedAt: Date
+    endedAt: Date
+    duration: number
+    description: string
+    user: {
+        id: string
+        name: string
+    }
+}
+
 // The request of updating work log
 export type UpdateWorkLogRequest = CreateWorkLogRequest & { id: string }
 

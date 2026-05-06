@@ -2,16 +2,48 @@
     import type { PageProps } from './$types'
     import WorkLogEditor from '$lib/components/WorkLogEditor.svelte'
     import {
+        type PendingWorkLog as PendingWorkLogType,
         type WorkLog as WorkLogType,
         WorkLogServices,
     } from '$lib/services/work_log.service'
     import WorkLog from '$lib/components/WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/common/Loading.svelte'
+    import { getSelfId, getSelfName, sleep } from '$lib/utils'
+    import PendingWorkLog from '$lib/components/PendingWorkLog.svelte'
+
+    const selfId = getSelfId()
+    const selfName = getSelfName()
 
     let { data }: PageProps = $props()
     let id = data.id
     let logs: WorkLogType[] = $state([])
+    let pendingLogs = $derived.by(() => {
+        return logs
+            .filter((log) => {
+                const collaborators = log.collaborators.filter(
+                    (collaborator) =>
+                        collaborator.status === 'pending' &&
+                        collaborator.userId === selfId,
+                )
+                return collaborators.length > 0
+            })
+            .map((log) => {
+                const p: PendingWorkLogType = {
+                    id: log.id,
+                    startedAt: log.startedAt,
+                    endedAt: log.endedAt,
+                    duration: log.duration,
+                    description: log.description,
+                    user: {
+                        id: selfId,
+                        name: selfName,
+                    },
+                }
+
+                return p
+            })
+    })
     let isLoading = $state(false)
     let isCreated = $state(false)
 
@@ -20,20 +52,20 @@
         isCreated = false
     }
 
-    $effect(() => {
-        const load = async () => {
-            isLoading = true
-            const resp = await WorkLogServices.list(id)
-            isLoading = false
-            if (resp.error) {
-                console.error(resp.message)
-                return
-            }
-
-            logs = resp.logs
+    async function fetchWorkLogs() {
+        isLoading = true
+        const resp = await WorkLogServices.list(id)
+        isLoading = false
+        if (resp.error) {
+            console.error(resp.message)
+            return
         }
 
-        load()
+        logs = resp.logs
+    }
+
+    $effect(() => {
+        fetchWorkLogs()
     })
 </script>
 
@@ -62,33 +94,77 @@
             </button>
         </div>
     {/if}
-</main>
 
-<div class="md:m-4 md:rounded md:shadow">
-    <div
-        class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
-    >
-        <p class="text-md flex-5/12 px-2 py-3 text-left font-bold">
-            Description
-        </p>
-        <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
-            Started At
-        </p>
-        <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">Used Hrs</p>
-        <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
-            Participants
-        </p>
-        <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">&nbsp;</p>
-    </div>
-    {#each logs as log, i (log.id)}
-        <WorkLog
-            caseId={id}
-            {log}
-            onSaved={(e) => (logs[i] = e)}
-            onDeleted={() => (logs = logs.filter((l) => l.id !== log.id))}
-        />
-        {#if i < logs.length - 1}
-            <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">&nbsp;</div>
-        {/if}
-    {/each}
-</div>
+    {#if pendingLogs.length > 0}
+        <p class="px-5 text-xl font-semibold">Pending Logs</p>
+        <div class="md:m-4 md:rounded md:shadow">
+            <div
+                class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-orange-300"
+            >
+                <p class="text-md flex-5/12 px-2 py-3 text-left font-bold">
+                    Description
+                </p>
+                <p class="text-md flex-4/12 px-2 py-3 text-left font-bold">
+                    Period
+                </p>
+                <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">
+                    Used Hrs
+                </p>
+                <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
+                    &nbsp;
+                </p>
+            </div>
+            <div class="h-fit max-h-96 w-full overflow-y-auto">
+                {#each pendingLogs as log, i (log.id)}
+                    <PendingWorkLog {...log} />
+                    {#if i < logs.length - 1}
+                        <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">
+                            &nbsp;
+                        </div>
+                    {/if}
+                {/each}
+            </div>
+        </div>
+    {/if}
+
+    {#if logs.length > 0}
+        <p class="mt-16 px-5 text-xl font-semibold">Work Logs</p>
+        <div class="md:m-4 md:rounded md:shadow">
+            <div
+                class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
+            >
+                <p class="text-md flex-5/12 px-2 py-3 text-left font-bold">
+                    Description
+                </p>
+                <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
+                    Period
+                </p>
+                <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">
+                    Used Hrs
+                </p>
+                <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
+                    Participants
+                </p>
+                <p class="text-md flex-1/12 px-2 py-3 text-left font-bold">
+                    &nbsp;
+                </p>
+            </div>
+            <div class="h-fit max-h-96 w-full overflow-y-auto">
+                {#each logs as log, i (log.id)}
+                    <WorkLog
+                        caseId={id}
+                        {log}
+                        onSaved={(e) => (logs[i] = e)}
+                        onDeleted={() =>
+                            (logs = logs.filter((l) => l.id !== log.id))}
+                    />
+                    {#if i < logs.length - 1}
+                        <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">
+                            &nbsp;
+                        </div>
+                    {/if}
+                {/each}
+            </div>
+        </div>
+    {/if}
+</main>

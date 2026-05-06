@@ -42,3 +42,36 @@ export function formatDateTime(date: Date): string {
 export function roundTo(num: number, decimals: number): number {
     return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals)
 }
+
+export function dateRangeFormatter(startedAt: Date, endedAt: Date): string {
+    const baseDateOpts: Intl.DateTimeFormatOptions = {
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit',
+    }
+
+    const timeOpts: Intl.DateTimeFormatOptions = {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    }
+
+    const sameDay =
+        startedAt.getFullYear() === endedAt.getFullYear() &&
+        startedAt.getMonth() === endedAt.getMonth() &&
+        startedAt.getDate() === endedAt.getDate()
+
+    const st = startedAt.toLocaleString('en-US', {
+        ...baseDateOpts,
+        ...timeOpts,
+    })
+
+    const ed = sameDay
+        ? endedAt.toLocaleTimeString('en-US', timeOpts)
+        : endedAt.toLocaleString('en-US', {
+              ...baseDateOpts,
+              ...timeOpts,
+          })
+
+    return `${st} ~ ${ed}`
+}

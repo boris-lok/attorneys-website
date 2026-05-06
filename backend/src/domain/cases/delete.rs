@@ -15,7 +15,7 @@ pub async fn execute(
     repo: Arc<Mutex<impl ICaseRepository + Sync + Send>>,
     req: Request,
 ) -> Result<(), Error> {
-    let case_id = CaseID::try_from(req.id).map_err(|e| Error::InvalidID)?;
+    let case_id = CaseID::try_from(req.id).map_err(|_| Error::InvalidID)?;
 
     let mut repo = repo.lock().await;
 

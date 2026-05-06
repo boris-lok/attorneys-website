@@ -72,7 +72,7 @@ impl IRolesRepository for SqlxRolesRepository<'_> {
 
         match res {
             Ok(res) => res.into_iter().map(Role::from).collect(),
-            Err(e) => vec![],
+            Err(_) => vec![],
         }
     }
 }

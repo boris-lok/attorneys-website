@@ -81,18 +81,18 @@
             class="m-4 rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50"
         >
             <div
-                class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium"
+                class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium flex-row flex items-center gap-1"
             >
                 {#if copiedData.pendingLogs > 0}
                     <div
-                        class="inline-block h-4 w-4 rounded-[50%] border bg-red-500 text-center text-sm"
+                        class="inline-block h-5 w-5 rounded-[50%] border bg-red-500 text-center text-sm"
                     >
                         <p class="text-xs text-white">
-                            {copiedData.pendingLogs}
+                            {copiedData.pendingLogs > 10 ? '9+' : copiedData.pendingLogs}
                         </p>
                     </div>
                 {/if}
-                {copiedData.name}
+                <p>{copiedData.name}</p>
             </div>
 
             <div

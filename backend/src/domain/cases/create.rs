@@ -22,7 +22,7 @@ pub async fn execute(
     let mut lock = repo.lock().await;
 
     let id = lock
-        .create_case(
+        .create(
             &req.name,
             req.estimated_minutes,
             req.started_at,

@@ -52,12 +52,12 @@ pub async fn execute(
     let id = work_log.id;
     let mut lock = repo.lock().await;
 
-    lock.create_work_log(work_log)
+    lock.create(work_log)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 
     if !collaborators.is_empty() {
-        lock.create_work_log_mapping(id, collaborators)
+        lock.create_mapping(id, collaborators)
             .await
             .map_err(|e| Error::Unknown(e.to_string()))?;
     }

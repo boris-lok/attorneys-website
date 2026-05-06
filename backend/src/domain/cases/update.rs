@@ -21,7 +21,7 @@ pub async fn execute(
     let id = CaseID::try_from(req.id).map_err(Error::Unknown)?;
     let mut lock = repo.lock().await;
 
-    lock.update_case(id, req.name, req.estimated_minutes)
+    lock.update(id, req.name, req.estimated_minutes)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))
 }

@@ -66,7 +66,7 @@ pub async fn execute(
 
     let mut lock = repo.lock().await;
 
-    lock.delete_work_log(work_log_id)
+    lock.delete(work_log_id)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 

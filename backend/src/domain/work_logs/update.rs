@@ -91,7 +91,7 @@ pub async fn execute(
         deleted_at: None,
     };
 
-    lock.update_work_log(req)
+    lock.update(req)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 

@@ -22,7 +22,7 @@ pub async fn execute(
     let lock = repo.lock().await;
 
     let res = lock
-        .list_work_logs(&case_id)
+        .list(&case_id)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 

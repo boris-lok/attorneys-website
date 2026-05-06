@@ -9,15 +9,11 @@ use uuid::Uuid;
 
 #[async_trait::async_trait]
 pub trait IWorkLogsRepository {
-    async fn create_work_log(&mut self, work_log: CreateWorkLog) -> anyhow::Result<()>;
-    async fn create_work_log_mapping(
-        &mut self,
-        id: Uuid,
-        user_ids: Vec<UserID>,
-    ) -> anyhow::Result<()>;
-    async fn delete_work_log(&mut self, id: Uuid) -> anyhow::Result<()>;
-    async fn list_work_logs(&self, case_id: &CaseID) -> anyhow::Result<Vec<WorkLog>>;
-    async fn update_work_log(&mut self, req: UpdateWorkLog) -> anyhow::Result<()>;
+    async fn create(&mut self, work_log: CreateWorkLog) -> anyhow::Result<()>;
+    async fn create_mapping(&mut self, id: Uuid, user_ids: Vec<UserID>) -> anyhow::Result<()>;
+    async fn delete(&mut self, id: Uuid) -> anyhow::Result<()>;
+    async fn list(&self, case_id: &CaseID) -> anyhow::Result<Vec<WorkLog>>;
+    async fn update(&mut self, req: UpdateWorkLog) -> anyhow::Result<()>;
     async fn is_creator(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool>;
     async fn is_collaborator_work_log(&self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool>;
     async fn is_work_log_exist(&self, id: &Uuid) -> anyhow::Result<bool>;
@@ -128,7 +124,7 @@ pub struct WorkLogFromSQLx {
 
 #[async_trait::async_trait]
 impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
-    async fn create_work_log(&mut self, work_log: CreateWorkLog) -> anyhow::Result<()> {
+    async fn create(&mut self, work_log: CreateWorkLog) -> anyhow::Result<()> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
@@ -152,11 +148,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         Ok(())
     }
 
-    async fn create_work_log_mapping(
-        &mut self,
-        id: Uuid,
-        user_ids: Vec<UserID>,
-    ) -> anyhow::Result<()> {
+    async fn create_mapping(&mut self, id: Uuid, user_ids: Vec<UserID>) -> anyhow::Result<()> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
@@ -177,7 +169,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         Ok(())
     }
 
-    async fn delete_work_log(&mut self, id: Uuid) -> anyhow::Result<()> {
+    async fn delete(&mut self, id: Uuid) -> anyhow::Result<()> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
@@ -190,7 +182,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         Ok(())
     }
 
-    async fn list_work_logs(&self, case_id: &CaseID) -> anyhow::Result<Vec<WorkLog>> {
+    async fn list(&self, case_id: &CaseID) -> anyhow::Result<Vec<WorkLog>> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
@@ -258,7 +250,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         Ok(res.into_values().collect())
     }
 
-    async fn update_work_log(&mut self, req: UpdateWorkLog) -> anyhow::Result<()> {
+    async fn update(&mut self, req: UpdateWorkLog) -> anyhow::Result<()> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 

@@ -75,20 +75,20 @@ impl From<CaseFromSQLx> for Case {
 
 #[async_trait::async_trait]
 pub trait ICaseRepository {
-    async fn create_case(
+    async fn create(
         &mut self,
         name: &str,
         estimated_minutes: i32,
         started_at: chrono::DateTime<chrono::Utc>,
         ended_at: chrono::DateTime<chrono::Utc>,
     ) -> anyhow::Result<CaseID>;
-    async fn update_case(
+    async fn update(
         &mut self,
         id: CaseID,
         name: Option<String>,
         estimated_minutes: Option<i32>,
     ) -> anyhow::Result<()>;
-    async fn list_cases(&self, user_id: &UserID) -> anyhow::Result<Vec<Case>>;
+    async fn list(&self, user_id: &UserID) -> anyhow::Result<Vec<Case>>;
     async fn delete(&mut self, id: CaseID) -> anyhow::Result<()>;
 }
 
@@ -104,7 +104,7 @@ impl<'tx> SQLxCaseRepository<'tx> {
 
 #[async_trait::async_trait]
 impl ICaseRepository for SQLxCaseRepository<'_> {
-    async fn create_case(
+    async fn create(
         &mut self,
         name: &str,
         estimated_minutes: i32,
@@ -130,7 +130,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         Ok(CaseID(id))
     }
 
-    async fn update_case(
+    async fn update(
         &mut self,
         id: CaseID,
         name: Option<String>,
@@ -156,7 +156,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         Ok(())
     }
 
-    async fn list_cases(&self, user_id: &UserID) -> anyhow::Result<Vec<Case>> {
+    async fn list(&self, user_id: &UserID) -> anyhow::Result<Vec<Case>> {
         let user_id = Uuid::from(user_id);
 
         let mut conn = self.conn.lock().await;

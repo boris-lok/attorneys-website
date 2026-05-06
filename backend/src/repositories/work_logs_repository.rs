@@ -208,8 +208,6 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         where
           wl.case_id = $1
           and wl.deleted_at is null
-        order by
-          wl.started_at;
         ";
 
         let rows = sqlx::query_as::<_, WorkLogFromSQLx>(query)
@@ -247,7 +245,10 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
             }
         }
 
-        Ok(res.into_values().collect())
+        let mut sorted: Vec<_> = res.into_values().collect();
+        sorted.sort_by_key(|wl| wl.started_at);
+
+        Ok(sorted)
     }
 
     async fn update(&mut self, req: UpdateWorkLog) -> anyhow::Result<()> {

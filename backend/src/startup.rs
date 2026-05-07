@@ -4,12 +4,12 @@ use crate::api::logout::logout;
 use crate::api::{
     create_article, create_case, create_category, create_contact, create_home, create_member,
     create_service, create_work_log, delete_article, delete_case, delete_category, delete_member,
-    delete_service, delete_work_log, health_check, list_articles, list_cases, list_categories,
-    list_contact, list_home, list_members, list_services, list_users, list_work_logs,
-    retrieve_article, retrieve_category, retrieve_contact, retrieve_home, retrieve_member,
-    retrieve_service, update_article, update_case, update_category, update_contact, update_home,
-    update_member, update_service, update_work_log, update_work_log_status, upload_member_avatar,
-    view_article,
+    delete_service, delete_work_log, download, health_check, list_articles, list_cases,
+    list_categories, list_contact, list_home, list_members, list_services, list_users,
+    list_work_logs, retrieve_article, retrieve_category, retrieve_contact, retrieve_home,
+    retrieve_member, retrieve_service, update_article, update_case, update_category,
+    update_contact, update_home, update_member, update_service, update_work_log,
+    update_work_log_status, upload_member_avatar, view_article,
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
@@ -107,7 +107,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .route("/work_logs", post(create_work_log).get(list_work_logs))
         .route("/work_logs", put(update_work_log))
         .route("/work_logs/status", put(update_work_log_status))
-        .route("/work_logs/{id}", delete(delete_work_log));
+        .route("/work_logs/{id}", delete(delete_work_log))
+        .route("/work_logs/download", get(download));
 
     let admin_routes = Router::new()
         .merge(admin_member_routes)

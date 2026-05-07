@@ -152,6 +152,29 @@ async function list(
     }
 }
 
+async function download(
+    caseId: string,
+): Promise<APIError | APIResponse<{ blob: Blob }>> {
+    let url = `${ADMIN_URL}/work_logs/download?case_id=${caseId}`
+
+    try {
+        const resp = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: getToken(),
+            },
+            signal: AbortSignal.timeout(TIMEOUT),
+        })
+
+        const blob = await resp.blob()
+
+        return { error: false, blob: blob }
+    } catch (error) {
+        return { error: true, message: `Error: ${error}` }
+    }
+}
+
 async function del(id: string): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/work_logs/${id}`, {
@@ -200,4 +223,5 @@ export const WorkLogServices = {
     delete: del,
     accept: (id: string) => updateStatus(id, 'approved'),
     reject: (id: string) => updateStatus(id, 'rejected'),
+    download: download,
 }

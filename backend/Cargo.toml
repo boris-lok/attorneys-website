@@ -45,3 +45,4 @@ tracing-subscriber = { version = "0.3.22", features = ["json"] }
 tracing-log = "0.2.0"
 dialoguer = "0.12.0"
 clap = { version = "4.5.60", features = ["derive"] }
+rust_xlsxwriter = { version = "0.94.0", features = ["chrono", "serde"] }

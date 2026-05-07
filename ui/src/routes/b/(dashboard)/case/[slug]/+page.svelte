@@ -46,6 +46,7 @@
     })
     let isLoading = $state(false)
     let isCreated = $state(false)
+    let downloadLink: HTMLAnchorElement
 
     function appendCase(log: WorkLogType) {
         logs = [log, ...logs]
@@ -79,6 +80,22 @@
         c.collaborators = collaborators
     }
 
+    async function download() {
+        const resp = await WorkLogServices.download(id)
+        if (resp.error) {
+            console.error(resp.message)
+            return
+        }
+
+        // Create download link
+        const urlBlob = window.URL.createObjectURL(resp.blob)
+        downloadLink.href = urlBlob
+        downloadLink.download = `${new Date().toISOString().split('T')[0]}.xlsx`
+        downloadLink.click()
+
+        URL.revokeObjectURL(urlBlob)
+    }
+
     $effect(() => {
         fetchWorkLogs()
     })
@@ -99,12 +116,19 @@
         </div>
     {:else}
         <div
-            class="my-2 flex h-16 flex-row items-center justify-end gap-2 px-4"
+            class="my-2 flex h-16 flex-row items-center justify-end gap-4 px-4"
         >
             <button class="cursor-pointer" onclick={() => (isCreated = true)}>
                 <IconifyIcon
                     class="h-4 w-4 md:h-6 md:w-6"
                     icon="solar:add-folder-broken"
+                />
+            </button>
+
+            <button class="cursor-pointer" onclick={download}>
+                <IconifyIcon
+                    class="h-4 w-4 md:h-6 md:w-6"
+                    icon="solar:download-outline"
                 />
             </button>
         </div>
@@ -177,4 +201,6 @@
             </div>
         </div>
     {/if}
+
+    <a bind:this={downloadLink} style="display:none"></a>
 </main>

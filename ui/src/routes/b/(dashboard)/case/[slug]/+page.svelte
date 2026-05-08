@@ -121,14 +121,14 @@
             <button class="cursor-pointer" onclick={() => (isCreated = true)}>
                 <IconifyIcon
                     class="h-4 w-4 md:h-6 md:w-6"
-                    icon="solar:add-folder-broken"
+                    icon="tabler:library-plus"
                 />
             </button>
 
             <button class="cursor-pointer" onclick={download}>
                 <IconifyIcon
                     class="h-4 w-4 md:h-6 md:w-6"
-                    icon="solar:download-outline"
+                    icon="tabler:download"
                 />
             </button>
         </div>

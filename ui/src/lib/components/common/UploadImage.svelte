@@ -116,7 +116,7 @@
             <Image image={data} alt="preview" />
             <button onclick={onDeleteClicked} class="cursor-pointer">
                 <IconifyIcon
-                    icon="material-symbols-light:delete-outline"
+                    icon="tabler:trash"
                     class="h-6 w-6 text-red-800 hover:text-red-500"
                 />
             </button>
@@ -131,7 +131,7 @@
             />
             <button onclick={onDeleteClicked} class="cursor-pointer">
                 <IconifyIcon
-                    icon="material-symbols-light:delete-outline"
+                    icon="tabler:trash"
                     class="h-6 w-6 text-red-800 hover:text-red-500"
                 />
             </button>

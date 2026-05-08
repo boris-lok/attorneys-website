@@ -51,7 +51,7 @@
                         <Image alt={member.name} image={member.avatar} />
                     </div>
                 {:else}
-                    <IconifyIcon icon="radix-icons:avatar" class="h-24 w-24" />
+                    <IconifyIcon icon="tabler:user-circle" class="h-24 w-24" />
                 {/if}
                 <p class="text-2xl">{member.name}</p>
             </a>

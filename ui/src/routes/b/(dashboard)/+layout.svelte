@@ -9,6 +9,11 @@
 
     let items: NavigationItem[] = [
         {
+            icon: 'tabler:square-rounded-letter-w',
+            name: '工作時時',
+            url: '/b/case',
+        },
+        {
             icon: 'tabler:logout',
             name: '登出',
             onClick: async () => {

@@ -106,6 +106,7 @@
                 createdAt: now,
                 startedAt: copiedData.startedAt,
                 endedAt: copiedData.endedAt,
+                pendingLogs: 0,
             })
         }
 
@@ -172,13 +173,13 @@
         <button class="cursor-pointer md:m-0.5" onclick={_onSaved}>
             <IconifyIcon
                 class="h-6 w-6 text-green-500"
-                icon="charm:square-tick"
+                icon="line-md:circle-to-confirm-circle-transition"
             />
         </button>
         <button class="cursor-pointer md:m-0.5" onclick={_onClosed}>
             <IconifyIcon
                 class="h-6 w-6 text-red-500"
-                icon="line-md:close-square"
+                icon="line-md:close-circle"
             />
         </button>
     </div>

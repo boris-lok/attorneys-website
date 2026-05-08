@@ -132,7 +132,7 @@
                 >
                     <IconifyIcon
                         class="hidden h-4 w-4 hover:text-green-400 md:block md:h-6 md:w-6"
-                        icon="lucide:edit"
+                        icon="tabler:edit"
                     />
                     <span class="md:hidden">Edit</span>
                 </button>
@@ -143,7 +143,7 @@
                 >
                     <IconifyIcon
                         class="hidden h-4 w-4 hover:text-red-500 md:block md:h-6 md:w-6"
-                        icon="mi:delete"
+                        icon="tabler:trash"
                     />
                     <span class="md:hidden">Delete</span>
                 </button>

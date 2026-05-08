@@ -55,14 +55,14 @@
         <button class="cursor-pointer" onclick={() => onClicked('accepted')}>
             <IconifyIcon
                 class="h-4 w-4 text-green-500 md:h-6 md:w-6"
-                icon="mdi:clipboard-tick-outline"
+                icon="line-md:circle-to-confirm-circle-transition"
             />
         </button>
 
         <button class="cursor-pointer" onclick={() => onClicked('rejected')}>
             <IconifyIcon
                 class="h-4 w-4 text-red-500 md:h-6 md:w-6"
-                icon="iconamoon:file-close-light"
+                icon="line-md:close-circle"
             />
         </button>
     </div>

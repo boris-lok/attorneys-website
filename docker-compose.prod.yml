@@ -7,8 +7,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: yeework
       POSTGRES_DB: db
-    ports:
-      - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -28,8 +26,6 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.backend
-    ports:
-      - "8081:8081"
     volumes:
       - upload_folder:/app/uploads
       - logs:/app/logs
@@ -41,8 +37,6 @@ services:
     depends_on:
       - backend
     container_name: ui
-    ports:
-      - "3000:3000"
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.ui

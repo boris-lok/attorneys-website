@@ -1,5 +1,5 @@
 # Use the official Rust Image as the base image for building the application
-from rust:1.86.0-bullseye as builder
+from rust:1.95.0-bullseye as builder
 
 # Set the working directory
 workdir /app
@@ -46,7 +46,7 @@ run chown -R app_user:app_group /app
 # Copy the compiled binary from the build stage to the container
 copy --from=builder /app/target/release/backend /usr/local/bin/
 copy --from=builder /app/target/release/generate_sitemap /usr/local/bin/
-copy --from=builder /app/target/release/create_user /usr/local/bin/
+copy --from=builder /app/target/release/manage_user /usr/local/bin/
 copy ./backend/src/configuration ./src/configuration
 
 # create a upload directory

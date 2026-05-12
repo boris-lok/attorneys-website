@@ -4,13 +4,14 @@
     import {
         type PendingWorkLog as PendingWorkLogType,
         type WorkLog as WorkLogType,
-        WorkLogServices,
+        WorkLogServices
     } from '$lib/services/work_log.service'
     import WorkLog from '$lib/components/WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/common/Loading.svelte'
     import { getSelfId, getSelfName } from '$lib/utils'
     import PendingWorkLog from '$lib/components/PendingWorkLog.svelte'
+    import DateTimePicker from '$lib/components/DateTimePicker.svelte'
 
     const selfId = getSelfId()
     const selfName = getSelfName()
@@ -24,7 +25,7 @@
                 const collaborators = log.collaborators.filter(
                     (collaborator) =>
                         collaborator.status === 'pending' &&
-                        collaborator.userId === selfId,
+                        collaborator.userId === selfId
                 )
                 return collaborators.length > 0
             })
@@ -37,8 +38,8 @@
                     description: log.description,
                     user: {
                         id: selfId,
-                        name: selfName,
-                    },
+                        name: selfName
+                    }
                 }
 
                 return p
@@ -47,15 +48,29 @@
     let isLoading = $state(false)
     let isCreated = $state(false)
     let downloadLink: HTMLAnchorElement
+    let startedAt: Date = setDateSuffix(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), 0, 0, 0, 0)
+    let endedAt: Date = setDateSuffix(new Date(), 23, 59, 59, 59)
+
+    function setDateSuffix(date: Date, hrs: number, mins: number, s: number, ms: number): Date {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hrs, mins, s, ms)
+    }
+
+    function onDateChanged(type: 'startedAt' | 'endedAt', date: Date) {
+        if (type === 'startedAt') {
+            startedAt = date
+        } else if (type === 'endedAt') {
+            endedAt = date
+        }
+    }
 
     function appendCase(log: WorkLogType) {
         logs = [log, ...logs]
         isCreated = false
     }
 
-    async function fetchWorkLogs() {
+    async function fetchWorkLogs(startedAt: Date, endedAt: Date) {
         isLoading = true
-        const resp = await WorkLogServices.list(id)
+        const resp = await WorkLogServices.list(id, startedAt, endedAt)
         isLoading = false
         if (resp.error) {
             console.error(resp.message)
@@ -67,13 +82,13 @@
 
     function editStatus(
         id: string,
-        status: 'accepted' | 'pending' | 'rejected',
+        status: 'accepted' | 'pending' | 'rejected'
     ) {
         let c = logs.find((l) => l.id === id)
         if (!c) return
         let collaborators = [...c.collaborators]
         let collaborator = collaborators.find(
-            (collaborator) => collaborator.userId === selfId,
+            (collaborator) => collaborator.userId === selfId
         )
         if (!collaborator) return
         collaborator.status = status
@@ -97,7 +112,7 @@
     }
 
     $effect(() => {
-        fetchWorkLogs()
+        fetchWorkLogs(startedAt, endedAt)
     })
 </script>
 
@@ -166,6 +181,11 @@
     {/if}
 
     {#if logs.length > 0}
+        <div>
+            <DateTimePicker date={startedAt} dateOnly={true} onChanged={e => onDateChanged('startedAt', e)} />
+            <DateTimePicker date={endedAt} dateOnly={true} onChanged={e => onDateChanged('endedAt', e)} />
+        </div>
+
         <p class="mt-16 px-5 text-xl font-semibold">Work Logs</p>
         <div class="md:m-4 md:rounded md:shadow">
             <div

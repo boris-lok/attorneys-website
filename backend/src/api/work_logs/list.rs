@@ -12,6 +12,8 @@ use tokio::sync::Mutex;
 #[derive(Debug, Deserialize)]
 pub struct ListWorkLogsRequest {
     case_id: String,
+    started_at: Option<chrono::DateTime<chrono::Utc>>,
+    ended_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -24,8 +26,6 @@ pub async fn list_work_logs(
     State(state): State<AppState>,
     query: Query<ListWorkLogsRequest>,
 ) -> Result<Json<ListWorkLogsResponse>, ApiError> {
-    let case_id = query.case_id.clone();
-
     let mut conn = state
         .pool
         .acquire()
@@ -34,7 +34,11 @@ pub async fn list_work_logs(
 
     let repo = SqlxWorkLogsRepository::new(Arc::new(Mutex::new(&mut *conn)));
 
-    let req = Request { case_id };
+    let req = Request {
+        case_id: query.case_id.clone(),
+        started_at: query.started_at,
+        ended_at: query.ended_at,
+    };
 
     let res = execute(Arc::new(Mutex::new(repo)), req).await;
 

@@ -12,7 +12,12 @@ pub trait IWorkLogsRepository {
     async fn create(&mut self, work_log: CreateWorkLog) -> anyhow::Result<()>;
     async fn create_mapping(&mut self, id: Uuid, user_ids: Vec<UserID>) -> anyhow::Result<()>;
     async fn delete(&mut self, id: Uuid) -> anyhow::Result<()>;
-    async fn list(&self, case_id: &CaseID) -> anyhow::Result<Vec<WorkLog>>;
+    async fn list(
+        &self,
+        case_id: &CaseID,
+        started_at: Option<chrono::DateTime<chrono::Utc>>,
+        ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    ) -> anyhow::Result<Vec<WorkLog>>;
     async fn update(&mut self, req: UpdateWorkLog) -> anyhow::Result<()>;
     async fn update_status(
         &mut self,
@@ -187,7 +192,12 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         Ok(())
     }
 
-    async fn list(&self, case_id: &CaseID) -> anyhow::Result<Vec<WorkLog>> {
+    async fn list(
+        &self,
+        case_id: &CaseID,
+        started_at: Option<chrono::DateTime<chrono::Utc>>,
+        ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    ) -> anyhow::Result<Vec<WorkLog>> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
@@ -213,10 +223,14 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         where
           wl.case_id = $1
           and wl.deleted_at is null
+          and ($2::timestamptz is null or wl.started_at >= $2)
+          and ($3::timestamptz is null or wl.ended_at <= $3)
         ";
 
         let rows = sqlx::query_as::<_, WorkLogFromSQLx>(query)
             .bind(Uuid::from(case_id.clone()))
+            .bind(started_at)
+            .bind(ended_at)
             .fetch_all(conn)
             .await?;
 

@@ -5,6 +5,8 @@ use tokio::sync::Mutex;
 #[derive(Debug)]
 pub struct Request {
     pub case_id: String,
+    pub started_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[derive(Debug)]
@@ -22,7 +24,7 @@ pub async fn execute(
     let lock = repo.lock().await;
 
     let res = lock
-        .list(&case_id)
+        .list(&case_id, req.started_at, req.ended_at)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 

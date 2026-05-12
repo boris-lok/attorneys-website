@@ -13,6 +13,8 @@ use tokio::sync::Mutex;
 #[derive(Debug, Deserialize)]
 pub struct DownloadWorkLogsRequest {
     case_id: String,
+    started_at: Option<chrono::DateTime<chrono::Utc>>,
+    ended_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 pub async fn download(
@@ -20,8 +22,6 @@ pub async fn download(
     State(state): State<AppState>,
     query: Query<DownloadWorkLogsRequest>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let case_id = query.case_id.clone();
-
     let mut conn = state
         .pool
         .acquire()
@@ -30,7 +30,11 @@ pub async fn download(
 
     let repo = SqlxWorkLogsRepository::new(Arc::new(Mutex::new(&mut *conn)));
 
-    let req = Request { case_id };
+    let req = Request {
+        case_id: query.case_id.clone(),
+        started_at: query.started_at,
+        ended_at: query.ended_at,
+    };
 
     let res = execute(Arc::new(Mutex::new(repo)), req).await;
 

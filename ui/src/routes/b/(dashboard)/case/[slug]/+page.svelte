@@ -4,7 +4,7 @@
     import {
         type PendingWorkLog as PendingWorkLogType,
         type WorkLog as WorkLogType,
-        WorkLogServices,
+        WorkLogServices
     } from '$lib/services/work_log.service'
     import WorkLog from '$lib/components/WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
@@ -26,7 +26,7 @@
                 const collaborators = log.collaborators.filter(
                     (collaborator) =>
                         collaborator.status === 'pending' &&
-                        collaborator.userId === selfId,
+                        collaborator.userId === selfId
                 )
                 return collaborators.length > 0
             })
@@ -39,8 +39,8 @@
                     description: log.description,
                     user: {
                         id: selfId,
-                        name: selfName,
-                    },
+                        name: selfName
+                    }
                 }
 
                 return p
@@ -55,8 +55,8 @@
             0,
             0,
             0,
-            0,
-        ),
+            0
+        )
     )
     let endedAt = $state(setDateSuffix(new Date(), 23, 59, 59, 59))
 
@@ -65,7 +65,7 @@
         hrs: number,
         mins: number,
         s: number,
-        ms: number,
+        ms: number
     ): Date {
         return new Date(
             date.getFullYear(),
@@ -74,7 +74,7 @@
             hrs,
             mins,
             s,
-            ms,
+            ms
         )
     }
 
@@ -111,13 +111,13 @@
 
     function editStatus(
         id: string,
-        status: 'accepted' | 'pending' | 'rejected',
+        status: 'accepted' | 'pending' | 'rejected'
     ) {
         let c = logs.find((l) => l.id === id)
         if (!c) return
         let collaborators = [...c.collaborators]
         let collaborator = collaborators.find(
-            (collaborator) => collaborator.userId === selfId,
+            (collaborator) => collaborator.userId === selfId
         )
         if (!collaborator) return
         collaborator.status = status
@@ -125,7 +125,7 @@
     }
 
     async function download() {
-        const resp = await WorkLogServices.download(id)
+        const resp = await WorkLogServices.download(id, startedAt, endedAt)
         if (resp.error) {
             console.error(resp.message)
             return
@@ -166,9 +166,7 @@
                 <IconifyIcon class="h-6 w-6" icon="tabler:library-plus" />
             </button>
 
-            <button class="cursor-pointer" onclick={download}>
-                <IconifyIcon class="h-6 w-6" icon="tabler:download" />
-            </button>
+
         </div>
     {/if}
 
@@ -206,7 +204,7 @@
     <p class="mt-16 px-5 text-xl font-semibold">Work Logs</p>
 
     <div
-        class="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-end md:px-6"
+        class="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-end md:px-6 md:gap-4"
     >
         <div class="m-2 flex flex-row items-center gap-4">
             <DateTimePicker
@@ -221,6 +219,16 @@
                 onChanged={(e) => onDateChanged('endedAt', e)}
             />
         </div>
+
+
+        <button class="cursor-pointer relative group" onclick={download}>
+            <IconifyIcon class="h-6 w-6" icon="tabler:download" />
+            <p
+                class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
+            >
+                Download
+            </p>
+        </button>
 
         <button class="group relative cursor-pointer" onclick={search}>
             <IconifyIcon icon="tabler:file-search" class="h-6 w-6" />
@@ -271,5 +279,5 @@
         {/if}
     </div>
 
-    <a bind:this={downloadLink} style="display:none"></a>
+    <a bind:this={downloadLink} class="hidden"></a>
 </main>

@@ -165,11 +165,22 @@ async function list(
 
 async function download(
     caseId: string,
+    startedAt: Date | null = null,
+    endedAt: Date | null = null,
 ): Promise<APIError | APIResponse<{ blob: Blob }>> {
-    let url = `${ADMIN_URL}/work_logs/download?case_id=${caseId}`
+    const url = new URL(`${ADMIN_URL}/work_logs/download`)
+    url.searchParams.set('case_id', caseId)
+
+    if (startedAt) {
+        url.searchParams.set('started_at', startedAt.toISOString())
+    }
+
+    if (endedAt) {
+        url.searchParams.set('ended_at', endedAt.toISOString())
+    }
 
     try {
-        const resp = await fetch(url, {
+        const resp = await fetch(url.toString(), {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

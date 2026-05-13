@@ -94,21 +94,15 @@ async function list(
     startedAt: Date | null = null,
     endedAt: Date | null = null,
 ): Promise<APIError | APIResponse<{ logs: WorkLog[] }>> {
-    const url = new URL(`${ADMIN_URL}/work_logs`);
-    url.searchParams.set('case_id', caseId);
+    const url = new URL(`${ADMIN_URL}/work_logs`)
+    url.searchParams.set('case_id', caseId)
 
     if (startedAt) {
-        url.searchParams.set(
-            'started_at',
-            startedAt.toISOString()
-        );
+        url.searchParams.set('started_at', startedAt.toISOString())
     }
 
     if (endedAt) {
-        url.searchParams.set(
-            'ended_at',
-            endedAt.toISOString()
-        );
+        url.searchParams.set('ended_at', endedAt.toISOString())
     }
 
     try {

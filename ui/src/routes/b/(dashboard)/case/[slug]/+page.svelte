@@ -4,7 +4,7 @@
     import {
         type PendingWorkLog as PendingWorkLogType,
         type WorkLog as WorkLogType,
-        WorkLogServices
+        WorkLogServices,
     } from '$lib/services/work_log.service'
     import WorkLog from '$lib/components/WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
@@ -12,6 +12,7 @@
     import { getSelfId, getSelfName } from '$lib/utils'
     import PendingWorkLog from '$lib/components/PendingWorkLog.svelte'
     import DateTimePicker from '$lib/components/DateTimePicker.svelte'
+    import { untrack } from 'svelte'
 
     const selfId = getSelfId()
     const selfName = getSelfName()
@@ -25,7 +26,7 @@
                 const collaborators = log.collaborators.filter(
                     (collaborator) =>
                         collaborator.status === 'pending' &&
-                        collaborator.userId === selfId
+                        collaborator.userId === selfId,
                 )
                 return collaborators.length > 0
             })
@@ -38,8 +39,8 @@
                     description: log.description,
                     user: {
                         id: selfId,
-                        name: selfName
-                    }
+                        name: selfName,
+                    },
                 }
 
                 return p
@@ -48,11 +49,33 @@
     let isLoading = $state(false)
     let isCreated = $state(false)
     let downloadLink: HTMLAnchorElement
-    let startedAt: Date = setDateSuffix(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), 0, 0, 0, 0)
-    let endedAt: Date = setDateSuffix(new Date(), 23, 59, 59, 59)
+    let startedAt = $state(
+        setDateSuffix(
+            new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+            0,
+            0,
+            0,
+            0,
+        ),
+    )
+    let endedAt = $state(setDateSuffix(new Date(), 23, 59, 59, 59))
 
-    function setDateSuffix(date: Date, hrs: number, mins: number, s: number, ms: number): Date {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hrs, mins, s, ms)
+    function setDateSuffix(
+        date: Date,
+        hrs: number,
+        mins: number,
+        s: number,
+        ms: number,
+    ): Date {
+        return new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate(),
+            hrs,
+            mins,
+            s,
+            ms,
+        )
     }
 
     function onDateChanged(type: 'startedAt' | 'endedAt', date: Date) {
@@ -68,7 +91,7 @@
         isCreated = false
     }
 
-    async function fetchWorkLogs(startedAt: Date, endedAt: Date) {
+    async function fetchWorkLogs() {
         isLoading = true
         const resp = await WorkLogServices.list(id, startedAt, endedAt)
         isLoading = false
@@ -80,15 +103,21 @@
         logs = resp.logs
     }
 
+    async function search(e: Event) {
+        e.preventDefault()
+        e.stopPropagation()
+        await fetchWorkLogs()
+    }
+
     function editStatus(
         id: string,
-        status: 'accepted' | 'pending' | 'rejected'
+        status: 'accepted' | 'pending' | 'rejected',
     ) {
         let c = logs.find((l) => l.id === id)
         if (!c) return
         let collaborators = [...c.collaborators]
         let collaborator = collaborators.find(
-            (collaborator) => collaborator.userId === selfId
+            (collaborator) => collaborator.userId === selfId,
         )
         if (!collaborator) return
         collaborator.status = status
@@ -112,7 +141,7 @@
     }
 
     $effect(() => {
-        fetchWorkLogs(startedAt, endedAt)
+        untrack(() => fetchWorkLogs())
     })
 </script>
 
@@ -134,17 +163,11 @@
             class="my-2 flex h-16 flex-row items-center justify-end gap-4 px-4"
         >
             <button class="cursor-pointer" onclick={() => (isCreated = true)}>
-                <IconifyIcon
-                    class="h-4 w-4 md:h-6 md:w-6"
-                    icon="tabler:library-plus"
-                />
+                <IconifyIcon class="h-6 w-6" icon="tabler:library-plus" />
             </button>
 
             <button class="cursor-pointer" onclick={download}>
-                <IconifyIcon
-                    class="h-4 w-4 md:h-6 md:w-6"
-                    icon="tabler:download"
-                />
+                <IconifyIcon class="h-6 w-6" icon="tabler:download" />
             </button>
         </div>
     {/if}
@@ -180,29 +203,51 @@
         </div>
     {/if}
 
-    {#if logs.length > 0}
-        <div>
-            <DateTimePicker date={startedAt} dateOnly={true} onChanged={e => onDateChanged('startedAt', e)} />
-            <DateTimePicker date={endedAt} dateOnly={true} onChanged={e => onDateChanged('endedAt', e)} />
+    <p class="mt-16 px-5 text-xl font-semibold">Work Logs</p>
+
+    <div
+        class="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-end md:px-6"
+    >
+        <div class="m-2 flex flex-row items-center gap-4">
+            <DateTimePicker
+                date={startedAt}
+                dateOnly={true}
+                onChanged={(e) => onDateChanged('startedAt', e)}
+            />
+            <span>~</span>
+            <DateTimePicker
+                date={endedAt}
+                dateOnly={true}
+                onChanged={(e) => onDateChanged('endedAt', e)}
+            />
         </div>
 
-        <p class="mt-16 px-5 text-xl font-semibold">Work Logs</p>
-        <div class="md:m-4 md:rounded md:shadow">
-            <div
-                class="hidden rounded-t px-4 md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
+        <button class="group relative cursor-pointer" onclick={search}>
+            <IconifyIcon icon="tabler:file-search" class="h-6 w-6" />
+            <p
+                class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
             >
-                <p class="text-md flex-5/12 py-3 text-left font-bold">
-                    Description
-                </p>
-                <p class="text-md flex-2/12 py-3 text-left font-bold">Period</p>
-                <p class="text-md flex-1/12 py-3 text-left font-bold">
-                    Used Hrs
-                </p>
-                <p class="text-md flex-2/12 py-3 text-left font-bold">
-                    Participants
-                </p>
-                <p class="text-md flex-1/12 py-3 text-left font-bold">&nbsp;</p>
-            </div>
+                Search
+            </p>
+        </button>
+    </div>
+
+    <div class="md:m-4 md:rounded md:shadow">
+        <div
+            class="hidden rounded-t px-4 md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
+        >
+            <p class="text-md flex-5/12 py-3 text-left font-bold">
+                Description
+            </p>
+            <p class="text-md flex-2/12 py-3 text-left font-bold">Period</p>
+            <p class="text-md flex-1/12 py-3 text-left font-bold">Used Hrs</p>
+            <p class="text-md flex-2/12 py-3 text-left font-bold">
+                Participants
+            </p>
+            <p class="text-md flex-1/12 py-3 text-left font-bold">&nbsp;</p>
+        </div>
+
+        {#if logs.length > 0}
             <div class="h-fit max-h-96 w-full overflow-y-auto">
                 {#each logs as log, i (log.id)}
                     <WorkLog
@@ -219,8 +264,12 @@
                     {/if}
                 {/each}
             </div>
-        </div>
-    {/if}
+        {:else}
+            <div class="block h-full w-full">
+                <p class="w-full py-3 text-center">No work logs found</p>
+            </div>
+        {/if}
+    </div>
 
     <a bind:this={downloadLink} style="display:none"></a>
 </main>

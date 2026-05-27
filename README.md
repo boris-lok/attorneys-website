@@ -21,3 +21,7 @@ This is a simple website for showcasing attorneys.
 4. ssh user@remote_host 'docker load -i /path/to/destination/backend.tar'
 5. rename the images
 6. docker compose up -d
+
+# Build only ui part
+1. docker build -f dockerfiles/Dockerfile.ui -t ui .
+2. docker run -d --name ui --network attorneys-website_app-network ui

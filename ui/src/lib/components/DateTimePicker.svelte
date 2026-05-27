@@ -8,11 +8,11 @@
     }
     let { date = new Date(), onChanged, dateOnly }: Props = $props()
 
-    let year = $state(date.getFullYear())
-    let month = $state(date.getMonth() + 1)
-    let day = $state(date.getDate())
-    let hour = $state(date.getHours())
-    let minute = $state(date.getMinutes())
+    let year = $derived(date.getFullYear())
+    let month = $derived(date.getMonth() + 1)
+    let day = $derived(date.getDate())
+    let hour = $derived(date.getHours())
+    let minute = $derived(date.getMinutes())
 
     const years = Array.from({ length: 10 }, (_, i) => year + i)
     const months = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -46,6 +46,7 @@
 
         onChanged?.(new Date(year, month - 1, day, hour, minute))
     }
+
 </script>
 
 <div class="flex flex-wrap items-center gap-1">

@@ -57,9 +57,13 @@
     })
 
     function onDateChanged(key: 'startedAt' | 'endedAt', newDate: Date) {
-        console.log('onDateChanged', key, newDate)
+        console.log(key, newDate)
         if (key === 'startedAt') {
             _startedAt = newDate
+            const d = new Date(newDate)
+            d.setMinutes(d.getMinutes() + 15)
+            _endedAt = d
+            console.log(_endedAt)
         } else {
             _endedAt = newDate
         }
@@ -198,12 +202,12 @@
         <div class="flex flex-col gap-1 md:flex-row md:items-center md:gap-2">
             <span class="text-sm font-semibold">Working Time: </span>
             <DateTimePicker
-                date={startedAt}
+                date={_startedAt}
                 onChanged={(e) => onDateChanged('startedAt', e)}
             />
             <span class="text-center"> ~ </span>
             <DateTimePicker
-                date={endedAt}
+                date={_endedAt}
                 onChanged={(e) => onDateChanged('endedAt', e)}
             />
         </div>

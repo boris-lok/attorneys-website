@@ -27,7 +27,7 @@
         onBlur,
         onSelect,
     }: Props = $props()
-    let inputValue = $state(value)
+    let inputValue = $derived(value)
 
     let opts: Options = $state([])
     let keyword = $state(value)

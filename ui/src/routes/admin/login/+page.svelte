@@ -38,10 +38,10 @@
         }
         isLoading = true
         const resp = await UserService.login(data)
-        isLoading = false
 
         if (resp.error) {
             console.error(`login failed: ${resp}`)
+            isLoading = false
             return
         }
 

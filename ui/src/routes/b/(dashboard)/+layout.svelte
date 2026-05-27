@@ -28,7 +28,7 @@
     ]
 </script>
 
-<NavigateBar {items} rootUrl="/admin/dashboard"></NavigateBar>
+<NavigateBar {items} rootUrl="/b/dashboard"></NavigateBar>
 
 <main>
     <div class="relative min-h-[calc(100vh-64px-48px)]">

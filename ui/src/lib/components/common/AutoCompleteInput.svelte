@@ -9,8 +9,6 @@
         label?: string
         name: string
         value?: string
-        keywordFilter?: (keyword: string, opt: Option) => boolean
-        validator?: (s: string) => boolean
         options: () => Promise<Options>
         onInput?: (s: string) => void
         onSelect?: (opt: Option) => void
@@ -21,41 +19,47 @@
         label,
         name,
         value = '',
-        keywordFilter,
         options,
         onInput,
         onBlur,
-        onSelect,
+        onSelect
     }: Props = $props()
-    let inputValue = $derived(value)
 
     let opts: Options = $state([])
-    let keyword = $state(value)
+    let draft = $state(value)
     let filteredOpts: Options = $derived.by(() => {
-        if (keywordFilter) {
-            return opts.filter((opt) => keywordFilter(keyword, opt))
-        }
-
-        return opts
+        const k = draft.toLowerCase()
+        return opts.filter((opt) =>
+            opt.value.toLowerCase().includes(k)
+        )
     })
     let open = $state(false)
-    let optsLoaded = false
+    let selected = false
+    let disposed = false
+    let loadId = 0
 
     function _onInput(e: Event & { currentTarget: HTMLInputElement }) {
-        keyword = e.currentTarget.value
+        selected = false
+        draft = e.currentTarget.value
         open = true
-        onInput?.(keyword)
+        onInput?.(draft)
     }
 
     function _onBlur(e: Event & { currentTarget: HTMLInputElement }) {
         open = false
+
+        if (selected) {
+            selected = false
+            return
+        }
+
         onBlur?.(e.currentTarget.value)
     }
 
     function _onSelect(opt: Option) {
-        keyword = opt.value
-        inputValue = opt.value
+        draft = opt.value
         open = false
+        selected = true
         onSelect?.(opt)
     }
 
@@ -65,10 +69,24 @@
     }
 
     async function _ensureOptionsLoaded() {
-        if (optsLoaded) return
-        optsLoaded = true
-        opts = await options()
+        const id = ++loadId
+
+        const res = await options()
+
+        if (disposed || id !== loadId) return
+
+        opts = res
     }
+
+    $effect(() => {
+        draft = value
+    })
+
+    $effect(() => {
+        return () => {
+            disposed = true
+        }
+    })
 </script>
 
 {#if label}
@@ -83,8 +101,13 @@
         type="text"
         onblur={_onBlur}
         onfocus={_onFocus}
+        onkeydown={e => {
+            if (e.key === 'Escape') {
+                open = false
+            }
+        }}
         class="h-8 w-full border-b border-gray-300 px-2 py-1 leading-tight text-gray-700 focus:border-blue-500 focus:outline-none"
-        bind:value={inputValue}
+        value={draft}
     />
 
     <div
@@ -97,11 +120,10 @@
             <div
                 class="cursor-pointer p-1"
                 role="option"
-                aria-selected={opt.key === keyword}
                 tabindex="-1"
                 onpointerdown={(e) => {
                     e.preventDefault()
-                    _onSelect?.(opt)
+                    _onSelect(opt)
                 }}
             >
                 {opt.value}

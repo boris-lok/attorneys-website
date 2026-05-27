@@ -5,8 +5,8 @@
         type: 'text' | 'password' | 'number'
         value: string | number
         variant?: 'default' | 'outlined'
-        onInput?: (
-            event: Event & { currentTarget: EventTarget & HTMLInputElement },
+        onInput: (
+            event: Event & { currentTarget: EventTarget & HTMLInputElement }
         ) => void
     }
 
@@ -16,7 +16,7 @@
         type,
         value,
         onInput,
-        variant = 'default',
+        variant = 'default'
     }: InputProps = $props()
 
     function typeAction(node: HTMLInputElement) {
@@ -27,7 +27,7 @@
 <div class="mb-4">
     {#if label}
         <label class="block text-sm font-bold text-gray-700" for={name}
-            >{label}</label
+        >{label}</label
         >
     {/if}
     <input
@@ -37,9 +37,9 @@
         id={name}
         {name}
         oninput={onInput}
-        type="text"
+        type={type}
         use:typeAction
-        {value}
+        value={value}
     />
 </div>
 

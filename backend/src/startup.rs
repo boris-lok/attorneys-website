@@ -13,6 +13,7 @@ use crate::api::{
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
+use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
 use axum::http::HeaderValue;
 use axum::routing::{delete, get, post, put};
 use axum::{Extension, Router};
@@ -23,7 +24,7 @@ use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -129,26 +130,28 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .merge(category_routes)
         .merge(article_routes);
 
+    let cors = CorsLayer::new()
+        .allow_headers([
+            AUTHORIZATION,
+            CONTENT_TYPE,
+        ])
+        .allow_methods(Any)
+        .allow_origin(Any);
+
     let app = Router::new()
         .route("/health", get(health_check))
         .nest("/api/{version}/admin", admin_routes)
         .nest("/api/{version}/", routes)
         .layer(Extension(Arc::new(image_util)))
         .layer(Extension(Arc::new(redis_client)))
-        .layer(CorsLayer::permissive())
-        .layer(
-            tower_http::set_header::response::SetResponseHeaderLayer::if_not_present(
-                axum::http::header::ACCESS_CONTROL_ALLOW_ORIGIN,
-                HeaderValue::from_static("*"),
-            ),
-        )
+        .layer(cors)
         .with_state(state);
 
     axum::serve(
         listener,
         app.into_make_service_with_connect_info::<SocketAddr>(),
     )
-    .await
+        .await
 }
 
 pub async fn get_database_connection(config: &DatabaseSettings) -> PgPool {

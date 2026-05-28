@@ -4,6 +4,7 @@
     }
 
     let { progress }: Props = $props()
+    progress = $derived(Math.min(progress, 100))
     const barColor = $derived.by(() => {
         return progress > 90 ? 'bg-red-500' : progress > 70 ? 'bg-orange-500' : 'bg-green-500'
     })

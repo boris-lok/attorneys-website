@@ -1,59 +1,49 @@
 <script lang="ts">
     import type { CaseData } from '$lib/types'
-    import { CaseServices } from '$lib/services/case.service'
     import Case from '$lib/components/Case.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/common/Loading.svelte'
     import CaseEditor from '$lib/components/CaseEditor.svelte'
+    import type { PageProps } from './$types'
 
-    let isLoading = $state(false)
-    let isCreated = $state(false)
+    let { data }: PageProps = $props()
+
+    let isCreating = $state(false)
+    let isLoaded = $state(false)
     let cases: CaseData[] = $state([])
+    let errMsg = $state('')
 
-    async function fetchCases(): Promise<CaseData[]> {
-        isLoading = true
-        try {
-            const resp = await CaseServices.list()
-            if (resp.error) {
-                console.error(resp.message)
-                return []
-            }
 
-            return resp.cases
-        } catch (e) {
-            console.error(e)
-            return []
-        } finally {
-            isLoading = false
+    data.cases.then(resp => {
+        if (resp.error) {
+            errMsg = resp.error
+        } else {
+            cases = resp.cases
         }
-    }
+        isLoaded = true
+    })
 
     function appendCase(c: CaseData) {
-        cases = [c, ...cases]
+        cases = [
+            c,
+            ...cases.filter((e) => e.id !== c.id)
+        ]
     }
-
-    $effect(() => {
-        const load = async () => {
-            cases = await fetchCases()
-        }
-
-        load()
-    })
 </script>
 
-{#if isLoading}
+{#if !isLoaded}
     <Loading />
 {/if}
 
 <main>
-    {#if isCreated}
+    {#if isCreating}
         <div class="mx-4 my-4 flex items-center justify-center rounded px-8 shadow">
-            <CaseEditor onClosed={() => (isCreated = false)} onSaved={appendCase} />
+            <CaseEditor onClosed={() => (isCreating = false)} onSaved={appendCase} />
         </div>
     {:else}
         <div class="my-2 flex h-16 flex-row items-center justify-end gap-2 px-4">
-            <button class="cursor-pointer" onclick={() => (isCreated = true)}>
-                <IconifyIcon class="h-4 w-4 md:h-6 md:w-6" icon="tabler:library-plus" />
+            <button class="cursor-pointer" onclick={() => (isCreating = true)}>
+                <IconifyIcon class="h-6 w-6" icon="tabler:library-plus" />
             </button>
         </div>
     {/if}
@@ -70,11 +60,13 @@
         {#each cases as c, i (c.id)}
             <Case
                 {...c}
-                onSaved={(e) => (cases[i] = e)}
+                onSaved={(updated) => {
+                    cases = cases.map((c) =>c.id === updated.id ? updated : c )
+                }}
                 onDeleted={() => (cases = cases.filter((e) => e.id !== c.id))}
             />
             {#if i < cases.length - 1}
-                <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">&nbsp;</div>
+                <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
             {/if}
         {/each}
     </div>

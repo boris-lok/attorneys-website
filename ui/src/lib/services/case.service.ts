@@ -1,13 +1,11 @@
 import type {
     APIError,
     APIResponse,
-    ArticleData,
     CaseData,
     CreateCaseRequest,
-    Language,
     UpdateCaseRequest,
 } from '$lib/types'
-import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
+import { ADMIN_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 
 async function save(

@@ -11,20 +11,30 @@
         onDeleted: () => void
     }
 
-    let { onSaved, onDeleted, ...rest }: Props = $props()
-    let copiedData = $state<CaseData>(rest)
+    let {
+        onSaved,
+        onDeleted,
+        id,
+        name,
+        usedMinutes,
+        estimatedMinutes,
+        startedAt,
+        endedAt,
+        pendingLogs
+    }: Props = $props()
+    let isEditMode = $state(false)
 
-    const hrs = $derived(roundTo(copiedData.estimatedMinutes / 60, 2))
+    const hrs = $derived(roundTo(estimatedMinutes / 60, 2))
     const usedPercentage = $derived(
-        roundTo((copiedData.usedMinutes * 100) / copiedData.estimatedMinutes, 0)
+        roundTo((usedMinutes * 100) / estimatedMinutes, 0)
     )
-    const usedHrs = $derived(roundTo(copiedData.usedMinutes / 60, 2))
+    const usedHrs = $derived(roundTo(usedMinutes / 60, 2))
 
-    function formater(date: Date) {
+    function formatter(date: Date) {
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
-            day: 'numeric',
+            day: 'numeric'
         })
     }
 
@@ -43,7 +53,7 @@
         )
 
         if (confirmed) {
-            const resp = await CaseServices.delete(copiedData.id)
+            const resp = await CaseServices.delete(id)
             if (resp.error) {
                 alert(resp.message)
                 return
@@ -55,45 +65,44 @@
     }
 
     function _onSaved(data: CaseData) {
-        data.usedMinutes = copiedData.usedMinutes
-        onSaved(data)
+        isEditMode = false
+        onSaved({ ...data, usedMinutes })
     }
 
-    let isEditMode = $state(false)
 </script>
 
 {#if isEditMode}
     <CaseEditor
-        id={copiedData.id}
-        name={copiedData.name}
+        id={id}
+        name={name}
         {hrs}
-        startedAt={copiedData.startedAt}
-        endedAt={copiedData.endedAt}
+        startedAt={startedAt}
+        endedAt={endedAt}
         onSaved={_onSaved}
         onClosed={() => (isEditMode = false)}
     />
 {:else}
-    <a href={`/b/case/${copiedData.id}`}>
+    <a href={`/b/case/${id}`}>
         <div
             class="m-4 rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50"
         >
             <div
                 class="my-2 flex flex-6/12 flex-row items-center gap-1 font-semibold text-nowrap md:my-0 md:font-medium"
             >
-                {#if copiedData.pendingLogs > 0}
+                {#if pendingLogs > 0}
                     <div
                         class="inline-block h-5 w-5 rounded-[50%] border bg-red-500 text-center text-sm"
                     >
                         <p class="text-xs text-white">
-                            {copiedData.pendingLogs > 10 ? '9+' : copiedData.pendingLogs}
+                            {pendingLogs > 10 ? '9+' : pendingLogs}
                         </p>
                     </div>
                 {/if}
-                <p>{copiedData.name}</p>
+                <p>{name}</p>
             </div>
 
             <div class="my-1 flex-2/12 text-sm text-gray-500 md:my-0 md:text-gray-700">
-                {formater(copiedData.startedAt)} -> {formater(copiedData.endedAt)}
+                {formatter(startedAt)} -> {formatter(endedAt)}
             </div>
 
             <div class="flex-2/12 text-sm md:text-right">

@@ -5,11 +5,7 @@
 
     let { progress }: Props = $props()
     const barColor = $derived.by(() => {
-        return progress > 90
-            ? 'bg-red-500'
-            : progress > 70
-              ? 'bg-orange-500'
-              : 'bg-green-500'
+        return progress > 90 ? 'bg-red-500' : progress > 70 ? 'bg-orange-500' : 'bg-green-500'
     })
 </script>
 

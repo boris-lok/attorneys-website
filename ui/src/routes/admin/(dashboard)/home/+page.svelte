@@ -7,9 +7,7 @@
     let id: undefined | string = $state(undefined)
 </script>
 
-<div
-    class="relative mx-auto flex max-w-[var(--max-screen-width)] flex-col gap-y-8 px-16 py-16"
->
+<div class="relative mx-auto flex max-w-[var(--max-screen-width)] flex-col gap-y-8 px-16 py-16">
     <div class="relative flex flex-row justify-end">
         {#if id && id !== ''}
             <a href="/admin/home/edit/{id}">

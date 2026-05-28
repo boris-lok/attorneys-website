@@ -1,5 +1,4 @@
 <script lang="ts">
-
     import Input from '$lib/components/common/Input.svelte'
 
     type Props = {
@@ -15,14 +14,10 @@
     let hour = $derived(date.getHours())
     let minute = $derived(date.getMinutes())
 
-    function onChange(
-        key: 'year' | 'month' | 'day' | 'hour' | 'minute',
-        value: string
-    ) {
+    function onChange(key: 'year' | 'month' | 'day' | 'hour' | 'minute', value: string) {
         const parsedValue = parseInt(value)
 
         if (isNaN(parsedValue)) return
-
 
         switch (key) {
             case 'year':
@@ -41,9 +36,7 @@
                 onChanged?.(new Date(year, month - 1, day, hour, parsedValue))
                 break
         }
-
     }
-
 </script>
 
 <div class="flex flex-wrap items-center gap-1">
@@ -59,46 +52,46 @@
     <span class="text-gray-500">/</span>
 
     <span class="w-8">
-               <Input
-                   name="year"
-                   value={year.toString()}
-                   type="text"
-                   onInput={(e) => onChange('month', e.currentTarget.value)}
-               />
+        <Input
+            name="year"
+            value={year.toString()}
+            type="text"
+            onInput={(e) => onChange('month', e.currentTarget.value)}
+        />
     </span>
 
     <span class="text-gray-500">/</span>
 
     <span class="w-8">
-               <Input
-                   name="year"
-                   value={year.toString()}
-                   type="text"
-                   onInput={(e) => onChange('day', e.currentTarget.value)}
-               />
+        <Input
+            name="year"
+            value={year.toString()}
+            type="text"
+            onInput={(e) => onChange('day', e.currentTarget.value)}
+        />
     </span>
 
     {#if !dateOnly}
         <span class="text-gray-500">&nbsp;</span>
 
         <span class="w-8">
-                          <Input
-                              name="year"
-                              value={year.toString()}
-                              type="text"
-                              onInput={(e) => onChange('hour', e.currentTarget.value)}
-                          />
+            <Input
+                name="year"
+                value={year.toString()}
+                type="text"
+                onInput={(e) => onChange('hour', e.currentTarget.value)}
+            />
         </span>
 
         <span class="text-gray-500">:</span>
 
         <span class="w-8">
-                          <Input
-                              name="year"
-                              value={year.toString()}
-                              type="text"
-                              onInput={(e) => onChange('minute', e.currentTarget.value)}
-                          />
+            <Input
+                name="year"
+                value={year.toString()}
+                type="text"
+                onInput={(e) => onChange('minute', e.currentTarget.value)}
+            />
         </span>
     {/if}
 </div>

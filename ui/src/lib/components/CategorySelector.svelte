@@ -37,8 +37,7 @@
         {#each categories as category (category.id)}
             <button
                 class="w-36 cursor-pointer text-left text-base hover:text-xl hover:text-[var(--primary-color)]"
-                onclick={() => selectCategory(category.id)}
-                >{category.data.name}</button
+                onclick={() => selectCategory(category.id)}>{category.data.name}</button
             >
         {/each}
     </div>

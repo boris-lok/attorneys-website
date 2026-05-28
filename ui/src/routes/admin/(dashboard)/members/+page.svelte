@@ -9,9 +9,7 @@
             <Icon height="24" icon="gridicons:create" width="24" />
         </a>
     </div>
-    <div
-        class="relative mt-4 flex flex-col gap-8 px-4 md:flex-row md:justify-center"
-    >
+    <div class="relative mt-4 flex flex-col gap-8 px-4 md:flex-row md:justify-center">
         <MemberList isAdmin={true} />
     </div>
 </div>

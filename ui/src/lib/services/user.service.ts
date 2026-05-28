@@ -28,9 +28,7 @@ export type SimpleUser = {
 async function login(req: {
     username: string
     password: string
-}): Promise<
-    APIError | APIResponse<{ error: boolean; credential: Credential }>
-> {
+}): Promise<APIError | APIResponse<{ error: boolean; credential: Credential }>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/login`, {
             method: 'POST',
@@ -101,9 +99,7 @@ async function logout(): Promise<APIError | APIResponse<void>> {
     }
 }
 
-async function list(): Promise<
-    APIError | APIResponse<{ users: SimpleUser[] }>
-> {
+async function list(): Promise<APIError | APIResponse<{ users: SimpleUser[] }>> {
     let url = `${ADMIN_URL}/users`
 
     try {
@@ -120,15 +116,13 @@ async function list(): Promise<
         let users = []
 
         if ('users' in json && json.users.length > 0) {
-            users = json.users.map(
-                (e: { id: string; nickname: string; roles: string[] }) => {
-                    return {
-                        id: e.id,
-                        nickname: e.nickname,
-                        roles: e.roles,
-                    }
-                },
-            )
+            users = json.users.map((e: { id: string; nickname: string; roles: string[] }) => {
+                return {
+                    id: e.id,
+                    nickname: e.nickname,
+                    roles: e.roles,
+                }
+            })
         }
 
         return { error: false, users: users }

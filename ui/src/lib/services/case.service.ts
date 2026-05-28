@@ -11,7 +11,7 @@ import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 
 async function save(
-    req: CreateCaseRequest | UpdateCaseRequest,
+    req: CreateCaseRequest | UpdateCaseRequest
 ): Promise<APIError | APIResponse<{ id: string }>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/cases`, {
@@ -81,7 +81,7 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
                         endedAt: new Date(e.ended_at),
                         pendingLogs: e.pending_logs,
                     }
-                },
+                }
             )
         }
 

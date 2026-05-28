@@ -21,7 +21,7 @@
      * @return {void} This function does not return a value. It updates the content variable with the trimmed value from the textarea.
      */
     function onContentChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
+        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }
     ): void {
         content = (e.currentTarget as HTMLTextAreaElement).value.trim()
     }
@@ -70,28 +70,17 @@
 {#if isLoading}
     <Loading />
 {:else}
-    <div
-        class="mb-2 flex hidden rounded-lg bg-red-50 p-4 [.show]:block"
-        role="alert"
-    >
+    <div class="mb-2 flex hidden rounded-lg bg-red-50 p-4 [.show]:block" role="alert">
         <p class="w-full text-center text-sm text-red-800">{errorMsg}</p>
     </div>
-    <div
-        class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4"
-    >
+    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
         <div class="flex-1">
-            <Textarea
-                label="Home Content"
-                name="home"
-                onInput={onContentChanged}
-                value={data ?? ''}
+            <Textarea label="Home Content" name="home" onInput={onContentChanged} value={data ?? ''}
             ></Textarea>
         </div>
         <div class="flex-1">
             <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
-            <div
-                class="prose block min-h-96 w-full rounded-lg bg-gray-100 px-4 py-4"
-            >
+            <div class="prose block min-h-96 w-full rounded-lg bg-gray-100 px-4 py-4">
                 <Markdown source={content}></Markdown>
             </div>
         </div>

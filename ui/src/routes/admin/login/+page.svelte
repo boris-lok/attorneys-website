@@ -19,7 +19,7 @@
 
     function onDataChanged<K extends keyof Data>(
         key: K,
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
+        e: Event & { currentTarget: EventTarget & HTMLInputElement }
     ) {
         if (!e.target) {
             return
@@ -57,9 +57,7 @@
 {#if isLoading}
     <Loading />
 {:else}
-    <div
-        class="mx-auto mt-[10%] mb-4 w-11/12 rounded bg-white px-8 pt-6 pb-8 shadow-md md:w-96"
-    >
+    <div class="mx-auto mt-[10%] mb-4 w-11/12 rounded bg-white px-8 pt-6 pb-8 shadow-md md:w-96">
         <Input
             label="Username"
             name="username"

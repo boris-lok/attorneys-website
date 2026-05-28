@@ -20,14 +20,9 @@
         lang: Language,
         categoryId: string | null,
         page: number,
-        pageSize: number,
+        pageSize: number
     ) {
-        const resp = await ArticleServices.list(
-            lang,
-            categoryId,
-            page,
-            pageSize,
-        )
+        const resp = await ArticleServices.list(lang, categoryId, page, pageSize)
 
         if (resp.error) {
             console.error(resp.message)
@@ -81,14 +76,9 @@
             lang: Language,
             selectedCategoryId: string | null,
             page: number,
-            pageSize: number,
+            pageSize: number
         ) => {
-            const resp = await fetchArticlesObservable(
-                lang,
-                selectedCategoryId,
-                page,
-                pageSize,
-            )
+            const resp = await fetchArticlesObservable(lang, selectedCategoryId, page, pageSize)
 
             articles = resp.articles
             totalPages = resp.totalPages
@@ -110,9 +100,7 @@
 
         <div class="flex flex-col-reverse gap-4 lg:flex-row lg:gap-8">
             <div class="flex-4">
-                <div
-                    class="grid grid-cols-1 gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3"
-                >
+                <div class="grid grid-cols-1 gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3">
                     {#each articles as article (article.id)}
                         <div class="relative">
                             <ArticleCard
@@ -123,11 +111,7 @@
                             />
                             <div class="absolute top-2 right-2">
                                 <a href="/admin/articles/edit/{article.id}">
-                                    <Icon
-                                        icon="mingcute:edit-line"
-                                        width="24"
-                                        height="24"
-                                    />
+                                    <Icon icon="mingcute:edit-line" width="24" height="24" />
                                 </a>
                             </div>
                         </div>

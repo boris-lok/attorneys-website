@@ -98,9 +98,7 @@
             ondragleave={handleDragLeave}
             class:is-dragging={isDragging}
         >
-            <div
-                class="absolute flex h-full w-full items-center justify-center text-xl"
-            >
+            <div class="absolute flex h-full w-full items-center justify-center text-xl">
                 <p>Please click or drag an image here.</p>
             </div>
             <input
@@ -115,25 +113,15 @@
         <div class="flex flex-row items-center gap-8">
             <Image image={data} alt="preview" />
             <button onclick={onDeleteClicked} class="cursor-pointer">
-                <IconifyIcon
-                    icon="tabler:trash"
-                    class="h-6 w-6 text-red-800 hover:text-red-500"
-                />
+                <IconifyIcon icon="tabler:trash" class="h-6 w-6 text-red-800 hover:text-red-500" />
             </button>
         </div>
     {/if}
     {#if hasImage}
         <div class="relative flex flex-row items-center gap-4">
-            <img
-                src={imageSrc}
-                alt="avatarPreview"
-                class="h-36 w-36 overflow-clip rounded-[50%]"
-            />
+            <img src={imageSrc} alt="avatarPreview" class="h-36 w-36 overflow-clip rounded-[50%]" />
             <button onclick={onDeleteClicked} class="cursor-pointer">
-                <IconifyIcon
-                    icon="tabler:trash"
-                    class="h-6 w-6 text-red-800 hover:text-red-500"
-                />
+                <IconifyIcon icon="tabler:trash" class="h-6 w-6 text-red-800 hover:text-red-500" />
             </button>
         </div>
     {/if}

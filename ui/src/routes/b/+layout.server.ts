@@ -9,10 +9,7 @@ export const load = async ({ cookies }) => {
         throw redirect(302, '/admin/login')
     }
 
-    if (
-        !checkRole(user.roles ?? [], 'admin') &&
-        !checkRole(user.roles ?? [], 'lawyer')
-    ) {
+    if (!checkRole(user.roles ?? [], 'admin') && !checkRole(user.roles ?? [], 'lawyer')) {
         throw redirect(302, '/error/permission_denied')
     }
 }

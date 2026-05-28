@@ -16,7 +16,7 @@ import { getToken } from '$lib/utils'
  * @return {Promise<APIError | APIResponse<void>>} A promise that resolves to an object indicating the success or failure of the save operation. If an error occurs, the object includes an error message.
  */
 async function save(
-    req: CreateServiceRequest | UpdateServiceRequest,
+    req: CreateServiceRequest | UpdateServiceRequest
 ): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/services`, {
@@ -48,7 +48,7 @@ async function save(
  */
 async function retrieve(
     id: string,
-    language: Language,
+    language: Language
 ): Promise<APIError | APIResponse<{ service: ServiceData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/services/${id}`, {
@@ -85,7 +85,7 @@ async function retrieve(
  * - `message` (optional string): An error message if the operation fails.
  */
 async function list(
-    language: Language,
+    language: Language
 ): Promise<APIError | APIResponse<{ services: ServiceData[] }>> {
     try {
         const resp = await fetch(`${BASE_URL}/services`, {

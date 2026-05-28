@@ -59,9 +59,7 @@
     <div
         class="relative flex h-16 flex-row items-center gap-12 overflow-hidden bg-[var(--primary-color)] px-4 md:px-8"
     >
-        <div
-            class="relative flex h-12 w-[100%] flex-row items-center justify-between"
-        >
+        <div class="relative flex h-12 w-[100%] flex-row items-center justify-between">
             <!-- Logo -->
             <div>
                 <a href={rootUrl}>
@@ -77,9 +75,7 @@
                 <button class="cursor-pointer" onclick={toggleMenu}>
                     <IconifyIcon
                         class="m-2 h-6 w-6"
-                        icon={show
-                            ? 'material-symbols-light:close'
-                            : 'ri:menu-3-fill'}
+                        icon={show ? 'material-symbols-light:close' : 'ri:menu-3-fill'}
                     />
                 </button>
             </div>
@@ -95,19 +91,11 @@
                                 item.onClick()
                             }}
                         >
-                            <NavigateItem
-                                label={item.name}
-                                icon={item.icon}
-                                topBar={true}
-                            />
+                            <NavigateItem label={item.name} icon={item.icon} topBar={true} />
                         </button>
                     {:else if 'url' in item}
                         <a href={item.url} onclick={() => (show = false)}>
-                            <NavigateItem
-                                label={item.name}
-                                icon={item.icon}
-                                topBar={true}
-                            />
+                            <NavigateItem label={item.name} icon={item.icon} topBar={true} />
                         </a>
                     {/if}
                 {/each}
@@ -122,9 +110,7 @@
     class:show
 >
     <!--Dropdown Navigate Item -->
-    <div
-        class="relative h-[calc(100vh-4rem)] w-screen overflow-y-scroll md:hidden"
-    >
+    <div class="relative h-[calc(100vh-4rem)] w-screen overflow-y-scroll md:hidden">
         <div
             class="grid max-h-[calc(100vh-4rem)] w-full grid-cols-2 justify-items-center gap-y-8 overflow-x-hidden overflow-y-auto px-4 py-6"
         >
@@ -137,19 +123,11 @@
                             item.onClick()
                         }}
                     >
-                        <NavigateItem
-                            label={item.name}
-                            icon={item.icon}
-                            topBar={false}
-                        />
+                        <NavigateItem label={item.name} icon={item.icon} topBar={false} />
                     </button>
                 {:else if 'url' in item}
                     <a href={item.url} onclick={() => (show = false)}>
-                        <NavigateItem
-                            label={item.name}
-                            icon={item.icon}
-                            topBar={false}
-                        />
+                        <NavigateItem label={item.name} icon={item.icon} topBar={false} />
                     </a>
                 {/if}
             {/each}

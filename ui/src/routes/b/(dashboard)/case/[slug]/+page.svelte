@@ -4,7 +4,7 @@
     import {
         type PendingWorkLog as PendingWorkLogType,
         type WorkLog as WorkLogType,
-        WorkLogServices
+        WorkLogServices,
     } from '$lib/services/work_log.service'
     import WorkLog from '$lib/components/WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
@@ -25,8 +25,7 @@
             .filter((log) => {
                 const collaborators = log.collaborators.filter(
                     (collaborator) =>
-                        collaborator.status === 'pending' &&
-                        collaborator.userId === selfId
+                        collaborator.status === 'pending' && collaborator.userId === selfId
                 )
                 return collaborators.length > 0
             })
@@ -39,8 +38,8 @@
                     description: log.description,
                     user: {
                         id: selfId,
-                        name: selfName
-                    }
+                        name: selfName,
+                    },
                 }
 
                 return p
@@ -50,32 +49,12 @@
     let isCreated = $state(false)
     let downloadLink: HTMLAnchorElement
     let startedAt = $state(
-        setDateSuffix(
-            new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
-            0,
-            0,
-            0,
-            0
-        )
+        setDateSuffix(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), 0, 0, 0, 0)
     )
     let endedAt = $state(setDateSuffix(new Date(), 23, 59, 59, 59))
 
-    function setDateSuffix(
-        date: Date,
-        hrs: number,
-        mins: number,
-        s: number,
-        ms: number
-    ): Date {
-        return new Date(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate(),
-            hrs,
-            mins,
-            s,
-            ms
-        )
+    function setDateSuffix(date: Date, hrs: number, mins: number, s: number, ms: number): Date {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hrs, mins, s, ms)
     }
 
     function onDateChanged(type: 'startedAt' | 'endedAt', date: Date) {
@@ -109,16 +88,11 @@
         await fetchWorkLogs()
     }
 
-    function editStatus(
-        id: string,
-        status: 'accepted' | 'pending' | 'rejected'
-    ) {
+    function editStatus(id: string, status: 'accepted' | 'pending' | 'rejected') {
         let c = logs.find((l) => l.id === id)
         if (!c) return
         let collaborators = [...c.collaborators]
-        let collaborator = collaborators.find(
-            (collaborator) => collaborator.userId === selfId
-        )
+        let collaborator = collaborators.find((collaborator) => collaborator.userId === selfId)
         if (!collaborator) return
         collaborator.status = status
         c.collaborators = collaborators
@@ -152,21 +126,13 @@
 <main>
     {#if isCreated}
         <div>
-            <WorkLogEditor
-                onClosed={() => (isCreated = false)}
-                caseId={id}
-                onSaved={appendCase}
-            />
+            <WorkLogEditor onClosed={() => (isCreated = false)} caseId={id} onSaved={appendCase} />
         </div>
     {:else}
-        <div
-            class="my-2 flex h-16 flex-row items-center justify-end gap-4 px-4"
-        >
+        <div class="my-2 flex h-16 flex-row items-center justify-end gap-4 px-4">
             <button class="cursor-pointer" onclick={() => (isCreated = true)}>
                 <IconifyIcon class="h-6 w-6" icon="tabler:library-plus" />
             </button>
-
-
         </div>
     {/if}
 
@@ -176,25 +142,16 @@
             <div
                 class="hidden rounded-t px-4 md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-orange-300"
             >
-                <p class="text-md flex-5/12 py-3 text-left font-bold">
-                    Description
-                </p>
+                <p class="text-md flex-5/12 py-3 text-left font-bold">Description</p>
                 <p class="text-md flex-4/12 py-3 text-left font-bold">Period</p>
-                <p class="text-md flex-1/12 py-3 text-left font-bold">
-                    Used Hrs
-                </p>
+                <p class="text-md flex-1/12 py-3 text-left font-bold">Used Hrs</p>
                 <p class="text-md flex-2/12 py-3 text-left font-bold">&nbsp;</p>
             </div>
             <div class="h-fit max-h-96 w-full overflow-y-auto">
                 {#each pendingLogs as log, i (log.id)}
-                    <PendingWorkLog
-                        {...log}
-                        onDone={(e) => editStatus(log.id, e)}
-                    />
+                    <PendingWorkLog {...log} onDone={(e) => editStatus(log.id, e)} />
                     {#if i < logs.length - 1}
-                        <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">
-                            &nbsp;
-                        </div>
+                        <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">&nbsp;</div>
                     {/if}
                 {/each}
             </div>
@@ -204,7 +161,7 @@
     <p class="mt-16 px-5 text-xl font-semibold">Work Logs</p>
 
     <div
-        class="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-end md:px-6 md:gap-4"
+        class="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-end md:gap-4 md:px-6"
     >
         <div class="m-2 flex flex-row items-center gap-4">
             <DateTimePicker
@@ -220,8 +177,7 @@
             />
         </div>
 
-
-        <button class="cursor-pointer relative group" onclick={download}>
+        <button class="group relative cursor-pointer" onclick={download}>
             <IconifyIcon class="h-6 w-6" icon="tabler:download" />
             <p
                 class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
@@ -244,14 +200,10 @@
         <div
             class="hidden rounded-t px-4 md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
         >
-            <p class="text-md flex-5/12 py-3 text-left font-bold">
-                Description
-            </p>
+            <p class="text-md flex-5/12 py-3 text-left font-bold">Description</p>
             <p class="text-md flex-2/12 py-3 text-left font-bold">Period</p>
             <p class="text-md flex-1/12 py-3 text-left font-bold">Used Hrs</p>
-            <p class="text-md flex-2/12 py-3 text-left font-bold">
-                Participants
-            </p>
+            <p class="text-md flex-2/12 py-3 text-left font-bold">Participants</p>
             <p class="text-md flex-1/12 py-3 text-left font-bold">&nbsp;</p>
         </div>
 
@@ -262,13 +214,10 @@
                         caseId={id}
                         {log}
                         onSaved={(e) => (logs[i] = e)}
-                        onDeleted={() =>
-                            (logs = logs.filter((l) => l.id !== log.id))}
+                        onDeleted={() => (logs = logs.filter((l) => l.id !== log.id))}
                     />
                     {#if i < logs.length - 1}
-                        <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">
-                            &nbsp;
-                        </div>
+                        <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">&nbsp;</div>
                     {/if}
                 {/each}
             </div>

@@ -50,7 +50,7 @@ export type PendingWorkLog = {
 export type UpdateWorkLogRequest = CreateWorkLogRequest & { id: string }
 
 async function save(
-    req: CreateWorkLogRequest | UpdateWorkLogRequest,
+    req: CreateWorkLogRequest | UpdateWorkLogRequest
 ): Promise<APIError | APIResponse<{ id: string }>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/work_logs`, {
@@ -92,7 +92,7 @@ async function save(
 async function list(
     caseId: string,
     startedAt: Date | null = null,
-    endedAt: Date | null = null,
+    endedAt: Date | null = null
 ): Promise<APIError | APIResponse<{ logs: WorkLog[] }>> {
     const url = new URL(`${ADMIN_URL}/work_logs`)
     url.searchParams.set('case_id', caseId)
@@ -153,7 +153,7 @@ async function list(
                             name: e.user.name,
                         },
                     } as WorkLog
-                },
+                }
             )
         }
 
@@ -166,7 +166,7 @@ async function list(
 async function download(
     caseId: string,
     startedAt: Date | null = null,
-    endedAt: Date | null = null,
+    endedAt: Date | null = null
 ): Promise<APIError | APIResponse<{ blob: Blob }>> {
     const url = new URL(`${ADMIN_URL}/work_logs/download`)
     url.searchParams.set('case_id', caseId)
@@ -218,7 +218,7 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
 
 async function updateStatus(
     id: string,
-    status: 'approved' | 'rejected' | 'pending',
+    status: 'approved' | 'rejected' | 'pending'
 ): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/work_logs/status`, {

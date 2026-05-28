@@ -11,23 +11,14 @@
     let line = '@594ylsoj'
 </script>
 
-<div
-    class="relative flex h-[calc(100vh-144px-96px)] min-h-[48rem] flex-col items-center"
->
-    <p class="px-16 pt-16 text-4xl font-bold text-[var(--primary-color)]">
-        聯絡我們
-    </p>
+<div class="relative flex h-[calc(100vh-144px-96px)] min-h-[48rem] flex-col items-center">
+    <p class="px-16 pt-16 text-4xl font-bold text-[var(--primary-color)]">聯絡我們</p>
     <div
         class="relative flex flex-col md:mx-auto md:mt-12 md:w-full md:max-w-4xl md:flex-col md:gap-8"
     >
-        <div
-            class="flex flex-col items-center gap-4 px-4 py-4 md:flex-1 md:justify-evenly"
-        >
+        <div class="flex flex-col items-center gap-4 px-4 py-4 md:flex-1 md:justify-evenly">
             <div class="flex flex-row items-center gap-2">
-                <IconifyIcon
-                    class="h-12 w-12"
-                    icon="mdi:address-marker-outline"
-                />
+                <IconifyIcon class="h-12 w-12" icon="mdi:address-marker-outline" />
                 <p class="text-2xl">{address}</p>
             </div>
             <div class="flex flex-row items-center gap-2">

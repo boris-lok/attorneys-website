@@ -24,9 +24,7 @@
     let isLoading = $state(false)
 
     // handles name has been changed
-    function onNameChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
-    ) {
+    function onNameChanged(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
         data = {
             ...data,
             name: (e.currentTarget as HTMLInputElement).value.trim(),
@@ -34,9 +32,7 @@
     }
 
     // handles icon has been changed
-    function onIconChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
-    ) {
+    function onIconChanged(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
         data = {
             ...data,
             icon: (e.currentTarget as HTMLInputElement).value.trim(),
@@ -87,9 +83,7 @@
     >
         <p class="w-full text-center">{errorMsg}</p>
     </div>
-    <div
-        class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4"
-    >
+    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
         <div class="flex-1">
             <div class="flex flex-col gap-x-1">
                 <Input
@@ -119,9 +113,7 @@
         </div>
         <div class="flex-1">
             <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
-            <div
-                class="flex w-full flex-row items-center gap-2 rounded-lg bg-gray-100 px-4 py-4"
-            >
+            <div class="flex w-full flex-row items-center gap-2 rounded-lg bg-gray-100 px-4 py-4">
                 {#if data.icon}
                     <IconifyIcon icon={data.icon} class="h-8 w-8" />
                 {/if}

@@ -3,3 +3,4 @@ dist
 build
 .svelte-kit
 package-lock.json
+src/safelist.txt

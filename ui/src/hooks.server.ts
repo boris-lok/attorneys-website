@@ -21,9 +21,7 @@ const validateRoute: ValidateRoute[] = [
 ]
 
 export const handle = async ({ event, resolve }) => {
-    const user: Partial<Credential> = JSON.parse(
-        event.cookies.get('user') || '{}',
-    )
+    const user: Partial<Credential> = JSON.parse(event.cookies.get('user') || '{}')
 
     for (const e of validateRoute) {
         if (event.url.pathname.startsWith(e.start)) {

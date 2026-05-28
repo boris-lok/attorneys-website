@@ -20,7 +20,7 @@ import { getToken } from '$lib/utils'
  * The `error` field is true if an error occurs, and `message` provides details about the error when applicable.
  */
 async function save(
-    req: CreateArticleRequest | UpdateArticleRequest,
+    req: CreateArticleRequest | UpdateArticleRequest
 ): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/articles`, {
@@ -53,7 +53,7 @@ async function save(
  */
 async function retrieve(
     id: string,
-    language: Language,
+    language: Language
 ): Promise<APIError | APIResponse<{ article: ArticleData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/articles/${id}`, {
@@ -94,7 +94,7 @@ async function list(
     language: Language,
     categoryId: string | null,
     page: number,
-    pageSize: number,
+    pageSize: number
 ): Promise<
     | APIError
     | APIResponse<{
@@ -146,7 +146,7 @@ async function list(
                         createdAtString: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
                         seq: article.seq,
                     }
-                },
+                }
             )
         }
 

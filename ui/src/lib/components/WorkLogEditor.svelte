@@ -69,9 +69,7 @@
         }
     }
 
-    function onDescriptionChanged(
-        e: Event & { currentTarget: HTMLTextAreaElement },
-    ) {
+    function onDescriptionChanged(e: Event & { currentTarget: HTMLTextAreaElement }) {
         _description = e.currentTarget.value
     }
 
@@ -97,9 +95,7 @@
         }
         const selfId = getSelfId()
 
-        users = resp.users
-            .filter((e) => e.id !== selfId)
-            .filter((e) => e.roles.includes('Lawyer'))
+        users = resp.users.filter((e) => e.id !== selfId).filter((e) => e.roles.includes('Lawyer'))
     }
 
     async function onShareChanged(e: Event) {
@@ -196,20 +192,12 @@
 {/if}
 
 <div class="flex flex-col gap-4">
-    <div
-        class="flex flex-row items-center justify-between md:justify-normal md:gap-4"
-    >
+    <div class="flex flex-row items-center justify-between md:justify-normal md:gap-4">
         <div class="flex flex-col gap-1 md:flex-row md:items-center md:gap-2">
             <span class="text-sm font-semibold">Working Time: </span>
-            <DateTimePicker
-                date={_startedAt}
-                onChanged={(e) => onDateChanged('startedAt', e)}
-            />
+            <DateTimePicker date={_startedAt} onChanged={(e) => onDateChanged('startedAt', e)} />
             <span class="text-center"> ~ </span>
-            <DateTimePicker
-                date={_endedAt}
-                onChanged={(e) => onDateChanged('endedAt', e)}
-            />
+            <DateTimePicker date={_endedAt} onChanged={(e) => onDateChanged('endedAt', e)} />
         </div>
 
         <span class="h-fit"> ({duration} min)</span>
@@ -227,29 +215,17 @@
 
     {#if !hideShare}
         <label class="inline-flex cursor-pointer items-center">
-            <input
-                type="checkbox"
-                value=""
-                class="peer sr-only"
-                onclick={onShareChanged}
-            />
+            <input type="checkbox" value="" class="peer sr-only" onclick={onShareChanged} />
             <div
                 class="peer relative h-5 w-9 rounded-full bg-gray-500 peer-checked:bg-blue-500 peer-focus:outline-none after:absolute after:start-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
             ></div>
-            <span class="text-heading ms-3 text-sm font-medium select-none"
-                >Share</span
-            >
+            <span class="text-heading ms-3 text-sm font-medium select-none">Share</span>
         </label>
 
         {#if share}
-            <div
-                class="mx-2 my-1 flex flex-row flex-wrap gap-4 rounded bg-gray-100 px-2 py-2"
-            >
+            <div class="mx-2 my-1 flex flex-row flex-wrap gap-4 rounded bg-gray-100 px-2 py-2">
                 {#each users as user (user.id)}
-                    <label
-                        for={user.id}
-                        class="text-md cursor-pointer font-medium"
-                    >
+                    <label for={user.id} class="text-md cursor-pointer font-medium">
                         <input
                             type="checkbox"
                             id={user.id}
@@ -257,10 +233,7 @@
                             class="mr-2"
                             checked={_collaboratorIds.includes(user.id)}
                             onchange={(e) => {
-                                onCollaboratorIdsChanged(
-                                    user.id,
-                                    e.currentTarget.checked,
-                                )
+                                onCollaboratorIdsChanged(user.id, e.currentTarget.checked)
                             }}
                         />{user.nickname}
                     </label>
@@ -277,10 +250,7 @@
             />
         </button>
         <button class="cursor-pointer md:m-2" onclick={onClosed}>
-            <IconifyIcon
-                class="h-6 w-6 text-red-500"
-                icon="line-md:close-circle"
-            />
+            <IconifyIcon class="h-6 w-6 text-red-500" icon="line-md:close-circle" />
         </button>
     </div>
 </div>

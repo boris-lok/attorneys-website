@@ -59,11 +59,7 @@
                         class="absolute top-2 right-2 z-10 rounded p-1 opacity-10 hover:bg-gray-400/20 hover:opacity-100"
                     >
                         <a href="/admin/services/edit/{service.id}">
-                            <Icon
-                                icon="mingcute:edit-line"
-                                width="24"
-                                height="24"
-                            />
+                            <Icon icon="mingcute:edit-line" width="24" height="24" />
                         </a>
                     </div>
                 {/if}

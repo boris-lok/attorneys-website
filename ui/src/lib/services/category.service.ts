@@ -20,7 +20,7 @@ import { getToken } from '$lib/utils'
  * The `message` property is included in case of an error.
  */
 async function save(
-    req: CreateCategoryRequest | UpdateCategoryRequest,
+    req: CreateCategoryRequest | UpdateCategoryRequest
 ): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/categories`, {
@@ -51,7 +51,7 @@ async function save(
  * A promise that resolves to an object containing either the list of categories or an error message.
  */
 async function list(
-    language: Language,
+    language: Language
 ): Promise<APIError | APIResponse<{ categories: CategoryData[] }>> {
     try {
         const resp = await fetch(`${BASE_URL}/categories`, {
@@ -117,7 +117,7 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
  */
 async function retrieve(
     id: string,
-    language: Language,
+    language: Language
 ): Promise<APIError | APIResponse<{ category: CategoryData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/categories/${id}`, {

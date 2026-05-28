@@ -47,11 +47,7 @@
                 <p>{category.data.name}</p>
                 <div class="absolute top-0 right-0 p-2">
                     <a href="/admin/categories/edit/{category.id}">
-                        <Icon
-                            icon="mingcute:edit-line"
-                            width="24"
-                            height="24"
-                        />
+                        <Icon icon="mingcute:edit-line" width="24" height="24" />
                     </a>
                 </div>
             </div>

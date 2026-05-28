@@ -39,24 +39,17 @@
     }
 
     // handles the name has been changed
-    function onNameChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
-    ) {
+    function onNameChanged(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
         name = (e.target as HTMLInputElement).value.trim()
     }
 
     // handles the description has been changed
-    function onDescriptionChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
-    ) {
+    function onDescriptionChanged(e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }) {
         description = (e.target as HTMLTextAreaElement).value.trim()
     }
 
     // a function that validate the all data is correct
-    function validate(data: {
-        name: string | undefined
-        description: string | undefined
-    }) {
+    function validate(data: { name: string | undefined; description: string | undefined }) {
         return (
             data.name &&
             data.name.trim() !== '' &&
@@ -113,9 +106,7 @@
     >
         <p class="w-full text-center">{errorMsg}</p>
     </div>
-    <div
-        class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4"
-    >
+    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
         <div class="flex-1">
             <div class="relative flex flex-col gap-4">
                 <UploadImage imageData={avatarData} onChange={onImageChanged} />
@@ -137,9 +128,7 @@
         </div>
         <div class="flex-1">
             <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
-            <div
-                class="prose block min-h-96 w-full rounded-lg bg-gray-100 px-4 py-4"
-            >
+            <div class="prose block min-h-96 w-full rounded-lg bg-gray-100 px-4 py-4">
                 <p class="py-2 text-lg font-bold text-[var(--primary-color)]">
                     {name}
                 </p>

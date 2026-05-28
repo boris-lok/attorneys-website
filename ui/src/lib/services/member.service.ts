@@ -7,12 +7,7 @@ import type {
     SimpleMember,
     UpdateMemberRequest,
 } from '$lib/types'
-import {
-    ADMIN_URL,
-    BASE_URL,
-    TIMEOUT,
-    UPLOAD_IMAGE_TIMEOUT,
-} from '$lib/constant'
+import { ADMIN_URL, BASE_URL, TIMEOUT, UPLOAD_IMAGE_TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
 
 /**
@@ -25,7 +20,7 @@ import { getToken } from '$lib/utils'
  *         On failure, the object contains `error: true` and an error `message`.
  */
 async function save(
-    req: CreateMemberRequest | UpdateMemberRequest,
+    req: CreateMemberRequest | UpdateMemberRequest
 ): Promise<APIError | APIResponse<{ id: string }>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/members`, {
@@ -63,7 +58,7 @@ async function save(
  */
 async function retrieve(
     id: string,
-    language: Language,
+    language: Language
 ): Promise<APIError | APIResponse<{ member: MemberData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/members/${id}`, {
@@ -96,7 +91,7 @@ async function retrieve(
  * @return {Promise<APIError | APIResponse<{members: SimpleMember[]}>>} A promise that resolves to an object containing a list of members or an error message.
  */
 async function list(
-    language: Language,
+    language: Language
 ): Promise<APIError | APIResponse<{ members: SimpleMember[] }>> {
     try {
         const resp = await fetch(`${BASE_URL}/members`, {
@@ -129,10 +124,7 @@ async function list(
  * @param {File} file - The avatar image file to upload.
  * @return {Promise<APIError | APIResponse<void>>} A promise that resolves to an object indicating the success or failure of the upload. If the upload fails, the object contains an error message.
  */
-async function saveAvatar(
-    id: string,
-    file: File,
-): Promise<APIError | APIResponse<void>> {
+async function saveAvatar(id: string, file: File): Promise<APIError | APIResponse<void>> {
     try {
         const formData = new FormData()
         formData.append('avatar', file)

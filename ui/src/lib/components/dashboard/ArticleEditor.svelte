@@ -15,8 +15,10 @@
     }
 
     let { id, content, title, categoryId, categories }: EditorProps = $props()
-    let newData: { title: string; content: string; category_id?: string } =
-        $state({ title: '', content: '' })
+    let newData: { title: string; content: string; category_id?: string } = $state({
+        title: '',
+        content: '',
+    })
     $effect(() => {
         // init the state by props
         newData = {
@@ -30,9 +32,7 @@
 
     // handles content has been changed
     // it will update the preview zone automatically
-    function onContentChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
-    ) {
+    function onContentChanged(e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }) {
         newData = {
             ...newData,
             content: (e.currentTarget as HTMLTextAreaElement).value.trim(),
@@ -40,9 +40,7 @@
     }
 
     // handles title has been changed
-    function onTitleChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
-    ) {
+    function onTitleChanged(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
         newData = {
             ...newData,
             title: (e.currentTarget as HTMLInputElement).value.trim(),
@@ -50,9 +48,7 @@
     }
 
     // handles category has been changed
-    function onCategoryChanged(
-        e: Event & { currentTarget: EventTarget & HTMLSelectElement },
-    ) {
+    function onCategoryChanged(e: Event & { currentTarget: EventTarget & HTMLSelectElement }) {
         newData = {
             ...newData,
             category_id: (e.currentTarget as HTMLSelectElement).value.trim(),
@@ -104,9 +100,7 @@
     >
         <p class="w-full text-center">{errorMsg}</p>
     </div>
-    <div
-        class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4"
-    >
+    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
         <div class="flex-1">
             <div class="relative flex-row gap-x-4">
                 <Input
@@ -119,9 +113,8 @@
                 />
 
                 <div class="mb-4">
-                    <label
-                        class="mb-2 block text-sm font-bold text-gray-700"
-                        for="countries">Category</label
+                    <label class="mb-2 block text-sm font-bold text-gray-700" for="countries"
+                        >Category</label
                     >
                     <select
                         class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-700"
@@ -130,9 +123,7 @@
                     >
                         <option selected>Choose a category</option>
                         {#each categories as category (category.id)}
-                            <option
-                                value={category.id}
-                                selected={categoryId === category.id}
+                            <option value={category.id} selected={categoryId === category.id}
                                 >{category.data.name}</option
                             >
                         {/each}
@@ -149,9 +140,7 @@
         </div>
         <div class="flex-1">
             <p class="mb-2 block text-sm font-medium text-gray-900">Preview</p>
-            <div
-                class="prose block min-h-96 w-full rounded-lg bg-gray-100 px-4 py-4"
-            >
+            <div class="prose block min-h-96 w-full rounded-lg bg-gray-100 px-4 py-4">
                 <p class="py-2 text-lg font-bold text-[var(--primary-color)]">
                     {newData.title}
                 </p>

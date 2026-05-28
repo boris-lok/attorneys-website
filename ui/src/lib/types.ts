@@ -148,9 +148,7 @@ export type APIError = {
     message: string
 }
 
-export type APIResponse<T> = T extends void
-    ? { error: false }
-    : { error: false } & T
+export type APIResponse<T> = T extends void ? { error: false } : { error: false } & T
 
 // The request of creating case content
 export type CreateCaseRequest = {

@@ -19,14 +19,9 @@
         lang: Language,
         categoryId: string | null,
         page: number,
-        pageSize: number,
+        pageSize: number
     ) {
-        const resp = await ArticleServices.list(
-            lang,
-            categoryId,
-            page,
-            pageSize,
-        )
+        const resp = await ArticleServices.list(lang, categoryId, page, pageSize)
 
         if (resp.error) {
             console.error(resp.message)
@@ -67,14 +62,9 @@
             lang: Language,
             selectedCategoryId: string | null,
             page: number,
-            pageSize: number,
+            pageSize: number
         ) => {
-            const resp = await fetchArticlesObservable(
-                lang,
-                selectedCategoryId,
-                page,
-                pageSize,
-            )
+            const resp = await fetchArticlesObservable(lang, selectedCategoryId, page, pageSize)
 
             articles = resp.articles
             totalPages = resp.totalPages
@@ -96,9 +86,7 @@
 
         <div class="flex flex-col-reverse gap-4 lg:flex-row lg:gap-8">
             <div class="flex-4">
-                <div
-                    class="grid grid-cols-1 gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3"
-                >
+                <div class="grid grid-cols-1 gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3">
                     {#each articles as article (article.id)}
                         <ArticleCard
                             id={article.id}
@@ -110,20 +98,12 @@
             </div>
 
             <div class="flex-1">
-                <CategorySelector
-                    {categories}
-                    onChanged={onCategoryChanged}
-                    {selectedCategoryId}
-                />
+                <CategorySelector {categories} onChanged={onCategoryChanged} {selectedCategoryId} />
             </div>
         </div>
 
         <div class="mt-8 lg:mt-16">
-            <PaginationComponent
-                {totalPages}
-                {onPageChanged}
-                currentPage={page}
-            />
+            <PaginationComponent {totalPages} {onPageChanged} currentPage={page} />
         </div>
     </div>
 {/if}

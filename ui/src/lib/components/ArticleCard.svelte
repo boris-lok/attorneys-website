@@ -10,9 +10,7 @@
 </script>
 
 {#if disabled}
-    <div
-        class="flex flex-col justify-around rounded-lg bg-white px-8 py-6 shadow"
-    >
+    <div class="flex flex-col justify-around rounded-lg bg-white px-8 py-6 shadow">
         <h2 class="text-xl font-semibold text-gray-800">
             {title}
         </h2>

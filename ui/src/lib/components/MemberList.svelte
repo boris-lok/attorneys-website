@@ -42,10 +42,7 @@
         <div
             class="flex h-36 w-full flex-row justify-between rounded px-4 py-4 shadow-md md:w-84 lg:w-96"
         >
-            <a
-                href="/members/{member.id}"
-                class="flex flex-row items-center gap-4"
-            >
+            <a href="/members/{member.id}" class="flex flex-row items-center gap-4">
                 {#if member.avatar}
                     <div class="h-24 w-24">
                         <Image alt={member.name} image={member.avatar} />
@@ -56,10 +53,7 @@
                 <p class="text-2xl">{member.name}</p>
             </a>
             {#if isAdmin}
-                <a
-                    href="/admin/members/edit/{member.id}"
-                    class="inline-block h-6 w-6"
-                >
+                <a href="/admin/members/edit/{member.id}" class="inline-block h-6 w-6">
                     <Icon icon="mingcute:edit-line" width="24" height="24" />
                 </a>
             {/if}

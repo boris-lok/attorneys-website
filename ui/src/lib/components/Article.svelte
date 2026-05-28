@@ -53,17 +53,12 @@
 {:else}
     <div class="relative mx-auto mt-8 md:mt-16 md:max-w-5xl">
         <div class="relative flex flex-row justify-between">
-            <p
-                class=" my-8 text-center text-3xl font-bold text-[var(--primary-color)]"
-            >
+            <p class=" my-8 text-center text-3xl font-bold text-[var(--primary-color)]">
                 {data.title}
             </p>
             {#if onBackClicked}
                 <button class="cursor-pointer" onclick={onBackClicked}>
-                    <IconifyIcon
-                        icon="line-md:close-circle"
-                        class="m-2 h-6 w-6"
-                    />
+                    <IconifyIcon icon="line-md:close-circle" class="m-2 h-6 w-6" />
                 </button>
             {/if}
         </div>

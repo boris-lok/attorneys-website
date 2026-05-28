@@ -47,23 +47,13 @@
 
 <main>
     {#if isCreated}
-        <div
-            class="mx-4 my-4 flex items-center justify-center rounded px-8 shadow"
-        >
-            <CaseEditor
-                onClosed={() => (isCreated = false)}
-                onSaved={appendCase}
-            />
+        <div class="mx-4 my-4 flex items-center justify-center rounded px-8 shadow">
+            <CaseEditor onClosed={() => (isCreated = false)} onSaved={appendCase} />
         </div>
     {:else}
-        <div
-            class="my-2 flex h-16 flex-row items-center justify-end gap-2 px-4"
-        >
+        <div class="my-2 flex h-16 flex-row items-center justify-end gap-2 px-4">
             <button class="cursor-pointer" onclick={() => (isCreated = true)}>
-                <IconifyIcon
-                    class="h-4 w-4 md:h-6 md:w-6"
-                    icon="tabler:library-plus"
-                />
+                <IconifyIcon class="h-4 w-4 md:h-6 md:w-6" icon="tabler:library-plus" />
             </button>
         </div>
     {/if}
@@ -72,18 +62,10 @@
         <div
             class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
         >
-            <p class="text-md flex-6/12 px-2 py-3 text-left font-bold">
-                Case Name
-            </p>
-            <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
-                Period
-            </p>
-            <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">
-                Used Hrs
-            </p>
-            <p class="text-md flex-auto px-2 py-3 text-left font-bold">
-                &nbsp;
-            </p>
+            <p class="text-md flex-6/12 px-2 py-3 text-left font-bold">Case Name</p>
+            <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">Period</p>
+            <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">Used Hrs</p>
+            <p class="text-md flex-auto px-2 py-3 text-left font-bold">&nbsp;</p>
         </div>
         {#each cases as c, i (c.id)}
             <Case
@@ -92,9 +74,7 @@
                 onDeleted={() => (cases = cases.filter((e) => e.id !== c.id))}
             />
             {#if i < cases.length - 1}
-                <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">
-                    &nbsp;
-                </div>
+                <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">&nbsp;</div>
             {/if}
         {/each}
     </div>

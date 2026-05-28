@@ -48,9 +48,7 @@
     {#if errorMessage}
         <div>{errorMessage}</div>
     {/if}
-    <div
-        class="prose mx-auto my-6 w-full px-6 md:my-16 md:min-w-2xl md:px-16 lg:min-w-3xl"
-    >
+    <div class="prose mx-auto my-6 w-full px-6 md:my-16 md:min-w-2xl md:px-16 lg:min-w-3xl">
         <Markdown source={content}></Markdown>
     </div>
 {/if}

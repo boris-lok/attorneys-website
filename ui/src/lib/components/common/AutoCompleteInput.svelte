@@ -15,23 +15,13 @@
         onBlur?: (s: string) => void
     }
 
-    let {
-        label,
-        name,
-        value = '',
-        options,
-        onInput,
-        onBlur,
-        onSelect
-    }: Props = $props()
+    let { label, name, value = '', options, onInput, onBlur, onSelect }: Props = $props()
 
     let opts: Options = $state([])
     let draft = $state(value)
     let filteredOpts: Options = $derived.by(() => {
         const k = draft.toLowerCase()
-        return opts.filter((opt) =>
-            opt.value.toLowerCase().includes(k)
-        )
+        return opts.filter((opt) => opt.value.toLowerCase().includes(k))
     })
     let open = $state(false)
     let selected = false
@@ -101,7 +91,7 @@
         type="text"
         onblur={_onBlur}
         onfocus={_onFocus}
-        onkeydown={e => {
+        onkeydown={(e) => {
             if (e.key === 'Escape') {
                 open = false
             }

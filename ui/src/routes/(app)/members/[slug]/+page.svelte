@@ -46,9 +46,7 @@
     <Loading />
 {:else}
     <div class="my-8 px-4 md:mx-auto md:my-16 md:max-w-5xl md:px-8">
-        <div
-            class="relative flex flex-col items-center justify-between md:flex-row"
-        >
+        <div class="relative flex flex-col items-center justify-between md:flex-row">
             <p class="mb-8 text-3xl font-bold text-[var(--primary-color)]">
                 {name}
             </p>

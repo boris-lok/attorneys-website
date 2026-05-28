@@ -33,9 +33,7 @@
 
     // handles content has been changed
     // it will update the preview zone automatically
-    function onContentChanged(
-        e: Event & { currentTarget: EventTarget & HTMLTextAreaElement },
-    ) {
+    function onContentChanged(e: Event & { currentTarget: EventTarget & HTMLTextAreaElement }) {
         newData = {
             ...newData,
             data: (e.currentTarget as HTMLTextAreaElement).value.trim(),
@@ -43,9 +41,7 @@
     }
 
     // handles title has been changed
-    function onTitleChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
-    ) {
+    function onTitleChanged(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
         newData = {
             ...newData,
             title: (e.currentTarget as HTMLInputElement).value.trim(),
@@ -53,9 +49,7 @@
     }
 
     // handles icon has been changed
-    function onIconChanged(
-        e: Event & { currentTarget: EventTarget & HTMLInputElement },
-    ) {
+    function onIconChanged(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
         newData = {
             ...newData,
             icon: (e.currentTarget as HTMLInputElement).value.trim(),
@@ -70,11 +64,7 @@
     // checks if content is not empty
     // if it is, returns false. Otherwise, returns true
     function isValid() {
-        return (
-            newData.title.trim() !== '' &&
-            newData.data !== '' &&
-            newData.icon.trim() !== ''
-        )
+        return newData.title.trim() !== '' && newData.data !== '' && newData.icon.trim() !== ''
     }
 
     // handles the save button has been clicked
@@ -113,9 +103,7 @@
     >
         <p class="w-full text-center">{errorMsg}</p>
     </div>
-    <div
-        class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4"
-    >
+    <div class="relative flex flex-col gap-y-4 px-4 py-4 md:flex-row md:gap-x-4">
         <div class="flex-1">
             <div class="relative flex-row gap-x-4">
                 <div class="flex flex-col gap-x-1">

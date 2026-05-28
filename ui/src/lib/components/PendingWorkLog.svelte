@@ -1,8 +1,5 @@
 <script lang="ts">
-    import {
-        type PendingWorkLog,
-        WorkLogServices,
-    } from '$lib/services/work_log.service'
+    import { type PendingWorkLog, WorkLogServices } from '$lib/services/work_log.service'
     import { dateRangeFormatter, roundTo } from '$lib/utils'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/common/Loading.svelte'
@@ -36,9 +33,7 @@
 <div
     class="m-4 rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50"
 >
-    <div
-        class="my-2 flex-5/12 font-semibold text-nowrap md:my-0 md:font-medium"
-    >
+    <div class="my-2 flex-5/12 font-semibold text-nowrap md:my-0 md:font-medium">
         {copiedData.description}
     </div>
 
@@ -60,10 +55,7 @@
         </button>
 
         <button class="cursor-pointer" onclick={() => onClicked('rejected')}>
-            <IconifyIcon
-                class="h-4 w-4 text-red-500 md:h-6 md:w-6"
-                icon="line-md:close-circle"
-            />
+            <IconifyIcon class="h-4 w-4 text-red-500 md:h-6 md:w-6" icon="line-md:close-circle" />
         </button>
     </div>
 </div>

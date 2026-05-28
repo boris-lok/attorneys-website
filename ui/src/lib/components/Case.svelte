@@ -16,10 +16,7 @@
 
     const hrs = $derived(roundTo(copiedData.estimatedMinutes / 60, 2))
     const usedPercentage = $derived(
-        roundTo(
-            (copiedData.usedMinutes * 100) / copiedData.estimatedMinutes,
-            0,
-        ),
+        roundTo((copiedData.usedMinutes * 100) / copiedData.estimatedMinutes, 0)
     )
     const usedHrs = $derived(roundTo(copiedData.usedMinutes / 60, 2))
 
@@ -42,7 +39,7 @@
         e.stopPropagation()
 
         const confirmed = confirm(
-            'Are you sure you want to delete this case? This action cannot be undone.',
+            'Are you sure you want to delete this case? This action cannot be undone.'
         )
 
         if (confirmed) {
@@ -88,27 +85,19 @@
                         class="inline-block h-5 w-5 rounded-[50%] border bg-red-500 text-center text-sm"
                     >
                         <p class="text-xs text-white">
-                            {copiedData.pendingLogs > 10
-                                ? '9+'
-                                : copiedData.pendingLogs}
+                            {copiedData.pendingLogs > 10 ? '9+' : copiedData.pendingLogs}
                         </p>
                     </div>
                 {/if}
                 <p>{copiedData.name}</p>
             </div>
 
-            <div
-                class="my-1 flex-2/12 text-sm text-gray-500 md:my-0 md:text-gray-700"
-            >
-                {formater(copiedData.startedAt)} -> {formater(
-                    copiedData.endedAt,
-                )}
+            <div class="my-1 flex-2/12 text-sm text-gray-500 md:my-0 md:text-gray-700">
+                {formater(copiedData.startedAt)} -> {formater(copiedData.endedAt)}
             </div>
 
             <div class="flex-2/12 text-sm md:text-right">
-                <div
-                    class="flex flex-col-reverse md:flex-row md:items-center md:gap-2"
-                >
+                <div class="flex flex-col-reverse md:flex-row md:items-center md:gap-2">
                     <div class="w-full md:w-20">
                         <ProgressBar progress={usedPercentage} />
                     </div>
@@ -126,10 +115,7 @@
             </div>
 
             <div class="flex h-fit flex-auto flex-row justify-end gap-2">
-                <button
-                    class="mt-4 cursor-pointer md:mt-0"
-                    onclick={onEditClicked}
-                >
+                <button class="mt-4 cursor-pointer md:mt-0" onclick={onEditClicked}>
                     <IconifyIcon
                         class="hidden h-4 w-4 hover:text-green-400 md:block md:h-6 md:w-6"
                         icon="tabler:edit"
@@ -137,10 +123,7 @@
                     <span class="md:hidden">Edit</span>
                 </button>
 
-                <button
-                    class="mt-4 cursor-pointer md:mt-0"
-                    onclick={onDeleteClicked}
-                >
+                <button class="mt-4 cursor-pointer md:mt-0" onclick={onDeleteClicked}>
                     <IconifyIcon
                         class="hidden h-4 w-4 hover:text-red-500 md:block md:h-6 md:w-6"
                         icon="tabler:trash"

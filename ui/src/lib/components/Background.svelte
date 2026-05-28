@@ -35,9 +35,7 @@
     </picture>
 
     <div class="z-10 pt-4 text-center md:pt-36">
-        <p class="text-2xl text-gray-300 md:text-4xl md:text-6xl lg:text-6xl">
-            勤睿國際法律事務所
-        </p>
+        <p class="text-2xl text-gray-300 md:text-4xl md:text-6xl lg:text-6xl">勤睿國際法律事務所</p>
 
         <div
             class="fixed right-[1.5rem] bottom-[3rem] flex flex-col md:mt-8 lg:relative lg:right-auto lg:bottom-auto"
@@ -53,9 +51,7 @@
                             class="h-8 w-8 text-green-400 lg:h-10 lg:w-10"
                             icon={item.icon}
                         />
-                        <p
-                            class="hidden lg:block lg:text-3xl lg:text-xl lg:text-yellow-100"
-                        >
+                        <p class="hidden lg:block lg:text-3xl lg:text-xl lg:text-yellow-100">
                             諮詢
                         </p>
                     </a>

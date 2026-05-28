@@ -26,18 +26,10 @@
         name: rest.name ?? '',
         hrs: rest.hrs ?? 0,
         startedAt:
-            rest.startedAt ??
-            new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0),
+            rest.startedAt ?? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0),
         endedAt:
             rest.endedAt ??
-            new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                now.getDate() + 1,
-                23,
-                59,
-                59,
-            ),
+            new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59),
     })
     let errMsg = $state('')
     let isLoading = $state(false)
@@ -127,9 +119,7 @@
 <div
     class="m-4 w-full rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none"
 >
-    <div
-        class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium"
-    >
+    <div class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium">
         <Input
             value={copiedData.name}
             label="Case Name"
@@ -167,9 +157,7 @@
         />
     </div>
 
-    <div
-        class="flex h-fit flex-auto flex-row justify-center gap-2 md:justify-end"
-    >
+    <div class="flex h-fit flex-auto flex-row justify-center gap-2 md:justify-end">
         <button class="cursor-pointer md:m-0.5" onclick={_onSaved}>
             <IconifyIcon
                 class="h-6 w-6 text-green-500"
@@ -177,10 +165,7 @@
             />
         </button>
         <button class="cursor-pointer md:m-0.5" onclick={_onClosed}>
-            <IconifyIcon
-                class="h-6 w-6 text-red-500"
-                icon="line-md:close-circle"
-            />
+            <IconifyIcon class="h-6 w-6 text-red-500" icon="line-md:close-circle" />
         </button>
     </div>
 </div>

@@ -17,7 +17,7 @@ import { getToken } from '$lib/utils'
  * @return {Promise<APIError | APIResponse<void>>} A promise that resolves to an object indicating if the operation was successful or not.
  */
 async function save(
-    req: CreateHomeRequest | UpdateHomeRequest,
+    req: CreateHomeRequest | UpdateHomeRequest
 ): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/home`, {
@@ -49,7 +49,7 @@ async function save(
  */
 async function retrieve(
     id: string,
-    language: Language,
+    language: Language
 ): Promise<APIError | APIResponse<{ home: HomeData }>> {
     try {
         const resp = await fetch(`${BASE_URL}/home/${id}`, {
@@ -81,9 +81,7 @@ async function retrieve(
  * @param {Language} language - The language preference for the request headers.
  * @return {Promise<APIError | APIResponse<{home: HomeData[]>}>} - A promise that resolves to an object containing either the fetched data or an error message.
  */
-async function list(
-    language: Language,
-): Promise<APIError | APIResponse<{ home: HomeData[] }>> {
+async function list(language: Language): Promise<APIError | APIResponse<{ home: HomeData[] }>> {
     try {
         const resp = await fetch(`${BASE_URL}/home`, {
             method: 'GET',

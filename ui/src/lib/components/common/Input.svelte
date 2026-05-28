@@ -22,9 +22,7 @@
 
 <div class="mb-4">
     {#if label}
-        <label class="block text-sm font-bold text-gray-700" for={inputId}
-            >{label}</label
-        >
+        <label class="block text-sm font-bold text-gray-700" for={inputId}>{label}</label>
     {/if}
     <input
         {...props}

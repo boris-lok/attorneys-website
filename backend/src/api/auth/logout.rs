@@ -13,16 +13,6 @@ pub async fn logout(
     jar: CookieJar,
     Extension(redis_client): Extension<Arc<redis::Client>>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let user_id = claims.sub;
-
-    let mut conn = redis_client
-        .get_connection()
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-
-    let () = conn
-        .del(&user_id)
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-
     let cookie = Cookie::build(("token", ""))
         .path("/")
         .max_age(time::Duration::seconds(0));

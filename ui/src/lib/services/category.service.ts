@@ -25,9 +25,9 @@ async function save(
     try {
         const resp = await fetch(`${ADMIN_URL}/categories`, {
             method: 'id' in req ? 'PUT' : 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             body: JSON.stringify(req),
             signal: AbortSignal.timeout(TIMEOUT),
@@ -93,9 +93,9 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/categories/${id}`, {
             method: 'DELETE',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             signal: AbortSignal.timeout(TIMEOUT),
         })

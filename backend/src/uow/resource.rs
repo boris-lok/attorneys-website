@@ -15,7 +15,7 @@ use crate::repositories::{IResourceRepository, SqlxAvatarRepository, SqlxContent
 use anyhow::anyhow;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use sqlx::{PgPool, Postgres, Row, Transaction};
+use sqlx::{PgPool, Postgres, QueryBuilder, Row, Transaction};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -66,7 +66,7 @@ pub trait IResourceUnitOfWork {
 
     /** Commit the transaction */
     async fn commit(mut self) -> anyhow::Result<()>;
-    /** Rollback the transaction */
+    /** Roll back the transaction */
     async fn rollback(mut self) -> anyhow::Result<()>;
 }
 
@@ -532,45 +532,50 @@ impl IResourceUnitOfWork for InDatabase<'_> {
             }
         };
 
-        let query = format!(
-            r#"select resource.id as id,
+        let mut qb = QueryBuilder::new(
+            r#"
+             select resource.id as id,
                 content.data as data,
                 content.language as language,
                 resource.seq as seq
                 from resource,
                     content
                 where resource.id = content.id
-                and content.language = $1
-                and resource.resource_type = $2
                 and resource.deleted_at is null
-                {}
-                order by seq, resource.created_at desc
-                "#,
-            filter_str
+            "#,
         );
+        qb.push(" and content.language = ");
+        qb.push_bind(language.as_str());
+        qb.push(" and resource.resource_type = ");
+        qb.push_bind(resource_type.as_str());
+        qb.push(filter_str);
+        qb.push(" order by seq, resource.created_at desc ");
+        qb.push(offset.as_str());
 
         let res = match resource_type {
             ResourceType::Member => {
-                let query = format!(
-                    r"select resource.id as id,
-                content.data->>'name' as name,
-                avatar.data->>'small_image' as avatar,
-                resource.seq as seq
-                from resource,
-                     content
-                left join avatar on content.id = avatar.id
-                where resource.id = content.id
-                and content.language = $1
-                and resource.resource_type = $2
-                and resource.deleted_at is null
-                {}
-                order by seq, resource.created_at desc {}",
-                    filter_str, offset
+                let mut qb = QueryBuilder::new(
+                    r#"
+                    select
+                      resource.id as id,
+                      content.data->>'name' as name,
+                      avatar.data->>'small_image' as avatar,
+                      resource.seq as seq
+                    from resource
+                      join content on resource.id = content.id
+                      left join avatar on content.id = avatar.id
+                    where content.language =
+                    "#,
                 );
 
-                sqlx::query_as::<_, SimpleMemberEntityFromSQLx>(query.as_str())
-                    .bind(language.as_str())
-                    .bind(resource_type.as_str())
+                qb.push_bind(language.as_str());
+                qb.push(" and resource.resource_type = ");
+                qb.push_bind(resource_type.as_str());
+                qb.push(" and resource.deleted_at is null");
+                qb.push(" order by seq, resource.created_at desc ");
+                qb.push(offset.as_str());
+
+                qb.build_query_as::<SimpleMemberEntityFromSQLx>()
                     .fetch_all(self.pool)
                     .await?
                     .into_iter()
@@ -578,35 +583,26 @@ impl IResourceUnitOfWork for InDatabase<'_> {
                     .filter_map(|e| serde_json::value::to_value(e).ok())
                     .collect::<Vec<_>>()
             }
-            ResourceType::Service => {
-                let query = format!("{}{}", query, offset);
-
-                sqlx::query_as::<_, ServiceEntityFromSQLx>(query.as_str())
-                    .bind(language.as_str())
-                    .bind(resource_type.as_str())
-                    .fetch_all(self.pool)
-                    .await?
-                    .into_iter()
-                    .map(ServiceEntity::from)
-                    .filter_map(|e| serde_json::value::to_value(e).ok())
-                    .collect::<Vec<_>>()
-            }
-            ResourceType::Home => {
-                let query = format!("{}{}", query, offset);
-
-                sqlx::query_as::<_, HomeEntityFromSQLx>(query.as_str())
-                    .bind(language.as_str())
-                    .bind(resource_type.as_str())
-                    .fetch_all(self.pool)
-                    .await?
-                    .into_iter()
-                    .map(HomeEntity::from)
-                    .filter_map(|e| serde_json::value::to_value(e).ok())
-                    .collect::<Vec<_>>()
-            }
+            ResourceType::Service => qb
+                .build_query_as::<ServiceEntityFromSQLx>()
+                .fetch_all(self.pool)
+                .await?
+                .into_iter()
+                .map(ServiceEntity::from)
+                .filter_map(|e| serde_json::value::to_value(e).ok())
+                .collect::<Vec<_>>(),
+            ResourceType::Home => qb
+                .build_query_as::<HomeEntityFromSQLx>()
+                .fetch_all(self.pool)
+                .await?
+                .into_iter()
+                .map(HomeEntity::from)
+                .filter_map(|e| serde_json::value::to_value(e).ok())
+                .collect::<Vec<_>>(),
             ResourceType::Article => {
-                let query = format!(
-                    r#"select resource.id as id,
+                let mut qb = QueryBuilder::new(
+                    r#"
+                   select resource.id as id,
                 content.data->>'title' as title,
                 content.created_at as created_at,
                 content.language as language,
@@ -614,19 +610,19 @@ impl IResourceUnitOfWork for InDatabase<'_> {
                 from resource,
                     content
                 where resource.id = content.id
-                and content.language = $1
-                and resource.resource_type = $2
                 and resource.deleted_at is null
-                {}
-                order by seq, resource.created_at desc
-                {}
-                "#,
-                    filter_str, offset
+                    "#,
                 );
 
-                sqlx::query_as::<_, SimpleArticleEntityFromSQLx>(query.as_str())
-                    .bind(language.as_str())
-                    .bind(resource_type.as_str())
+                qb.push(" and content.language = ");
+                qb.push_bind(language.as_str());
+                qb.push(" and resource.resource_type = ");
+                qb.push_bind(resource_type.as_str());
+                qb.push(filter_str);
+                qb.push(" order by seq, resource.created_at desc ");
+                qb.push(offset.as_str());
+
+                qb.build_query_as::<SimpleArticleEntityFromSQLx>()
                     .fetch_all(self.pool)
                     .await?
                     .into_iter()
@@ -634,32 +630,22 @@ impl IResourceUnitOfWork for InDatabase<'_> {
                     .filter_map(|e| serde_json::value::to_value(e).ok())
                     .collect::<Vec<_>>()
             }
-            ResourceType::Contact => {
-                let query = format!("{}{}", query, offset);
-
-                sqlx::query_as::<_, ContactEntityFromSQLx>(query.as_str())
-                    .bind(language.as_str())
-                    .bind(resource_type.as_str())
-                    .fetch_all(self.pool)
-                    .await?
-                    .into_iter()
-                    .map(ContactEntity::from)
-                    .filter_map(|e| serde_json::value::to_value(e).ok())
-                    .collect::<Vec<_>>()
-            }
-            ResourceType::Category => {
-                let query = format!("{}{}", query, offset);
-
-                sqlx::query_as::<_, CategoryEntityFromSQLx>(query.as_str())
-                    .bind(language.as_str())
-                    .bind(resource_type.as_str())
-                    .fetch_all(self.pool)
-                    .await?
-                    .into_iter()
-                    .map(CategoryEntity::from)
-                    .filter_map(|e| serde_json::value::to_value(e).ok())
-                    .collect::<Vec<_>>()
-            }
+            ResourceType::Contact => qb
+                .build_query_as::<ContactEntityFromSQLx>()
+                .fetch_all(self.pool)
+                .await?
+                .into_iter()
+                .map(ContactEntity::from)
+                .filter_map(|e| serde_json::value::to_value(e).ok())
+                .collect::<Vec<_>>(),
+            ResourceType::Category => qb
+                .build_query_as::<CategoryEntityFromSQLx>()
+                .fetch_all(self.pool)
+                .await?
+                .into_iter()
+                .map(CategoryEntity::from)
+                .filter_map(|e| serde_json::value::to_value(e).ok())
+                .collect::<Vec<_>>(),
         };
 
         Ok(res
@@ -676,23 +662,23 @@ impl IResourceUnitOfWork for InDatabase<'_> {
         resource_type: &ResourceType,
     ) -> anyhow::Result<usize> {
         let filter_str = filter_str.clone().unwrap_or_default();
-        let filter_str = filter_str.as_str();
-        let query = format!(
+
+        let mut qb = QueryBuilder::new(
             r#"select count(resource.id) as total
                 from resource,
                     content
                 where resource.id = content.id
-                and content.language = $1
-                and resource.resource_type = $2
                 and resource.deleted_at is null
-                {}
                 "#,
-            filter_str
         );
+        qb.push(" and content.language = ");
+        qb.push_bind(language.as_str());
+        qb.push(" and resource.resource_type = ");
+        qb.push_bind(resource_type.as_str());
+        qb.push(filter_str);
 
-        let count = sqlx::query(&query)
-            .bind(language.as_str())
-            .bind(resource_type.as_str())
+        let count = qb
+            .build()
             .fetch_one(self.pool)
             .await
             .map(|e| e.get::<i64, usize>(0))?;

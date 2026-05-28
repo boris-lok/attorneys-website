@@ -5,12 +5,15 @@ use crate::repositories::{IUserRepository, SqlxUserRepository};
 use crate::startup::AppState;
 use anyhow::Context;
 use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::{Extension, Json};
-use axum_extra::extract::WithRejection;
+use axum_extra::extract::cookie::{Cookie, SameSite};
+use axum_extra::extract::{CookieJar, WithRejection};
 use chrono::{Duration, Utc};
 use redis::Commands;
 use secrecy::SecretBox;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -20,20 +23,13 @@ pub struct LoginRequest {
     password: String,
 }
 
-#[derive(Debug, Serialize)]
-pub struct LoginResponse {
-    user_id: String,
-    username: String,
-    nickname: String,
-    token: String,
-    roles: Vec<String>,
-}
-
+#[axum_macros::debug_handler]
 pub async fn login(
     State(state): State<AppState>,
+    jar: CookieJar,
     Extension(redis_client): Extension<Arc<redis::Client>>,
     WithRejection(Json(req), _): WithRejection<Json<LoginRequest>, ApiError>,
-) -> Result<Json<LoginResponse>, ApiError> {
+) -> Result<impl IntoResponse, ApiError> {
     let mut conn = state
         .pool
         .acquire()
@@ -52,7 +48,7 @@ pub async fn login(
     match res {
         Ok(id) => {
             let user_id = id.to_string();
-            let exp = Utc::now() + Duration::days(7);
+            let exp = Utc::now() + Duration::seconds(60);
 
             let mut redis_connection = redis_client
                 .get_connection()
@@ -77,6 +73,7 @@ pub async fn login(
                 sub: user_id.clone(),
                 exp: exp.timestamp() as usize,
                 roles: roles.clone(),
+                nickname: nickname.clone(),
             };
 
             let token = jsonwebtoken::encode(
@@ -86,13 +83,15 @@ pub async fn login(
             )
             .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 
-            Ok(Json(LoginResponse {
-                user_id,
-                username: req.username,
-                nickname,
-                token,
-                roles,
-            }))
+            let ct = Cookie::build(("token", token))
+                .path("/")
+                .http_only(true)
+                .secure(false)
+                .same_site(SameSite::Lax);
+
+            let jar = jar.add(ct);
+
+            Ok((jar, StatusCode::OK))
         }
         Err(Error::InvalidCredentials) => Err(ApiError::InvalidCredentials),
         Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e.to_string())),

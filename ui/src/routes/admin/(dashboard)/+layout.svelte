@@ -2,8 +2,8 @@
     import NavigateBar from '$lib/components/sidebar/NavigateBar.svelte'
     import type { NavigationItem } from '$lib/types'
     import { UserService } from '$lib/services/user.service'
-    import { user } from '$lib/stores/user.store'
     import { goto } from '$app/navigation'
+    import Cookies from 'js-cookie'
 
     let { children } = $props()
 
@@ -41,7 +41,7 @@
                 if (resp.error) {
                     console.error(resp.message)
                 }
-                user.remove()
+                Cookies.remove('token')
                 await goto('/admin/login')
             },
         },

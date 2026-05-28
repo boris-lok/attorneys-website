@@ -13,8 +13,8 @@ use crate::api::{
 };
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::utils::image::ImageUtil;
-use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
-use axum::http::HeaderValue;
+use axum::http::header::{ACCEPT_LANGUAGE, CONTENT_TYPE};
+use axum::http::{HeaderValue, Method};
 use axum::routing::{delete, get, post, put};
 use axum::{Extension, Router};
 use jsonwebtoken::{DecodingKey, EncodingKey};
@@ -24,7 +24,7 @@ use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -130,13 +130,24 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         .merge(category_routes)
         .merge(article_routes);
 
+    let allowed_origins = vec!["http://localhost:5173", "https://chenwanglaw.com"];
+
     let cors = CorsLayer::new()
-        .allow_headers([
-            AUTHORIZATION,
-            CONTENT_TYPE,
+        .allow_origin(
+            allowed_origins
+                .into_iter()
+                .map(|o| o.parse::<HeaderValue>().unwrap())
+                .collect::<Vec<_>>(),
+        )
+        .allow_credentials(true)
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::OPTIONS,
         ])
-        .allow_methods(Any)
-        .allow_origin(Any);
+        .allow_headers([CONTENT_TYPE, ACCEPT_LANGUAGE]);
 
     let app = Router::new()
         .route("/health", get(health_check))
@@ -151,7 +162,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         listener,
         app.into_make_service_with_connect_info::<SocketAddr>(),
     )
-        .await
+    .await
 }
 
 pub async fn get_database_connection(config: &DatabaseSettings) -> PgPool {

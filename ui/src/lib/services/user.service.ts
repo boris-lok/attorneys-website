@@ -28,43 +28,21 @@ export type SimpleUser = {
 async function login(req: {
     username: string
     password: string
-}): Promise<APIError | APIResponse<{ error: boolean; credential: Credential }>> {
+}): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/login`, {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req),
-            signal: AbortSignal.timeout(TIMEOUT),
+            signal: AbortSignal.timeout(TIMEOUT)
         })
 
         if (!resp.ok) {
             return { error: true, message: `Error: ${resp.status}` }
         }
 
-        const json = await resp.json()
-        if (
-            'token' in json &&
-            'user_id' in json &&
-            'username' in json &&
-            'nickname' in json &&
-            'roles' in json
-        ) {
-            return {
-                error: false,
-                credential: {
-                    userId: json.user_id,
-                    username: json.username,
-                    nickname: json.nickname,
-                    token: json.token,
-                    roles: json.roles,
-                },
-            }
-        }
-
-        return {
-            error: true,
-            message: `Unknown error: ${JSON.stringify(json)}`,
-        }
+        return { error: false }
     } catch (error) {
         return { error: true, message: `Error: ${error}` }
     }
@@ -82,11 +60,11 @@ async function logout(): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/logout`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
-            signal: AbortSignal.timeout(TIMEOUT),
+            signal: AbortSignal.timeout(TIMEOUT)
         })
 
         if (!resp.ok) {
@@ -105,11 +83,11 @@ async function list(): Promise<APIError | APIResponse<{ users: SimpleUser[] }>> 
     try {
         const resp = await fetch(url, {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
-            signal: AbortSignal.timeout(TIMEOUT),
+            signal: AbortSignal.timeout(TIMEOUT)
         })
 
         const json = await resp.json()
@@ -120,7 +98,7 @@ async function list(): Promise<APIError | APIResponse<{ users: SimpleUser[] }>> 
                 return {
                     id: e.id,
                     nickname: e.nickname,
-                    roles: e.roles,
+                    roles: e.roles
                 }
             })
         }
@@ -139,5 +117,5 @@ async function list(): Promise<APIError | APIResponse<{ users: SimpleUser[] }>> 
 export const UserService = {
     login: login,
     logout: logout,
-    list: list,
+    list: list
 }

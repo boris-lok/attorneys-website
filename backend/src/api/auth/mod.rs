@@ -17,6 +17,7 @@ pub struct Claims {
     pub sub: String,
     pub exp: usize,
     pub roles: Vec<String>,
+    pub nickname: String,
 }
 
 impl<S> FromRequestParts<S> for Claims
@@ -42,17 +43,14 @@ where
             .get_connection()
             .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 
-        let bearer = parts
-            .headers
-            .get("Authorization")
-            .and_then(|value| value.to_str().ok())
-            .and_then(|value| value.split_once(' '))
-            .context("Missing Authorization header")
-            .map_err(|_| ApiError::MissingBearer)?
-            .1;
+        let jar = axum_extra::extract::CookieJar::from_request_parts(parts, &state)
+            .await
+            .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+
+        let token = jar.get("token").ok_or(ApiError::MissingBearer)?.value();
 
         let token_data = jsonwebtoken::decode::<Claims>(
-            bearer,
+            token,
             &state.jwt_decoding_key,
             &jsonwebtoken::Validation::default(),
         )

@@ -25,9 +25,9 @@ async function save(
     try {
         const resp = await fetch(`${ADMIN_URL}/members`, {
             method: 'id' in req ? 'PUT' : 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             body: JSON.stringify(req),
             signal: AbortSignal.timeout(TIMEOUT),
@@ -131,9 +131,7 @@ async function saveAvatar(id: string, file: File): Promise<APIError | APIRespons
         const resp = await fetch(`${ADMIN_URL}/members/${id}/avatar`, {
             method: 'POST',
             body: formData,
-            headers: {
-                Authorization: getToken(),
-            },
+            credentials: 'include',
             signal: AbortSignal.timeout(UPLOAD_IMAGE_TIMEOUT),
         })
         if (!resp.ok) {

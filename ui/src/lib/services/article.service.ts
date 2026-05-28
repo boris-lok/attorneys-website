@@ -25,9 +25,9 @@ async function save(
     try {
         const resp = await fetch(`${ADMIN_URL}/articles`, {
             method: 'id' in req ? 'PUT' : 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             body: JSON.stringify(req),
             signal: AbortSignal.timeout(TIMEOUT),

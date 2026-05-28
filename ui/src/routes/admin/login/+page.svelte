@@ -2,42 +2,26 @@
     import Input from '$lib/components/common/Input.svelte'
     import { UserService } from '$lib/services/user.service'
     import { goto } from '$app/navigation'
-    import { user } from '$lib/stores/user.store'
     import Loading from '$lib/components/common/Loading.svelte'
 
     let isLoading = $state(false)
+    let username = $state('')
+    let password = $state('')
 
-    type Data = {
-        username: string
-        password: string
-    }
-
-    let data: Data = {
-        username: '',
-        password: '',
-    }
-
-    function onDataChanged<K extends keyof Data>(
-        key: K,
-        e: Event & { currentTarget: EventTarget & HTMLInputElement }
-    ) {
-        if (!e.target) {
-            return
+    function validate() {
+        if (username === '' || password === '') {
+            return false
         }
-
-        const { value } = e.target as HTMLInputElement
-        data = {
-            ...data,
-            [key]: value.trim(),
-        }
+        return true
     }
 
     async function onSubmitClicked() {
-        if (data.username === '' || data.password === '') {
+        if (!validate()) {
             return
         }
+
         isLoading = true
-        const resp = await UserService.login(data)
+        const resp = await UserService.login({ username, password })
 
         if (resp.error) {
             console.error(`login failed: ${resp}`)
@@ -45,12 +29,7 @@
             return
         }
 
-        user.set(resp.credential)
-        if (resp.credential.roles.some((r) => r.toLowerCase() === 'lawyer')) {
-            await goto(`/b/dashboard`)
-        } else {
-            await goto('/admin/dashboard')
-        }
+        await goto(`/b/dashboard`)
     }
 </script>
 
@@ -61,23 +40,21 @@
         <Input
             label="Username"
             name="username"
-            onInput={(e) => onDataChanged('username', e)}
             type="text"
-            value=""
+            bind:value={username}
         />
         <Input
             label="Password"
             name="password"
-            onInput={(e) => onDataChanged('password', e)}
             type="password"
-            value=""
+            bind:value={password}
         />
         <div class="flex items-center justify-center">
             <button
                 class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:bg-gray-500"
                 disabled={isLoading}
                 onclick={onSubmitClicked}
-                >Login
+            >Login
             </button>
         </div>
     </div>

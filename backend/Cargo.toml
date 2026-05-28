@@ -18,31 +18,32 @@ path = "src/bin/manage_user.rs"
 
 [dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
+serde_json = "1.0.150"
 async-trait = "0.1.89"
 anyhow = "1.0.102"
 ulid = "1.2.1"
-axum = { version = "0.8.8", features = ["multipart"] }
-axum-macros = "0.5.0"
-axum-extra = { version = "0.12.5", features = ["typed-header", "with-rejection"] }
-config = "0.15.19"
-tokio = { version = "1.49.0", features = ["full"] }
+axum = { version = "0.8.9", features = ["multipart"] }
+axum-macros = "0.5.1"
+axum-extra = { version = "0.12.6", features = ["typed-header", "with-rejection", "cookie"] }
+config = "0.15.23"
+tokio = { version = "1.52.3", features = ["full"] }
 thiserror = "2.0.18"
 tower = "0.5.3"
-tower-http = { version = "0.6.8", features = ["cors", "set-header"] }
-sqlx = { version = "0.8.6", features = ["chrono", "macros", "migrate", "postgres", "runtime-tokio-rustls", "uuid", "ipnet"] }
-chrono = { version = "0.4.43", default-features = false, features = ["serde"] }
-image = "0.25.9"
+tower-http = { version = "0.6.11", features = ["cors", "set-header"] }
+sqlx = { version = "0.9.0", features = ["chrono", "macros", "migrate", "postgres", "runtime-tokio", "uuid", "ipnet"] }
+chrono = { version = "0.4.44", default-features = false, features = ["serde"] }
+image = "0.25.10"
 validator = { version = "0.20.0", features = ["derive"] }
-uuid = { version = "1.21.0", features = ["v4", "serde"] }
+uuid = { version = "1.23.1", features = ["v4", "serde"] }
 secrecy = { version = "0.10.3", features = ["serde"] }
 argon2 = { version = "0.5.3", features = ["std"] }
-rand = "0.10.0"
-jsonwebtoken = { version = "10.3.0" , features = ["rust_crypto"]}
-redis = { version = "1.0.4", features = ["tokio-comp"] }
+rand = "0.10.1"
+jsonwebtoken = { version = "10.4.0" , features = ["rust_crypto"]}
+redis = { version = "1.2.1", features = ["tokio-comp"] }
 tracing = "0.1.44"
-tracing-subscriber = { version = "0.3.22", features = ["json"] }
+tracing-subscriber = { version = "0.3.23", features = ["json"] }
 tracing-log = "0.2.0"
 dialoguer = "0.12.0"
-clap = { version = "4.5.60", features = ["derive"] }
-rust_xlsxwriter = { version = "0.94.0", features = ["chrono", "serde"] }
+clap = { version = "4.6.1", features = ["derive"] }
+rust_xlsxwriter = { version = "0.95.0", features = ["chrono", "serde"] }
+time = "0.3.37"

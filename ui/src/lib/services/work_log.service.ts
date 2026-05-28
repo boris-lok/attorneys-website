@@ -55,9 +55,9 @@ async function save(
     try {
         const resp = await fetch(`${ADMIN_URL}/work_logs`, {
             method: 'id' in req ? 'PUT' : 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             body: JSON.stringify({
                 ...('id' in req ? { id: req.id } : {}),
@@ -108,9 +108,9 @@ async function list(
     try {
         const resp = await fetch(url.toString(), {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             signal: AbortSignal.timeout(TIMEOUT),
         })
@@ -182,9 +182,9 @@ async function download(
     try {
         const resp = await fetch(url.toString(), {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             signal: AbortSignal.timeout(TIMEOUT),
         })
@@ -201,9 +201,9 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/work_logs/${id}`, {
             method: 'DELETE',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             signal: AbortSignal.timeout(TIMEOUT),
         })
@@ -223,9 +223,9 @@ async function updateStatus(
     try {
         const resp = await fetch(`${ADMIN_URL}/work_logs/status`, {
             method: 'PUT',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             body: JSON.stringify({ id: id, status: status }),
             signal: AbortSignal.timeout(TIMEOUT),

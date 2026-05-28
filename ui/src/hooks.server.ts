@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit'
-import type { Credential } from '$lib/services/user.service'
+import { jwtDecode } from 'jwt-decode'
+import type { PayLoad } from '$lib/utils'
 
 type ValidateRoute = {
     start: string
@@ -11,17 +12,24 @@ const validateRoute: ValidateRoute[] = [
     {
         start: '/admin',
         excludes: ['login'],
-        roles: ['admin'],
+        roles: ['admin']
     },
     {
         start: '/b',
         excludes: [],
-        roles: ['admin', 'lawyer'],
-    },
+        roles: ['admin', 'lawyer']
+    }
 ]
 
 export const handle = async ({ event, resolve }) => {
-    const user: Partial<Credential> = JSON.parse(event.cookies.get('user') || '{}')
+    const token = event.cookies.get('token')
+
+    let payLoad: PayLoad | null = null
+    try {
+        payLoad = jwtDecode<PayLoad>(token ?? '')
+    } catch (e) {
+        payLoad = null
+    }
 
     for (const e of validateRoute) {
         if (event.url.pathname.startsWith(e.start)) {
@@ -29,13 +37,21 @@ export const handle = async ({ event, resolve }) => {
                 break
             }
 
-            if (!user.token) {
+            if (!payLoad || !token) {
+                event.locals.user = null
                 throw redirect(302, '/admin/login')
             }
 
-            if (!e.roles.some((role) => checkRole(user.roles ?? [], role))) {
+            if (!e.roles.some((role) => checkRole(payLoad.roles ?? [], role))) {
                 throw redirect(302, '/error/permission_denied')
             }
+        }
+    }
+
+    if (payLoad) {
+        event.locals.user = {
+            id: payLoad.sub,
+            roles: payLoad.roles ?? []
         }
     }
 

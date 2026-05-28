@@ -20,15 +20,10 @@
     type PartialProps = Partial<Props> & Output
 
     let { onClosed, onSaved, id, name, hrs, startedAt, endedAt }: PartialProps = $props()
-    // svelte-ignore state_referenced_locally
     let _id = $state(id ?? '')
-    // svelte-ignore state_referenced_locally
     let _name = $state(name ?? '')
-    // svelte-ignore state_referenced_locally
     let _hrs = $state(hrs ?? 0)
-    // svelte-ignore state_referenced_locally
     let _startedAt = $state(startedAt ?? new Date())
-    // svelte-ignore state_referenced_locally
     let _endedAt = $state(endedAt ?? new Date())
     let isLoading = $state(false)
     let errMsg = $state('')

@@ -4,7 +4,7 @@
     import {
         type PendingWorkLog as PendingWorkLogType,
         type WorkLog as WorkLogType,
-        WorkLogServices,
+        WorkLogServices
     } from '$lib/services/work_log.service'
     import WorkLog from '$lib/components/WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
@@ -38,8 +38,8 @@
                     description: log.description,
                     user: {
                         id: selfId,
-                        name: selfName,
-                    },
+                        name: selfName
+                    }
                 }
 
                 return p
@@ -125,7 +125,7 @@
 
 <main>
     {#if isCreated}
-        <div>
+        <div class="px-4">
             <WorkLogEditor onClosed={() => (isCreated = false)} caseId={id} onSaved={appendCase} />
         </div>
     {:else}
@@ -151,7 +151,7 @@
                 {#each pendingLogs as log, i (log.id)}
                     <PendingWorkLog {...log} onDone={(e) => editStatus(log.id, e)} />
                     {#if i < logs.length - 1}
-                        <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">&nbsp;</div>
+                        <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
                     {/if}
                 {/each}
             </div>
@@ -177,23 +177,26 @@
             />
         </div>
 
-        <button class="group relative cursor-pointer" onclick={download}>
-            <IconifyIcon class="h-6 w-6" icon="tabler:download" />
-            <p
-                class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
-            >
-                Download
-            </p>
-        </button>
+        <div class="flex flex-row items-center gap-2">
+            <button class="group relative cursor-pointer" onclick={download}>
+                <IconifyIcon class="h-6 w-6" icon="tabler:download" />
+                <p
+                    class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
+                >
+                    Download
+                </p>
+            </button>
 
-        <button class="group relative cursor-pointer" onclick={search}>
-            <IconifyIcon icon="tabler:file-search" class="h-6 w-6" />
-            <p
-                class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
-            >
-                Search
-            </p>
-        </button>
+            <button class="group relative cursor-pointer" onclick={search}>
+                <IconifyIcon icon="tabler:file-search" class="h-6 w-6" />
+                <p
+                    class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
+                >
+                    Search
+                </p>
+            </button>
+        </div>
+
     </div>
 
     <div class="md:m-4 md:rounded md:shadow">
@@ -213,11 +216,13 @@
                     <WorkLog
                         caseId={id}
                         {log}
-                        onSaved={(e) => (logs[i] = e)}
+                        onSaved={(updated) => {
+                            logs = logs.map(l => updated.id === l.id ? updated : l)
+                        }}
                         onDeleted={() => (logs = logs.filter((l) => l.id !== log.id))}
                     />
                     {#if i < logs.length - 1}
-                        <div class="mx-2 hidden h-[1px] bg-gray-200 md:block">&nbsp;</div>
+                        <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
                     {/if}
                 {/each}
             </div>

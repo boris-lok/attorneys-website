@@ -5,7 +5,7 @@
     import {
         type Collaborator,
         type WorkLog,
-        WorkLogServices,
+        WorkLogServices
     } from '$lib/services/work_log.service'
     import Textarea from '$lib/components/common/Textarea.svelte'
     import IconifyIcon from '@iconify/svelte'
@@ -32,7 +32,7 @@
         collaboratorIds = [],
         hideShare = false,
         onSaved,
-        onClosed,
+        onClosed
     }: Props = $props()
     let users: SimpleUser[] = $state([])
     let loaded = false
@@ -48,33 +48,15 @@
         const _s = new Date(_startedAt)
 
         // ignore time part
-        _e.setSeconds(0)
-        _e.setMilliseconds(0)
-        _s.setSeconds(0)
-        _s.setMilliseconds(0)
+        _e.setSeconds(0, 0)
+        _s.setSeconds(0, 0)
 
         return (_e.getTime() - _s.getTime()) / 1000 / 60
     })
-
-    function onDateChanged(key: 'startedAt' | 'endedAt', newDate: Date) {
-        console.log(key, newDate)
-        if (key === 'startedAt') {
-            _startedAt = newDate
-            const d = new Date(newDate)
-            d.setMinutes(d.getMinutes() + 15)
-            _endedAt = d
-            console.log(_endedAt)
-        } else {
-            _endedAt = newDate
-        }
-    }
-
-    function onDescriptionChanged(e: Event & { currentTarget: HTMLTextAreaElement }) {
-        _description = e.currentTarget.value
-    }
+    let fifteenMinutes = 15 * 60 * 1000
 
     function onCollaboratorIdsChanged(id: string, checked: boolean) {
-        let newIds = [...collaboratorIds]
+        let newIds = [..._collaboratorIds]
         if (checked) {
             newIds = [...newIds, id]
         } else {
@@ -98,42 +80,37 @@
         users = resp.users.filter((e) => e.id !== selfId).filter((e) => e.roles.includes('Lawyer'))
     }
 
-    async function onShareChanged(e: Event) {
-        let elem = e.target as HTMLInputElement
-        if (elem.checked) {
-            await fetchUsers()
-        }
-
-        share = elem.checked
+    async function onShareChanged() {
         if (share) {
+            await fetchUsers()
             _collaboratorIds = users.map((e) => e.id)
         } else {
             _collaboratorIds = []
         }
     }
 
-    async function onSave() {
-        const validate = () => {
-            if (!_startedAt) {
-                errMsg = 'Please select start time'
-                return false
-            }
-            if (!_endedAt) {
-                errMsg = 'Please select end time'
-                return false
-            }
-            if (!_description) {
-                errMsg = 'Please enter description'
-                return false
-            }
-            if (duration <= 0) {
-                errMsg = 'Ended date must be later than start date'
-                return false
-            }
-
-            return true
+    function validate() {
+        if (!_startedAt) {
+            errMsg = 'Please select start time'
+            return false
+        }
+        if (!_endedAt) {
+            errMsg = 'Please select end time'
+            return false
+        }
+        if (!_description) {
+            errMsg = 'Please enter description'
+            return false
+        }
+        if (duration <= 0) {
+            errMsg = 'Ended date must be later than start date'
+            return false
         }
 
+        return true
+    }
+
+    async function onSave() {
         if (!validate()) {
             return
         }
@@ -145,7 +122,7 @@
             collaboratorIds: _collaboratorIds,
             description: _description,
             duration: duration,
-            startedAt: _startedAt,
+            startedAt: _startedAt
         })
         isLoading = false
 
@@ -160,7 +137,7 @@
                 parentId: resp.id,
                 userId: e.id,
                 name: e.nickname,
-                status: 'pending',
+                status: 'pending'
             }))
 
         onSaved?.({
@@ -173,8 +150,8 @@
             collaborators: collaborators,
             user: {
                 id: getSelfId(),
-                name: getSelfName(),
-            },
+                name: getSelfName()
+            }
         })
     }
 </script>
@@ -195,9 +172,12 @@
     <div class="flex flex-row items-center justify-between md:justify-normal md:gap-4">
         <div class="flex flex-col gap-1 md:flex-row md:items-center md:gap-2">
             <span class="text-sm font-semibold">Working Time: </span>
-            <DateTimePicker date={_startedAt} onChanged={(e) => onDateChanged('startedAt', e)} />
+            <DateTimePicker date={_startedAt} onChanged={(e) => {
+                _startedAt = e
+                _endedAt = new Date(_startedAt.getTime() + fifteenMinutes)
+            }} />
             <span class="text-center"> ~ </span>
-            <DateTimePicker date={_endedAt} onChanged={(e) => onDateChanged('endedAt', e)} />
+            <DateTimePicker date={_endedAt} onChanged={(e) => _endedAt = e} />
         </div>
 
         <span class="h-fit"> ({duration} min)</span>
@@ -207,15 +187,14 @@
         <Textarea
             label="Description"
             name="description"
-            value={description}
-            onInput={onDescriptionChanged}
+            bind:value={_description}
             height="h-36"
         />
     </div>
 
     {#if !hideShare}
         <label class="inline-flex cursor-pointer items-center">
-            <input type="checkbox" value="" class="peer sr-only" onclick={onShareChanged} />
+            <input type="checkbox" bind:checked={share} class="peer sr-only" onchange={onShareChanged} />
             <div
                 class="peer relative h-5 w-9 rounded-full bg-gray-500 peer-checked:bg-blue-500 peer-focus:outline-none after:absolute after:start-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
             ></div>
@@ -228,10 +207,10 @@
                     <label for={user.id} class="text-md cursor-pointer font-medium">
                         <input
                             type="checkbox"
+                            bind:group={_collaboratorIds}
                             id={user.id}
                             value={user.id}
                             class="mr-2"
-                            checked={_collaboratorIds.includes(user.id)}
                             onchange={(e) => {
                                 onCollaboratorIdsChanged(user.id, e.currentTarget.checked)
                             }}

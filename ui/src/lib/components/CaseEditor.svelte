@@ -19,59 +19,37 @@
     }
     type PartialProps = Partial<Props> & Output
 
-    let { onClosed, onSaved, ...rest }: PartialProps = $props()
-    const now = new Date()
-    let copiedData: Props = $state({
-        id: rest.id ?? '',
-        name: rest.name ?? '',
-        hrs: rest.hrs ?? 0,
-        startedAt:
-            rest.startedAt ?? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0),
-        endedAt:
-            rest.endedAt ??
-            new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59),
-    })
-    let errMsg = $state('')
+    let { onClosed, onSaved, id, name, hrs, startedAt, endedAt }: PartialProps = $props()
+    // svelte-ignore state_referenced_locally
+    let _id = $state(id ?? '')
+    // svelte-ignore state_referenced_locally
+    let _name = $state(name ?? '')
+    // svelte-ignore state_referenced_locally
+    let _hrs = $state(hrs ?? 0)
+    // svelte-ignore state_referenced_locally
+    let _startedAt = $state(startedAt ?? new Date())
+    // svelte-ignore state_referenced_locally
+    let _endedAt = $state(endedAt ?? new Date())
     let isLoading = $state(false)
+    let errMsg = $state('')
 
-    function onPropsChanged(key: keyof Props, newValue: string) {
-        if (key === 'name') {
-            copiedData = { ...copiedData, name: newValue }
-        } else if (key === 'hrs') {
-            const n = Number(newValue)
-            if (isNaN(n)) {
-                errMsg = 'Please enter a valid number'
-                return
-            }
-            copiedData = { ...copiedData, hrs: n }
+    function validate() {
+        if (_name === '') {
+            errMsg = 'Please enter a case name'
+            return false
         }
-    }
 
-    function onDateChanged(key: 'startedAt' | 'endedAt', newValue: Date) {
-        console.log(key, newValue, 'onDateChanged')
-        if (key === 'startedAt') {
-            copiedData = { ...copiedData, startedAt: newValue }
-        } else if (key === 'endedAt') {
-            copiedData = { ...copiedData, endedAt: newValue }
+        if ((_hrs ?? 0) <= 0) {
+            errMsg = 'Please enter a valid number'
+            return false
         }
+
+        return true
     }
 
     async function _onSaved(e: Event) {
         e.preventDefault()
-        e.stopPropagation()
         errMsg = ''
-        console.log(copiedData)
-        const validate = () => {
-            if (copiedData.name === '') {
-                errMsg = 'Please enter a case name'
-                return false
-            }
-            if ((copiedData.hrs ?? 0) <= 0) {
-                errMsg = 'Please enter a valid number'
-                return false
-            }
-            return true
-        }
 
         if (!validate()) {
             return
@@ -79,26 +57,25 @@
 
         isLoading = true
         const resp = await CaseServices.save({
-            ...(copiedData.id === '' ? {} : { id: copiedData.id }),
-            name: copiedData.name!,
-            estimated_minutes: copiedData.hrs! * 60,
-            started_at: copiedData.startedAt,
-            ended_at: copiedData.endedAt,
+            ...(_id === '' ? {} : { id: _id }),
+            name: _name,
+            estimated_minutes: _hrs * 60,
+            started_at: _startedAt,
+            ended_at: _endedAt
         })
 
         if (resp.error) {
             errMsg = resp.message
         } else {
-            onClosed?.()
             onSaved?.({
                 id: resp.id,
-                name: copiedData.name!,
+                name: _name,
                 usedMinutes: 0,
-                estimatedMinutes: copiedData.hrs! * 60,
-                createdAt: now,
-                startedAt: copiedData.startedAt,
-                endedAt: copiedData.endedAt,
-                pendingLogs: 0,
+                estimatedMinutes: _hrs * 60,
+                createdAt: new Date(),
+                startedAt: _startedAt,
+                endedAt: _endedAt,
+                pendingLogs: 0
             })
         }
 
@@ -107,7 +84,6 @@
 
     function _onClosed(e: Event) {
         e.preventDefault()
-        e.stopPropagation()
         onClosed?.()
     }
 </script>
@@ -116,56 +92,71 @@
     <Loading />
 {/if}
 
-<div
-    class="m-4 w-full rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none"
->
-    <div class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium">
-        <Input
-            value={copiedData.name}
-            label="Case Name"
-            name="name"
-            type="text"
-            variant="outlined"
-            onInput={(e) => onPropsChanged('name', e.currentTarget.value)}
-        />
-    </div>
+<div class="w-full">
+    {#if errMsg}
+        <div class="mt-2 text-sm text-red-500 w-full text-center">
+            {errMsg}
+        </div>
+    {/if}
 
     <div
-        class="my-1 flex flex-2/12 flex-row items-center text-sm text-gray-500 md:my-0 md:flex-col md:text-gray-700"
+        class="m-4 w-full p-4 md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:p-2"
     >
-        <DateTimePicker
-            date={copiedData.startedAt}
-            onChanged={(e) => onDateChanged('startedAt', e)}
-            dateOnly={true}
-        />
-        <span>~</span>
-        <DateTimePicker
-            date={copiedData.endedAt}
-            onChanged={(e) => onDateChanged('endedAt', e)}
-            dateOnly={true}
-        />
-    </div>
 
-    <div class="flex-2/12 text-sm">
-        <Input
-            value={copiedData.hrs}
-            label="Hrs"
-            name="hrs"
-            type="text"
-            variant="outlined"
-            onInput={(e) => onPropsChanged('hrs', e.currentTarget.value)}
-        />
-    </div>
-
-    <div class="flex h-fit flex-auto flex-row justify-center gap-2 md:justify-end">
-        <button class="cursor-pointer md:m-0.5" onclick={_onSaved}>
-            <IconifyIcon
-                class="h-6 w-6 text-green-500"
-                icon="line-md:circle-to-confirm-circle-transition"
+        <div class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium">
+            <Input
+                label="Case Name"
+                name="name"
+                type="text"
+                variant="outlined"
+                bind:value={_name}
             />
-        </button>
-        <button class="cursor-pointer md:m-0.5" onclick={_onClosed}>
-            <IconifyIcon class="h-6 w-6 text-red-500" icon="line-md:close-circle" />
-        </button>
+        </div>
+
+        <div
+            class="my-1 flex flex-2/12 flex-row items-center text-sm text-gray-500 md:my-0 md:flex-col md:text-gray-700"
+        >
+            <DateTimePicker
+                date={_startedAt}
+                onChanged={(e) => _startedAt = e }
+                dateOnly={true}
+            />
+            <span>~</span>
+            <DateTimePicker
+                date={_endedAt}
+                onChanged={(e) => _endedAt = e }
+                dateOnly={true}
+            />
+        </div>
+
+        <div class="flex-2/12 text-sm">
+            <Input
+                label="Hrs"
+                name="hrs"
+                type="text"
+                variant="outlined"
+                value={_hrs}
+                oninput={(e) => {
+                const n = Number(e.currentTarget.value)
+                if (Number.isNaN(n)) return
+                _hrs = n
+            }}
+            />
+        </div>
+
+        <div class="flex h-fit flex-auto flex-row justify-center gap-2 md:justify-end">
+            <button class="cursor-pointer md:m-0.5" onclick={_onSaved}>
+                <IconifyIcon
+                    class="h-6 w-6 text-green-500"
+                    icon="line-md:circle-to-confirm-circle-transition"
+                />
+            </button>
+            <button class="cursor-pointer md:m-0.5" onclick={_onClosed}>
+                <IconifyIcon class="h-6 w-6 text-red-500" icon="line-md:close-circle" />
+            </button>
+        </div>
     </div>
+
 </div>
+
+

@@ -15,11 +15,11 @@ This is a simple website for showcasing attorneys.
 - [Markdown](https://magidoc.js.org/svelte-plugins/marked)
 
 # Use Local Machine to build
-1. docker buildx build --platform linux/amd64,linux/arm64 --push --tag backend:latest -f dockerfiles/Dockerfile.backend .
+1. docker buildx build --platform linux/amd64,linux/arm64 --tag backend:latest -f dockerfiles/Dockerfile.backend .
 2. docker save backend:latest -o backend.tar 
 3. scp backend.tar user@remote_host:/path/to/destination
 4. ssh user@remote_host 'docker load -i /path/to/destination/backend.tar'
-5. rename the images
+5. rename the images (docker tag backend:latest attorneys-website-backend:latest)
 6. docker compose up -d
 
 # Build only ui part

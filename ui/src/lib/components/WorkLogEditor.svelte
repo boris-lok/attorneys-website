@@ -1,7 +1,6 @@
 <script lang="ts">
     import DateTimePicker from '$lib/components/DateTimePicker.svelte'
     import { type SimpleUser, UserService } from '$lib/services/user.service'
-    import { getSelfId, getSelfName } from '$lib/utils'
     import {
         type Collaborator,
         type WorkLog,
@@ -13,6 +12,8 @@
 
     type Props = {
         id?: string
+        selfId: string
+        selfName: string
         caseId: string
         startedAt?: Date
         endedAt?: Date
@@ -26,6 +27,8 @@
     let {
         id,
         caseId,
+        selfId,
+        selfName,
         startedAt = new Date(),
         endedAt = new Date(),
         description = '',
@@ -75,7 +78,6 @@
             console.error('Error loading users:', resp.message)
             return
         }
-        const selfId = getSelfId()
 
         users = resp.users.filter((e) => e.id !== selfId).filter((e) => e.roles.includes('Lawyer'))
     }
@@ -149,8 +151,8 @@
             isCollaborative: share,
             collaborators: collaborators,
             user: {
-                id: getSelfId(),
-                name: getSelfName()
+                id: selfId,
+                name: selfName
             }
         })
     }

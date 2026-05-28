@@ -2,20 +2,20 @@
     import { type WorkLog, WorkLogServices } from '$lib/services/work_log.service'
     import WorkLogEditor from '$lib/components/WorkLogEditor.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import { getSelfId, roundTo } from '$lib/utils'
-    import { CaseServices } from '$lib/services/case.service'
+    import { roundTo } from '$lib/utils'
 
     type Props = {
         log: WorkLog
         caseId: string
+        selfId: string
+        selfName: string
         onSaved: (data: WorkLog) => void
         onDeleted: () => void
     }
 
-    let { log, caseId, onSaved, onDeleted }: Props = $props()
+    let { log, caseId, selfId, selfName, onSaved, onDeleted }: Props = $props()
     let isEditMode = $state(false)
     let copiedData = $state(log)
-    const selfId = getSelfId()
 
     function _onSaved(newValue: WorkLog) {
         copiedData = newValue
@@ -53,7 +53,7 @@
             day: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false,
+            hour12: false
         })
 
         let year: '2-digit' | undefined =
@@ -71,7 +71,7 @@
                 day,
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: false,
+                hour12: false
             })
         } else {
             ed = endedAt.toLocaleString('en-US', {
@@ -80,7 +80,7 @@
                 day: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: false,
+                hour12: false
             })
         }
 
@@ -99,6 +99,8 @@
         <WorkLogEditor
             id={log.id}
             {caseId}
+            selfId={selfId}
+            selfName={selfName}
             startedAt={log.startedAt}
             endedAt={log.endedAt}
             description={log.description}

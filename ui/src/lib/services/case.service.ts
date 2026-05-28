@@ -6,7 +6,6 @@ import type {
     UpdateCaseRequest,
 } from '$lib/types'
 import { ADMIN_URL, TIMEOUT } from '$lib/constant'
-import { getToken } from '$lib/utils'
 
 async function save(
     req: CreateCaseRequest | UpdateCaseRequest
@@ -47,9 +46,9 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
     try {
         const resp = await fetch(url, {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: getToken(),
             },
             signal: AbortSignal.timeout(TIMEOUT),
         })

@@ -9,16 +9,24 @@
     import WorkLog from '$lib/components/WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/common/Loading.svelte'
-    import { getSelfId, getSelfName } from '$lib/utils'
     import PendingWorkLog from '$lib/components/PendingWorkLog.svelte'
     import DateTimePicker from '$lib/components/DateTimePicker.svelte'
     import { untrack } from 'svelte'
+    import { jwtDecode } from 'jwt-decode'
+    import type { PayLoad } from '$lib/utils'
 
-    const selfId = getSelfId()
-    const selfName = getSelfName()
 
     let { data }: PageProps = $props()
     let id = data.id
+    let payLoad: PayLoad | null = null
+    try {
+        payLoad = jwtDecode<PayLoad>(data.token ?? '')
+    } catch (e) {
+        console.error('Failed to decode token:', e)
+        payLoad = null
+    }
+    const selfId = payLoad?.sub ?? ''
+    const selfName = payLoad?.nickname ?? ''
     let logs: WorkLogType[] = $state([])
     let pendingLogs = $derived.by(() => {
         return logs
@@ -126,7 +134,8 @@
 <main>
     {#if isCreated}
         <div class="px-4">
-            <WorkLogEditor onClosed={() => (isCreated = false)} caseId={id} onSaved={appendCase} />
+            <WorkLogEditor selfId={selfId} selfName={selfName} onClosed={() => (isCreated = false)} caseId={id}
+                           onSaved={appendCase} />
         </div>
     {:else}
         <div class="my-2 flex h-16 flex-row items-center justify-end gap-4 px-4">
@@ -214,6 +223,8 @@
             <div class="h-fit max-h-96 w-full overflow-y-auto">
                 {#each logs as log, i (log.id)}
                     <WorkLog
+                        selfId={selfId}
+                        selfName={selfName}
                         caseId={id}
                         {log}
                         onSaved={(updated) => {

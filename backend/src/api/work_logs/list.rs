@@ -38,6 +38,7 @@ pub async fn list_work_logs(
         case_id: query.case_id.clone(),
         started_at: query.started_at,
         ended_at: query.ended_at,
+        settled_at: None,
     };
 
     let res = execute(Arc::new(Mutex::new(repo)), req).await;

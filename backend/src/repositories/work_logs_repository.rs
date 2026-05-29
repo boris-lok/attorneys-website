@@ -17,6 +17,7 @@ pub trait IWorkLogsRepository {
         case_id: &CaseID,
         started_at: Option<chrono::DateTime<chrono::Utc>>,
         ended_at: Option<chrono::DateTime<chrono::Utc>>,
+        settled_at: Option<chrono::DateTime<chrono::Utc>>,
     ) -> anyhow::Result<Vec<WorkLog>>;
     async fn update(&mut self, req: UpdateWorkLog) -> anyhow::Result<()>;
     async fn update_status(
@@ -197,6 +198,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         case_id: &CaseID,
         started_at: Option<chrono::DateTime<chrono::Utc>>,
         ended_at: Option<chrono::DateTime<chrono::Utc>>,
+        settled_at: Option<chrono::DateTime<chrono::Utc>>,
     ) -> anyhow::Result<Vec<WorkLog>> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
@@ -225,12 +227,14 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
           and wl.deleted_at is null
           and ($2::timestamptz is null or wl.started_at >= $2)
           and ($3::timestamptz is null or wl.ended_at <= $3)
+          and ($4::timestamptz is null or wl.settled_at >= $4)
         ";
 
         let rows = sqlx::query_as::<_, WorkLogFromSQLx>(query)
             .bind(Uuid::from(case_id.clone()))
             .bind(started_at)
             .bind(ended_at)
+            .bind(settled_at)
             .fetch_all(conn)
             .await?;
 

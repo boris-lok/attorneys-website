@@ -109,6 +109,11 @@ pub trait ICaseRepository {
     async fn delete(&mut self, id: CaseID) -> anyhow::Result<()>;
 
     async fn settle(&mut self, id: &CaseID) -> anyhow::Result<()>;
+
+    async fn retrieve_settled_at(
+        &self,
+        id: &CaseID,
+    ) -> anyhow::Result<Option<chrono::DateTime<chrono::Utc>>>;
 }
 
 pub struct SQLxCaseRepository<'tx> {
@@ -271,5 +276,23 @@ GROUP BY
             .await?;
 
         Ok(())
+    }
+
+    async fn retrieve_settled_at(
+        &self,
+        id: &CaseID,
+    ) -> anyhow::Result<Option<chrono::DateTime<chrono::Utc>>> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let settled_at = sqlx::query_scalar::<_, Option<chrono::DateTime<chrono::Utc>>>(
+            "select settled_at from cases where id = $1",
+        )
+            .bind(Uuid::from(id))
+            .fetch_optional(conn)
+            .await?
+            .flatten();
+
+        Ok(settled_at)
     }
 }

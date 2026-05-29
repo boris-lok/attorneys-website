@@ -61,6 +61,7 @@
         setDateSuffix(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), 0, 0, 0, 0)
     )
     let endedAt = $state(setDateSuffix(new Date(), 23, 59, 59, 59))
+    let msg = $state('')
 
     function setDateSuffix(date: Date, hrs: number, mins: number, s: number, ms: number): Date {
         return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hrs, mins, s, ms)
@@ -129,6 +130,8 @@
             console.error(resp.message)
             return
         }
+
+        msg = 'Case settled successfully'
     }
 
     $effect(() => {
@@ -139,6 +142,7 @@
 {#if isLoading}
     <Loading />
 {/if}
+
 
 <main>
     {#if isCreated}
@@ -233,6 +237,13 @@
         </div>
 
     </div>
+
+
+    {#if msg}
+        <div class="text-green-600 w-full text-center text-md">
+            {msg}
+        </div>
+    {/if}
 
     <div class="md:m-4 md:rounded md:shadow">
         <div

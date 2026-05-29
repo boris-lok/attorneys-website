@@ -227,7 +227,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
           and wl.deleted_at is null
           and ($2::timestamptz is null or wl.started_at >= $2)
           and ($3::timestamptz is null or wl.ended_at <= $3)
-          and ($4::boolean is null or wl.settled_at is null)
+          and ($4::boolean or wl.settled_at is null)
         ";
 
         let rows = sqlx::query_as::<_, WorkLogFromSQLx>(query)

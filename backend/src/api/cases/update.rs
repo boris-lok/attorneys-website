@@ -15,6 +15,8 @@ use tokio::sync::Mutex;
 pub struct UpdateCaseRequest {
     pub id: String,
     pub name: Option<String>,
+    pub started_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
     pub estimated_minutes: Option<i32>,
     pub billing_cycle: Option<i32>,
 }
@@ -27,6 +29,8 @@ pub async fn update_case(
     let req = Request {
         id: req.id,
         name: req.name,
+        started_at: req.started_at,
+        ended_at: req.ended_at,
         estimated_minutes: req.estimated_minutes,
         billing_cycle: req.billing_cycle,
     };

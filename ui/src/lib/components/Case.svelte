@@ -42,12 +42,16 @@
     }
 
     function nextBillingDate(settledAt: Date | null, cycling: number, defaultAt: Date): Date {
-        const MS_PER_DAY = 86_400_000
         const anchor = settledAt ?? defaultAt
-        const daysSinceStart = Math.max(0, Math.floor((anchor.getTime() - defaultAt.getTime()) / MS_PER_DAY))
-        const cyclesPassed = Math.floor(daysSinceStart / cycling)
+        const monthsSinceStart = Math.max(
+            0,
+            (anchor.getFullYear() - defaultAt.getFullYear()) * 12 +
+            (anchor.getMonth() - defaultAt.getMonth()) -
+            (anchor.getDate() < defaultAt.getDate() ? 1 : 0),
+        )
+        const cyclesPassed = Math.floor(monthsSinceStart / cycling)
         const next = new Date(defaultAt)
-        next.setDate(next.getDate() + (cyclesPassed + 1) * cycling)
+        next.setMonth(next.getMonth() + (cyclesPassed + 1) * cycling)
         return next
     }
 

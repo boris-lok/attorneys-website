@@ -100,6 +100,8 @@ pub trait ICaseRepository {
         &mut self,
         id: CaseID,
         name: Option<String>,
+        started_at: Option<chrono::DateTime<chrono::Utc>>,
+        ended_at: Option<chrono::DateTime<chrono::Utc>>,
         estimated_minutes: Option<i32>,
         billing_cycle: Option<i32>,
     ) -> anyhow::Result<()>;
@@ -155,6 +157,8 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         &mut self,
         id: CaseID,
         name: Option<String>,
+        started_at: Option<chrono::DateTime<chrono::Utc>>,
+        ended_at: Option<chrono::DateTime<chrono::Utc>>,
         estimated_minutes: Option<i32>,
         billing_cycle: Option<i32>,
     ) -> anyhow::Result<()> {
@@ -166,7 +170,9 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
     SET
       estimated_minutes = COALESCE($2, estimated_minutes),
       name = COALESCE($3, name),
-      billing_cycle = COALESCE($4, billing_cycle)
+      billing_cycle = COALESCE($4, billing_cycle),
+      started_at = COALESCE($5, started_at),
+      ended_at = COALESCE($6, ended_at)
     WHERE id = $1
 ";
 
@@ -175,6 +181,8 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
             .bind(estimated_minutes) // Option<i32> or similar
             .bind(name) // Option<String>
             .bind(billing_cycle)
+            .bind(started_at)
+            .bind(ended_at)
             .execute(conn)
             .await?;
 

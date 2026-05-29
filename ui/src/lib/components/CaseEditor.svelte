@@ -69,7 +69,7 @@
                 id: resp.id,
                 name: _name,
                 usedMinutes: 0,
-                estimatedMinutes: _hrs * 60,
+                estimatedMinutes: Math.round(_hrs * 60),
                 createdAt: new Date(),
                 startedAt: _startedAt,
                 endedAt: _endedAt,
@@ -146,7 +146,7 @@
 
         <div class="flex-1/12 text-sm">
             <Input
-                label="Billing Cycle (days)"
+                label="Billing Cycle (month)"
                 name="cycle"
                 type="text"
                 variant="outlined"

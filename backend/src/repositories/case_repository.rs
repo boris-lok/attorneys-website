@@ -40,10 +40,12 @@ pub struct Case {
     pub name: String,
     pub used_minutes: i32,
     pub estimated_minutes: i32,
+    pub billing_cycle: i32,
     pub pending_logs: i32,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub ended_at: chrono::DateTime<chrono::Utc>,
+    pub settled_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[derive(Debug, sqlx::FromRow)]
@@ -52,10 +54,12 @@ struct CaseFromSQLx {
     pub name: String,
     pub used_minutes: i32,
     pub estimated_minutes: i32,
+    pub billing_cycle: i32,
     pub pending_logs: i32,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub ended_at: chrono::DateTime<chrono::Utc>,
+    pub settled_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 impl From<CaseFromSQLx> for Case {
@@ -65,10 +69,12 @@ impl From<CaseFromSQLx> for Case {
             name: value.name,
             used_minutes: value.used_minutes,
             estimated_minutes: value.estimated_minutes,
+            billing_cycle: value.billing_cycle,
             created_at: value.created_at,
             started_at: value.started_at,
             ended_at: value.ended_at,
             pending_logs: value.pending_logs,
+            settled_at: value.settled_at,
         }
     }
 }
@@ -79,16 +85,21 @@ pub trait ICaseRepository {
         &mut self,
         name: &str,
         estimated_minutes: i32,
+        billing_cycle: i32,
         started_at: chrono::DateTime<chrono::Utc>,
         ended_at: chrono::DateTime<chrono::Utc>,
     ) -> anyhow::Result<CaseID>;
+
     async fn update(
         &mut self,
         id: CaseID,
         name: Option<String>,
         estimated_minutes: Option<i32>,
+        billing_cycle: Option<i32>,
     ) -> anyhow::Result<()>;
+
     async fn list(&self, user_id: &UserID) -> anyhow::Result<Vec<Case>>;
+
     async fn delete(&mut self, id: CaseID) -> anyhow::Result<()>;
 }
 
@@ -108,6 +119,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         &mut self,
         name: &str,
         estimated_minutes: i32,
+        billing_cycle: i32,
         started_at: chrono::DateTime<chrono::Utc>,
         ended_at: chrono::DateTime<chrono::Utc>,
     ) -> anyhow::Result<CaseID> {
@@ -116,7 +128,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
-        let query = r"insert into cases (id, name, estimated_minutes, started_at, ended_at) values ($1, $2, $3, $4, $5)";
+        let query = r"insert into cases (id, name, estimated_minutes, started_at, ended_at, billing_cycle) values ($1, $2, $3, $4, $5, $6, $7)";
 
         sqlx::query(query)
             .bind(id)
@@ -124,6 +136,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
             .bind(estimated_minutes)
             .bind(started_at)
             .bind(ended_at)
+            .bind(billing_cycle)
             .execute(conn)
             .await?;
 
@@ -135,21 +148,25 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         id: CaseID,
         name: Option<String>,
         estimated_minutes: Option<i32>,
+        billing_cycle: Option<i32>,
     ) -> anyhow::Result<()> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
         let query = r"
     UPDATE cases
-    SET estimated_minutes = COALESCE($1, estimated_minutes),
-        name = COALESCE($2, name)
-    WHERE id = $3
+    SET
+      estimated_minutes = COALESCE($2, estimated_minutes),
+      name = COALESCE($3, name),
+      billing_cycle = COALESCE($4, billing_cycle)
+    WHERE id = $1
 ";
 
         sqlx::query(query)
+            .bind(Uuid::from(id))
             .bind(estimated_minutes) // Option<i32> or similar
             .bind(name) // Option<String>
-            .bind(Uuid::from(id))
+            .bind(billing_cycle)
             .execute(conn)
             .await?;
 
@@ -167,10 +184,11 @@ SELECT
     c.id,
     c.name,
     c.estimated_minutes,
+    c.billing_cycle,
     c.created_at,
     c.started_at,
     c.ended_at,
-
+    c.settled_at,
     COALESCE(
         SUM(
             wl.duration_minutes * (1 + COALESCE(cnt.approved_cnt, 0))

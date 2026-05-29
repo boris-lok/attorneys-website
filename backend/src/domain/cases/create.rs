@@ -6,6 +6,7 @@ use tokio::sync::Mutex;
 pub struct Request {
     pub name: String,
     pub estimated_minutes: i32,
+    pub billing_cycle: i32,
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub ended_at: chrono::DateTime<chrono::Utc>,
 }
@@ -25,6 +26,7 @@ pub async fn execute(
         .create(
             &req.name,
             req.estimated_minutes,
+            req.billing_cycle,
             req.started_at,
             req.ended_at,
         )

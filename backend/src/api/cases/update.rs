@@ -16,6 +16,7 @@ pub struct UpdateCaseRequest {
     pub id: String,
     pub name: Option<String>,
     pub estimated_minutes: Option<i32>,
+    pub billing_cycle: Option<i32>,
 }
 
 pub async fn update_case(
@@ -27,6 +28,7 @@ pub async fn update_case(
         id: req.id,
         name: req.name,
         estimated_minutes: req.estimated_minutes,
+        billing_cycle: req.billing_cycle,
     };
 
     let mut conn = state

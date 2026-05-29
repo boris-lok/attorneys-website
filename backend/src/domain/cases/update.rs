@@ -7,6 +7,7 @@ pub struct Request {
     pub id: String,
     pub name: Option<String>,
     pub estimated_minutes: Option<i32>,
+    pub billing_cycle: Option<i32>,
 }
 
 #[derive(Debug)]
@@ -21,7 +22,7 @@ pub async fn execute(
     let id = CaseID::try_from(req.id).map_err(Error::Unknown)?;
     let mut lock = repo.lock().await;
 
-    lock.update(id, req.name, req.estimated_minutes)
+    lock.update(id, req.name, req.estimated_minutes, req.billing_cycle)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))
 }

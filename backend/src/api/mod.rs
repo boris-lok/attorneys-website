@@ -49,6 +49,7 @@ pub use users::list::list_users;
 pub use cases::create::create_case;
 pub use cases::delete::delete_case;
 pub use cases::list::list_cases;
+pub use cases::settle::settle;
 pub use cases::update::update_case;
 
 pub use work_logs::create::create_work_log;

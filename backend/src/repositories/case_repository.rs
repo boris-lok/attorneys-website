@@ -19,6 +19,12 @@ impl From<CaseID> for Uuid {
     }
 }
 
+impl From<&CaseID> for Uuid {
+    fn from(value: &CaseID) -> Self {
+        value.0
+    }
+}
+
 impl From<Uuid> for CaseID {
     fn from(value: Uuid) -> Self {
         Self(value)
@@ -101,6 +107,8 @@ pub trait ICaseRepository {
     async fn list(&self, user_id: &UserID) -> anyhow::Result<Vec<Case>>;
 
     async fn delete(&mut self, id: CaseID) -> anyhow::Result<()>;
+
+    async fn settle(&mut self, id: &CaseID) -> anyhow::Result<()>;
 }
 
 pub struct SQLxCaseRepository<'tx> {
@@ -236,6 +244,26 @@ GROUP BY
         let conn = &mut **conn;
 
         let query = r"update cases set deleted_at = now() where id = $1";
+
+        sqlx::query(query)
+            .bind(Uuid::from(id))
+            .execute(conn)
+            .await?;
+
+        Ok(())
+    }
+
+    async fn settle(&mut self, id: &CaseID) -> anyhow::Result<()> {
+        let mut conn = self.conn.lock().await;
+        let conn = &mut **conn;
+
+        let query = "\
+        with c as (update cases set settled_at = now() where id = $1 returning id) \
+        update work_logs set settled_at = now() \
+        from c where work_logs.case_id = c.id \
+        and work_logs.settled_at is null \
+        and work_logs.started_at <= now()\
+        ";
 
         sqlx::query(query)
             .bind(Uuid::from(id))

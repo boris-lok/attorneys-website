@@ -35,7 +35,7 @@ async function login(req: {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req),
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
 
         if (!resp.ok) {
@@ -64,7 +64,7 @@ async function logout(): Promise<APIError | APIResponse<void>> {
             headers: {
                 'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
 
         if (!resp.ok) {
@@ -87,7 +87,7 @@ async function list(): Promise<APIError | APIResponse<{ users: SimpleUser[] }>> 
             headers: {
                 'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
 
         const json = await resp.json()
@@ -98,7 +98,7 @@ async function list(): Promise<APIError | APIResponse<{ users: SimpleUser[] }>> 
                 return {
                     id: e.id,
                     nickname: e.nickname,
-                    roles: e.roles
+                    roles: e.roles,
                 }
             })
         }
@@ -117,5 +117,5 @@ async function list(): Promise<APIError | APIResponse<{ users: SimpleUser[] }>> 
 export const UserService = {
     login: login,
     logout: logout,
-    list: list
+    list: list,
 }

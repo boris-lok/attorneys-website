@@ -57,13 +57,13 @@ export function dateRangeFormatter(startedAt: Date, endedAt: Date): string {
     const baseDateOpts: Intl.DateTimeFormatOptions = {
         year: '2-digit',
         month: '2-digit',
-        day: '2-digit'
+        day: '2-digit',
     }
 
     const timeOpts: Intl.DateTimeFormatOptions = {
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false
+        hour12: false,
     }
 
     const sameDay =
@@ -73,15 +73,15 @@ export function dateRangeFormatter(startedAt: Date, endedAt: Date): string {
 
     const st = startedAt.toLocaleString('en-US', {
         ...baseDateOpts,
-        ...timeOpts
+        ...timeOpts,
     })
 
     const ed = sameDay
         ? endedAt.toLocaleTimeString('en-US', timeOpts)
         : endedAt.toLocaleString('en-US', {
-            ...baseDateOpts,
-            ...timeOpts
-        })
+              ...baseDateOpts,
+              ...timeOpts,
+          })
 
     return `${st} ~ ${ed}`
 }

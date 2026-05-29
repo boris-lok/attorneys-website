@@ -8,7 +8,10 @@ export const load = async ({ locals, url }) => {
         throw redirect(302, '/admin/login')
     }
 
-    if (!checkRole(locals.user.roles ?? [], 'admin') && !checkRole(locals.user.roles ?? [], 'lawyer')) {
+    if (
+        !checkRole(locals.user.roles ?? [], 'admin') &&
+        !checkRole(locals.user.roles ?? [], 'lawyer')
+    ) {
         throw redirect(302, '/error/permission_denied')
     }
 }

@@ -5,6 +5,6 @@ export const load: PageServerLoad = ({ params, cookies }) => {
 
     return {
         id: params.slug,
-        token
+        token,
     }
 }

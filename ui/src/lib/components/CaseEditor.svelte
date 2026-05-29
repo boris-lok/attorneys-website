@@ -13,6 +13,7 @@
         billingCycle: number
         startedAt: Date
         endedAt: Date
+        settledAt: Date | null
     }
     type Output = {
         onClosed?: () => void
@@ -20,7 +21,7 @@
     }
     type PartialProps = Partial<Props> & Output
 
-    let { onClosed, onSaved, id, name, hrs, startedAt, endedAt, billingCycle }: PartialProps = $props()
+    let { onClosed, onSaved, id, name, hrs, startedAt, endedAt, billingCycle, settledAt }: PartialProps = $props()
     let _id = $state(id ?? '')
     let _name = $state(name ?? '')
     let _hrs = $state(hrs ?? 0)
@@ -59,7 +60,7 @@
             estimated_minutes: _hrs * 60,
             billing_cycle: _billingCycle,
             started_at: _startedAt,
-            ended_at: _endedAt,
+            ended_at: _endedAt
         })
 
         if (resp.error) {
@@ -75,7 +76,7 @@
                 endedAt: _endedAt,
                 pendingLogs: 0,
                 billingCycle: _billingCycle,
-                settledAt: null,
+                settledAt: settledAt ?? null
             })
         }
 

@@ -47,7 +47,7 @@
             0,
             (anchor.getFullYear() - defaultAt.getFullYear()) * 12 +
             (anchor.getMonth() - defaultAt.getMonth()) -
-            (anchor.getDate() < defaultAt.getDate() ? 1 : 0),
+            (anchor.getDate() < defaultAt.getDate() ? 1 : 0)
         )
         const cyclesPassed = Math.floor(monthsSinceStart / cycling)
         const next = new Date(defaultAt)
@@ -96,6 +96,7 @@
         startedAt={startedAt}
         endedAt={endedAt}
         billingCycle={billingCycle}
+        settledAt={settledAt}
         onSaved={_onSaved}
         onClosed={() => (isEditMode = false)}
     />

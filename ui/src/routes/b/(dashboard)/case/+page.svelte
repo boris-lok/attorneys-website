@@ -13,32 +13,41 @@
     let cases: CaseData[] = $state([])
     let errMsg = $state('')
 
-
-    data.cases.then(resp => {
-        if (resp.error) {
-            errMsg = resp.error
-        } else {
-            cases = resp.cases
-        }
-        isLoaded = true
-    })
-
-    function appendCase(c: CaseData) {
+    function upsertCase(c: CaseData) {
         cases = [
             c,
-            ...cases.filter((e) => e.id !== c.id)
+            ...cases.filter((e) => e.id !== c.id),
         ]
     }
+
+    $effect(() => {
+        data.cases
+            .then(resp => {
+                if (resp.error) errMsg = resp.message
+                else cases = resp.cases
+            })
+            .finally(() => isLoaded = true)
+    })
+
 </script>
 
 {#if !isLoaded}
     <Loading />
 {/if}
 
+{#if errMsg}
+    <div class="mt-2 text-sm text-red-500 w-full text-center">
+        {errMsg}
+    </div>
+{/if}
+
 <main>
     {#if isCreating}
         <div class="mx-4 my-4 flex items-center justify-center rounded px-8 shadow">
-            <CaseEditor onClosed={() => (isCreating = false)} onSaved={appendCase} />
+            <CaseEditor onClosed={() => (isCreating = false)} onSaved={(e) => {
+                isCreating = false
+                upsertCase(e)
+            }} />
         </div>
     {:else}
         <div class="my-2 flex h-16 flex-row items-center justify-end gap-2 px-4">
@@ -52,9 +61,11 @@
         <div
             class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
         >
-            <p class="text-md flex-6/12 px-2 py-3 text-left font-bold">Case Name</p>
+            <p class="text-md flex-4/12 px-2 py-3 text-left font-bold">Case Name</p>
             <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">Period</p>
-            <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">Used Hrs</p>
+            <p class="text-md flex-2/12 px-2 py-3 text-left font-bold text-nowrap">Used Hrs</p>
+            <p class="text-md flex-1/12 px-2 py-3 text-left font-bold text-nowrap">Billing Cycle</p>
+            <p class="text-md flex-1/12 px-2 py-3 text-left font-bold text-nowrap">Settled At</p>
             <p class="text-md flex-auto px-2 py-3 text-left font-bold">&nbsp;</p>
         </div>
         {#each cases as c, i (c.id)}

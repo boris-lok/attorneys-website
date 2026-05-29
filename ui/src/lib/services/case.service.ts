@@ -63,9 +63,11 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
                     name: string
                     used_minutes: number
                     estimated_minutes: number
+                    billing_cycle: number
                     created_at: string
                     started_at: string
                     ended_at: string
+                    settled_at: string | null
                     pending_logs: number
                 }) => {
                     return {
@@ -77,6 +79,8 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
                         startedAt: new Date(e.started_at),
                         endedAt: new Date(e.ended_at),
                         pendingLogs: e.pending_logs,
+                        billingCycle: e.billing_cycle,
+                        settledAt: e.settled_at ? new Date(e.settled_at) : null,
                     }
                 }
             )

@@ -10,6 +10,7 @@
         id: string
         name: string
         hrs: number
+        billingCycle: number
         startedAt: Date
         endedAt: Date
     }
@@ -19,12 +20,13 @@
     }
     type PartialProps = Partial<Props> & Output
 
-    let { onClosed, onSaved, id, name, hrs, startedAt, endedAt }: PartialProps = $props()
+    let { onClosed, onSaved, id, name, hrs, startedAt, endedAt, billingCycle }: PartialProps = $props()
     let _id = $state(id ?? '')
     let _name = $state(name ?? '')
     let _hrs = $state(hrs ?? 0)
     let _startedAt = $state(startedAt ?? new Date())
     let _endedAt = $state(endedAt ?? new Date())
+    let _billingCycle = $state(billingCycle ?? 0)
     let isLoading = $state(false)
     let errMsg = $state('')
 
@@ -55,8 +57,9 @@
             ...(_id === '' ? {} : { id: _id }),
             name: _name,
             estimated_minutes: _hrs * 60,
+            billing_cycle: _billingCycle,
             started_at: _startedAt,
-            ended_at: _endedAt
+            ended_at: _endedAt,
         })
 
         if (resp.error) {
@@ -70,7 +73,9 @@
                 createdAt: new Date(),
                 startedAt: _startedAt,
                 endedAt: _endedAt,
-                pendingLogs: 0
+                pendingLogs: 0,
+                billingCycle: _billingCycle,
+                settledAt: null,
             })
         }
 
@@ -98,7 +103,7 @@
         class="m-4 w-full p-4 md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:p-2"
     >
 
-        <div class="my-2 flex-6/12 font-semibold text-nowrap md:my-0 md:font-medium">
+        <div class="my-2 flex-4/12 font-semibold text-nowrap md:my-0 md:font-medium">
             <Input
                 label="Case Name"
                 name="name"
@@ -124,7 +129,7 @@
             />
         </div>
 
-        <div class="flex-2/12 text-sm">
+        <div class="flex-1/12 text-sm">
             <Input
                 label="Hrs"
                 name="hrs"
@@ -135,6 +140,21 @@
                 const n = Number(e.currentTarget.value)
                 if (Number.isNaN(n)) return
                 _hrs = n
+            }}
+            />
+        </div>
+
+        <div class="flex-1/12 text-sm">
+            <Input
+                label="Billing Cycle (days)"
+                name="cycle"
+                type="text"
+                variant="outlined"
+                value={_billingCycle}
+                oninput={(e) => {
+                const n = Number(e.currentTarget.value)
+                if (Number.isNaN(n)) return
+                _billingCycle = n
             }}
             />
         </div>

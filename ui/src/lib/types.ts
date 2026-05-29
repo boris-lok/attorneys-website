@@ -154,6 +154,7 @@ export type APIResponse<T> = T extends void ? { error: false } : { error: false 
 export type CreateCaseRequest = {
     name: string
     estimated_minutes: number
+    billing_cycle: number
     started_at: Date
     ended_at: Date
 }
@@ -171,4 +172,6 @@ export type CaseData = {
     startedAt: Date
     endedAt: Date
     pendingLogs: number
+    billingCycle: number
+    settledAt: Date | null
 }

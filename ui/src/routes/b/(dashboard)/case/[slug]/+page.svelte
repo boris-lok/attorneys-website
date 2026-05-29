@@ -14,6 +14,7 @@
     import { untrack } from 'svelte'
     import { jwtDecode } from 'jwt-decode'
     import type { PayLoad } from '$lib/utils'
+    import { CaseServices } from '$lib/services/case.service'
 
 
     let { data }: PageProps = $props()
@@ -122,6 +123,14 @@
         URL.revokeObjectURL(urlBlob)
     }
 
+    async function settle() {
+        const resp = await CaseServices.settle(id)
+        if (resp.error) {
+            console.error(resp.message)
+            return
+        }
+    }
+
     $effect(() => {
         untrack(() => fetchWorkLogs())
     })
@@ -202,6 +211,23 @@
                     class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
                 >
                     Search
+                </p>
+            </button>
+
+            <button
+                class="group relative"
+                class:text-red-500={logs.length > 0}
+                class:cursor-pointer={logs.length > 0}
+                class:text-gray-300={logs.length === 0}
+                onclick={settle}
+                disabled={logs.length === 0}
+            >
+                <IconifyIcon icon="tabler:align-box-right-top"
+                             class="h-6 w-6" />
+                <p
+                    class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
+                >
+                    Settle
                 </p>
             </button>
         </div>

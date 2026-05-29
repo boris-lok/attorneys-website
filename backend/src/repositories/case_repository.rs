@@ -128,7 +128,7 @@ impl ICaseRepository for SQLxCaseRepository<'_> {
         let mut conn = self.conn.lock().await;
         let conn = &mut **conn;
 
-        let query = r"insert into cases (id, name, estimated_minutes, started_at, ended_at, billing_cycle) values ($1, $2, $3, $4, $5, $6, $7)";
+        let query = r"insert into cases (id, name, estimated_minutes, started_at, ended_at, billing_cycle) values ($1, $2, $3, $4, $5, $6)";
 
         sqlx::query(query)
             .bind(id)

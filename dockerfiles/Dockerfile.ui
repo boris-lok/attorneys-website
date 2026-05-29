@@ -1,26 +1,29 @@
-# Step 1: Build the Svelte application
-# Create a builder
-from node:22 as builder
+# Stage 1
+from node:22.13.1-slim as builder
 
-# Setup the working directory
 workdir /app
 
-# Install app dependencies using pnpm
-# run npm install -g pnpm
+# Install pnpm
+run npm install -g pnpm@10.12.1
 
-## Copy the rest of the application code
-copy ../ui/ .
-## Replace the .env to production environment
-copy ../ui/.env ./.env
+# Cache dependencies separately from source
+copy ui/package.json ui/pnpm-lock.yaml ui/pnpm-workspace.yaml ./
+run pnpm install --frozen-lockfile
 
-## Delete the node_modules and previous build files
-run rm -rf /app/node_modules
-run rm -rf /app/.svelte-kit
+# Copy source and build
+copy ui/ .
+copy ui/.env ./.env
+run rm -rf .svelte-kit && npm run build
 
-run npm cache clean --force
-run npm install --verbose
+# Stage 2: Production
+from node:22.13.1-slim as runner
 
-run npm run build
+workdir /app
+
+# Copy only what's needed to run
+copy --from=builder /app/build ./build
+copy --from=builder /app/package*.json ./
+run npm install -g pnpm && pnpm install --prod
 
 expose 3000
 

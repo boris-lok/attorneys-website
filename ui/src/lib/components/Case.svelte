@@ -22,22 +22,33 @@
         endedAt,
         pendingLogs,
         billingCycle,
-        settledAt,
+        settledAt
     }: Props = $props()
     let isEditMode = $state(false)
 
     const hrs = $derived(roundTo(estimatedMinutes / 60, 2))
     const usedPercentage = $derived(
-        roundTo((usedMinutes * 100) / estimatedMinutes, 0),
+        roundTo((usedMinutes * 100) / estimatedMinutes, 0)
     )
     const usedHrs = $derived(roundTo(usedMinutes / 60, 2))
+    const billingAt = $derived(nextBillingDate(settledAt, billingCycle, startedAt))
 
     function formatter(date: Date) {
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
-            day: 'numeric',
+            day: 'numeric'
         })
+    }
+
+    function nextBillingDate(settledAt: Date | null, cycling: number, defaultAt: Date): Date {
+        const MS_PER_DAY = 86_400_000
+        const anchor = settledAt ?? defaultAt
+        const daysSinceStart = Math.max(0, Math.floor((anchor.getTime() - defaultAt.getTime()) / MS_PER_DAY))
+        const cyclesPassed = Math.floor(daysSinceStart / cycling)
+        const next = new Date(defaultAt)
+        next.setDate(next.getDate() + (cyclesPassed + 1) * cycling)
+        return next
     }
 
     function onEditClicked(e: Event) {
@@ -51,7 +62,7 @@
         e.stopPropagation()
 
         const confirmed = confirm(
-            'Are you sure you want to delete this case? This action cannot be undone.',
+            'Are you sure you want to delete this case? This action cannot be undone.'
         )
 
         if (confirmed) {
@@ -90,7 +101,7 @@
             class="m-4 rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50"
         >
             <div
-                class="my-2 flex flex-4/12 flex-row items-center gap-1 font-semibold text-nowrap md:my-0 md:font-medium"
+                class="my-2 flex flex-3/12 flex-row items-center gap-1 font-semibold text-nowrap md:my-0 md:font-medium"
             >
                 {#if pendingLogs > 0}
                     <div
@@ -126,8 +137,8 @@
                 </div>
             </div>
 
-            <div class="flex-1/12 text-sm text-gray-500 md:text-center">
-                {billingCycle} days
+            <div class="flex-1/12 text-sm text-amber-500 md:text-center">
+                {formatter(billingAt)}
             </div>
 
             <div class="flex-1/12 text-sm text-gray-500 md:text-center">

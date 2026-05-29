@@ -98,7 +98,8 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let admin_user_routes = Router::new()
         .route("/login", post(login))
         .route("/logout", post(logout))
-        .route("/users", get(list_users));
+        .route("/users", get(list_users))
+        .route("/password", put(change_password));
 
     let admin_case_routes = Router::new()
         .route("/cases", post(create_case).put(update_case).get(list_cases))

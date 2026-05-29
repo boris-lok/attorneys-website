@@ -5,8 +5,9 @@ use crate::repositories::SqlxUserRepository;
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::Json;
+use axum::{Extension, Json};
 use axum_extra::extract::WithRejection;
+use redis::TypedCommands;
 use secrecy::SecretBox;
 use serde::Deserialize;
 use std::sync::Arc;
@@ -21,6 +22,7 @@ pub(crate) struct ChangePasswordRequest {
 pub async fn change_password(
     claims: Claims,
     state: State<AppState>,
+    Extension(redis_client): Extension<Arc<redis::Client>>,
     WithRejection(Json(req), _): WithRejection<Json<ChangePasswordRequest>, ApiError>,
 ) -> Result<StatusCode, ApiError> {
     let mut conn = state
@@ -39,7 +41,15 @@ pub async fn change_password(
     let user_repo = SqlxUserRepository::new(Arc::new(Mutex::new(conn.as_mut())));
 
     match crate::domain::users::change_password::execute(req, Mutex::new(user_repo)).await {
-        Ok(_) => Ok(StatusCode::OK),
+        Ok(_) => {
+            let mut c = redis_client
+                .get_connection()
+                .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+            c.del(&claims.sub)
+                .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+
+            Ok(StatusCode::OK)
+        }
         Err(crate::domain::users::change_password::Error::Unknown(e)) => {
             Err(ApiError::InternalServerError(e))
         }

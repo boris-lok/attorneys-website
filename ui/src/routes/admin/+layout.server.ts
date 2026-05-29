@@ -1,6 +1,5 @@
 import { redirect } from '@sveltejs/kit'
 import { checkRole } from '../../hooks.server'
-import type { PayLoad } from '$lib/utils'
 
 export const load = async ({ locals, url }) => {
     if (url.pathname === '/admin/login') return

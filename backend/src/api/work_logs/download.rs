@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
 use crate::domain::work_logs::list::{execute, Error, Request};
-use crate::repositories::{CaseID, ICaseRepository, SQLxCaseRepository, SqlxWorkLogsRepository};
+use crate::repositories::SqlxWorkLogsRepository;
 use crate::startup::AppState;
 use axum::extract::{Query, State};
 use axum::http::{header, StatusCode};
@@ -30,23 +30,11 @@ pub async fn download(
 
     let repo = SqlxWorkLogsRepository::new(Arc::new(Mutex::new(&mut *conn)));
 
-    let mut conn = state
-        .pool
-        .acquire()
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
-    let case_id = CaseID::try_from(query.case_id.clone()).map_err(|_| ApiError::BadRequest)?;
-    let case_repo = SQLxCaseRepository::new(Arc::new(Mutex::new(&mut *conn)));
-    let settled_at = case_repo
-        .retrieve_settled_at(&case_id)
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
-
     let req = Request {
         case_id: query.case_id.clone(),
         started_at: query.started_at,
         ended_at: query.ended_at,
-        settled_at,
+        include_settled: false,
     };
 
     let res = execute(Arc::new(Mutex::new(repo)), req).await;

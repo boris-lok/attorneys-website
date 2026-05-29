@@ -7,7 +7,7 @@ pub struct Request {
     pub case_id: String,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub settled_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub include_settled: bool,
 }
 
 #[derive(Debug)]
@@ -25,7 +25,7 @@ pub async fn execute(
     let lock = repo.lock().await;
 
     let res = lock
-        .list(&case_id, req.started_at, req.ended_at, req.settled_at)
+        .list(&case_id, req.started_at, req.ended_at, req.include_settled)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 

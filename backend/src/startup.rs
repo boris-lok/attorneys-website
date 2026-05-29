@@ -104,7 +104,7 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let admin_case_routes = Router::new()
         .route("/cases", post(create_case).put(update_case).get(list_cases))
         .route("/cases/{id}", delete(delete_case))
-        .route("/settle", post(settle));
+        .route("/case/settle", put(settle));
 
     let admin_work_log_routes = Router::new()
         .route("/work_logs", post(create_work_log).get(list_work_logs))

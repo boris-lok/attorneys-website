@@ -10,7 +10,7 @@
     let items: NavigationItem[] = [
         {
             icon: 'tabler:square-rounded-letter-w',
-            name: '工作時時',
+            name: '工作時數',
             url: '/b/case',
         },
         {

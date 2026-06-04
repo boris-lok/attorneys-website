@@ -1,16 +1,7 @@
-use crate::repositories::{CaseID, ICaseRepository};
+use crate::domain::cases::entity::UpdateCaseRequest;
+use crate::domain::cases::repository::CaseRepository;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-
-#[derive(Debug)]
-pub struct Request {
-    pub id: String,
-    pub name: Option<String>,
-    pub started_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub estimated_minutes: Option<i32>,
-    pub billing_cycle: Option<i32>,
-}
 
 #[derive(Debug)]
 pub enum Error {
@@ -18,20 +9,12 @@ pub enum Error {
 }
 
 pub async fn execute(
-    repo: Arc<Mutex<impl ICaseRepository + Sync + Send>>,
-    req: Request,
+    repo: Arc<Mutex<impl CaseRepository + Sync + Send>>,
+    req: UpdateCaseRequest,
 ) -> Result<(), Error> {
-    let id = CaseID::try_from(req.id).map_err(Error::Unknown)?;
     let mut lock = repo.lock().await;
 
-    lock.update(
-        id,
-        req.name,
-        req.started_at,
-        req.ended_at,
-        req.estimated_minutes,
-        req.billing_cycle,
-    )
-    .await
-    .map_err(|e| Error::Unknown(e.to_string()))
+    lock.update(req)
+        .await
+        .map_err(|e| Error::Unknown(e.to_string()))
 }

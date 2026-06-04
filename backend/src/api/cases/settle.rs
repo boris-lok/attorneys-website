@@ -1,7 +1,8 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
+use crate::domain::cases::entity::CaseID;
 use crate::domain::cases::settle::Error;
-use crate::repositories::SQLxCaseRepository;
+use crate::infrastructure::db::case_repo::PostgresCaseRepo;
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -22,23 +23,16 @@ pub async fn settle(
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<SettleRequest>, ApiError>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let req = crate::domain::cases::settle::Request {
-        case_id: req.case_id,
-    };
+    let case_id = CaseID::try_from(req.case_id).map_err(|_| ApiError::BadRequest)?;
 
-    let mut conn = state
-        .pool
-        .acquire()
+    let repo = PostgresCaseRepo::new(&state.pool)
         .await
         .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
 
-    let case_repo = SQLxCaseRepository::new(Arc::new(Mutex::new(&mut *conn)));
-
-    let res = crate::domain::cases::settle::execute(req, Arc::new(Mutex::new(case_repo))).await;
+    let res = crate::domain::cases::settle::execute(Arc::new(Mutex::new(repo)), &case_id).await;
 
     match res {
         Ok(_) => Ok(StatusCode::OK),
-        Err(Error::InvalidCaseID) => Err(ApiError::BadRequest),
         Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e.to_string())),
     }
 }

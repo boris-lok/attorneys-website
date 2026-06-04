@@ -1,5 +1,5 @@
+use crate::domain::cases::entity::CaseID;
 use crate::domain::entities::UserID;
-use crate::repositories::CaseID;
 use serde::Serialize;
 use sqlx::{Postgres, Row};
 use std::collections::HashMap;
@@ -148,7 +148,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         sqlx::query(query)
             .bind(work_log.id)
             .bind(work_log.user_id)
-            .bind(Uuid::from(work_log.case_id))
+            .bind(Uuid::from(&work_log.case_id))
             .bind(work_log.started_at)
             .bind(work_log.ended_at)
             .bind(work_log.description)
@@ -231,7 +231,7 @@ impl IWorkLogsRepository for SqlxWorkLogsRepository<'_> {
         ";
 
         let rows = sqlx::query_as::<_, WorkLogFromSQLx>(query)
-            .bind(Uuid::from(case_id.clone()))
+            .bind(Uuid::from(case_id))
             .bind(started_at)
             .bind(ended_at)
             .bind(include_settled)

@@ -1,0 +1,179 @@
+use crate::domain::cases::entity::{Case, CaseID, CreateCaseRequest, UpdateCaseRequest};
+use crate::domain::cases::repository::CaseRepository;
+use crate::domain::entities::UserID;
+use crate::infrastructure::db::connection::PgConn;
+use uuid::Uuid;
+
+const CREATE_CASE_QUERY: &str = r"
+  INSERT INTO cases
+    (id, name, estimated_minutes, started_at, ended_at, billing_cycle)
+  VALUES
+    ($1, $2, $3, $4, $5, $6)
+";
+
+const UPDATE_CASE_QUERY: &str = r"
+  UPDATE cases SET
+    estimated_minutes = COALESCE($2, estimated_minutes),
+    name = COALESCE($3, name),
+    billing_cycle = COALESCE($4, billing_cycle),
+    started_at = COALESCE($5, started_at),
+    ended_at = COALESCE($6, ended_at)
+  WHERE id = $1
+";
+
+const DELETE_CASE_QUERY: &str = r"
+  UPDATE cases SET
+    deleted_at = now()
+  WHERE id = $1
+";
+
+const SETTLE_CASE_QUERY: &str = r"
+  UPDATE cases SET
+    settled_at = now()
+  WHERE id = $1
+";
+
+const LIST_CASES_QUERY: &str = r"
+  SELECT
+    c.id,
+    c.name,
+    c.estimated_minutes,
+    c.billing_cycle,
+    c.created_at,
+    c.started_at,
+    c.ended_at,
+    c.settled_at,
+    COALESCE(
+        SUM(
+            wl.duration_minutes * (1 + COALESCE(cnt.approved_cnt, 0))
+        ),
+        0
+    )::INT4 AS used_minutes,
+    COALESCE(
+        SUM(cnt.pending_cnt),
+        0
+    )::INT4 AS pending_logs
+  FROM cases c
+  LEFT JOIN work_logs wl
+    ON c.id = wl.case_id
+    AND wl.deleted_at IS NULL
+  LEFT JOIN (
+    SELECT
+        parent_id,
+        COUNT(*) FILTER (WHERE status = 'approved') AS approved_cnt,
+        COUNT(*) FILTER (WHERE status = 'pending' and user_id = $1) AS pending_cnt
+    FROM work_logs_mapping
+    GROUP BY parent_id
+) cnt ON cnt.parent_id = wl.id
+  WHERE
+    c.deleted_at IS NULL
+  GROUP BY
+    c.id
+";
+
+pub struct PostgresCaseRepo<'tx> {
+    conn: PgConn<'tx>,
+}
+
+impl<'tx> PostgresCaseRepo<'tx> {
+    pub async fn new(pool: &'tx sqlx::Pool<sqlx::Postgres>) -> anyhow::Result<Self> {
+        let conn = PgConn::from_pool(pool).await?;
+        Ok(Self { conn })
+    }
+
+    pub fn with_tx(tx: &'tx mut sqlx::PgConnection) -> Self {
+        Self {
+            conn: PgConn::Transaction(tx),
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
+    async fn create(&mut self, req: CreateCaseRequest) -> anyhow::Result<CaseID> {
+        sqlx::query(CREATE_CASE_QUERY)
+            .bind(Uuid::from(&req.id))
+            .bind(req.name)
+            .bind(req.estimated_minutes)
+            .bind(req.started_at)
+            .bind(req.ended_at)
+            .bind(req.billing_cycle)
+            .execute(self.conn.as_conn())
+            .await?;
+
+        Ok(req.id)
+    }
+
+    async fn update(&mut self, req: UpdateCaseRequest) -> anyhow::Result<()> {
+        sqlx::query(UPDATE_CASE_QUERY)
+            .bind(Uuid::from(&req.id))
+            .bind(req.estimated_minutes)
+            .bind(req.name)
+            .bind(req.billing_cycle)
+            .bind(req.started_at)
+            .bind(req.ended_at)
+            .execute(self.conn.as_conn())
+            .await?;
+
+        Ok(())
+    }
+
+    async fn list(&mut self, user_id: &UserID) -> anyhow::Result<Vec<Case>> {
+        let res = sqlx::query_as::<_, CaseFromSQLx>(LIST_CASES_QUERY)
+            .bind(Uuid::from(user_id))
+            .fetch_all(self.conn.as_conn())
+            .await?;
+
+        let cases = res.into_iter().map(|r| r.into()).collect::<Vec<Case>>();
+        Ok(cases)
+    }
+
+    async fn delete(&mut self, case_id: &CaseID) -> anyhow::Result<()> {
+        sqlx::query(DELETE_CASE_QUERY)
+            .bind(Uuid::from(case_id))
+            .execute(self.conn.as_conn())
+            .await?;
+
+        Ok(())
+    }
+
+    async fn settle(&mut self, case_id: &CaseID) -> anyhow::Result<()> {
+        sqlx::query(SETTLE_CASE_QUERY)
+            .bind(Uuid::from(case_id))
+            .execute(self.conn.as_conn())
+            .await?;
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct CaseFromSQLx {
+    pub id: Uuid,
+    pub name: String,
+    pub used_minutes: i32,
+    pub estimated_minutes: i32,
+    pub billing_cycle: i32,
+    pub pending_logs: i32,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub started_at: chrono::DateTime<chrono::Utc>,
+    pub ended_at: chrono::DateTime<chrono::Utc>,
+    pub settled_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+impl From<CaseFromSQLx> for Case {
+    fn from(value: CaseFromSQLx) -> Self {
+        Self {
+            id: CaseID::from(value.id),
+            name: value.name,
+            used_minutes: value.used_minutes,
+            estimated_minutes: value.estimated_minutes,
+            billing_cycle: value.billing_cycle,
+            created_at: value.created_at,
+            started_at: value.started_at,
+            ended_at: value.ended_at,
+            pending_logs: value.pending_logs,
+            settled_at: value.settled_at,
+        }
+    }
+}

@@ -1,4 +1,5 @@
-use crate::repositories::{CaseID, IWorkLogsRepository, WorkLog};
+use crate::domain::cases::entity::CaseID;
+use crate::repositories::{IWorkLogsRepository, WorkLog};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 

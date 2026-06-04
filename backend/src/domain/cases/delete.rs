@@ -1,25 +1,19 @@
-use crate::repositories::{CaseID, ICaseRepository};
+use crate::domain::cases::entity::CaseID;
+use crate::domain::cases::repository::CaseRepository;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-pub struct Request {
-    pub id: String,
-}
-
 pub enum Error {
-    InvalidID,
     Unknown(String),
 }
 
 pub async fn execute(
-    repo: Arc<Mutex<impl ICaseRepository + Sync + Send>>,
-    req: Request,
+    repo: Arc<Mutex<impl CaseRepository + Sync + Send>>,
+    id: &CaseID,
 ) -> Result<(), Error> {
-    let case_id = CaseID::try_from(req.id).map_err(|_| Error::InvalidID)?;
-
     let mut repo = repo.lock().await;
 
-    repo.delete(case_id)
+    repo.delete(id)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 

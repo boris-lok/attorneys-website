@@ -1,5 +1,6 @@
+use crate::domain::cases::entity::CaseID;
 use crate::domain::entities::UserID;
-use crate::repositories::{CaseID, CreateWorkLog, IWorkLogsRepository};
+use crate::repositories::{CreateWorkLog, IWorkLogsRepository};
 use std::sync::Arc;
 use uuid::Uuid;
 

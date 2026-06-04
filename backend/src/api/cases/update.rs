@@ -1,7 +1,8 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
-use crate::domain::cases::update::{execute, Error, Request};
-use crate::repositories::SQLxCaseRepository;
+use crate::domain::cases::entity::CaseID;
+use crate::domain::cases::update::{execute, Error};
+use crate::infrastructure::db::case_repo::PostgresCaseRepo;
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -26,8 +27,8 @@ pub async fn update_case(
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<UpdateCaseRequest>, ApiError>,
 ) -> Result<StatusCode, ApiError> {
-    let req = Request {
-        id: req.id,
+    let req = crate::domain::cases::entity::UpdateCaseRequest {
+        id: CaseID::try_from(req.id).map_err(|_| ApiError::BadRequest)?,
         name: req.name,
         started_at: req.started_at,
         ended_at: req.ended_at,
@@ -35,13 +36,9 @@ pub async fn update_case(
         billing_cycle: req.billing_cycle,
     };
 
-    let mut conn = state
-        .pool
-        .acquire()
+    let repo = PostgresCaseRepo::new(&state.pool)
         .await
         .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
-
-    let repo = SQLxCaseRepository::new(Arc::new(Mutex::new(&mut *conn)));
 
     let res = execute(Arc::new(Mutex::new(repo)), req).await;
 

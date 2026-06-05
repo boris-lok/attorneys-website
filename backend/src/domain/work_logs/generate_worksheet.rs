@@ -1,4 +1,4 @@
-use crate::repositories::WorkLog;
+use crate::domain::work_logs::entity::WorkLog;
 use chrono::FixedOffset;
 use rust_xlsxwriter::{Format, Workbook};
 

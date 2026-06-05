@@ -1,6 +1,6 @@
 database:
   host: 127.0.0.1
-  # if we dockerized the application, we need to change the host to the database service name
+  # if we dockerized the application, we need to change the host to the database services name
   # host: db
   port: 15432
   username: postgres

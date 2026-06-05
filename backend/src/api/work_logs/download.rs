@@ -1,14 +1,13 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
+use crate::domain::cases::entity::CaseID;
 use crate::domain::work_logs::list::{execute, Error, Request};
-use crate::repositories::SqlxWorkLogsRepository;
+use crate::infrastructure::db::connection::{PostgresRepo, WorkLogRepo};
 use crate::startup::AppState;
 use axum::extract::{Query, State};
 use axum::http::{header, StatusCode};
 use axum::response::IntoResponse;
 use serde::Deserialize;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Debug, Deserialize)]
 pub struct DownloadWorkLogsRequest {
@@ -22,22 +21,18 @@ pub async fn download(
     State(state): State<AppState>,
     query: Query<DownloadWorkLogsRequest>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let mut conn = state
-        .pool
-        .acquire()
+    let mut repo = PostgresRepo::<WorkLogRepo>::new(&state.pool)
         .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
-
-    let repo = SqlxWorkLogsRepository::new(Arc::new(Mutex::new(&mut *conn)));
+        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 
     let req = Request {
-        case_id: query.case_id.clone(),
+        case_id: CaseID::try_from(query.case_id.clone()).map_err(|_| ApiError::BadRequest)?,
         started_at: query.started_at,
         ended_at: query.ended_at,
         include_settled: false,
     };
 
-    let res = execute(Arc::new(Mutex::new(repo)), req).await;
+    let res = execute(&mut repo, req).await;
 
     match res {
         Ok(work_logs) => {
@@ -64,6 +59,5 @@ pub async fn download(
             ))
         }
         Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
-        Err(Error::InvalidCaseID) => Err(ApiError::BadRequest),
     }
 }

@@ -9,10 +9,6 @@ pub use resource_repository::{
 pub use roles_repository::{IRolesRepository, SqlxRolesRepository};
 pub use user_repository::{IUserRepository, SqlxUserRepository, User};
 pub use user_roles_repository::{IUserRolesRepository, SqlxUserRolesRepository};
-pub use work_logs_repository::{
-    CreateWorkLog, IWorkLogsRepository, SqlxWorkLogsRepository, UpdateWorkLog, WorkLog,
-    WorkLogStatus,
-};
 
 #[cfg(test)]
 pub use {
@@ -37,4 +33,3 @@ mod resource_repository;
 mod roles_repository;
 mod user_repository;
 mod user_roles_repository;
-mod work_logs_repository;

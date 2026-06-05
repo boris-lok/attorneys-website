@@ -1,7 +1,7 @@
 use crate::domain::cases::entity::{Case, CaseID, CreateCaseRequest, UpdateCaseRequest};
 use crate::domain::cases::repository::CaseRepository;
 use crate::domain::entities::UserID;
-use crate::infrastructure::db::connection::PgConn;
+use crate::infrastructure::db::connection::{CaseRepo, PostgresRepo};
 use uuid::Uuid;
 
 const CREATE_CASE_QUERY: &str = r"
@@ -71,22 +71,7 @@ const LIST_CASES_QUERY: &str = r"
     c.id
 ";
 
-pub struct PostgresCaseRepo<'tx> {
-    conn: PgConn<'tx>,
-}
-
-impl<'tx> PostgresCaseRepo<'tx> {
-    pub async fn new(pool: &'tx sqlx::Pool<sqlx::Postgres>) -> anyhow::Result<Self> {
-        let conn = PgConn::from_pool(pool).await?;
-        Ok(Self { conn })
-    }
-
-    pub fn with_tx(tx: &'tx mut sqlx::PgConnection) -> Self {
-        Self {
-            conn: PgConn::Transaction(tx),
-        }
-    }
-}
+pub type PostgresCaseRepo<'tx> = PostgresRepo<'tx, CaseRepo>;
 
 #[async_trait::async_trait]
 impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
@@ -98,7 +83,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
             .bind(req.started_at)
             .bind(req.ended_at)
             .bind(req.billing_cycle)
-            .execute(self.conn.as_conn())
+            .execute(self.get_conn())
             .await?;
 
         Ok(req.id)
@@ -112,7 +97,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
             .bind(req.billing_cycle)
             .bind(req.started_at)
             .bind(req.ended_at)
-            .execute(self.conn.as_conn())
+            .execute(self.get_conn())
             .await?;
 
         Ok(())
@@ -121,7 +106,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
     async fn list(&mut self, user_id: &UserID) -> anyhow::Result<Vec<Case>> {
         let res = sqlx::query_as::<_, CaseFromSQLx>(LIST_CASES_QUERY)
             .bind(Uuid::from(user_id))
-            .fetch_all(self.conn.as_conn())
+            .fetch_all(self.get_conn())
             .await?;
 
         let cases = res.into_iter().map(|r| r.into()).collect::<Vec<Case>>();
@@ -131,7 +116,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
     async fn delete(&mut self, case_id: &CaseID) -> anyhow::Result<()> {
         sqlx::query(DELETE_CASE_QUERY)
             .bind(Uuid::from(case_id))
-            .execute(self.conn.as_conn())
+            .execute(self.get_conn())
             .await?;
 
         Ok(())
@@ -140,7 +125,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
     async fn settle(&mut self, case_id: &CaseID) -> anyhow::Result<()> {
         sqlx::query(SETTLE_CASE_QUERY)
             .bind(Uuid::from(case_id))
-            .execute(self.conn.as_conn())
+            .execute(self.get_conn())
             .await?;
 
         Ok(())

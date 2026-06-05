@@ -1,12 +1,11 @@
 use crate::domain::entities::UserID;
-use crate::repositories::{IWorkLogsRepository, UpdateWorkLog};
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use crate::domain::work_logs::entity::UpdateWorkLogRequest;
+use crate::domain::work_logs::repository::WorkLogsRepository;
 use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct Request {
-    pub id: String,
+    pub id: Uuid,
     pub user_id: UserID,
     pub description: Option<String>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -22,8 +21,6 @@ pub struct Request {
 pub enum Error {
     NotFound,
     PermissionDenied,
-    InvalidID,
-    InvalidStatus(String),
     Unknown(String),
 }
 
@@ -33,14 +30,12 @@ pub enum Error {
 /// - check if the creator is an owner.
 /// - check the work_log is co-operate with others.
 async fn validate(
-    repo: Arc<Mutex<impl IWorkLogsRepository + Send + Sync>>,
+    repo: &mut impl WorkLogsRepository,
     id: &Uuid,
     user_id: &UserID,
     force: bool,
 ) -> Result<(), Error> {
-    let lock = repo.lock().await;
-
-    let is_exist = lock
+    let is_exist = repo
         .is_work_log_exist(id)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
@@ -49,12 +44,12 @@ async fn validate(
     }
 
     if !force {
-        let is_creator = lock
+        let is_creator = repo
             .is_creator(id, user_id)
             .await
             .map_err(|e| Error::Unknown(e.to_string()))?;
 
-        let is_collaborator = lock
+        let is_collaborator = repo
             .is_collaborator_work_log(id, user_id)
             .await
             .map_err(|e| Error::Unknown(e.to_string()))?;
@@ -67,24 +62,17 @@ async fn validate(
     Ok(())
 }
 
-pub async fn execute(
-    repo: Arc<Mutex<impl IWorkLogsRepository + Send + Sync>>,
-    req: Request,
-) -> Result<(), Error> {
-    let work_log_id = Uuid::parse_str(&req.id).map_err(|_| Error::InvalidID)?;
+pub async fn execute(repo: &mut impl WorkLogsRepository, req: Request) -> Result<(), Error> {
+    validate(repo, &req.id, &req.user_id, req.force).await?;
 
-    validate(repo.clone(), &work_log_id, &req.user_id, req.force).await?;
-
-    let mut lock = repo.lock().await;
-    let req = UpdateWorkLog {
-        id: work_log_id,
+    let req = UpdateWorkLogRequest {
+        id: req.id,
         description: req.description,
         started_at: req.started_at,
         ended_at: req.ended_at,
-        deleted_at: None,
     };
 
-    lock.update(req)
+    repo.update(req)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 

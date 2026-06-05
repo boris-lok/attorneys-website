@@ -5,3 +5,6 @@ pub mod member;
 pub mod resources;
 pub mod users;
 pub mod work_logs;
+pub mod work_log_mapping;
+pub(crate) mod uow;
+pub mod services;

@@ -1,15 +1,12 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
+use crate::domain::cases::entity::CaseID;
 use crate::domain::entities::UserID;
-use crate::repositories::SqlxWorkLogsRepository;
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
-use sqlx::Acquire;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
@@ -31,48 +28,33 @@ pub async fn create_work_log(
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<CreateWorkLogRequest>, ApiError>,
 ) -> Result<Json<CreateWorkLogResponse>, ApiError> {
-    let creator_id = Uuid::parse_str(claims.sub.as_str()).unwrap();
-    let creator_id = UserID::from(creator_id);
-    let case_id = Uuid::parse_str(req.case_id.as_str()).map_err(|_| ApiError::BadRequest)?;
-    let collaborators = req.collaborator_ids.map(|c| {
-        c.iter()
-            .filter_map(|id| {
-                let id = Uuid::parse_str(id.as_str());
-                id.map(UserID::from).ok()
-            })
-            .collect::<Vec<_>>()
-    });
+    let collaborator_ids = req
+        .collaborator_ids
+        .unwrap_or_default()
+        .iter()
+        .map(|id| {
+            Uuid::parse_str(id)
+                .map(UserID::from)
+                .map_err(|_| ApiError::BadRequest)
+        })
+        .collect::<Result<Vec<_>, _>>()?;
 
     let req = crate::domain::work_logs::create::Request {
-        creator_id,
-        case_id,
+        id: Uuid::new_v4(),
+        user_id: Uuid::parse_str(&claims.sub).map_err(|_| ApiError::BadRequest)?,
+        case_id: CaseID::from(Uuid::parse_str(&req.case_id).map_err(|_| ApiError::BadRequest)?),
         started_at: req.started_at,
-        duration: chrono::Duration::minutes(req.duration),
+        ended_at: req.started_at + chrono::Duration::minutes(req.duration),
         description: req.description,
-        collaborator_ids: collaborators,
+        collaborator_ids,
     };
 
-    let mut conn = state
-        .pool
-        .acquire()
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
-    let mut tx = conn
-        .begin()
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
+    let service = state.work_log_service();
 
-    let repo = SqlxWorkLogsRepository::new(Arc::new(Mutex::new(&mut tx)));
-
-    let res = crate::domain::work_logs::create::execute(Arc::new(Mutex::new(repo)), req).await;
-
-    tx.commit()
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
+    let res = crate::domain::work_logs::create::execute(&service, req).await;
 
     match res {
         Ok(id) => Ok(Json(CreateWorkLogResponse { id: id.to_string() })),
-        Err(crate::domain::work_logs::create::Error::InvalidCaseID) => Err(ApiError::BadRequest),
         Err(crate::domain::work_logs::create::Error::Unknown(e)) => {
             Err(ApiError::InternalServerError(e))
         }

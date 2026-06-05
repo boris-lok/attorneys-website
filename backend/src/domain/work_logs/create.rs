@@ -1,67 +1,48 @@
 use crate::domain::cases::entity::CaseID;
 use crate::domain::entities::UserID;
-use crate::repositories::{CreateWorkLog, IWorkLogsRepository};
-use std::sync::Arc;
+use crate::domain::services::work_log::WorkLogService;
+use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::work_log_mapping::repository::WorkLogMappingRepository;
+use crate::domain::work_logs::entity::CreateWorkLogRequest;
+use crate::domain::work_logs::repository::WorkLogsRepository;
 use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct Request {
-    pub creator_id: UserID,
-    pub case_id: Uuid,
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub case_id: CaseID,
     pub started_at: chrono::DateTime<chrono::Utc>,
-    pub duration: chrono::Duration,
+    pub ended_at: chrono::DateTime<chrono::Utc>,
     pub description: String,
-    pub collaborator_ids: Option<Vec<UserID>>,
-}
-
-impl TryFrom<Request> for CreateWorkLog {
-    type Error = String;
-
-    fn try_from(value: Request) -> Result<Self, Self::Error> {
-        let user_id = Uuid::parse_str(&value.creator_id.to_string()).unwrap();
-        let case_id = CaseID::try_from(value.case_id.to_string())?;
-        let is_collaborative = value
-            .collaborator_ids
-            .map(|e| !e.is_empty())
-            .unwrap_or(false);
-
-        Ok(Self {
-            id: Uuid::new_v4(),
-            user_id,
-            case_id,
-            started_at: value.started_at,
-            ended_at: value.started_at + value.duration,
-            description: value.description,
-            is_collaborative,
-        })
-    }
+    pub collaborator_ids: Vec<UserID>,
 }
 
 #[derive(Debug)]
 pub enum Error {
-    InvalidCaseID,
     Unknown(String),
 }
 
-pub async fn execute(
-    repo: Arc<tokio::sync::Mutex<impl IWorkLogsRepository + Sync + Send>>,
+pub async fn execute<F: UnitOfWorkFactory>(
+    service: &WorkLogService<F>,
     req: Request,
 ) -> Result<Uuid, Error> {
-    let collaborators = req.collaborator_ids.clone().unwrap_or_default();
+    let id = req.id;
 
-    let work_log = CreateWorkLog::try_from(req).map_err(|_| Error::InvalidCaseID)?;
-    let id = work_log.id;
-    let mut lock = repo.lock().await;
+    let work_log = CreateWorkLogRequest {
+        id,
+        user_id: req.user_id,
+        case_id: req.case_id,
+        started_at: req.started_at,
+        ended_at: req.ended_at,
+        description: req.description,
+        is_collaborative: !req.collaborator_ids.is_empty(),
+    };
 
-    lock.create(work_log)
+    service
+        .create(work_log, req.collaborator_ids)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
-
-    if !collaborators.is_empty() {
-        lock.create_mapping(id, collaborators)
-            .await
-            .map_err(|e| Error::Unknown(e.to_string()))?;
-    }
 
     Ok(id)
 }

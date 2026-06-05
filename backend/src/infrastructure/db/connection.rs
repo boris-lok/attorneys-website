@@ -1,5 +1,6 @@
 use sqlx::pool::PoolConnection;
 use sqlx::{PgConnection, Postgres};
+use std::marker::PhantomData;
 
 pub enum PgConn<'tx> {
     Pool(PoolConnection<Postgres>),
@@ -18,3 +19,33 @@ impl<'tx> PgConn<'tx> {
         }
     }
 }
+
+pub struct PostgresRepo<'tx, T> {
+    conn: PgConn<'tx>,
+    _marker: PhantomData<T>,
+}
+
+impl<'tx, T> PostgresRepo<'tx, T> {
+    pub async fn new(pool: &sqlx::Pool<Postgres>) -> anyhow::Result<Self> {
+        let conn = PgConn::from_pool(pool).await?;
+        Ok(Self {
+            conn,
+            _marker: PhantomData,
+        })
+    }
+
+    pub fn with_tx(tx: &'tx mut PgConnection) -> Self {
+        Self {
+            conn: PgConn::Transaction(tx),
+            _marker: PhantomData,
+        }
+    }
+
+    pub(crate) fn get_conn(&mut self) -> &mut PgConnection {
+        self.conn.as_conn()
+    }
+}
+
+pub struct CaseRepo;
+pub struct WorkLogRepo;
+pub struct WorkLogMappingRepo;

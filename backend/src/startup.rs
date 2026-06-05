@@ -12,6 +12,8 @@ use crate::api::{
     update_work_log_status, upload_member_avatar, view_article,
 };
 use crate::configuration::{DatabaseSettings, Settings};
+use crate::domain::services::work_log::WorkLogService;
+use crate::infrastructure::db::uow::PostgresUoWFactory;
 use crate::utils::image::ImageUtil;
 use axum::http::header::{ACCEPT_LANGUAGE, CONTENT_TYPE};
 use axum::http::{HeaderValue, Method};
@@ -32,6 +34,12 @@ pub struct AppState {
     pub upload_folder: Arc<String>,
     pub jwt_encoding_key: Arc<EncodingKey>,
     pub jwt_decoding_key: Arc<DecodingKey>,
+}
+
+impl AppState {
+    pub fn work_log_service(&self) -> WorkLogService<PostgresUoWFactory> {
+        WorkLogService::new(PostgresUoWFactory::new(self.pool.clone()))
+    }
 }
 
 pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io::Error> {

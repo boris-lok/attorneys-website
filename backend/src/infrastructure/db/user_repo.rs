@@ -52,7 +52,7 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
             .bind(nickname)
             .fetch_one(self.get_conn())
             .await
-            .map(|id| UserID::from(id))?;
+            .map(UserID::from)?;
 
         Ok(id)
     }

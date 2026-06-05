@@ -15,7 +15,7 @@ impl<'tx> PgConn<'tx> {
     pub fn as_conn(&mut self) -> &mut PgConnection {
         match self {
             PgConn::Pool(conn) => &mut *conn,
-            PgConn::Transaction(tx) => &mut **tx,
+            PgConn::Transaction(tx) => tx,
         }
     }
 }

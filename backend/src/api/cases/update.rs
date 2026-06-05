@@ -9,8 +9,6 @@ use axum::http::StatusCode;
 use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::Deserialize;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateCaseRequest {

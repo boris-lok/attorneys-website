@@ -25,9 +25,9 @@ impl TryFrom<String> for CaseID {
     }
 }
 
-impl Into<String> for CaseID {
-    fn into(self) -> String {
-        self.0.to_string()
+impl From<CaseID> for String {
+    fn from(value: CaseID) -> Self {
+        value.0.to_string()
     }
 }
 

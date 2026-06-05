@@ -1,7 +1,5 @@
 use crate::domain::cases::entity::{CaseID, CreateCaseRequest};
 use crate::domain::cases::repository::CaseRepository;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Debug)]
 pub enum Error {
@@ -9,12 +7,10 @@ pub enum Error {
 }
 
 pub async fn execute(
-    repo: Arc<Mutex<impl CaseRepository + Sync + Send>>,
+    repo: &mut impl CaseRepository,
     req: CreateCaseRequest,
 ) -> Result<CaseID, Error> {
-    let mut lock = repo.lock().await;
-
-    let id = lock
+    let id = repo
         .create(req)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;

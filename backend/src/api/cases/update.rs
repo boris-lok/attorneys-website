@@ -36,11 +36,11 @@ pub async fn update_case(
         billing_cycle: req.billing_cycle,
     };
 
-    let repo = PostgresCaseRepo::new(&state.pool)
+    let mut repo = PostgresCaseRepo::new(&state.pool)
         .await
         .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
 
-    let res = execute(Arc::new(Mutex::new(repo)), req).await;
+    let res = execute(&mut repo, req).await;
 
     match res {
         Ok(_) => Ok(StatusCode::OK),

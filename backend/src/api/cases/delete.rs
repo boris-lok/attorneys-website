@@ -7,8 +7,6 @@ use crate::startup::AppState;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use std::collections::HashMap;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 pub async fn delete_case(
     _: Claims,
@@ -18,11 +16,11 @@ pub async fn delete_case(
     let id = params.get("id").ok_or(ApiError::BadRequest)?;
     let case_id = CaseID::try_from(id.clone()).map_err(|_| ApiError::BadRequest)?;
 
-    let repo = PostgresCaseRepo::new(&state.pool)
+    let mut repo = PostgresCaseRepo::new(&state.pool)
         .await
         .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
 
-    let res = execute(Arc::new(Mutex::new(repo)), &case_id).await;
+    let res = execute(&mut repo, &case_id).await;
 
     match res {
         Ok(_) => Ok(StatusCode::OK),

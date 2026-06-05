@@ -7,8 +7,6 @@ use axum::extract::State;
 use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
@@ -39,11 +37,11 @@ pub async fn create_case(
         ended_at: req.ended_at,
     };
 
-    let repo = PostgresCaseRepo::new(&state.pool)
+    let mut repo = PostgresCaseRepo::new(&state.pool)
         .await
         .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
 
-    let resp = crate::domain::cases::create::execute(Arc::new(Mutex::new(repo)), req).await;
+    let resp = crate::domain::cases::create::execute(&mut repo, req).await;
 
     match resp {
         Ok(id) => Ok(Json(CreateCaseResponse { id: id.into() })),

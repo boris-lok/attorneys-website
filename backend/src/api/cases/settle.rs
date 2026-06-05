@@ -10,8 +10,6 @@ use axum::response::IntoResponse;
 use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::Deserialize;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Debug, Deserialize)]
 pub struct SettleRequest {
@@ -25,11 +23,11 @@ pub async fn settle(
 ) -> Result<impl IntoResponse, ApiError> {
     let case_id = CaseID::try_from(req.case_id).map_err(|_| ApiError::BadRequest)?;
 
-    let repo = PostgresCaseRepo::new(&state.pool)
+    let mut repo = PostgresCaseRepo::new(&state.pool)
         .await
         .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
 
-    let res = crate::domain::cases::settle::execute(Arc::new(Mutex::new(repo)), &case_id).await;
+    let res = crate::domain::cases::settle::execute(&mut repo, &case_id).await;
 
     match res {
         Ok(_) => Ok(StatusCode::OK),

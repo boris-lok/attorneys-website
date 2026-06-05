@@ -24,7 +24,7 @@ impl<F: UnitOfWorkFactory> WorkLogService<F> {
         let mut uow = self.factory.begin().await?;
 
         let res = async {
-            let id = log.id.clone();
+            let id = log.id;
             uow.work_log_repo().create(log).await?;
             uow.work_log_mapping_repo()
                 .create(&id, collaborator_ids)

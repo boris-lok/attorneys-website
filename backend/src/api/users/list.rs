@@ -1,11 +1,10 @@
 use crate::api::api_error::ApiError;
-use crate::repositories::SqlxUserRepository;
+use crate::domain::users::list;
+use crate::infrastructure::db::connection::{PostgresRepo, UserRepo};
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::Json;
 use serde::Serialize;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Debug, Serialize)]
 pub struct SimpleUser {
@@ -21,16 +20,11 @@ pub struct ListUsersResponse {
 pub async fn list_users(
     State(state): State<AppState>,
 ) -> Result<Json<ListUsersResponse>, ApiError> {
-    use crate::domain::users::list_users;
-    let conn = &mut *state
-        .pool
-        .acquire()
+    let mut repo = PostgresRepo::<UserRepo>::new(&state.pool)
         .await
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 
-    let user_repo = SqlxUserRepository::new(Arc::new(Mutex::new(conn)));
-
-    match list_users::execute(Mutex::new(user_repo)).await {
+    match list::execute(&mut repo).await {
         Ok(users) => Ok(Json(ListUsersResponse {
             users: users
                 .into_iter()
@@ -41,6 +35,6 @@ pub async fn list_users(
                 })
                 .collect(),
         })),
-        Err(list_users::Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
+        Err(list::Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
     }
 }

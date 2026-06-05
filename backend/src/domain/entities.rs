@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::FromRow;
 use std::fmt::Formatter;
-use uuid::Uuid;
 use validator::Validate;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -525,38 +524,6 @@ pub enum Pagination {
 pub struct Page {
     pub page: u32,
     pub size: u32,
-}
-
-#[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub struct UserID(Uuid);
-
-impl TryFrom<String> for UserID {
-    type Error = ();
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        match Uuid::try_parse(value.as_str()) {
-            Ok(id) => Ok(UserID(id)),
-            Err(_) => Err(()),
-        }
-    }
-}
-
-impl From<Uuid> for UserID {
-    fn from(value: Uuid) -> Self {
-        UserID(value)
-    }
-}
-
-impl From<&UserID> for Uuid {
-    fn from(value: &UserID) -> Self {
-        value.0
-    }
-}
-
-impl std::fmt::Display for UserID {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
 }
 
 #[derive(Debug, Serialize, Validate, Deserialize, Clone, Eq, PartialEq)]

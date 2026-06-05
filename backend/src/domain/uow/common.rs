@@ -1,3 +1,4 @@
+use crate::domain::users::repository::{UserRepository, UserRoleRepository};
 use crate::domain::work_log_mapping::repository::WorkLogMappingRepository;
 use crate::domain::work_logs::repository::WorkLogsRepository;
 
@@ -9,10 +10,20 @@ pub trait UnitOfWork {
     type WorkLogMappingRepo<'a>: WorkLogMappingRepository
     where
         Self: 'a;
+    type UserRepo<'a>: UserRepository
+    where
+        Self: 'a;
+    type UserRoleRepo<'a>: UserRoleRepository
+    where
+        Self: 'a;
 
     fn work_log_repo(&mut self) -> Self::WorkLogRepo<'_>;
 
     fn work_log_mapping_repo(&mut self) -> Self::WorkLogMappingRepo<'_>;
+
+    fn user_repo(&mut self) -> Self::UserRepo<'_>;
+
+    fn user_role_repo(&mut self) -> Self::UserRoleRepo<'_>;
 
     async fn commit(self) -> anyhow::Result<()>;
 

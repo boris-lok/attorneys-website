@@ -1,6 +1,6 @@
 use crate::domain::cases::entity::{Case, CaseID, CreateCaseRequest, UpdateCaseRequest};
 use crate::domain::cases::repository::CaseRepository;
-use crate::domain::entities::UserID;
+use crate::domain::users::entity::UserID;
 use crate::infrastructure::db::connection::{CaseRepo, PostgresRepo};
 use uuid::Uuid;
 

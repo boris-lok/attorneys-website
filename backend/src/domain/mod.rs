@@ -3,6 +3,7 @@ pub mod cases;
 pub mod entities;
 pub mod member;
 pub mod resources;
+pub mod role;
 pub mod services;
 pub(crate) mod uow;
 pub mod users;

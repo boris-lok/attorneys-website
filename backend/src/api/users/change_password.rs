@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
-use crate::domain::entities::UserID;
-use crate::repositories::SqlxUserRepository;
+use crate::domain::users::entity::UserID;
+use crate::infrastructure::db::connection::{PostgresRepo, UserRepo};
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -11,8 +11,6 @@ use redis::TypedCommands;
 use secrecy::SecretBox;
 use serde::Deserialize;
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct ChangePasswordRequest {
@@ -25,22 +23,18 @@ pub async fn change_password(
     Extension(redis_client): Extension<Arc<redis::Client>>,
     WithRejection(Json(req), _): WithRejection<Json<ChangePasswordRequest>, ApiError>,
 ) -> Result<StatusCode, ApiError> {
-    let mut conn = state
-        .pool
-        .acquire()
+    let mut repo = PostgresRepo::<UserRepo>::new(&state.pool)
         .await
         .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 
-    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| ApiError::BadRequest)?;
-    let user_id = UserID::from(user_id);
+    let user_id = UserID::try_from(claims.sub.clone()).map_err(|_| ApiError::BadRequest)?;
 
     let req = crate::domain::users::change_password::Request {
         user_id,
         new_password: SecretBox::new(Box::new(req.new_password)),
     };
-    let user_repo = SqlxUserRepository::new(Arc::new(Mutex::new(conn.as_mut())));
 
-    match crate::domain::users::change_password::execute(req, Mutex::new(user_repo)).await {
+    match crate::domain::users::change_password::execute(&mut repo, req).await {
         Ok(_) => {
             let mut c = redis_client
                 .get_connection()

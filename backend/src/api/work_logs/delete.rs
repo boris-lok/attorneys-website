@@ -1,6 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
-use crate::domain::entities::UserID;
+use crate::domain::users::entity::UserID;
 use crate::domain::work_logs::delete::{execute, Error, Request};
 use crate::infrastructure::db::connection::{PostgresRepo, WorkLogRepo};
 use crate::startup::AppState;

@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
 use crate::domain::cases::entity::CaseID;
-use crate::domain::entities::UserID;
+use crate::domain::users::entity::UserID;
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::Json;

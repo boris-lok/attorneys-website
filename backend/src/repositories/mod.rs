@@ -6,15 +6,9 @@ pub use content_repository::{
 pub use resource_repository::{
     IResourceRepository, InMemoryResourceRepository, SqlxResourceRepository,
 };
-pub use roles_repository::{IRolesRepository, SqlxRolesRepository};
-pub use user_repository::{IUserRepository, SqlxUserRepository, User};
-pub use user_roles_repository::{IUserRolesRepository, SqlxUserRolesRepository};
 
 #[cfg(test)]
-pub use {
-    article_views_repository::InMemoryArticleViewsRepository,
-    user_repository::InMemoryUserRepository,
-};
+pub use article_views_repository::InMemoryArticleViewsRepository;
 
 use sqlx::{Pool, Postgres, Transaction};
 use std::sync::Weak;
@@ -30,6 +24,3 @@ mod article_views_repository;
 mod avatar_repository;
 mod content_repository;
 mod resource_repository;
-mod roles_repository;
-mod user_repository;
-mod user_roles_repository;

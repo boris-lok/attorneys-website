@@ -1,5 +1,5 @@
-use crate::domain::entities::UserID;
-use crate::repositories::IUserRepository;
+use crate::domain::users::entity::UserID;
+use crate::domain::users::repository::UserRepository;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Algorithm, Argon2, Params, PasswordHasher, Version};
@@ -14,10 +14,7 @@ pub enum Error {
     Unknown(String),
 }
 
-pub async fn execute(
-    req: Request,
-    user_repo: tokio::sync::Mutex<impl IUserRepository + Sync + Send>,
-) -> Result<(), Error> {
+pub async fn execute(repo: &mut impl UserRepository, req: Request) -> Result<(), Error> {
     let salt = SaltString::generate(&mut OsRng);
     let password_hash = Argon2::new(
         Algorithm::Argon2d,
@@ -28,10 +25,10 @@ pub async fn execute(
     .unwrap()
     .to_string();
 
-    let mut lock = user_repo.lock().await;
-    lock.change_password(req.user_id, SecretBox::new(Box::new(password_hash)))
+    repo.change_password(&req.user_id, SecretBox::new(Box::new(password_hash)))
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 
+    // TODO: clear the session.
     Ok(())
 }

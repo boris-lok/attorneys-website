@@ -1,17 +1,15 @@
 use anyhow::anyhow;
-use backend::domain::entities::UserID;
+use backend::domain::role::repository::RoleRepository;
+use backend::domain::services::user::UserService;
 use backend::domain::users;
+use backend::domain::users::entity::UserID;
 use backend::get_configuration;
-use backend::repositories::{
-    IRolesRepository, SqlxRolesRepository, SqlxUserRepository, SqlxUserRolesRepository,
-};
+use backend::infrastructure::db::connection::{PostgresRepo, RoleRepo, UserRepo};
+use backend::infrastructure::db::uow::PostgresUoWFactory;
 use clap::Parser;
 use dialoguer::{theme::ColorfulTheme, MultiSelect, Password};
 use secrecy::SecretBox;
 use sqlx::postgres::PgPoolOptions;
-use sqlx::Acquire;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -25,14 +23,11 @@ async fn main() -> anyhow::Result<()> {
             configuration.database.timeout,
         ))
         .connect_lazy_with(configuration.database.with_db());
-    let conn = Arc::new(conn);
 
     match cli.commands {
         Commands::List => list_users(conn).await?,
-        Commands::Create { username, nickname } => {
-            create_user(conn.clone(), username, nickname).await?
-        }
-        Commands::Delete { id } => delete_user(conn.clone(), id).await?,
+        Commands::Create { username, nickname } => create_user(conn, username, nickname).await?,
+        Commands::Delete { id } => delete_user(conn, id).await?,
     }
 
     Ok(())
@@ -68,11 +63,12 @@ enum Commands {
 }
 
 /// list all users from the database and print the result in the console
-async fn list_users(pool: Arc<sqlx::PgPool>) -> anyhow::Result<()> {
-    let conn = &mut *pool.acquire().await?;
-    let user_repo = SqlxUserRepository::new(Arc::new(Mutex::new(conn)));
+async fn list_users(pool: sqlx::PgPool) -> anyhow::Result<()> {
+    let mut repo = PostgresRepo::<UserRepo>::new(&pool)
+        .await
+        .map_err(|e| anyhow!("Failed to create user repository: {:?}", e))?;
 
-    let res = users::list_users::execute(Mutex::new(user_repo))
+    let res = users::list::execute(&mut repo)
         .await
         .map_err(|e| anyhow!("Failed to list users, got an error: {:?}", e))?;
 
@@ -94,33 +90,26 @@ async fn list_users(pool: Arc<sqlx::PgPool>) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn delete_user(pool: Arc<sqlx::PgPool>, id: String) -> anyhow::Result<()> {
+async fn delete_user(pool: sqlx::PgPool, id: String) -> anyhow::Result<()> {
+    let mut repo = PostgresRepo::<UserRepo>::new(&pool)
+        .await
+        .map_err(|e| anyhow!("Failed to create user repository: {:?}", e))?;
+
     let user_id = UserID::try_from(id).map_err(|_| anyhow!("Invalid user ID, must be a UUID"))?;
 
-    let conn = &mut *pool.acquire().await?;
-    let user_repo = SqlxUserRepository::new(Arc::new(Mutex::new(conn)));
-
-    users::delete_user::execute(
-        users::delete_user::Request { id: user_id },
-        Mutex::new(user_repo),
-    )
-    .await?;
+    users::delete::execute(&mut repo, &user_id).await?;
 
     println!("User deleted successfully");
 
     Ok(())
 }
 
-async fn create_user(
-    pool: Arc<sqlx::PgPool>,
-    username: String,
-    nickname: String,
-) -> anyhow::Result<()> {
-    let conn = &mut *pool.acquire().await?;
+async fn create_user(pool: sqlx::PgPool, username: String, nickname: String) -> anyhow::Result<()> {
+    let mut role_repo = PostgresRepo::<RoleRepo>::new(&pool)
+        .await
+        .map_err(|e| anyhow!("Failed to create role repository: {:?}", e))?;
 
-    let role_repo = SqlxRolesRepository::new(Mutex::new(conn));
-
-    let roles = role_repo.list_roles().await;
+    let roles = role_repo.list().await;
 
     let selection = roles
         .clone()
@@ -156,28 +145,20 @@ async fn create_user(
         .map(|index| roles[*index].id)
         .collect::<Vec<_>>();
 
-    let mut tx = pool.begin().await?;
-    let conn = tx.acquire().await?;
-    let conn = Arc::new(Mutex::new(conn));
+    let service = UserService::new(PostgresUoWFactory::new(pool));
 
-    let user_repo = SqlxUserRepository::new(conn.clone());
-    let user_role_repo = SqlxUserRolesRepository::new(conn);
-
-    let req = users::create_user::Request {
+    let req = users::create::Request {
         username: username.clone(),
         password: secret_password,
         nickname: nickname.clone(),
         role_ids: selected_roles,
     };
 
-    let user_id =
-        users::create_user::execute(req, Mutex::new(user_repo), Mutex::new(user_role_repo))
-            .await
-            .map_err(|e| anyhow!("Failed to create user, got an error: {:?}", e))?;
+    let user_id = users::create::execute(&service, req)
+        .await
+        .map_err(|e| anyhow!("Failed to create user, got an error: {:?}", e))?;
 
     println!("User created with ID: {}", user_id);
-
-    tx.commit().await?;
 
     Ok(())
 }

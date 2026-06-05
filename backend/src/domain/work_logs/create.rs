@@ -1,7 +1,7 @@
 use crate::domain::cases::entity::CaseID;
-use crate::domain::entities::UserID;
 use crate::domain::services::work_log::WorkLogService;
 use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::repository::WorkLogMappingRepository;
 use crate::domain::work_logs::entity::CreateWorkLogRequest;
 use crate::domain::work_logs::repository::WorkLogsRepository;

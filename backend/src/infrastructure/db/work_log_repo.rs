@@ -1,5 +1,5 @@
 use crate::domain::cases::entity::CaseID;
-use crate::domain::entities::UserID;
+use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use crate::domain::work_logs::entity::{
     Collaborator, CreateWorkLogRequest, SimpleUser, UpdateWorkLogRequest, WorkLog,

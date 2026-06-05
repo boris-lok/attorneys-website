@@ -1,19 +1,11 @@
-use crate::domain::entities::UserID;
 use crate::domain::uow::common::{UnitOfWork, UnitOfWorkFactory};
+use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::repository::WorkLogMappingRepository;
 use crate::domain::work_logs::entity::CreateWorkLogRequest;
 use crate::domain::work_logs::repository::WorkLogsRepository;
-use crate::infrastructure::db::uow::PostgresUoWFactory;
+use crate::impl_service;
 
-pub struct WorkLogService<F: UnitOfWorkFactory> {
-    factory: F,
-}
-
-impl WorkLogService<PostgresUoWFactory> {
-    pub fn new(factory: PostgresUoWFactory) -> Self {
-        Self { factory }
-    }
-}
+impl_service!(WorkLogService);
 
 impl<F: UnitOfWorkFactory> WorkLogService<F> {
     pub async fn create(

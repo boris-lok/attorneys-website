@@ -2,7 +2,7 @@ use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
 use crate::domain::cases::entity::Case;
 use crate::domain::cases::list::{execute, Error};
-use crate::domain::entities::UserID;
+use crate::domain::users::entity::UserID;
 use crate::infrastructure::db::case_repo::PostgresCaseRepo;
 use crate::startup::AppState;
 use axum::extract::State;

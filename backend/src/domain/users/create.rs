@@ -1,5 +1,6 @@
-use crate::domain::entities::UserID;
-use crate::repositories::{IUserRepository, IUserRolesRepository};
+use crate::domain::services::user::UserService;
+use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::users::entity::UserID;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Algorithm, Argon2, Params, PasswordHasher, Version};
@@ -18,10 +19,9 @@ pub enum Error {
     Unknown(String),
 }
 
-pub async fn execute(
+pub async fn execute<F: UnitOfWorkFactory>(
+    service: &UserService<F>,
     req: Request,
-    user_repo: tokio::sync::Mutex<impl IUserRepository + Sync + Send>,
-    user_role_repo: tokio::sync::Mutex<impl IUserRolesRepository + Sync + Send>,
 ) -> Result<UserID, Error> {
     let salt = SaltString::generate(&mut OsRng);
     let password_hash = Argon2::new(
@@ -33,23 +33,15 @@ pub async fn execute(
     .unwrap()
     .to_string();
 
-    let mut lock = user_repo.lock().await;
-    let user_id = lock
-        .create_user(
+    let id = service
+        .create(
             req.username,
             SecretBox::new(Box::new(password_hash)),
             req.nickname,
+            req.role_ids,
         )
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 
-    let mut lock = user_role_repo.lock().await;
-
-    for role_id in req.role_ids {
-        lock.insert_user_role(user_id.clone(), role_id)
-            .await
-            .map_err(|e| Error::Unknown(e.to_string()))?;
-    }
-
-    Ok(user_id)
+    Ok(id)
 }

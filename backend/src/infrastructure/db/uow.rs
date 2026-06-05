@@ -1,5 +1,7 @@
 use crate::domain::uow::common::{UnitOfWork, UnitOfWorkFactory};
-use crate::infrastructure::db::connection::{PostgresRepo, WorkLogMappingRepo, WorkLogRepo};
+use crate::infrastructure::db::connection::{
+    PostgresRepo, UserRepo, UserRoleRepo, WorkLogMappingRepo, WorkLogRepo,
+};
 use sqlx::PgPool;
 
 pub struct PostgresUoWFactory {
@@ -30,14 +32,23 @@ pub struct PostgresUoW {
 #[async_trait::async_trait]
 impl UnitOfWork for PostgresUoW {
     type WorkLogRepo<'a> = PostgresRepo<'a, WorkLogRepo>;
-
     type WorkLogMappingRepo<'a> = PostgresRepo<'a, WorkLogMappingRepo>;
+    type UserRepo<'a> = PostgresRepo<'a, UserRepo>;
+    type UserRoleRepo<'a> = PostgresRepo<'a, UserRoleRepo>;
 
     fn work_log_repo(&mut self) -> Self::WorkLogRepo<'_> {
         PostgresRepo::with_tx(&mut self.tx)
     }
 
     fn work_log_mapping_repo(&mut self) -> Self::WorkLogMappingRepo<'_> {
+        PostgresRepo::with_tx(&mut self.tx)
+    }
+
+    fn user_repo(&mut self) -> Self::UserRepo<'_> {
+        PostgresRepo::with_tx(&mut self.tx)
+    }
+
+    fn user_role_repo(&mut self) -> Self::UserRoleRepo<'_> {
         PostgresRepo::with_tx(&mut self.tx)
     }
 

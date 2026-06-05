@@ -1,6 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::api::auth::Claims;
-use crate::domain::entities::UserID;
+use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use crate::domain::work_logs::update_status::{execute, Error, Request};
 use crate::infrastructure::db::connection::{PostgresRepo, WorkLogMappingRepo, WorkLogRepo};

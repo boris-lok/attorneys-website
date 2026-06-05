@@ -49,3 +49,6 @@ impl<'tx, T> PostgresRepo<'tx, T> {
 pub struct CaseRepo;
 pub struct WorkLogRepo;
 pub struct WorkLogMappingRepo;
+pub struct UserRepo;
+pub struct RoleRepo;
+pub struct UserRoleRepo;

@@ -1,4 +1,4 @@
-use crate::domain::entities::UserID;
+use crate::domain::users::entity::UserID;
 use crate::domain::work_logs::repository::WorkLogsRepository;
 use uuid::Uuid;
 

@@ -1,6 +1,6 @@
 use crate::domain::cases::entity::Case;
 use crate::domain::cases::repository::CaseRepository;
-use crate::domain::entities::UserID;
+use crate::domain::users::entity::UserID;
 
 #[derive(Debug)]
 pub enum Error {

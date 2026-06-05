@@ -1,5 +1,5 @@
 use crate::domain::cases::entity::{Case, CaseID, CreateCaseRequest, UpdateCaseRequest};
-use crate::domain::entities::UserID;
+use crate::domain::users::entity::UserID;
 use async_trait::async_trait;
 
 #[async_trait]

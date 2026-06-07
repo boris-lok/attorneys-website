@@ -1,5 +1,4 @@
 pub use article_views_repository::{IArticleViewsRepository, SqlxArticleViewsRepository};
-pub use avatar_repository::{IAvatarRepository, InMemoryAvatarRepository, SqlxAvatarRepository};
 pub use content_repository::{
     IContentRepository, InMemoryContentRepository, SqlxContentRepository,
 };
@@ -21,6 +20,5 @@ pub enum Connection<'tx> {
 }
 
 mod article_views_repository;
-mod avatar_repository;
 mod content_repository;
 mod resource_repository;

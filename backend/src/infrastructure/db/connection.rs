@@ -52,3 +52,4 @@ pub struct WorkLogMappingRepo;
 pub struct UserRepo;
 pub struct RoleRepo;
 pub struct UserRoleRepo;
+pub struct AvatarRepo;

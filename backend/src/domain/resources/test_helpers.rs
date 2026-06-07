@@ -90,8 +90,6 @@ pub(crate) mod tests {
             resources_with_id.push((content_id, resource));
         }
 
-        let _ = uow.avatar_repository();
-
         (uow, resources_with_id)
     }
 }

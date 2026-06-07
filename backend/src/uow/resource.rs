@@ -6,12 +6,9 @@ use crate::domain::entities::{
     SimpleArticleEntity, SimpleArticleEntityFromSQLx, SimpleMemberEntity,
     SimpleMemberEntityFromSQLx,
 };
-use crate::domain::member::entities::AvatarData;
-use crate::repositories::{
-    IAvatarRepository, InMemoryAvatarRepository, InMemoryContentRepository, SqlxResourceRepository,
-};
 use crate::repositories::{IContentRepository, InMemoryResourceRepository};
-use crate::repositories::{IResourceRepository, SqlxAvatarRepository, SqlxContentRepository};
+use crate::repositories::{IResourceRepository, SqlxContentRepository};
+use crate::repositories::{InMemoryContentRepository, SqlxResourceRepository};
 use anyhow::anyhow;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -32,9 +29,6 @@ pub trait IResourceUnitOfWork {
 
     /** Content repository stores multiple language data */
     fn content_repository(&mut self) -> &mut impl IContentRepository;
-
-    /** Avatar repository stores all avatars associated with the members. */
-    fn avatar_repository(&mut self) -> &mut impl IAvatarRepository;
 
     /** Get a resource by ID and language */
     async fn get_resource<T>(
@@ -75,7 +69,6 @@ pub struct InMemory {
     error: bool,
     resource_repository: Option<InMemoryResourceRepository>,
     content_repository: Option<InMemoryContentRepository>,
-    avatar_repository: Option<InMemoryAvatarRepository>,
 }
 
 #[cfg(test)]
@@ -85,7 +78,6 @@ impl InMemory {
             error: false,
             resource_repository: None,
             content_repository: None,
-            avatar_repository: None,
         }
     }
 
@@ -94,7 +86,6 @@ impl InMemory {
             error: true,
             resource_repository: self.resource_repository.map(|repo| repo.with_error()),
             content_repository: self.content_repository.map(|repo| repo.with_error()),
-            avatar_repository: self.avatar_repository.map(|repo| repo.with_error()),
         }
     }
 }
@@ -125,18 +116,6 @@ impl IResourceUnitOfWork for InMemory {
         self.content_repository.as_mut().unwrap()
     }
 
-    fn avatar_repository(&mut self) -> &mut impl IAvatarRepository {
-        if self.avatar_repository.is_none() {
-            let avatar_repo = if self.error {
-                InMemoryAvatarRepository::new().with_error()
-            } else {
-                InMemoryAvatarRepository::new()
-            };
-            self.avatar_repository = Some(avatar_repo);
-        }
-        self.avatar_repository.as_mut().unwrap()
-    }
-
     async fn get_resource<T>(
         &self,
         id: &ResourceID,
@@ -158,16 +137,12 @@ impl IResourceUnitOfWork for InMemory {
             Ok(Some(data)) => {
                 let json = match resource_type {
                     ResourceType::Member => {
-                        let avatar = self.avatar_repository.as_ref().unwrap().get(id).await?;
-                        let avatar = avatar.and_then(|json| {
-                            serde_json::value::from_value::<AvatarData>(json.get()).ok()
-                        });
                         let json = serde_json::from_value::<MemberData>(data.clone().to_json())?;
                         let member = MemberEntity::new(
                             id.clone().to_string(),
                             lang.as_str().to_string(),
                             json,
-                            avatar,
+                            None,
                             0,
                         );
                         serde_json::value::to_value(member)?
@@ -360,7 +335,6 @@ pub struct InDatabase<'tx> {
     tx: Arc<Mutex<Transaction<'tx, Postgres>>>,
     resource_repository: Option<SqlxResourceRepository<'tx>>,
     content_repository: Option<SqlxContentRepository<'tx>>,
-    avatar_repository: Option<SqlxAvatarRepository<'tx>>,
 }
 
 impl<'tx> InDatabase<'tx> {
@@ -372,7 +346,6 @@ impl<'tx> InDatabase<'tx> {
             pool,
             tx,
             content_repository: None,
-            avatar_repository: None,
             resource_repository: None,
         })
     }
@@ -405,16 +378,6 @@ impl IResourceUnitOfWork for InDatabase<'_> {
             self.content_repository = Some(content_repo);
         }
         self.content_repository.as_mut().unwrap()
-    }
-
-    fn avatar_repository(&mut self) -> &mut impl IAvatarRepository {
-        if self.avatar_repository.is_none() {
-            let avatar_repo = SqlxAvatarRepository::new(
-                crate::repositories::Connection::Transaction(Arc::downgrade(&self.tx)),
-            );
-            self.avatar_repository = Some(avatar_repo);
-        }
-        self.avatar_repository.as_mut().unwrap()
     }
 
     async fn get_resource<T>(

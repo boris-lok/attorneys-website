@@ -1,3 +1,4 @@
+pub mod avatar_repo;
 pub mod case_repo;
 pub mod connection;
 pub mod role_repo;

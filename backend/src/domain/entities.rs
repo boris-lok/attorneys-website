@@ -1,35 +1,10 @@
-use crate::domain::member::entities::AvatarData;
+pub(crate) use crate::domain::resources::entity::ResourceID;
+use crate::domain::users::entity::AvatarData;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::FromRow;
 use std::fmt::Formatter;
 use validator::Validate;
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ResourceID(String);
-
-impl TryFrom<String> for ResourceID {
-    type Error = ();
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        match value.trim().is_empty() {
-            true => Err(()),
-            false => Ok(ResourceID(value)),
-        }
-    }
-}
-
-impl std::fmt::Display for ResourceID {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl ResourceID {
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub enum Language {
@@ -63,7 +38,7 @@ pub struct ContentID(String);
 
 impl From<ResourceID> for ContentID {
     fn from(value: ResourceID) -> Self {
-        ContentID(value.0)
+        ContentID(value.to_string())
     }
 }
 

@@ -15,6 +15,7 @@ use crate::configuration::{DatabaseSettings, Settings};
 use crate::domain::services::work_log::WorkLogService;
 use crate::infrastructure::db::uow::PostgresUoWFactory;
 use crate::utils::image::ImageUtil;
+use axum::extract::DefaultBodyLimit;
 use axum::http::header::{ACCEPT_LANGUAGE, CONTENT_TYPE};
 use axum::http::{HeaderValue, Method};
 use axum::routing::{delete, get, post, put};
@@ -65,7 +66,9 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
     let admin_member_routes = Router::new()
         .route("/members", post(create_member).put(update_member))
         .route("/members/{id}", delete(delete_member))
-        .route("/members/{id}/avatar", post(upload_member_avatar));
+        .route("/members/{id}/avatar", post(upload_member_avatar))
+        .layer(DefaultBodyLimit::max(5 * 1024 * 1024)); // 5MB limit;
+
     let member_routes = Router::new()
         .route("/members/{id}", get(retrieve_member))
         .route("/members", get(list_members));

@@ -1,4 +1,5 @@
-use crate::domain::users::entity::{User, UserID};
+use crate::domain::resources::entity::ResourceID;
+use crate::domain::users::entity::{AvatarJson, User, UserID};
 use secrecy::SecretBox;
 
 #[async_trait::async_trait]
@@ -33,4 +34,9 @@ pub trait UserRoleRepository {
     async fn get_user_roles(&mut self, id: &UserID) -> anyhow::Result<Vec<String>>;
 
     async fn create(&mut self, user_id: &UserID, role: i16) -> anyhow::Result<()>;
+}
+
+#[async_trait::async_trait]
+pub trait AvatarRepository {
+    async fn create(&mut self, id: &ResourceID, json: AvatarJson) -> anyhow::Result<()>;
 }

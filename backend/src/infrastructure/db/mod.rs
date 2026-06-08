@@ -1,3 +1,4 @@
+pub mod article_view_repo;
 pub mod avatar_repo;
 pub mod case_repo;
 pub mod connection;

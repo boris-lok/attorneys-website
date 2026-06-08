@@ -53,3 +53,4 @@ pub struct UserRepo;
 pub struct RoleRepo;
 pub struct UserRoleRepo;
 pub struct AvatarRepo;
+pub struct ArticleViewRepo;

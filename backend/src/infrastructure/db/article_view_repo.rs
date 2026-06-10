@@ -16,7 +16,7 @@ impl<'tx> ArticleViewRepository for PostgresArticleViewRepo<'tx> {
             .bind(id)
             .bind(ip)
             .bind(user_agent)
-            .fetch_one(self.get_conn())
+            .fetch_one(self.conn().await?)
             .await?;
 
         Ok(id)

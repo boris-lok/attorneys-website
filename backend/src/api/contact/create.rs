@@ -1,14 +1,12 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
-use crate::domain::entities::{ContactData, Resource};
+use crate::domain::entity::Claims;
+use crate::domain::resources::create;
+use crate::domain::resources::entity::{ContactData, Language, Resource};
 use crate::startup::AppState;
-use crate::uow::InDatabase;
 use axum::extract::State;
 use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
-use tokio::sync::Mutex;
-use ulid::Ulid;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateContactRequest {
@@ -27,25 +25,23 @@ pub async fn create_contact(
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<CreateContactRequest>, ApiError>,
 ) -> Result<Json<CreateContactResponse>, ApiError> {
-    let id = Ulid::new().to_string();
+    let resource = Resource::Contact(ContactData { data: req.data });
 
-    let uow = InDatabase::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-    let uow = Mutex::new(uow);
+    let (kind, data) = resource
+        .into_typed_content()
+        .map_err(|_| ApiError::BadRequest)?;
 
-    let req = crate::domain::resources::create::Request {
-        id: id.clone(),
-        data: Resource::Contact(ContactData::new(req.data)),
-        language: req.language,
+    let req = create::Request {
+        kind,
+        data,
         seq: req.seq,
+        language: Language::try_from(req.language).map_err(|_| ApiError::BadRequest)?,
     };
 
-    match crate::domain::resources::create::execute(uow, req).await {
+    let service = state.resource_uow();
+
+    match create::execute(&service, req).await {
         Ok(id) => Ok(Json(CreateContactResponse { id: id.to_string() })),
-        Err(crate::domain::resources::create::Error::BadRequest) => Err(ApiError::BadRequest),
-        Err(crate::domain::resources::create::Error::Unknown(e)) => {
-            Err(ApiError::InternalServerError(e))
-        }
+        Err(create::Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
     }
 }

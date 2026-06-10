@@ -83,7 +83,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
             .bind(req.started_at)
             .bind(req.ended_at)
             .bind(req.billing_cycle)
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(req.id)
@@ -97,7 +97,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
             .bind(req.billing_cycle)
             .bind(req.started_at)
             .bind(req.ended_at)
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())
@@ -106,7 +106,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
     async fn list(&mut self, user_id: &UserID) -> anyhow::Result<Vec<Case>> {
         let res = sqlx::query_as::<_, CaseFromSQLx>(LIST_CASES_QUERY)
             .bind(Uuid::from(user_id))
-            .fetch_all(self.get_conn())
+            .fetch_all(self.conn().await?)
             .await?;
 
         let cases = res.into_iter().map(|r| r.into()).collect::<Vec<Case>>();
@@ -116,7 +116,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
     async fn delete(&mut self, case_id: &CaseID) -> anyhow::Result<()> {
         sqlx::query(DELETE_CASE_QUERY)
             .bind(Uuid::from(case_id))
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())
@@ -125,7 +125,7 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
     async fn settle(&mut self, case_id: &CaseID) -> anyhow::Result<()> {
         sqlx::query(SETTLE_CASE_QUERY)
             .bind(Uuid::from(case_id))
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())

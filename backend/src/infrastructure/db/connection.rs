@@ -3,21 +3,9 @@ use sqlx::{PgConnection, Postgres};
 use std::marker::PhantomData;
 
 pub enum PgConn<'tx> {
-    Pool(PoolConnection<Postgres>),
+    Pool(&'tx sqlx::PgPool),
+    Acquired(PoolConnection<Postgres>),
     Transaction(&'tx mut PgConnection),
-}
-
-impl<'tx> PgConn<'tx> {
-    pub async fn from_pool(pool: &sqlx::Pool<Postgres>) -> anyhow::Result<Self> {
-        Ok(PgConn::Pool(pool.acquire().await?))
-    }
-
-    pub fn as_conn(&mut self) -> &mut PgConnection {
-        match self {
-            PgConn::Pool(conn) => &mut *conn,
-            PgConn::Transaction(tx) => tx,
-        }
-    }
 }
 
 pub struct PostgresRepo<'tx, T> {
@@ -26,12 +14,11 @@ pub struct PostgresRepo<'tx, T> {
 }
 
 impl<'tx, T> PostgresRepo<'tx, T> {
-    pub async fn new(pool: &sqlx::Pool<Postgres>) -> anyhow::Result<Self> {
-        let conn = PgConn::from_pool(pool).await?;
-        Ok(Self {
-            conn,
+    pub fn from_pool(pool: &'tx sqlx::PgPool) -> Self {
+        Self {
+            conn: PgConn::Pool(pool),
             _marker: PhantomData,
-        })
+        }
     }
 
     pub fn with_tx(tx: &'tx mut PgConnection) -> Self {
@@ -41,8 +28,16 @@ impl<'tx, T> PostgresRepo<'tx, T> {
         }
     }
 
-    pub(crate) fn get_conn(&mut self) -> &mut PgConnection {
-        self.conn.as_conn()
+    pub(crate) async fn conn(&mut self) -> anyhow::Result<&mut PgConnection> {
+        if let PgConn::Pool(pool) = self.conn {
+            self.conn = PgConn::Acquired(pool.acquire().await?);
+        }
+
+        match &mut self.conn {
+            PgConn::Transaction(tx) => Ok(*tx),
+            PgConn::Acquired(c) => Ok(c.as_mut()),
+            PgConn::Pool(_) => unreachable!(),
+        }
     }
 }
 
@@ -54,3 +49,5 @@ pub struct RoleRepo;
 pub struct UserRoleRepo;
 pub struct AvatarRepo;
 pub struct ArticleViewRepo;
+pub struct ContentRepo;
+pub struct ResourceRepo;

@@ -1,3 +1,7 @@
+use crate::domain::articles::repository::ArticleViewRepository;
+use crate::domain::resources::repository::{
+    ContentWriteRepository, ResourceReadRepository, ResourceRepository,
+};
 use crate::domain::users::repository::{AvatarRepository, UserRepository, UserRoleRepository};
 use crate::domain::work_log_mapping::repository::WorkLogMappingRepository;
 use crate::domain::work_logs::repository::WorkLogsRepository;
@@ -19,6 +23,15 @@ pub trait UnitOfWork {
     type AvatarRepo<'a>: AvatarRepository
     where
         Self: 'a;
+    type ArticleViewRepo<'a>: ArticleViewRepository
+    where
+        Self: 'a;
+    type ContentRepo<'a>: ContentWriteRepository
+    where
+        Self: 'a;
+    type ResourceRepo<'a>: ResourceRepository
+    where
+        Self: 'a;
 
     fn work_log_repo(&mut self) -> Self::WorkLogRepo<'_>;
 
@@ -30,6 +43,12 @@ pub trait UnitOfWork {
 
     fn avatar_repo(&mut self) -> Self::AvatarRepo<'_>;
 
+    fn article_repo(&mut self) -> Self::ArticleViewRepo<'_>;
+
+    fn content_repo(&mut self) -> Self::ContentRepo<'_>;
+
+    fn resource_repo(&mut self) -> Self::ResourceRepo<'_>;
+
     async fn commit(self) -> anyhow::Result<()>;
 
     async fn rollback(self) -> anyhow::Result<()>;
@@ -40,4 +59,12 @@ pub trait UnitOfWorkFactory {
     type UoW: UnitOfWork;
 
     async fn begin(&self) -> anyhow::Result<Self::UoW>;
+}
+
+pub trait Query {
+    type ResourceRepo<'a>: ResourceReadRepository
+    where
+        Self: 'a;
+
+    fn resource_repo(&self) -> Self::ResourceRepo<'_>;
 }

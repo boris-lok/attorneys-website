@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
+use crate::domain::entity::Claims;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum_extra::extract::cookie::Cookie;

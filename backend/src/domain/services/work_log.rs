@@ -5,9 +5,9 @@ use crate::domain::work_logs::entity::CreateWorkLogRequest;
 use crate::domain::work_logs::repository::WorkLogsRepository;
 use crate::impl_service;
 
-impl_service!(WorkLogService);
+impl_service!(WorkLogUoW);
 
-impl<F: UnitOfWorkFactory> WorkLogService<F> {
+impl<F: UnitOfWorkFactory> WorkLogUoW<F> {
     pub async fn create(
         &self,
         log: CreateWorkLogRequest,

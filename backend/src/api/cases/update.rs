@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
 use crate::domain::cases::entity::CaseID;
 use crate::domain::cases::update::{execute, Error};
+use crate::domain::entity::Claims;
 use crate::infrastructure::db::case_repo::PostgresCaseRepo;
 use crate::startup::AppState;
 use axum::extract::State;
@@ -34,9 +34,7 @@ pub async fn update_case(
         billing_cycle: req.billing_cycle,
     };
 
-    let mut repo = PostgresCaseRepo::new(&state.pool)
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
+    let mut repo = PostgresCaseRepo::from_pool(&state.pool);
 
     let res = execute(&mut repo, req).await;
 

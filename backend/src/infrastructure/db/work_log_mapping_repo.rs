@@ -33,7 +33,7 @@ impl<'tx> WorkLogMappingRepository for PostgresWorkLogMappingRepo<'tx> {
         // Conflict handling — adjust to DO UPDATE if you need upsert behaviour
         qb.push(" ON CONFLICT (parent_id, user_id) DO NOTHING");
 
-        qb.build().execute(self.get_conn()).await?;
+        qb.build().execute(self.conn().await?).await?;
 
         Ok(())
     }
@@ -48,7 +48,7 @@ impl<'tx> WorkLogMappingRepository for PostgresWorkLogMappingRepo<'tx> {
             .bind(id)
             .bind(Uuid::from(user_id))
             .bind(PostgresWorkLogStatus::from(status))
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
         Ok(())
     }

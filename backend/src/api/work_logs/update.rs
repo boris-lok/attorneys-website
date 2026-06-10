@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
+use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_logs::update::{execute, Error, Request};
 use crate::infrastructure::db::connection::{PostgresRepo, WorkLogRepo};
@@ -37,9 +37,7 @@ pub async fn update_work_log(
         force: false,
     };
 
-    let mut repo = PostgresRepo::<WorkLogRepo>::new(&state.pool)
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
+    let mut repo = PostgresRepo::<WorkLogRepo>::from_pool(&state.pool);
 
     let res = execute(&mut repo, req).await;
 

@@ -50,7 +50,7 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
             .bind(username)
             .bind(password_hash.expose_secret().to_string())
             .bind(nickname)
-            .fetch_one(self.get_conn())
+            .fetch_one(self.conn().await?)
             .await
             .map(UserID::from)?;
 
@@ -59,7 +59,7 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
 
     async fn list(&mut self) -> anyhow::Result<Vec<User>> {
         let rows = sqlx::query_as::<_, UserFromSQLx>(LIST_USERS_QUERY)
-            .fetch_all(self.get_conn())
+            .fetch_all(self.conn().await?)
             .await
             .map(|rows| rows.into_iter().map(User::from).collect::<Vec<_>>())?;
 
@@ -69,7 +69,7 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
     async fn delete(&mut self, id: &UserID) -> anyhow::Result<()> {
         sqlx::query(DELETE_USER_QUERY)
             .bind(Uuid::from(id))
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())
@@ -78,7 +78,7 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
     async fn get_user_nickname(&mut self, id: &UserID) -> anyhow::Result<String> {
         let res = sqlx::query_scalar::<_, String>(GET_USER_NICKNAME_QUERY)
             .bind(Uuid::from(id))
-            .fetch_optional(self.get_conn())
+            .fetch_optional(self.conn().await?)
             .await?;
 
         Ok(res.ok_or_else(|| anyhow::anyhow!("User not found"))?)
@@ -90,7 +90,7 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
     ) -> anyhow::Result<Option<(UserID, SecretBox<String>)>> {
         let res = sqlx::query_as::<_, (Uuid, String)>(GET_CREDENTIALS_QUERY)
             .bind(username)
-            .fetch_optional(self.get_conn())
+            .fetch_optional(self.conn().await?)
             .await
             .map(|e| {
                 e.map(|(id, password_hash)| {
@@ -109,7 +109,7 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
         sqlx::query(UPDATE_PASSWORD_QUERY)
             .bind(password_hash.expose_secret().to_string())
             .bind(Uuid::from(id))
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())

@@ -67,7 +67,7 @@ const LIST_WORK_LOGS_QUERY: &str = r"
     and wl.deleted_at is null
     and ($2::timestamptz is null or wl.started_at >= $2)
     and ($3::timestamptz is null or wl.ended_at <= $3)
-    and ($4::boolean or wl.settled_at is null
+    and ($4::boolean or wl.settled_at is null)
 ";
 
 pub type PostgresWorkLogRepo<'tx> = PostgresRepo<'tx, WorkLogRepo>;
@@ -83,7 +83,7 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
             .bind(req.ended_at)
             .bind(req.description)
             .bind(req.is_collaborative)
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())
@@ -92,7 +92,7 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
     async fn delete(&mut self, id: &Uuid) -> anyhow::Result<()> {
         sqlx::query(DELETE_WORK_LOG_QUERY)
             .bind(id)
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())
@@ -110,7 +110,7 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
             .bind(started_at)
             .bind(ended_at)
             .bind(include_settled)
-            .fetch_all(self.get_conn())
+            .fetch_all(self.conn().await?)
             .await?;
 
         Ok(parse_work_log_from_sqlx(rows))
@@ -122,7 +122,7 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
             .bind(req.ended_at)
             .bind(req.description)
             .bind(req.id)
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())
@@ -132,7 +132,7 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
         let row = sqlx::query(IS_CREATOR_QUERY)
             .bind(Uuid::from(user_id))
             .bind(id)
-            .fetch_one(self.get_conn())
+            .fetch_one(self.conn().await?)
             .await?;
 
         Ok(!row.is_empty())
@@ -146,7 +146,7 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
         let res: Option<bool> = sqlx::query_scalar(GET_WORK_LOG_COLLABORATIVE_FLAG_QUERY)
             .bind(id)
             .bind(Uuid::from(user_id))
-            .fetch_optional(self.get_conn())
+            .fetch_optional(self.conn().await?)
             .await?;
 
         res.ok_or_else(|| anyhow::anyhow!("work log not found: {}", id))
@@ -155,7 +155,7 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
     async fn is_work_log_exist(&mut self, id: &Uuid) -> anyhow::Result<bool> {
         let row = sqlx::query(IS_WORK_LOG_EXIST_QUERY)
             .bind(id)
-            .fetch_one(self.get_conn())
+            .fetch_one(self.conn().await?)
             .await?;
 
         Ok(!row.is_empty())

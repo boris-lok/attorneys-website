@@ -1,16 +1,16 @@
 use backend::domain;
-use backend::domain::entities::{
-    Language, Pagination, ResourceType, SimpleArticleEntity, SimpleMemberEntity,
-};
+use backend::domain::articles::entity::SimpleArticleEntity;
+use backend::domain::entity::Pagination;
+use backend::domain::member::entity::SimpleMemberEntity;
+use backend::domain::resources::entity::{Language, ResourceType};
 use backend::get_configuration;
-use backend::uow::InDatabase;
+use backend::infrastructure::db::uow::PostgresQuery;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 use std::fs::File;
 use std::io::Write;
-use tokio::sync::Mutex;
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -101,17 +101,16 @@ async fn get_resources<T>(
 where
     T: DeserializeOwned + Serialize,
 {
-    let uow = InDatabase::new(pool).await?;
-    let uow = Mutex::new(uow);
+    let query = PostgresQuery::new(pool.clone());
 
     let req = domain::resources::list::Request {
         filter_str: None,
-        resource_type: resource_type.clone(),
-        language: language.as_str().to_string(),
+        kind: resource_type.clone(),
+        language,
         default_language: Language::ZH,
         pagination: Pagination::All,
     };
-    let (resources, total) = domain::resources::list::execute::<_, T>(uow, req)
+    let (resources, total) = domain::resources::list::execute::<T>(&query, req)
         .await
         .map_err(|e| anyhow::anyhow!("{:?}", e))?;
 

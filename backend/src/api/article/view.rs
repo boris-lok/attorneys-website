@@ -14,9 +14,7 @@ pub async fn view_article(
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
 ) -> Result<StatusCode, ApiError> {
-    let mut repo = PostgresRepo::<ArticleViewRepo>::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let mut repo = PostgresRepo::<ArticleViewRepo>::from_pool(&state.pool);
 
     let article_id = params.get("id").ok_or(ApiError::BadRequest)?;
     let user_agent = user_agent.to_string();

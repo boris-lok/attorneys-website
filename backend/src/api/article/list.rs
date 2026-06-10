@@ -1,12 +1,13 @@
 use crate::api::api_error::ApiError;
-use crate::domain::entities::{Language, Page, Pagination, ResourceType, SimpleArticleEntity};
-use crate::startup::AppState;
-use crate::uow::InDatabase;
-use axum::extract::{Query, State};
+use crate::api::extractors::query::QueryExtractor;
+use crate::domain::articles::entity::SimpleArticleEntity;
+use crate::domain::entity::{Page, Pagination};
+use crate::domain::resources::entity::{Language, ResourceType};
+use crate::domain::resources::list;
+use axum::extract::Query;
 use axum::http::HeaderMap;
 use axum::Json;
 use serde::{Deserialize, Serialize};
-use tokio::sync::Mutex;
 
 #[derive(Deserialize)]
 pub struct QueryPagination {
@@ -26,27 +27,22 @@ pub struct ListArticlesResponse {
 }
 
 pub async fn list_articles(
-    State(state): State<AppState>,
+    QueryExtractor(query): QueryExtractor,
     headers: HeaderMap,
     pagination: Query<QueryPagination>,
     category_query: Query<CategoryQuery>,
 ) -> Result<Json<ListArticlesResponse>, ApiError> {
-    let category_id = category_query.category_id.clone();
-
-    let uow = InDatabase::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-    let uow = Mutex::new(uow);
+    let id = category_query.category_id.clone();
 
     let lang = headers
         .get("Accept-Language")
         .and_then(|v| v.to_str().ok())
         .unwrap_or("zh");
 
-    let req = crate::domain::resources::list::Request {
-        filter_str: category_id.map(|s| format!(" and content.data->>'category_id' = '{}'", s)),
-        resource_type: ResourceType::Article,
-        language: lang.to_string(),
+    let req = list::Request {
+        filter_str: id.map(|s| format!(" and content.data->>'category_id' = '{}'", s)),
+        kind: ResourceType::Article,
+        language: Language::try_from(lang.to_string()).map_err(|_| ApiError::BadRequest)?,
         default_language: Language::ZH,
         pagination: Pagination::Page(Page {
             page: pagination.page.unwrap_or(0),
@@ -54,11 +50,8 @@ pub async fn list_articles(
         }),
     };
 
-    match crate::domain::resources::list::execute(uow, req).await {
+    match list::execute(&query, req).await {
         Ok((articles, total)) => Ok(Json(ListArticlesResponse { articles, total })),
-        Err(crate::domain::resources::list::Error::BadRequest) => Err(ApiError::BadRequest),
-        Err(crate::domain::resources::list::Error::Unknown(e)) => {
-            Err(ApiError::InternalServerError(e.to_string()))
-        }
+        Err(list::Error::Unknown(e)) => Err(ApiError::InternalServerError(e.to_string())),
     }
 }

@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
 use crate::domain::cases::entity::Case;
 use crate::domain::cases::list::{execute, Error};
+use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use crate::infrastructure::db::case_repo::PostgresCaseRepo;
 use crate::startup::AppState;
@@ -18,9 +18,7 @@ pub async fn list_cases(
     c: Claims,
     State(state): State<AppState>,
 ) -> Result<Json<ListCasesResponse>, ApiError> {
-    let mut repo = PostgresCaseRepo::new(&state.pool)
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
+    let mut repo = PostgresCaseRepo::from_pool(&state.pool);
 
     let user_id = UserID::try_from(c.sub.clone()).map_err(|_| ApiError::BadRequest)?;
 

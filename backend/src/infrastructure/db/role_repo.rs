@@ -11,8 +11,12 @@ type PostgresRoleRepo<'tx> = PostgresRepo<'tx, RoleRepo>;
 #[async_trait::async_trait]
 impl<'tx> RoleRepository for PostgresRoleRepo<'tx> {
     async fn list(&mut self) -> Vec<Role> {
+        let conn = self.conn().await;
+        if conn.is_err() {
+            return vec![];
+        }
         let rows = sqlx::query_as::<_, RoleFromSQLx>(LIST_ROLES)
-            .fetch_all(self.get_conn())
+            .fetch_all(conn.unwrap())
             .await;
 
         match rows {

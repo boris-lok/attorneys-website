@@ -1,6 +1,7 @@
-use crate::domain::uow::common::{UnitOfWork, UnitOfWorkFactory};
+use crate::domain::uow::common::{Query, UnitOfWork, UnitOfWorkFactory};
 use crate::infrastructure::db::connection::{
-    AvatarRepo, PostgresRepo, UserRepo, UserRoleRepo, WorkLogMappingRepo, WorkLogRepo,
+    ArticleViewRepo, AvatarRepo, ContentRepo, PostgresRepo, ResourceRepo, UserRepo, UserRoleRepo,
+    WorkLogMappingRepo, WorkLogRepo,
 };
 use sqlx::PgPool;
 
@@ -36,6 +37,9 @@ impl UnitOfWork for PostgresUoW {
     type UserRepo<'a> = PostgresRepo<'a, UserRepo>;
     type UserRoleRepo<'a> = PostgresRepo<'a, UserRoleRepo>;
     type AvatarRepo<'a> = PostgresRepo<'a, AvatarRepo>;
+    type ArticleViewRepo<'a> = PostgresRepo<'a, ArticleViewRepo>;
+    type ContentRepo<'a> = PostgresRepo<'a, ContentRepo>;
+    type ResourceRepo<'a> = PostgresRepo<'a, ResourceRepo>;
 
     fn work_log_repo(&mut self) -> Self::WorkLogRepo<'_> {
         PostgresRepo::with_tx(&mut self.tx)
@@ -57,6 +61,18 @@ impl UnitOfWork for PostgresUoW {
         PostgresRepo::with_tx(&mut self.tx)
     }
 
+    fn article_repo(&mut self) -> Self::ArticleViewRepo<'_> {
+        PostgresRepo::with_tx(&mut self.tx)
+    }
+
+    fn content_repo(&mut self) -> Self::ContentRepo<'_> {
+        PostgresRepo::with_tx(&mut self.tx)
+    }
+
+    fn resource_repo(&mut self) -> Self::ResourceRepo<'_> {
+        PostgresRepo::with_tx(&mut self.tx)
+    }
+
     async fn commit(self) -> anyhow::Result<()> {
         self.tx.commit().await?;
         Ok(())
@@ -65,5 +81,23 @@ impl UnitOfWork for PostgresUoW {
     async fn rollback(self) -> anyhow::Result<()> {
         self.tx.rollback().await?;
         Ok(())
+    }
+}
+
+pub struct PostgresQuery {
+    pool: PgPool,
+}
+
+impl PostgresQuery {
+    pub fn new(pool: PgPool) -> Self {
+        Self { pool }
+    }
+}
+
+impl Query for PostgresQuery {
+    type ResourceRepo<'a> = PostgresRepo<'a, ResourceRepo>;
+
+    fn resource_repo(&self) -> Self::ResourceRepo<'_> {
+        PostgresRepo::from_pool(&self.pool)
     }
 }

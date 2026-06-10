@@ -1,25 +1,9 @@
-use crate::api::change_password::change_password;
-use crate::api::login::login;
-use crate::api::logout::logout;
-use crate::api::{
-    create_article, create_case, create_category, create_contact, create_home, create_member,
-    create_service, create_work_log, delete_article, delete_case, delete_category, delete_member,
-    delete_service, delete_work_log, download, health_check, list_articles, list_cases,
-    list_categories, list_contact, list_home, list_members, list_services, list_users,
-    list_work_logs, retrieve_article, retrieve_category, retrieve_contact, retrieve_home,
-    retrieve_member, retrieve_service, settle, update_article, update_case, update_category,
-    update_contact, update_home, update_member, update_service, update_work_log,
-    update_work_log_status, upload_member_avatar, view_article,
-};
+use crate::api::routes::build_router;
 use crate::configuration::{DatabaseSettings, Settings};
-use crate::domain::services::work_log::WorkLogService;
+use crate::domain::services::resource::ResourceUoW;
+use crate::domain::services::work_log::WorkLogUoW;
 use crate::infrastructure::db::uow::PostgresUoWFactory;
 use crate::utils::image::ImageUtil;
-use axum::extract::DefaultBodyLimit;
-use axum::http::header::{ACCEPT_LANGUAGE, CONTENT_TYPE};
-use axum::http::{HeaderValue, Method};
-use axum::routing::{delete, get, post, put};
-use axum::{Extension, Router};
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use secrecy::ExposeSecret;
 use sqlx::postgres::PgPoolOptions;
@@ -27,19 +11,22 @@ use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use tower_http::cors::CorsLayer;
 
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
-    pub upload_folder: Arc<String>,
+    pub upload_folder: String,
     pub jwt_encoding_key: Arc<EncodingKey>,
     pub jwt_decoding_key: Arc<DecodingKey>,
 }
 
 impl AppState {
-    pub fn work_log_service(&self) -> WorkLogService<PostgresUoWFactory> {
-        WorkLogService::new(PostgresUoWFactory::new(self.pool.clone()))
+    pub fn work_log_uow(&self) -> WorkLogUoW<PostgresUoWFactory> {
+        WorkLogUoW::new(PostgresUoWFactory::new(self.pool.clone()))
+    }
+
+    pub fn resource_uow(&self) -> ResourceUoW<PostgresUoWFactory> {
+        ResourceUoW::new(PostgresUoWFactory::new(self.pool.clone()))
     }
 }
 
@@ -56,120 +43,13 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
 
     let state = AppState {
         pool: get_database_connection(&config.database).await,
-        upload_folder: Arc::new(config.application.upload_folder),
+        upload_folder: config.application.upload_folder.to_string(),
         jwt_decoding_key,
         jwt_encoding_key,
     };
     let image_util = ImageUtil {};
 
-    // Config the routes
-    let admin_member_routes = Router::new()
-        .route("/members", post(create_member).put(update_member))
-        .route("/members/{id}", delete(delete_member))
-        .route("/members/{id}/avatar", post(upload_member_avatar))
-        .layer(DefaultBodyLimit::max(5 * 1024 * 1024)); // 5MB limit;
-
-    let member_routes = Router::new()
-        .route("/members/{id}", get(retrieve_member))
-        .route("/members", get(list_members));
-
-    let admin_service_routes = Router::new()
-        .route("/services", post(create_service).put(update_service))
-        .route("/services/{id}", delete(delete_service));
-    let service_routes = Router::new()
-        .route("/services/{id}", get(retrieve_service))
-        .route("/services", get(list_services));
-
-    let admin_home_routes = Router::new().route("/home", post(create_home).put(update_home));
-    let home_routes = Router::new()
-        .route("/home/{id}", get(retrieve_home))
-        .route("/home", get(list_home));
-
-    let admin_contact_routes =
-        Router::new().route("/contact", post(create_contact).put(update_contact));
-    let contact_routes = Router::new()
-        .route("/contact/{id}", get(retrieve_contact))
-        .route("/contact", get(list_contact));
-
-    let admin_article_routes = Router::new()
-        .route("/articles", post(create_article).put(update_article))
-        .route("/articles/{id}", delete(delete_article));
-    let article_routes = Router::new()
-        .route("/articles/{id}/view", post(view_article))
-        .route("/articles/{id}", get(retrieve_article))
-        .route("/articles", get(list_articles));
-
-    let admin_category_routes = Router::new()
-        .route("/categories", post(create_category).put(update_category))
-        .route("/categories/{id}", delete(delete_category));
-    let category_routes = Router::new()
-        .route("/categories", get(list_categories))
-        .route("/categories/{id}", get(retrieve_category));
-
-    let admin_user_routes = Router::new()
-        .route("/login", post(login))
-        .route("/logout", post(logout))
-        .route("/users", get(list_users))
-        .route("/password", put(change_password));
-
-    let admin_case_routes = Router::new()
-        .route("/cases", post(create_case).put(update_case).get(list_cases))
-        .route("/cases/{id}", delete(delete_case))
-        .route("/case/settle", put(settle));
-
-    let admin_work_log_routes = Router::new()
-        .route("/work_logs", post(create_work_log).get(list_work_logs))
-        .route("/work_logs", put(update_work_log))
-        .route("/work_logs/status", put(update_work_log_status))
-        .route("/work_logs/{id}", delete(delete_work_log))
-        .route("/work_logs/download", get(download));
-
-    let admin_routes = Router::new()
-        .merge(admin_member_routes)
-        .merge(admin_home_routes)
-        .merge(admin_service_routes)
-        .merge(admin_contact_routes)
-        .merge(admin_article_routes)
-        .merge(admin_category_routes)
-        .merge(admin_user_routes)
-        .merge(admin_case_routes)
-        .merge(admin_work_log_routes);
-
-    let routes = Router::new()
-        .merge(member_routes)
-        .merge(service_routes)
-        .merge(home_routes)
-        .merge(contact_routes)
-        .merge(category_routes)
-        .merge(article_routes);
-
-    let allowed_origins = vec!["http://localhost:5173", "https://chenwanglaw.com"];
-
-    let cors = CorsLayer::new()
-        .allow_origin(
-            allowed_origins
-                .into_iter()
-                .map(|o| o.parse::<HeaderValue>().unwrap())
-                .collect::<Vec<_>>(),
-        )
-        .allow_credentials(true)
-        .allow_methods([
-            Method::GET,
-            Method::POST,
-            Method::PUT,
-            Method::DELETE,
-            Method::OPTIONS,
-        ])
-        .allow_headers([CONTENT_TYPE, ACCEPT_LANGUAGE]);
-
-    let app = Router::new()
-        .route("/health", get(health_check))
-        .nest("/api/{version}/admin", admin_routes)
-        .nest("/api/{version}/", routes)
-        .layer(Extension(Arc::new(image_util)))
-        .layer(Extension(Arc::new(redis_client)))
-        .layer(cors)
-        .with_state(state);
+    let app = build_router(state, redis_client, image_util);
 
     axum::serve(
         listener,

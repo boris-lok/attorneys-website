@@ -1,74 +1,49 @@
-use crate::domain::entities::{Language, ResourceID, ResourceType};
-use crate::uow::IResourceUnitOfWork;
+use crate::domain::resources::entity::{Language, ResourceID, ResourceType};
+use crate::domain::resources::repository::ResourceReadRepository;
+use crate::domain::uow::common::Query;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use std::fmt::Formatter;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Debug)]
 pub struct Request {
-    pub id: String,
+    pub id: ResourceID,
     pub resource_type: ResourceType,
-    pub language: String,
+    pub language: Language,
     pub default_language: Language,
 }
 
 #[derive(Debug)]
 pub enum Error {
-    BadRequest,
     NotFound,
     Unknown(String),
 }
 
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::BadRequest => {
-                write!(f, "Bad request")
-            }
-            Error::NotFound => {
-                write!(f, "Not found")
-            }
-            Error::Unknown(e) => {
-                write!(f, "{}", e)
-            }
-        }
-    }
-}
-
-pub async fn execute<IUnitOfWork, T>(uow: Mutex<IUnitOfWork>, req: Request) -> Result<T, Error>
+pub async fn execute<T>(query: &impl Query, req: Request) -> Result<T, Error>
 where
-    IUnitOfWork: IResourceUnitOfWork,
     T: DeserializeOwned + Serialize,
 {
-    async fn inner_execute<IUnitOfWork, T>(
-        uow: Arc<Mutex<IUnitOfWork>>,
+    async fn inner_execute<T: DeserializeOwned + Serialize>(
+        query: &impl Query,
         id: &ResourceID,
         lang: &Language,
         resource_type: &ResourceType,
-    ) -> Result<T, Error>
-    where
-        IUnitOfWork: IResourceUnitOfWork,
-        T: DeserializeOwned + Serialize,
-    {
-        let lock = uow.lock().await;
-        match lock.get_resource(id, lang, resource_type).await {
-            Ok(Some(res)) => Ok(res),
-            Ok(None) => Err(Error::NotFound),
-            Err(e) => Err(Error::Unknown(e.to_string())),
+    ) -> Result<T, Error> {
+        let res = query
+            .resource_repo()
+            .retrieve(id, lang, resource_type)
+            .await
+            .map_err(|e| Error::Unknown(e.to_string()))?;
+
+        match res {
+            Some(res) => Ok(res),
+            None => Err(Error::NotFound),
         }
     }
 
-    let id = ResourceID::try_from(req.id).map_err(|_| Error::BadRequest)?;
-    let language = Language::try_from(req.language).map_err(|_| Error::BadRequest)?;
-
-    let uow = Arc::new(uow);
-
-    match inner_execute(uow.clone(), &id, &language, &req.resource_type).await {
+    match inner_execute(query, &req.id, &req.language, &req.resource_type).await {
         Ok(res) => Ok(res),
         Err(Error::NotFound) => {
-            inner_execute(uow.clone(), &id, &req.default_language, &req.resource_type).await
+            inner_execute(query, &req.id, &req.default_language, &req.resource_type).await
         }
         Err(e) => Err(e),
     }

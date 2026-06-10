@@ -1,13 +1,13 @@
 use crate::api::api_error::ApiError;
-use crate::domain::entities::{CategoryEntity, Language, ResourceType};
-use crate::startup::AppState;
-use crate::uow::InDatabase;
-use axum::extract::{Path, State};
+use crate::api::extractors::query::QueryExtractor;
+use crate::domain::articles::entity::CategoryEntity;
+use crate::domain::resources::entity::{Language, ResourceID, ResourceType};
+use crate::domain::resources::retrieve;
+use axum::extract::Path;
 use axum::http::HeaderMap;
 use axum::Json;
 use serde::Serialize;
 use std::collections::HashMap;
-use tokio::sync::Mutex;
 
 #[derive(Debug, Serialize)]
 pub struct RetrieveCategoryResponse {
@@ -15,35 +15,26 @@ pub struct RetrieveCategoryResponse {
 }
 
 pub async fn retrieve_category(
-    state: State<AppState>,
+    QueryExtractor(query): QueryExtractor,
     Path(params): Path<HashMap<String, String>>,
     headers: HeaderMap,
 ) -> Result<Json<RetrieveCategoryResponse>, ApiError> {
-    let uow = InDatabase::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-    let uow = Mutex::new(uow);
-
     let id = params.get("id").ok_or(ApiError::BadRequest)?;
     let lang = headers
         .get("Accept-Language")
         .and_then(|v| v.to_str().ok())
         .unwrap_or("zh");
 
-    let req = crate::domain::resources::retrieve::Request {
-        id: id.to_string(),
+    let req = retrieve::Request {
+        id: ResourceID::try_from(id.clone()).map_err(|_| ApiError::BadRequest)?,
         resource_type: ResourceType::Category,
-        language: lang.to_string(),
+        language: Language::try_from(lang.to_string()).map_err(|_| ApiError::BadRequest)?,
         default_language: Language::ZH,
     };
 
-    match crate::domain::resources::retrieve::execute::<InDatabase, CategoryEntity>(uow, req).await
-    {
+    match retrieve::execute::<CategoryEntity>(&query, req).await {
         Ok(res) => Ok(Json(RetrieveCategoryResponse { category: res })),
-        Err(crate::domain::resources::retrieve::Error::BadRequest) => Err(ApiError::BadRequest),
-        Err(crate::domain::resources::retrieve::Error::NotFound) => Err(ApiError::NotFound),
-        Err(crate::domain::resources::retrieve::Error::Unknown(e)) => {
-            Err(ApiError::InternalServerError(e))
-        }
+        Err(retrieve::Error::NotFound) => Err(ApiError::NotFound),
+        Err(retrieve::Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
     }
 }

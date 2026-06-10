@@ -6,8 +6,6 @@ mod api;
 mod configuration;
 pub mod domain;
 pub mod infrastructure;
-pub mod repositories;
 mod startup;
 mod telemetry;
-pub mod uow;
 mod utils;

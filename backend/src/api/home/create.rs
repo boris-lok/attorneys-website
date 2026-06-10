@@ -1,14 +1,12 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
-use crate::domain::entities::{HomeData, Resource};
+use crate::domain::entity::Claims;
+use crate::domain::resources::create;
+use crate::domain::resources::entity::{HomeData, Language, Resource};
 use crate::startup::AppState;
-use crate::uow::InDatabase;
 use axum::extract::State;
 use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
-use tokio::sync::Mutex;
-use ulid::Ulid;
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct CreateHomeRequest {
@@ -27,25 +25,23 @@ pub async fn create_home(
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<CreateHomeRequest>, ApiError>,
 ) -> Result<Json<CreateHomeResponse>, ApiError> {
-    let home_id = Ulid::new().to_string();
+    let resource = Resource::Home(HomeData { data: req.data });
 
-    let req = crate::domain::resources::create::Request {
-        id: home_id.clone(),
-        data: Resource::Home(HomeData::new(req.data)),
-        language: req.language,
+    let (kind, data) = resource
+        .into_typed_content()
+        .map_err(|_| ApiError::BadRequest)?;
+
+    let req = create::Request {
+        kind,
+        data,
         seq: req.seq,
+        language: Language::try_from(req.language).map_err(|_| ApiError::BadRequest)?,
     };
 
-    let uow = InDatabase::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-    let uow = Mutex::new(uow);
+    let service = state.resource_uow();
 
-    match crate::domain::resources::create::execute(uow, req).await {
+    match create::execute(&service, req).await {
         Ok(id) => Ok(Json(CreateHomeResponse { id: id.to_string() })),
-        Err(crate::domain::resources::create::Error::BadRequest) => Err(ApiError::BadRequest),
-        Err(crate::domain::resources::create::Error::Unknown(e)) => {
-            Err(ApiError::InternalServerError(e))
-        }
+        Err(create::Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
     }
 }

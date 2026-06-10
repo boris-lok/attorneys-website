@@ -1,5 +1,5 @@
 use crate::domain::cases::entity::CaseID;
-use crate::domain::services::work_log::WorkLogService;
+use crate::domain::services::work_log::WorkLogUoW;
 use crate::domain::uow::common::UnitOfWorkFactory;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_logs::entity::CreateWorkLogRequest;
@@ -22,7 +22,7 @@ pub enum Error {
 }
 
 pub async fn execute<F: UnitOfWorkFactory>(
-    service: &WorkLogService<F>,
+    service: &WorkLogUoW<F>,
     req: Request,
 ) -> Result<Uuid, Error> {
     let id = req.id;

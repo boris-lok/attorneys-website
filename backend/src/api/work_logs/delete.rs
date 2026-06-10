@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
+use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_logs::delete::{execute, Error, Request};
 use crate::infrastructure::db::connection::{PostgresRepo, WorkLogRepo};
@@ -23,9 +23,7 @@ pub async fn delete_work_log(
         force: false,
     };
 
-    let mut repo = PostgresRepo::<WorkLogRepo>::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let mut repo = PostgresRepo::<WorkLogRepo>::from_pool(&state.pool);
 
     let res = execute(&mut repo, req).await;
 

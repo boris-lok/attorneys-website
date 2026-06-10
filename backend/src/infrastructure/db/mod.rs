@@ -2,6 +2,8 @@ pub mod article_view_repo;
 pub mod avatar_repo;
 pub mod case_repo;
 pub mod connection;
+pub mod content_repo;
+pub mod resource_repo;
 pub mod role_repo;
 pub mod uow;
 pub mod user_repo;

@@ -1,6 +1,6 @@
 pub mod articles;
 pub mod cases;
-pub mod entities;
+pub mod entity;
 pub mod member;
 pub mod resources;
 pub mod role;

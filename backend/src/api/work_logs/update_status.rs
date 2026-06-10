@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
+use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use crate::domain::work_logs::update_status::{execute, Error, Request};
@@ -31,13 +31,8 @@ pub async fn update_work_log_status(
         status: WorkLogMappingStatus::try_from(req.status).map_err(|_| ApiError::BadRequest)?,
     };
 
-    let mut work_log_repo = PostgresRepo::<WorkLogRepo>::new(&state.pool)
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
-
-    let mut work_log_mapping_repo = PostgresRepo::<WorkLogMappingRepo>::new(&state.pool)
-        .await
-        .map_err(|err| ApiError::InternalServerError(err.to_string()))?;
+    let mut work_log_repo = PostgresRepo::<WorkLogRepo>::from_pool(&state.pool);
+    let mut work_log_mapping_repo = PostgresRepo::<WorkLogMappingRepo>::from_pool(&state.pool);
 
     let res = execute(&mut work_log_repo, &mut work_log_mapping_repo, req).await;
 

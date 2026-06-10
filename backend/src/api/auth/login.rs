@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
+use crate::domain::entity::Claims;
 use crate::domain::users::authentication::{validate_credentials, Credentials, Error};
 use crate::domain::users::repository::{UserRepository, UserRoleRepository};
 use crate::infrastructure::db::connection::{PostgresRepo, UserRepo, UserRoleRepo};
@@ -30,9 +30,7 @@ pub async fn login(
     Extension(redis_client): Extension<Arc<redis::Client>>,
     WithRejection(Json(req), _): WithRejection<Json<LoginRequest>, ApiError>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let mut repo = PostgresRepo::<UserRepo>::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let mut repo = PostgresRepo::<UserRepo>::from_pool(&state.pool);
 
     let credentials = Credentials {
         username: req.username.clone(),
@@ -43,9 +41,7 @@ pub async fn login(
 
     match res {
         Ok(id) => {
-            let mut user_role_repo = PostgresRepo::<UserRoleRepo>::new(&state.pool)
-                .await
-                .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+            let mut user_role_repo = PostgresRepo::<UserRoleRepo>::from_pool(&state.pool);
 
             let user_id = id.to_string();
             let exp = Utc::now() + Duration::days(30);

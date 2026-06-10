@@ -25,7 +25,7 @@ impl<'tx> UserRoleRepository for PostgresUserRoleRepo<'tx> {
     async fn get_user_roles(&mut self, id: &UserID) -> anyhow::Result<Vec<String>> {
         let res = sqlx::query_scalar::<_, String>(GET_USER_ROLES_QUERY)
             .bind(Uuid::from(id))
-            .fetch_all(self.get_conn())
+            .fetch_all(self.conn().await?)
             .await?;
 
         Ok(res)
@@ -35,7 +35,7 @@ impl<'tx> UserRoleRepository for PostgresUserRoleRepo<'tx> {
         sqlx::query(CREATE_USER_ROLE_QUERY)
             .bind(Uuid::from(user_id))
             .bind(role)
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())

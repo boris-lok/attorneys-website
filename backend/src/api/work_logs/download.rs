@@ -1,6 +1,6 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
 use crate::domain::cases::entity::CaseID;
+use crate::domain::entity::Claims;
 use crate::domain::work_logs::list::{execute, Error, Request};
 use crate::infrastructure::db::connection::{PostgresRepo, WorkLogRepo};
 use crate::startup::AppState;
@@ -21,9 +21,7 @@ pub async fn download(
     State(state): State<AppState>,
     query: Query<DownloadWorkLogsRequest>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let mut repo = PostgresRepo::<WorkLogRepo>::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let mut repo = PostgresRepo::<WorkLogRepo>::from_pool(&state.pool);
 
     let req = Request {
         case_id: CaseID::try_from(query.case_id.clone()).map_err(|_| ApiError::BadRequest)?,

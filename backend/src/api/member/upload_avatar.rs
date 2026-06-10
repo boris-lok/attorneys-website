@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
-use crate::domain::entities::ResourceID;
+use crate::domain::entity::Claims;
 use crate::domain::member::upload_avatar::{execute, Error};
+use crate::domain::resources::entity::ResourceID;
 use crate::domain::uow::common::UnitOfWorkFactory;
 use crate::infrastructure::db::uow::PostgresUoWFactory;
 use crate::startup::AppState;

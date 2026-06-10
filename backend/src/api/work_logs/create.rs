@@ -1,6 +1,6 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
 use crate::domain::cases::entity::CaseID;
+use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use crate::startup::AppState;
 use axum::extract::State;
@@ -49,7 +49,7 @@ pub async fn create_work_log(
         collaborator_ids,
     };
 
-    let service = state.work_log_service();
+    let service = state.work_log_uow();
 
     let res = crate::domain::work_logs::create::execute(&service, req).await;
 

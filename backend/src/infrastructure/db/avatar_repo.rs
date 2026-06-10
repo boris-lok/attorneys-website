@@ -1,4 +1,4 @@
-use crate::domain::entities::ResourceID;
+use crate::domain::resources::entity::ResourceID;
 use crate::domain::users::entity::AvatarJson;
 use crate::domain::users::repository::AvatarRepository;
 use crate::infrastructure::db::connection::{AvatarRepo, PostgresRepo};
@@ -16,7 +16,7 @@ impl<'tx> AvatarRepository for PostgresAvatarRepo<'tx> {
             .bind(id.as_str())
             .bind(json.clone().get())
             .bind(json.get())
-            .execute(self.get_conn())
+            .execute(self.conn().await?)
             .await?;
 
         Ok(())

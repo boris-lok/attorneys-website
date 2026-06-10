@@ -1,14 +1,13 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
-use crate::domain::entities::{CategoryData, Resource};
+use crate::domain::articles::entity::CategoryData;
+use crate::domain::entity::Claims;
+use crate::domain::resources::create;
+use crate::domain::resources::entity::{Language, Resource};
 use crate::startup::AppState;
-use crate::uow::InDatabase;
 use axum::extract::State;
 use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
-use tokio::sync::Mutex;
-use ulid::Ulid;
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct CreateCategoryRequest {
@@ -28,25 +27,26 @@ pub async fn create_category(
     State(state): State<AppState>,
     WithRejection(Json(req), _): WithRejection<Json<CreateCategoryRequest>, ApiError>,
 ) -> Result<Json<CreateCategoryResponse>, ApiError> {
-    let category_id = Ulid::new().to_string();
+    let resource = Resource::Category(CategoryData {
+        icon: req.icon,
+        name: req.name,
+    });
 
-    let req = crate::domain::resources::create::Request {
-        id: category_id.clone(),
-        data: Resource::Category(CategoryData::new(req.icon, req.name)),
-        language: req.language,
+    let (kind, data) = resource
+        .into_typed_content()
+        .map_err(|_| ApiError::BadRequest)?;
+
+    let req = create::Request {
+        kind,
+        data,
         seq: req.seq,
+        language: Language::try_from(req.language).map_err(|_| ApiError::BadRequest)?,
     };
 
-    let uow = InDatabase::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-    let uow = Mutex::new(uow);
+    let service = state.resource_uow();
 
-    match crate::domain::resources::create::execute(uow, req).await {
+    match create::execute(&service, req).await {
         Ok(id) => Ok(Json(CreateCategoryResponse { id: id.to_string() })),
-        Err(crate::domain::resources::create::Error::BadRequest) => Err(ApiError::BadRequest),
-        Err(crate::domain::resources::create::Error::Unknown(e)) => {
-            Err(ApiError::InternalServerError(e))
-        }
+        Err(create::Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
     }
 }

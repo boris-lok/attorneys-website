@@ -20,9 +20,7 @@ pub struct ListUsersResponse {
 pub async fn list_users(
     State(state): State<AppState>,
 ) -> Result<Json<ListUsersResponse>, ApiError> {
-    let mut repo = PostgresRepo::<UserRepo>::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let mut repo = PostgresRepo::<UserRepo>::from_pool(&state.pool);
 
     match list::execute(&mut repo).await {
         Ok(users) => Ok(Json(ListUsersResponse {

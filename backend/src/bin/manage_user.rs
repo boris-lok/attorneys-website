@@ -64,9 +64,7 @@ enum Commands {
 
 /// list all users from the database and print the result in the console
 async fn list_users(pool: sqlx::PgPool) -> anyhow::Result<()> {
-    let mut repo = PostgresRepo::<UserRepo>::new(&pool)
-        .await
-        .map_err(|e| anyhow!("Failed to create user repository: {:?}", e))?;
+    let mut repo = PostgresRepo::<UserRepo>::from_pool(&pool);
 
     let res = users::list::execute(&mut repo)
         .await
@@ -91,9 +89,7 @@ async fn list_users(pool: sqlx::PgPool) -> anyhow::Result<()> {
 }
 
 async fn delete_user(pool: sqlx::PgPool, id: String) -> anyhow::Result<()> {
-    let mut repo = PostgresRepo::<UserRepo>::new(&pool)
-        .await
-        .map_err(|e| anyhow!("Failed to create user repository: {:?}", e))?;
+    let mut repo = PostgresRepo::<UserRepo>::from_pool(&pool);
 
     let user_id = UserID::try_from(id).map_err(|_| anyhow!("Invalid user ID, must be a UUID"))?;
 
@@ -105,9 +101,7 @@ async fn delete_user(pool: sqlx::PgPool, id: String) -> anyhow::Result<()> {
 }
 
 async fn create_user(pool: sqlx::PgPool, username: String, nickname: String) -> anyhow::Result<()> {
-    let mut role_repo = PostgresRepo::<RoleRepo>::new(&pool)
-        .await
-        .map_err(|e| anyhow!("Failed to create role repository: {:?}", e))?;
+    let mut role_repo = PostgresRepo::<RoleRepo>::from_pool(&pool);
 
     let roles = role_repo.list().await;
 

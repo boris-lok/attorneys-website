@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::api::auth::Claims;
+use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use crate::infrastructure::db::connection::{PostgresRepo, UserRepo};
 use crate::startup::AppState;
@@ -23,9 +23,7 @@ pub async fn change_password(
     Extension(redis_client): Extension<Arc<redis::Client>>,
     WithRejection(Json(req), _): WithRejection<Json<ChangePasswordRequest>, ApiError>,
 ) -> Result<StatusCode, ApiError> {
-    let mut repo = PostgresRepo::<UserRepo>::new(&state.pool)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let mut repo = PostgresRepo::<UserRepo>::from_pool(&state.pool);
 
     let user_id = UserID::try_from(claims.sub.clone()).map_err(|_| ApiError::BadRequest)?;
 

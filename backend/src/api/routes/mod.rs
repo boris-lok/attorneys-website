@@ -8,7 +8,7 @@ use axum::routing::get;
 use axum::{Extension, Router};
 use std::sync::Arc;
 
-pub fn build_router(state: AppState, redis_client: redis::Client, image_util: ImageUtil) -> Router {
+pub fn build_router(state: AppState, image_util: ImageUtil) -> Router {
     use crate::api::health::health_check;
 
     Router::new()
@@ -16,7 +16,6 @@ pub fn build_router(state: AppState, redis_client: redis::Client, image_util: Im
         .nest("/api/{version}/admin", admin::router())
         .nest("/api/{version}/", public::router())
         .layer(Extension(Arc::new(image_util)))
-        .layer(Extension(Arc::new(redis_client)))
         .layer(middleware::cors_layer())
         .with_state(state)
 }

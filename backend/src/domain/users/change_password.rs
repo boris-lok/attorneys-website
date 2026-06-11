@@ -1,9 +1,12 @@
+use crate::domain::session::store::SessionStore;
+use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::uow::user::UserUoW;
 use crate::domain::users::entity::UserID;
-use crate::domain::users::repository::UserRepository;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Algorithm, Argon2, Params, PasswordHasher, Version};
 use secrecy::{ExposeSecret, SecretBox};
+use std::sync::Arc;
 
 pub struct Request {
     pub user_id: UserID,
@@ -14,7 +17,11 @@ pub enum Error {
     Unknown(String),
 }
 
-pub async fn execute(repo: &mut impl UserRepository, req: Request) -> Result<(), Error> {
+pub async fn execute<F: UnitOfWorkFactory>(
+    uow: &UserUoW<F>,
+    session: Arc<dyn SessionStore + Send + Sync>,
+    req: Request,
+) -> Result<(), Error> {
     let salt = SaltString::generate(&mut OsRng);
     let password_hash = Argon2::new(
         Algorithm::Argon2d,
@@ -25,10 +32,14 @@ pub async fn execute(repo: &mut impl UserRepository, req: Request) -> Result<(),
     .unwrap()
     .to_string();
 
-    repo.change_password(&req.user_id, SecretBox::new(Box::new(password_hash)))
+    uow.change_password(&req.user_id, SecretBox::new(Box::new(password_hash)))
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 
-    // TODO: clear the session.
+    session
+        .clear_user_sessions(&req.user_id)
+        .await
+        .map_err(|e| Error::Unknown(e.to_string()))?;
+
     Ok(())
 }

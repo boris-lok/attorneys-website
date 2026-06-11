@@ -1,8 +1,10 @@
 use crate::api::routes::build_router;
 use crate::configuration::{DatabaseSettings, Settings};
+use crate::domain::session::store::SessionStore;
 use crate::domain::uow::article_view::ArticleViewUoW;
 use crate::domain::uow::case::CaseUoW;
 use crate::domain::uow::resource::ResourceUoW;
+use crate::domain::uow::user::UserUoW;
 use crate::domain::uow::work_log::WorkLogUoW;
 use crate::infrastructure::db::uow::PostgresUoWFactory;
 use crate::utils::image::ImageUtil;
@@ -20,6 +22,7 @@ pub struct AppState {
     pub upload_folder: String,
     pub jwt_encoding_key: Arc<EncodingKey>,
     pub jwt_decoding_key: Arc<DecodingKey>,
+    pub session_store: Arc<dyn SessionStore + Send + Sync>,
 }
 
 impl AppState {
@@ -37,6 +40,10 @@ impl AppState {
 
     pub fn article_view_uow(&self) -> ArticleViewUoW<PostgresUoWFactory> {
         ArticleViewUoW::new(PostgresUoWFactory::new(self.pool.clone()))
+    }
+
+    pub fn user_uow(&self) -> UserUoW<PostgresUoWFactory> {
+        UserUoW::new(PostgresUoWFactory::new(self.pool.clone()))
     }
 }
 
@@ -56,10 +63,13 @@ pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io:
         upload_folder: config.application.upload_folder.to_string(),
         jwt_decoding_key,
         jwt_encoding_key,
+        session_store: Arc::new(
+            crate::infrastructure::session::redis::RedisSessionStore::new(redis_client),
+        ),
     };
     let image_util = ImageUtil {};
 
-    let app = build_router(state, redis_client, image_util);
+    let app = build_router(state, image_util);
 
     axum::serve(
         listener,

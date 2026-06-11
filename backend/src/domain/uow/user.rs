@@ -34,4 +34,17 @@ impl<F: UnitOfWorkFactory> UserUoW<F> {
 
         Ok(id)
     }
+    pub async fn change_password(
+        &self,
+        user_id: &UserID,
+        password_hash: SecretBox<String>,
+    ) -> anyhow::Result<()> {
+        let mut uow = self.factory.begin().await?;
+
+        uow.user_repo()
+            .change_password(user_id, password_hash)
+            .await?;
+
+        uow.commit().await
+    }
 }

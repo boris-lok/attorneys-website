@@ -1,5 +1,5 @@
 use crate::domain::cases::entity::{Case, CaseID, CreateCaseRequest, UpdateCaseRequest};
-use crate::domain::cases::repository::CaseRepository;
+use crate::domain::cases::repository::{CaseReadRepository, CaseRepository, CaseWriteRepository};
 use crate::domain::users::entity::UserID;
 use crate::infrastructure::db::connection::{CaseRepo, PostgresRepo};
 use uuid::Uuid;
@@ -74,7 +74,7 @@ const LIST_CASES_QUERY: &str = r"
 pub type PostgresCaseRepo<'tx> = PostgresRepo<'tx, CaseRepo>;
 
 #[async_trait::async_trait]
-impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
+impl<'tx> CaseWriteRepository for PostgresCaseRepo<'tx> {
     async fn create(&mut self, req: CreateCaseRequest) -> anyhow::Result<CaseID> {
         sqlx::query(CREATE_CASE_QUERY)
             .bind(Uuid::from(&req.id))
@@ -103,16 +103,6 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
         Ok(())
     }
 
-    async fn list(&mut self, user_id: &UserID) -> anyhow::Result<Vec<Case>> {
-        let res = sqlx::query_as::<_, CaseFromSQLx>(LIST_CASES_QUERY)
-            .bind(Uuid::from(user_id))
-            .fetch_all(self.conn().await?)
-            .await?;
-
-        let cases = res.into_iter().map(|r| r.into()).collect::<Vec<Case>>();
-        Ok(cases)
-    }
-
     async fn delete(&mut self, case_id: &CaseID) -> anyhow::Result<()> {
         sqlx::query(DELETE_CASE_QUERY)
             .bind(Uuid::from(case_id))
@@ -131,6 +121,21 @@ impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {
         Ok(())
     }
 }
+
+#[async_trait::async_trait]
+impl<'tx> CaseReadRepository for PostgresCaseRepo<'tx> {
+    async fn list(&mut self, user_id: &UserID) -> anyhow::Result<Vec<Case>> {
+        let res = sqlx::query_as::<_, CaseFromSQLx>(LIST_CASES_QUERY)
+            .bind(Uuid::from(user_id))
+            .fetch_all(self.conn().await?)
+            .await?;
+
+        let cases = res.into_iter().map(|r| r.into()).collect::<Vec<Case>>();
+        Ok(cases)
+    }
+}
+
+impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {}
 
 #[derive(Debug, sqlx::FromRow)]
 struct CaseFromSQLx {

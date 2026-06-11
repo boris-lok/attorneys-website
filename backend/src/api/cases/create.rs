@@ -1,7 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::domain::cases::entity::CaseID;
 use crate::domain::entity::Claims;
-use crate::infrastructure::db::case_repo::PostgresCaseRepo;
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::Json;
@@ -37,9 +36,7 @@ pub async fn create_case(
         ended_at: req.ended_at,
     };
 
-    let mut repo = PostgresCaseRepo::from_pool(&state.pool);
-
-    let resp = crate::domain::cases::create::execute(&mut repo, req).await;
+    let resp = crate::domain::cases::create::execute(&state.case_uow(), req).await;
 
     match resp {
         Ok(id) => Ok(Json(CreateCaseResponse { id: id.into() })),

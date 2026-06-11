@@ -1,3 +1,4 @@
+pub mod case;
 pub mod common;
 pub mod entity;
 pub mod resource;

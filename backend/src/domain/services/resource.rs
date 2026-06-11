@@ -3,15 +3,15 @@ use crate::domain::resources::entity::{
 };
 use crate::domain::resources::repository::{ContentWriteRepository, ResourceWriteRepository};
 use crate::domain::uow::common::{UnitOfWork, UnitOfWorkFactory};
-use crate::impl_service;
+use crate::impl_uow;
 
-impl_service!(ResourceUoW);
+impl_uow!(ResourceUoW);
 
 impl<F: UnitOfWorkFactory> ResourceUoW<F> {
     pub async fn create(&self, req: CreateResourceRequest) -> anyhow::Result<()> {
         let mut uow = self.factory.begin().await?;
 
-        let res = async {
+        async {
             uow.resource_repo()
                 .create(&req.id, &req.kind, req.seq)
                 .await?;
@@ -20,19 +20,11 @@ impl<F: UnitOfWorkFactory> ResourceUoW<F> {
 
             uow.content_repo()
                 .create(&content_id, req.data, req.language)
-                .await?;
-
-            Ok(())
+                .await
         }
-        .await;
+        .await?;
 
-        match res {
-            Ok(_) => uow.commit().await?,
-            Err(e) => {
-                uow.rollback().await?;
-                return Err(e);
-            }
-        }
+        uow.commit().await?;
 
         Ok(())
     }
@@ -49,24 +41,17 @@ impl<F: UnitOfWorkFactory> ResourceUoW<F> {
     pub async fn update(&self, req: UpdateResourceRequest) -> anyhow::Result<()> {
         let mut uow = self.factory.begin().await?;
 
-        let res = async {
+        async {
             uow.resource_repo().update_seq(&req.id, req.seq).await?;
 
             uow.content_repo()
                 .update(&ContentID::from(req.id), req.data, req.language)
-                .await?;
-
-            Ok(())
+                .await
         }
-        .await;
+        .await?;
 
-        match res {
-            Ok(_) => uow.commit().await?,
-            Err(e) => {
-                uow.rollback().await?;
-                return Err(e);
-            }
-        }
+        uow.commit().await?;
+
         Ok(())
     }
 }

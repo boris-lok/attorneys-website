@@ -3,9 +3,9 @@ use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::repository::WorkLogMappingRepository;
 use crate::domain::work_logs::entity::CreateWorkLogRequest;
 use crate::domain::work_logs::repository::WorkLogsRepository;
-use crate::impl_service;
+use crate::impl_uow;
 
-impl_service!(WorkLogUoW);
+impl_uow!(WorkLogUoW);
 
 impl<F: UnitOfWorkFactory> WorkLogUoW<F> {
     pub async fn create(

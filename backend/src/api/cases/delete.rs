@@ -2,7 +2,6 @@ use crate::api::api_error::ApiError;
 use crate::domain::cases::delete::{execute, Error};
 use crate::domain::cases::entity::CaseID;
 use crate::domain::entity::Claims;
-use crate::infrastructure::db::case_repo::PostgresCaseRepo;
 use crate::startup::AppState;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
@@ -16,9 +15,7 @@ pub async fn delete_case(
     let id = params.get("id").ok_or(ApiError::BadRequest)?;
     let case_id = CaseID::try_from(id.clone()).map_err(|_| ApiError::BadRequest)?;
 
-    let mut repo = PostgresCaseRepo::from_pool(&state.pool);
-
-    let res = execute(&mut repo, &case_id).await;
+    let res = execute(&state.case_uow(), &case_id).await;
 
     match res {
         Ok(_) => Ok(StatusCode::OK),

@@ -1,5 +1,6 @@
 use crate::api::routes::build_router;
 use crate::configuration::{DatabaseSettings, Settings};
+use crate::domain::services::case::CaseUoW;
 use crate::domain::services::resource::ResourceUoW;
 use crate::domain::services::work_log::WorkLogUoW;
 use crate::infrastructure::db::uow::PostgresUoWFactory;
@@ -27,6 +28,10 @@ impl AppState {
 
     pub fn resource_uow(&self) -> ResourceUoW<PostgresUoWFactory> {
         ResourceUoW::new(PostgresUoWFactory::new(self.pool.clone()))
+    }
+
+    pub fn case_uow(&self) -> CaseUoW<PostgresUoWFactory> {
+        CaseUoW::new(PostgresUoWFactory::new(self.pool.clone()))
     }
 }
 

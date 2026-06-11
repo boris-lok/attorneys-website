@@ -1,10 +1,10 @@
 use crate::domain::uow::common::{UnitOfWork, UnitOfWorkFactory};
 use crate::domain::users::entity::UserID;
 use crate::domain::users::repository::{UserRepository, UserRoleRepository};
-use crate::impl_service;
+use crate::impl_uow;
 use secrecy::SecretBox;
 
-impl_service!(UserService);
+impl_uow!(UserService);
 
 impl<F: UnitOfWorkFactory> UserService<F> {
     pub async fn create(
@@ -16,7 +16,7 @@ impl<F: UnitOfWorkFactory> UserService<F> {
     ) -> anyhow::Result<UserID> {
         let mut uow = self.factory.begin().await?;
 
-        let res = async {
+        let id = async {
             let user_id = uow
                 .user_repo()
                 .create(username, password_hash, nickname)
@@ -26,19 +26,12 @@ impl<F: UnitOfWorkFactory> UserService<F> {
                 uow.user_role_repo().create(&user_id, role_id).await?;
             }
 
-            Ok(user_id)
+            Ok::<_, anyhow::Error>(user_id)
         }
-        .await;
+        .await?;
 
-        match res {
-            Ok(id) => {
-                uow.commit().await?;
-                Ok(id)
-            }
-            Err(e) => {
-                uow.rollback().await?;
-                Err(e)
-            }
-        }
+        uow.commit().await?;
+
+        Ok(id)
     }
 }

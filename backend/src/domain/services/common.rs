@@ -1,5 +1,5 @@
 #[macro_export]
-macro_rules! impl_service {
+macro_rules! impl_uow {
     ($service:ident) => {
         pub struct $service<F: UnitOfWorkFactory> {
             factory: F,

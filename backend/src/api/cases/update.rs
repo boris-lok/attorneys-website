@@ -2,7 +2,6 @@ use crate::api::api_error::ApiError;
 use crate::domain::cases::entity::CaseID;
 use crate::domain::cases::update::{execute, Error};
 use crate::domain::entity::Claims;
-use crate::infrastructure::db::case_repo::PostgresCaseRepo;
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -34,9 +33,7 @@ pub async fn update_case(
         billing_cycle: req.billing_cycle,
     };
 
-    let mut repo = PostgresCaseRepo::from_pool(&state.pool);
-
-    let res = execute(&mut repo, req).await;
+    let res = execute(&state.case_uow(), req).await;
 
     match res {
         Ok(_) => Ok(StatusCode::OK),

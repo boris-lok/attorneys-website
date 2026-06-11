@@ -1,5 +1,5 @@
-use crate::domain::services::user::UserService;
 use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::uow::user::UserUoW;
 use crate::domain::users::entity::UserID;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
@@ -20,7 +20,7 @@ pub enum Error {
 }
 
 pub async fn execute<F: UnitOfWorkFactory>(
-    service: &UserService<F>,
+    service: &UserUoW<F>,
     req: Request,
 ) -> Result<UserID, Error> {
     let salt = SaltString::generate(&mut OsRng);

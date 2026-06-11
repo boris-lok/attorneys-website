@@ -41,6 +41,7 @@ impl UnitOfWork for PostgresUoW {
     type ContentRepo<'a> = PostgresRepo<'a, ContentRepo>;
     type ResourceRepo<'a> = PostgresRepo<'a, ResourceRepo>;
     type CaseRepo<'a> = PostgresRepo<'a, CaseRepo>;
+    type ArticleViewWriteRepo<'a> = PostgresRepo<'a, ArticleViewRepo>;
 
     fn work_log_repo(&mut self) -> Self::WorkLogRepo<'_> {
         PostgresRepo::with_tx(&mut self.tx)
@@ -75,6 +76,10 @@ impl UnitOfWork for PostgresUoW {
     }
 
     fn case_repo(&mut self) -> Self::CaseRepo<'_> {
+        PostgresRepo::with_tx(&mut self.tx)
+    }
+
+    fn article_view_repo(&mut self) -> Self::ArticleViewRepo<'_> {
         PostgresRepo::with_tx(&mut self.tx)
     }
 

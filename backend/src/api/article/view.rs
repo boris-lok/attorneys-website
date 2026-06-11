@@ -1,5 +1,4 @@
 use crate::api::api_error::ApiError;
-use crate::infrastructure::db::connection::{ArticleViewRepo, PostgresRepo};
 use crate::startup::AppState;
 use axum::extract::{ConnectInfo, Path, State};
 use axum::http::StatusCode;
@@ -14,8 +13,6 @@ pub async fn view_article(
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
 ) -> Result<StatusCode, ApiError> {
-    let mut repo = PostgresRepo::<ArticleViewRepo>::from_pool(&state.pool);
-
     let article_id = params.get("id").ok_or(ApiError::BadRequest)?;
     let user_agent = user_agent.to_string();
 
@@ -25,7 +22,7 @@ pub async fn view_article(
         user_agent,
     };
 
-    match crate::domain::articles::add_view::execute(&mut repo, req).await {
+    match crate::domain::articles::add_view::execute(&state.article_view_uow(), req).await {
         Ok(_) => Ok(StatusCode::OK),
         Err(crate::domain::articles::add_view::Error::Unknown(e)) => {
             Err(ApiError::InternalServerError(e))

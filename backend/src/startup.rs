@@ -1,8 +1,9 @@
 use crate::api::routes::build_router;
 use crate::configuration::{DatabaseSettings, Settings};
-use crate::domain::services::case::CaseUoW;
-use crate::domain::services::resource::ResourceUoW;
-use crate::domain::services::work_log::WorkLogUoW;
+use crate::domain::uow::article_view::ArticleViewUoW;
+use crate::domain::uow::case::CaseUoW;
+use crate::domain::uow::resource::ResourceUoW;
+use crate::domain::uow::work_log::WorkLogUoW;
 use crate::infrastructure::db::uow::PostgresUoWFactory;
 use crate::utils::image::ImageUtil;
 use jsonwebtoken::{DecodingKey, EncodingKey};
@@ -32,6 +33,10 @@ impl AppState {
 
     pub fn case_uow(&self) -> CaseUoW<PostgresUoWFactory> {
         CaseUoW::new(PostgresUoWFactory::new(self.pool.clone()))
+    }
+
+    pub fn article_view_uow(&self) -> ArticleViewUoW<PostgresUoWFactory> {
+        ArticleViewUoW::new(PostgresUoWFactory::new(self.pool.clone()))
     }
 }
 

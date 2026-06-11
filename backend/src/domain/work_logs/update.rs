@@ -1,5 +1,5 @@
-use crate::domain::services::work_log::WorkLogUoW;
 use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::uow::work_log::WorkLogUoW;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_logs::entity::UpdateWorkLogRequest;
 use crate::domain::work_logs::error::WorkLogError;
@@ -32,5 +32,5 @@ pub async fn execute<F: UnitOfWorkFactory>(
         ended_at: req.ended_at,
     };
 
-    uow.update(req, &user_id, force).await
+    uow.update(req, user_id, force).await
 }

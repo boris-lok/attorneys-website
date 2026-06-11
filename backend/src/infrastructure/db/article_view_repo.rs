@@ -1,4 +1,4 @@
-use crate::domain::articles::repository::ArticleViewRepository;
+use crate::domain::articles::repository::ArticleViewWriteRepository;
 use crate::infrastructure::db::connection::{ArticleViewRepo, PostgresRepo};
 use std::net::IpAddr;
 use uuid::Uuid;
@@ -10,7 +10,7 @@ const CREATE_ARTICLES_QUERY: &str = r"
 type PostgresArticleViewRepo<'tx> = PostgresRepo<'tx, ArticleViewRepo>;
 
 #[async_trait::async_trait]
-impl<'tx> ArticleViewRepository for PostgresArticleViewRepo<'tx> {
+impl<'tx> ArticleViewWriteRepository for PostgresArticleViewRepo<'tx> {
     async fn create(&mut self, id: &str, ip: &IpAddr, user_agent: &str) -> anyhow::Result<Uuid> {
         let id = sqlx::query_scalar::<_, Uuid>(CREATE_ARTICLES_QUERY)
             .bind(id)

@@ -1,6 +1,6 @@
 use crate::domain::resources::entity::ResourceID;
-use crate::domain::services::resource::ResourceUoW;
 use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::uow::resource::ResourceUoW;
 
 pub enum Error {
     Unknown(String),

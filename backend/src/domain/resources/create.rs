@@ -1,8 +1,8 @@
 use crate::domain::resources::entity::{
     ContentData, ContentID, CreateResourceRequest, Language, ResourceID, ResourceType,
 };
-use crate::domain::services::resource::ResourceUoW;
 use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::uow::resource::ResourceUoW;
 use ulid::Ulid;
 
 pub struct Request {

@@ -154,7 +154,7 @@ async fn asset_not_collaborator(
     user_id: &UserID,
 ) -> Result<(), WorkLogError> {
     let is_collaborator = repo
-        .is_collaborator_work_log(&id, user_id)
+        .is_collaborator_work_log(id, user_id)
         .await
         .map_err(|e| WorkLogError::Unknown(e.to_string()))?;
 

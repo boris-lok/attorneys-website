@@ -1,4 +1,5 @@
-use crate::domain::articles::repository::ArticleViewRepository;
+use crate::domain::uow::article_view::ArticleViewUoW;
+use crate::domain::uow::common::UnitOfWorkFactory;
 use std::net::IpAddr;
 use uuid::Uuid;
 
@@ -12,8 +13,11 @@ pub enum Error {
     Unknown(String),
 }
 
-pub async fn execute(repo: &mut impl ArticleViewRepository, req: Request) -> Result<Uuid, Error> {
-    let id = repo
+pub async fn execute<F: UnitOfWorkFactory>(
+    uow: &ArticleViewUoW<F>,
+    req: Request,
+) -> Result<Uuid, Error> {
+    let id = uow
         .create(&req.article_id, &req.ip, &req.user_agent)
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;

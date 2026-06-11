@@ -1,5 +1,5 @@
 use crate::domain::cases::entity::CaseID;
-use crate::domain::services::case::CaseUoW;
+use crate::domain::uow::case::CaseUoW;
 use crate::domain::uow::common::UnitOfWorkFactory;
 
 pub enum Error {

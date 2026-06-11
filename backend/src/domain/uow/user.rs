@@ -4,9 +4,9 @@ use crate::domain::users::repository::{UserRepository, UserRoleRepository};
 use crate::impl_uow;
 use secrecy::SecretBox;
 
-impl_uow!(UserService);
+impl_uow!(UserUoW);
 
-impl<F: UnitOfWorkFactory> UserService<F> {
+impl<F: UnitOfWorkFactory> UserUoW<F> {
     pub async fn create(
         &self,
         username: String,

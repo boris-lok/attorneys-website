@@ -1,5 +1,5 @@
-use crate::domain::services::work_log::WorkLogUoW;
 use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::uow::work_log::WorkLogUoW;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use crate::domain::work_logs::error::WorkLogError;

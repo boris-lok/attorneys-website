@@ -1,4 +1,4 @@
-use crate::domain::articles::repository::ArticleViewRepository;
+use crate::domain::articles::repository::ArticleViewWriteRepository;
 use crate::domain::cases::repository::{CaseReadRepository, CaseRepository};
 use crate::domain::resources::repository::{
     ContentWriteRepository, ResourceReadRepository, ResourceRepository,
@@ -24,7 +24,7 @@ pub trait UnitOfWork {
     type AvatarRepo<'a>: AvatarRepository
     where
         Self: 'a;
-    type ArticleViewRepo<'a>: ArticleViewRepository
+    type ArticleViewRepo<'a>: ArticleViewWriteRepository
     where
         Self: 'a;
     type ContentRepo<'a>: ContentWriteRepository
@@ -34,6 +34,9 @@ pub trait UnitOfWork {
     where
         Self: 'a;
     type CaseRepo<'a>: CaseRepository
+    where
+        Self: 'a;
+    type ArticleViewWriteRepo<'a>: ArticleViewWriteRepository
     where
         Self: 'a;
 
@@ -46,6 +49,7 @@ pub trait UnitOfWork {
     fn content_repo(&mut self) -> Self::ContentRepo<'_>;
     fn resource_repo(&mut self) -> Self::ResourceRepo<'_>;
     fn case_repo(&mut self) -> Self::CaseRepo<'_>;
+    fn article_view_repo(&mut self) -> Self::ArticleViewWriteRepo<'_>;
     async fn commit(self) -> anyhow::Result<()>;
     async fn rollback(self) -> anyhow::Result<()>;
 }
@@ -71,4 +75,19 @@ pub trait Query {
     fn resource_repo(&self) -> Self::ResourceRepo<'_>;
     fn case_repo(&self) -> Self::CaseRepo<'_>;
     fn work_log_repo(&self) -> Self::WorkLogRepo<'_>;
+}
+
+#[macro_export]
+macro_rules! impl_uow {
+    ($service:ident) => {
+        pub struct $service<F: UnitOfWorkFactory> {
+            factory: F,
+        }
+
+        impl<F: UnitOfWorkFactory> $service<F> {
+            pub fn new(factory: F) -> Self {
+                Self { factory }
+            }
+        }
+    };
 }

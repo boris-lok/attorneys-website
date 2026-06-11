@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use backend::domain::role::repository::RoleRepository;
-use backend::domain::services::user::UserService;
+use backend::domain::uow::user::UserUoW;
 use backend::domain::users;
 use backend::domain::users::entity::UserID;
 use backend::get_configuration;
@@ -139,7 +139,7 @@ async fn create_user(pool: sqlx::PgPool, username: String, nickname: String) -> 
         .map(|index| roles[*index].id)
         .collect::<Vec<_>>();
 
-    let service = UserService::new(PostgresUoWFactory::new(pool));
+    let service = UserUoW::new(PostgresUoWFactory::new(pool));
 
     let req = users::create::Request {
         username: username.clone(),

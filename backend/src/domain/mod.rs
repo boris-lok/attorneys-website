@@ -1,4 +1,5 @@
 pub mod articles;
+pub mod auth;
 pub mod cases;
 pub mod entity;
 pub mod member;

@@ -2,8 +2,8 @@ use crate::api::api_error::ApiError;
 use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
-use crate::domain::work_logs::update_status::{execute, Error, Request};
-use crate::infrastructure::db::connection::{PostgresRepo, WorkLogMappingRepo, WorkLogRepo};
+use crate::domain::work_logs::error::WorkLogError;
+use crate::domain::work_logs::update_status::{execute, Request};
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -31,14 +31,12 @@ pub async fn update_work_log_status(
         status: WorkLogMappingStatus::try_from(req.status).map_err(|_| ApiError::BadRequest)?,
     };
 
-    let mut work_log_repo = PostgresRepo::<WorkLogRepo>::from_pool(&state.pool);
-    let mut work_log_mapping_repo = PostgresRepo::<WorkLogMappingRepo>::from_pool(&state.pool);
-
-    let res = execute(&mut work_log_repo, &mut work_log_mapping_repo, req).await;
+    let res = execute(&state.work_log_uow(), req).await;
 
     match res {
         Ok(_) => Ok(StatusCode::OK),
-        Err(Error::NotFound) => Err(ApiError::NotFound),
-        Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
+        Err(WorkLogError::NotFound) => Err(ApiError::NotFound),
+        Err(WorkLogError::Unknown(e)) => Err(ApiError::InternalServerError(e)),
+        Err(WorkLogError::PermissionDenied) => Err(ApiError::PermissionDenied),
     }
 }

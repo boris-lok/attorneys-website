@@ -1,11 +1,11 @@
 use crate::api::api_error::ApiError;
+use crate::api::extractors::query::QueryExtractor;
 use crate::domain::cases::entity::CaseID;
 use crate::domain::entity::Claims;
 use crate::domain::work_logs::entity::WorkLog;
-use crate::domain::work_logs::list::{execute, Error, Request};
-use crate::infrastructure::db::connection::{PostgresRepo, WorkLogRepo};
-use crate::startup::AppState;
-use axum::extract::{Query, State};
+use crate::domain::work_logs::error::WorkLogError;
+use crate::domain::work_logs::list::{execute, Request};
+use axum::extract::Query;
 use axum::Json;
 use serde::{Deserialize, Serialize};
 
@@ -23,11 +23,9 @@ pub struct ListWorkLogsResponse {
 
 pub async fn list_work_logs(
     _: Claims,
-    State(state): State<AppState>,
+    QueryExtractor(q): QueryExtractor,
     query: Query<ListWorkLogsRequest>,
 ) -> Result<Json<ListWorkLogsResponse>, ApiError> {
-    let mut repo = PostgresRepo::<WorkLogRepo>::from_pool(&state.pool);
-
     let req = Request {
         case_id: CaseID::try_from(query.case_id.clone()).map_err(|_| ApiError::BadRequest)?,
         started_at: query.started_at,
@@ -35,10 +33,12 @@ pub async fn list_work_logs(
         include_settled: true,
     };
 
-    let res = execute(&mut repo, req).await;
+    let res = execute(&q, req).await;
 
     match res {
         Ok(work_logs) => Ok(Json(ListWorkLogsResponse { work_logs })),
-        Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
+        Err(WorkLogError::Unknown(e)) => Err(ApiError::InternalServerError(e)),
+        Err(WorkLogError::NotFound) => Err(ApiError::NotFound),
+        Err(WorkLogError::PermissionDenied) => Err(ApiError::PermissionDenied),
     }
 }

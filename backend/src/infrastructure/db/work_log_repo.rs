@@ -4,7 +4,9 @@ use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use crate::domain::work_logs::entity::{
     Collaborator, CreateWorkLogRequest, SimpleUser, UpdateWorkLogRequest, WorkLog,
 };
-use crate::domain::work_logs::repository::WorkLogsRepository;
+use crate::domain::work_logs::repository::{
+    WorkLogsReadRepository, WorkLogsRepository, WorkLogsWriteRepository,
+};
 use crate::infrastructure::db::connection::{PostgresRepo, WorkLogRepo};
 use crate::infrastructure::db::work_log_mapping_repo::PostgresWorkLogStatus;
 use chrono::{DateTime, Utc};
@@ -73,7 +75,7 @@ const LIST_WORK_LOGS_QUERY: &str = r"
 pub type PostgresWorkLogRepo<'tx> = PostgresRepo<'tx, WorkLogRepo>;
 
 #[async_trait::async_trait]
-impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
+impl<'tx> WorkLogsWriteRepository for PostgresWorkLogRepo<'tx> {
     async fn create(&mut self, req: CreateWorkLogRequest) -> anyhow::Result<()> {
         sqlx::query(CREATE_WORK_LOG_QUERY)
             .bind(req.id)
@@ -98,6 +100,21 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
         Ok(())
     }
 
+    async fn update(&mut self, req: UpdateWorkLogRequest) -> anyhow::Result<()> {
+        sqlx::query(UPDATE_WORK_LOG_QUERY)
+            .bind(req.started_at)
+            .bind(req.ended_at)
+            .bind(req.description)
+            .bind(req.id)
+            .execute(self.conn().await?)
+            .await?;
+
+        Ok(())
+    }
+}
+
+#[async_trait::async_trait]
+impl<'tx> WorkLogsReadRepository for PostgresWorkLogRepo<'tx> {
     async fn list(
         &mut self,
         case_id: &CaseID,
@@ -114,18 +131,6 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
             .await?;
 
         Ok(parse_work_log_from_sqlx(rows))
-    }
-
-    async fn update(&mut self, req: UpdateWorkLogRequest) -> anyhow::Result<()> {
-        sqlx::query(UPDATE_WORK_LOG_QUERY)
-            .bind(req.started_at)
-            .bind(req.ended_at)
-            .bind(req.description)
-            .bind(req.id)
-            .execute(self.conn().await?)
-            .await?;
-
-        Ok(())
     }
 
     async fn is_creator(&mut self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool> {
@@ -161,6 +166,8 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {
         Ok(!row.is_empty())
     }
 }
+
+impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {}
 
 #[derive(Debug, sqlx::FromRow)]
 pub struct WorkLogFromSQLx {

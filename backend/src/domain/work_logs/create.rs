@@ -3,6 +3,7 @@ use crate::domain::services::work_log::WorkLogUoW;
 use crate::domain::uow::common::UnitOfWorkFactory;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_logs::entity::CreateWorkLogRequest;
+use crate::domain::work_logs::error::WorkLogError;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -16,15 +17,10 @@ pub struct Request {
     pub collaborator_ids: Vec<UserID>,
 }
 
-#[derive(Debug)]
-pub enum Error {
-    Unknown(String),
-}
-
 pub async fn execute<F: UnitOfWorkFactory>(
     service: &WorkLogUoW<F>,
     req: Request,
-) -> Result<Uuid, Error> {
+) -> Result<Uuid, WorkLogError> {
     let id = req.id;
 
     let work_log = CreateWorkLogRequest {
@@ -37,10 +33,7 @@ pub async fn execute<F: UnitOfWorkFactory>(
         is_collaborative: !req.collaborator_ids.is_empty(),
     };
 
-    service
-        .create(work_log, req.collaborator_ids)
-        .await
-        .map_err(|e| Error::Unknown(e.to_string()))?;
+    service.create(work_log, req.collaborator_ids).await?;
 
     Ok(id)
 }

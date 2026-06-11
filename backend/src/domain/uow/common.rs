@@ -5,7 +5,7 @@ use crate::domain::resources::repository::{
 };
 use crate::domain::users::repository::{AvatarRepository, UserRepository, UserRoleRepository};
 use crate::domain::work_log_mapping::repository::WorkLogMappingRepository;
-use crate::domain::work_logs::repository::WorkLogsRepository;
+use crate::domain::work_logs::repository::{WorkLogsReadRepository, WorkLogsRepository};
 
 #[async_trait::async_trait]
 pub trait UnitOfWork {
@@ -64,7 +64,11 @@ pub trait Query {
     type CaseRepo<'a>: CaseReadRepository
     where
         Self: 'a;
+    type WorkLogRepo<'a>: WorkLogsReadRepository
+    where
+        Self: 'a;
 
     fn resource_repo(&self) -> Self::ResourceRepo<'_>;
     fn case_repo(&self) -> Self::CaseRepo<'_>;
+    fn work_log_repo(&self) -> Self::WorkLogRepo<'_>;
 }

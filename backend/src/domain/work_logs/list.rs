@@ -1,6 +1,8 @@
 use crate::domain::cases::entity::CaseID;
+use crate::domain::uow::common::Query;
 use crate::domain::work_logs::entity::WorkLog;
-use crate::domain::work_logs::repository::WorkLogsRepository;
+use crate::domain::work_logs::error::WorkLogError;
+use crate::domain::work_logs::repository::WorkLogsReadRepository;
 
 #[derive(Debug)]
 pub struct Request {
@@ -10,16 +12,9 @@ pub struct Request {
     pub include_settled: bool,
 }
 
-#[derive(Debug)]
-pub enum Error {
-    Unknown(String),
-}
-
-pub async fn execute(
-    repo: &mut impl WorkLogsRepository,
-    req: Request,
-) -> Result<Vec<WorkLog>, Error> {
-    let res = repo
+pub async fn execute(query: &impl Query, req: Request) -> Result<Vec<WorkLog>, WorkLogError> {
+    let res = query
+        .work_log_repo()
         .list(
             &req.case_id,
             req.started_at,
@@ -27,7 +22,7 @@ pub async fn execute(
             req.include_settled,
         )
         .await
-        .map_err(|e| Error::Unknown(e.to_string()))?;
+        .map_err(|e| WorkLogError::Unknown(e.to_string()))?;
 
     Ok(res)
 }

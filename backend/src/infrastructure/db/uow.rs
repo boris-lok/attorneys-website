@@ -102,12 +102,17 @@ impl PostgresQuery {
 impl Query for PostgresQuery {
     type ResourceRepo<'a> = PostgresRepo<'a, ResourceRepo>;
     type CaseRepo<'a> = PostgresRepo<'a, CaseRepo>;
+    type WorkLogRepo<'a> = PostgresRepo<'a, WorkLogRepo>;
 
     fn resource_repo(&self) -> Self::ResourceRepo<'_> {
         PostgresRepo::from_pool(&self.pool)
     }
 
     fn case_repo(&self) -> Self::CaseRepo<'_> {
+        PostgresRepo::from_pool(&self.pool)
+    }
+
+    fn work_log_repo(&self) -> Self::WorkLogRepo<'_> {
         PostgresRepo::from_pool(&self.pool)
     }
 }

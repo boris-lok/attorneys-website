@@ -1,5 +1,5 @@
 use crate::domain::users::entity::{User, UserID};
-use crate::domain::users::repository::UserRepository;
+use crate::domain::users::repository::{UserReadRepository, UserRepository, UserWriteRepository};
 use crate::infrastructure::db::connection::{PostgresRepo, UserRepo};
 use secrecy::{ExposeSecret, SecretBox};
 use uuid::Uuid;
@@ -39,7 +39,7 @@ const UPDATE_PASSWORD_QUERY: &str = r"
 pub type PostgresUserRepo<'tx> = PostgresRepo<'tx, UserRepo>;
 
 #[async_trait::async_trait]
-impl<'tx> UserRepository for PostgresUserRepo<'tx> {
+impl<'tx> UserWriteRepository for PostgresUserRepo<'tx> {
     async fn create(
         &mut self,
         username: String,
@@ -57,15 +57,6 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
         Ok(id)
     }
 
-    async fn list(&mut self) -> anyhow::Result<Vec<User>> {
-        let rows = sqlx::query_as::<_, UserFromSQLx>(LIST_USERS_QUERY)
-            .fetch_all(self.conn().await?)
-            .await
-            .map(|rows| rows.into_iter().map(User::from).collect::<Vec<_>>())?;
-
-        Ok(rows)
-    }
-
     async fn delete(&mut self, id: &UserID) -> anyhow::Result<()> {
         sqlx::query(DELETE_USER_QUERY)
             .bind(Uuid::from(id))
@@ -73,6 +64,32 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
             .await?;
 
         Ok(())
+    }
+
+    async fn change_password(
+        &mut self,
+        id: &UserID,
+        password_hash: SecretBox<String>,
+    ) -> anyhow::Result<()> {
+        sqlx::query(UPDATE_PASSWORD_QUERY)
+            .bind(password_hash.expose_secret().to_string())
+            .bind(Uuid::from(id))
+            .execute(self.conn().await?)
+            .await?;
+
+        Ok(())
+    }
+}
+
+#[async_trait::async_trait]
+impl<'tx> UserReadRepository for PostgresUserRepo<'tx> {
+    async fn list(&mut self) -> anyhow::Result<Vec<User>> {
+        let rows = sqlx::query_as::<_, UserFromSQLx>(LIST_USERS_QUERY)
+            .fetch_all(self.conn().await?)
+            .await
+            .map(|rows| rows.into_iter().map(User::from).collect::<Vec<_>>())?;
+
+        Ok(rows)
     }
 
     async fn get_user_nickname(&mut self, id: &UserID) -> anyhow::Result<String> {
@@ -100,21 +117,9 @@ impl<'tx> UserRepository for PostgresUserRepo<'tx> {
 
         Ok(res)
     }
-
-    async fn change_password(
-        &mut self,
-        id: &UserID,
-        password_hash: SecretBox<String>,
-    ) -> anyhow::Result<()> {
-        sqlx::query(UPDATE_PASSWORD_QUERY)
-            .bind(password_hash.expose_secret().to_string())
-            .bind(Uuid::from(id))
-            .execute(self.conn().await?)
-            .await?;
-
-        Ok(())
-    }
 }
+
+impl<'tx> UserRepository for PostgresUserRepo<'tx> {}
 
 #[derive(sqlx::FromRow, Debug)]
 pub struct UserFromSQLx {

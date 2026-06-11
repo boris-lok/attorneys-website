@@ -3,7 +3,10 @@ use crate::domain::cases::repository::{CaseReadRepository, CaseRepository};
 use crate::domain::resources::repository::{
     ContentWriteRepository, ResourceReadRepository, ResourceRepository,
 };
-use crate::domain::users::repository::{AvatarRepository, UserRepository, UserRoleRepository};
+use crate::domain::users::repository::{
+    AvatarWriteRepository, UserReadRepository, UserRepository, UserRoleReadRepository,
+    UserRoleRepository,
+};
 use crate::domain::work_log_mapping::repository::WorkLogMappingRepository;
 use crate::domain::work_logs::repository::{WorkLogsReadRepository, WorkLogsRepository};
 
@@ -21,7 +24,7 @@ pub trait UnitOfWork {
     type UserRoleRepo<'a>: UserRoleRepository
     where
         Self: 'a;
-    type AvatarRepo<'a>: AvatarRepository
+    type AvatarRepo<'a>: AvatarWriteRepository
     where
         Self: 'a;
     type ArticleViewRepo<'a>: ArticleViewWriteRepository
@@ -71,10 +74,18 @@ pub trait Query {
     type WorkLogRepo<'a>: WorkLogsReadRepository
     where
         Self: 'a;
+    type UserRepo<'a>: UserReadRepository
+    where
+        Self: 'a;
+    type UserRoleRepo<'a>: UserRoleReadRepository
+    where
+        Self: 'a;
 
     fn resource_repo(&self) -> Self::ResourceRepo<'_>;
     fn case_repo(&self) -> Self::CaseRepo<'_>;
     fn work_log_repo(&self) -> Self::WorkLogRepo<'_>;
+    fn user_repo(&self) -> Self::UserRepo<'_>;
+    fn user_role_repo(&self) -> Self::UserRoleRepo<'_>;
 }
 
 #[macro_export]

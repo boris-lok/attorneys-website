@@ -1,6 +1,6 @@
 use crate::domain::uow::common::{UnitOfWork, UnitOfWorkFactory};
 use crate::domain::users::entity::UserID;
-use crate::domain::users::repository::{UserRepository, UserRoleRepository};
+use crate::domain::users::repository::{UserRoleWriteRepository, UserWriteRepository};
 use crate::impl_uow;
 use secrecy::SecretBox;
 

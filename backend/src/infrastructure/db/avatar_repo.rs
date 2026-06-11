@@ -1,6 +1,6 @@
 use crate::domain::resources::entity::ResourceID;
 use crate::domain::users::entity::AvatarJson;
-use crate::domain::users::repository::AvatarRepository;
+use crate::domain::users::repository::AvatarWriteRepository;
 use crate::infrastructure::db::connection::{AvatarRepo, PostgresRepo};
 
 const CREATE_AVATAR_QUERY: &str = r"
@@ -10,7 +10,7 @@ const CREATE_AVATAR_QUERY: &str = r"
 type PostgresAvatarRepo<'tx> = PostgresRepo<'tx, AvatarRepo>;
 
 #[async_trait::async_trait]
-impl<'tx> AvatarRepository for PostgresAvatarRepo<'tx> {
+impl<'tx> AvatarWriteRepository for PostgresAvatarRepo<'tx> {
     async fn create(&mut self, id: &ResourceID, json: AvatarJson) -> anyhow::Result<()> {
         sqlx::query(CREATE_AVATAR_QUERY)
             .bind(id.as_str())

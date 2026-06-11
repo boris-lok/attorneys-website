@@ -1,5 +1,5 @@
 use crate::domain::users::entity::UserID;
-use crate::domain::users::repository::UserRepository;
+use crate::domain::users::repository::UserReadRepository;
 use anyhow::{anyhow, Context};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use secrecy::{ExposeSecret, SecretBox};
@@ -15,7 +15,7 @@ pub enum Error {
 }
 
 pub async fn validate_credentials(
-    repo: &mut impl UserRepository,
+    repo: &mut impl UserReadRepository,
     credentials: Credentials,
 ) -> Result<UserID, Error> {
     let mut id = None;

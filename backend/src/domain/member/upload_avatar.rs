@@ -1,7 +1,7 @@
 use crate::domain::resources::entity::ResourceID;
 use crate::domain::uow::common::UnitOfWork;
 use crate::domain::users::entity::{AvatarData, AvatarJson};
-use crate::domain::users::repository::AvatarRepository;
+use crate::domain::users::repository::AvatarWriteRepository;
 use crate::utils::image::{IImage, Size};
 use std::sync::Arc;
 use uuid::Uuid;

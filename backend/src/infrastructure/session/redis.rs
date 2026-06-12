@@ -22,10 +22,15 @@ impl SessionStore for RedisSessionStore {
         Ok(())
     }
 
-    async fn create_session(&self, user_id: &UserID, exp: i64) -> anyhow::Result<()> {
+    async fn create_session(
+        &self,
+        user_id: &UserID,
+        exp: i64,
+        expired_sec: u64,
+    ) -> anyhow::Result<()> {
         let mut c = self.redis.get_connection()?;
 
-        c.set::<_, _, ()>(user_id.to_string(), exp)?;
+        c.set_ex::<_, _, ()>(user_id.to_string(), exp, expired_sec)?;
 
         Ok(())
     }

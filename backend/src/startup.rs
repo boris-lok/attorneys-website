@@ -24,6 +24,7 @@ pub struct AppState {
     pub jwt_decoding_key: Arc<DecodingKey>,
     pub session_store: Arc<dyn SessionStore + Send + Sync>,
     pub environment: Environment,
+    pub jwt_expire_duration: time::Duration,
 }
 
 impl AppState {
@@ -78,6 +79,7 @@ pub async fn run(config: AppConfig, listener: TcpListener) -> Result<(), std::io
             crate::infrastructure::session::redis::RedisSessionStore::new(redis_client),
         ),
         environment: config.environment,
+        jwt_expire_duration: time::Duration::minutes(30 * 24 * 60),
     };
     let image_util = ImageUtil {};
 

@@ -40,6 +40,7 @@ pub async fn login(
         state.session_store.clone(),
         state.jwt_encoding_key.clone(),
         credentials,
+        state.jwt_expire_duration,
     )
     .await
     {
@@ -52,7 +53,8 @@ pub async fn login(
                     SameSite::Strict
                 } else {
                     SameSite::Lax
-                });
+                })
+                .max_age(state.jwt_expire_duration);
 
             let jar = jar.add(ct);
 

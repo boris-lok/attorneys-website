@@ -12,19 +12,18 @@ pub enum Error {
     Unknown(String),
 }
 
-const EXPIRATION_TIME: chrono::Duration = chrono::Duration::days(30);
-
 pub async fn execute(
     query: &impl Query,
     session: Arc<dyn SessionStore + Send + Sync>,
     jwt_encoding_key: Arc<EncodingKey>,
     creds: Credentials,
+    jwt_expire_duration: time::Duration,
 ) -> Result<String, Error> {
     let id = validate_credentials(&mut query.user_repo(), creds)
         .await
         .map_err(|_| Error::InvalidCredentials)?;
 
-    let exp = chrono::Utc::now() + EXPIRATION_TIME;
+    let exp = time::OffsetDateTime::now_utc() + jwt_expire_duration;
 
     let roles = query
         .user_role_repo()
@@ -39,7 +38,7 @@ pub async fn execute(
 
     let claims = Claims {
         sub: id.clone().to_string(),
-        exp: exp.timestamp() as usize,
+        exp: exp.unix_timestamp() as usize,
         roles,
         nickname,
     };
@@ -48,7 +47,11 @@ pub async fn execute(
         .map_err(|_| Error::CreateJWTFailed)?;
 
     session
-        .create_session(&id, exp.timestamp())
+        .create_session(
+            &id,
+            exp.unix_timestamp(),
+            jwt_expire_duration.whole_seconds() as u64,
+        )
         .await
         .map_err(|e| Error::Unknown(e.to_string()))?;
 

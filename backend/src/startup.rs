@@ -1,5 +1,5 @@
 use crate::api::routes::build_router;
-use crate::configuration::{DatabaseSettings, Settings};
+use crate::configuration::{AppConfig, DatabaseSettings, Environment};
 use crate::domain::session::store::SessionStore;
 use crate::domain::uow::article_view::ArticleViewUoW;
 use crate::domain::uow::case::CaseUoW;
@@ -23,6 +23,7 @@ pub struct AppState {
     pub jwt_encoding_key: Arc<EncodingKey>,
     pub jwt_decoding_key: Arc<DecodingKey>,
     pub session_store: Arc<dyn SessionStore + Send + Sync>,
+    pub environment: Environment,
 }
 
 impl AppState {
@@ -47,25 +48,36 @@ impl AppState {
     }
 }
 
-pub async fn run(config: Settings, listener: TcpListener) -> Result<(), std::io::Error> {
-    let redis_client =
-        redis::Client::open(config.redis_uri.as_str()).expect("Failed to connect the redis server");
+pub async fn run(config: AppConfig, listener: TcpListener) -> Result<(), std::io::Error> {
+    let redis_client = redis::Client::open(config.settings.redis_uri.as_str())
+        .expect("Failed to connect the redis server");
 
     let jwt_encoding_key = Arc::new(EncodingKey::from_secret(
-        config.application.jwt_secret.expose_secret().as_bytes(),
+        config
+            .settings
+            .application
+            .jwt_secret
+            .expose_secret()
+            .as_bytes(),
     ));
     let jwt_decoding_key = Arc::new(DecodingKey::from_secret(
-        config.application.jwt_secret.expose_secret().as_bytes(),
+        config
+            .settings
+            .application
+            .jwt_secret
+            .expose_secret()
+            .as_bytes(),
     ));
 
     let state = AppState {
-        pool: get_database_connection(&config.database).await,
-        upload_folder: config.application.upload_folder.to_string(),
+        pool: get_database_connection(&config.settings.database).await,
+        upload_folder: config.settings.application.upload_folder.to_string(),
         jwt_decoding_key,
         jwt_encoding_key,
         session_store: Arc::new(
             crate::infrastructure::session::redis::RedisSessionStore::new(redis_client),
         ),
+        environment: config.environment,
     };
     let image_util = ImageUtil {};
 

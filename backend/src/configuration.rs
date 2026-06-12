@@ -40,6 +40,7 @@ impl DatabaseSettings {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum Environment {
     Local,
     Production,
@@ -51,6 +52,10 @@ impl Environment {
             Environment::Local => "local",
             Environment::Production => "production",
         }
+    }
+
+    pub fn is_production(&self) -> bool {
+        matches!(self, Environment::Production)
     }
 }
 
@@ -77,7 +82,13 @@ pub struct Application {
     pub jwt_secret: SecretBox<String>,
 }
 
-pub fn get_configuration() -> Result<Settings, config::ConfigError> {
+#[derive(Debug)]
+pub struct AppConfig {
+    pub settings: Settings,
+    pub environment: Environment,
+}
+
+pub fn get_configuration() -> Result<AppConfig, config::ConfigError> {
     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
     let configuration_directory = base_path.join("src/configuration");
 
@@ -98,5 +109,8 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         .add_source(config::Environment::with_prefix("APP").prefix_separator("__"))
         .build()?;
 
-    settings.try_deserialize::<Settings>()
+    Ok(AppConfig {
+        settings: settings.try_deserialize::<Settings>()?,
+        environment,
+    })
 }

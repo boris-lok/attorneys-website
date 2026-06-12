@@ -9,12 +9,12 @@ async fn main() {
     let configuration = get_configuration().expect("Can't get configuration");
 
     let writer: Mutex<Box<dyn std::io::Write + Send>> =
-        match File::create(&configuration.application.log_file) {
+        match File::create(&configuration.settings.application.log_file) {
             Ok(file) => Mutex::new(Box::new(file)),
             Err(e) => {
                 eprintln!(
                     "Failed to create log file '{}': {e}. Falling back to stdout.",
-                    &configuration.application.log_file
+                    &configuration.settings.application.log_file
                 );
                 Mutex::new(Box::new(std::io::stdout()))
             }
@@ -25,7 +25,7 @@ async fn main() {
 
     let address = format!(
         "{}:{}",
-        &configuration.application.host, &configuration.application.port
+        &configuration.settings.application.host, &configuration.settings.application.port
     );
     let listener = TcpListener::bind(&address)
         .await

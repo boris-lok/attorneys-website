@@ -20,9 +20,9 @@ async fn main() -> anyhow::Result<()> {
     let configuration = get_configuration()?;
     let conn = PgPoolOptions::new()
         .acquire_timeout(std::time::Duration::from_secs(
-            configuration.database.timeout,
+            configuration.settings.database.timeout,
         ))
-        .connect_lazy_with(configuration.database.with_db());
+        .connect_lazy_with(configuration.settings.database.with_db());
 
     match cli.commands {
         Commands::List => list_users(conn).await?,

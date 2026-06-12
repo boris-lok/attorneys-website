@@ -5,18 +5,22 @@ use crate::domain::auth::login::Error;
 use crate::domain::users::authentication::Credentials;
 use crate::startup::AppState;
 use axum::extract::State;
-use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Json;
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use axum_extra::extract::{CookieJar, WithRejection};
 use secrecy::SecretBox;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
 pub struct LoginRequest {
     username: String,
     password: String,
+}
+
+#[derive(Serialize)]
+pub struct LoginResponse {
+    token: String,
 }
 
 #[axum_macros::debug_handler]
@@ -40,15 +44,19 @@ pub async fn login(
     .await
     {
         Ok(token) => {
-            let ct = Cookie::build(("token", token))
+            let ct = Cookie::build(("token", token.clone()))
                 .path("/")
                 .http_only(true)
-                .secure(false)
-                .same_site(SameSite::Lax);
+                .secure(state.environment.is_production())
+                .same_site(if state.environment.is_production() {
+                    SameSite::Strict
+                } else {
+                    SameSite::Lax
+                });
 
             let jar = jar.add(ct);
 
-            Ok((jar, StatusCode::OK))
+            Ok((jar, Json(LoginResponse { token })))
         }
         Err(Error::InvalidCredentials) => Err(ApiError::InvalidCredentials),
         Err(Error::CreateJWTFailed) => Err(ApiError::InternalServerError(

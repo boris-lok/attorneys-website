@@ -5,7 +5,7 @@ use backend::domain::users;
 use backend::domain::users::entity::UserID;
 use backend::get_configuration;
 use backend::infrastructure::db::connection::{PostgresRepo, RoleRepo, UserRepo};
-use backend::infrastructure::db::uow::PostgresUoWFactory;
+use backend::infrastructure::db::uow::{PostgresQuery, PostgresUoWFactory};
 use clap::Parser;
 use dialoguer::{theme::ColorfulTheme, MultiSelect, Password};
 use secrecy::SecretBox;
@@ -64,9 +64,9 @@ enum Commands {
 
 /// list all users from the database and print the result in the console
 async fn list_users(pool: sqlx::PgPool) -> anyhow::Result<()> {
-    let mut repo = PostgresRepo::<UserRepo>::from_pool(&pool);
+    let query = PostgresQuery::new(pool);
 
-    let res = users::list::execute(&mut repo)
+    let res = users::list::execute(&query)
         .await
         .map_err(|e| anyhow!("Failed to list users, got an error: {:?}", e))?;
 

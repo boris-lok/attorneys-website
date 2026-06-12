@@ -4,7 +4,14 @@ use crate::startup::AppState;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
 
-pub struct QueryExtractor(pub PostgresQuery);
+type AppQuery = PostgresQuery;
+// #[cfg(not(test))]
+// type AppQuery = PostgresQuery;
+//
+// #[cfg(test)]
+// type AppQuery = MockQuery;
+
+pub struct QueryExtractor(pub AppQuery);
 
 impl FromRequestParts<AppState> for QueryExtractor {
     type Rejection = ApiError;

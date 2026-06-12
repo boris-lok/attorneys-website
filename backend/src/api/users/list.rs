@@ -1,8 +1,6 @@
 use crate::api::api_error::ApiError;
+use crate::api::extractors::query::QueryExtractor;
 use crate::domain::users::list;
-use crate::infrastructure::db::connection::{PostgresRepo, UserRepo};
-use crate::startup::AppState;
-use axum::extract::State;
 use axum::Json;
 use serde::Serialize;
 
@@ -18,11 +16,9 @@ pub struct ListUsersResponse {
     users: Vec<SimpleUser>,
 }
 pub async fn list_users(
-    State(state): State<AppState>,
+    QueryExtractor(query): QueryExtractor,
 ) -> Result<Json<ListUsersResponse>, ApiError> {
-    let mut repo = PostgresRepo::<UserRepo>::from_pool(&state.pool);
-
-    match list::execute(&mut repo).await {
+    match list::execute(&query).await {
         Ok(users) => Ok(Json(ListUsersResponse {
             users: users
                 .into_iter()

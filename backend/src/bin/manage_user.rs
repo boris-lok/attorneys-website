@@ -1,10 +1,11 @@
 use anyhow::anyhow;
-use backend::domain::role::repository::RoleRepository;
+use backend::domain::role::repository::RoleReadRepository;
+use backend::domain::uow::common::Query;
 use backend::domain::uow::user::UserUoW;
 use backend::domain::users;
 use backend::domain::users::entity::UserID;
 use backend::get_configuration;
-use backend::infrastructure::db::connection::{PostgresRepo, RoleRepo, UserRepo};
+use backend::infrastructure::db::connection::{PostgresRepo, UserRepo};
 use backend::infrastructure::db::uow::{PostgresQuery, PostgresUoWFactory};
 use clap::Parser;
 use dialoguer::{theme::ColorfulTheme, MultiSelect, Password};
@@ -101,9 +102,9 @@ async fn delete_user(pool: sqlx::PgPool, id: String) -> anyhow::Result<()> {
 }
 
 async fn create_user(pool: sqlx::PgPool, username: String, nickname: String) -> anyhow::Result<()> {
-    let mut role_repo = PostgresRepo::<RoleRepo>::from_pool(&pool);
+    let query = PostgresQuery::new(pool.clone());
 
-    let roles = role_repo.list().await;
+    let roles = query.role_repo().list().await;
 
     let selection = roles
         .clone()
@@ -139,7 +140,7 @@ async fn create_user(pool: sqlx::PgPool, username: String, nickname: String) -> 
         .map(|index| roles[*index].id)
         .collect::<Vec<_>>();
 
-    let service = UserUoW::new(PostgresUoWFactory::new(pool));
+    let uow = UserUoW::new(PostgresUoWFactory::new(pool));
 
     let req = users::create::Request {
         username: username.clone(),
@@ -148,7 +149,7 @@ async fn create_user(pool: sqlx::PgPool, username: String, nickname: String) -> 
         role_ids: selected_roles,
     };
 
-    let user_id = users::create::execute(&service, req)
+    let user_id = users::create::execute(&uow, req)
         .await
         .map_err(|e| anyhow!("Failed to create user, got an error: {:?}", e))?;
 

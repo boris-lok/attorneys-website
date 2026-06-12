@@ -1,7 +1,7 @@
 use crate::domain::uow::common::{Query, UnitOfWork, UnitOfWorkFactory};
 use crate::infrastructure::db::connection::{
-    ArticleViewRepo, AvatarRepo, CaseRepo, ContentRepo, PostgresRepo, ResourceRepo, UserRepo,
-    UserRoleRepo, WorkLogMappingRepo, WorkLogRepo,
+    ArticleViewRepo, AvatarRepo, CaseRepo, ContentRepo, PostgresRepo, ResourceRepo, RoleRepo,
+    UserRepo, UserRoleRepo, WorkLogMappingRepo, WorkLogRepo,
 };
 use sqlx::PgPool;
 
@@ -42,6 +42,7 @@ impl UnitOfWork for PostgresUoW {
     type ResourceRepo<'a> = PostgresRepo<'a, ResourceRepo>;
     type CaseRepo<'a> = PostgresRepo<'a, CaseRepo>;
     type ArticleViewWriteRepo<'a> = PostgresRepo<'a, ArticleViewRepo>;
+    type RoleRepo<'a> = PostgresRepo<'a, RoleRepo>;
 
     fn work_log_repo(&mut self) -> Self::WorkLogRepo<'_> {
         PostgresRepo::with_tx(&mut self.tx)
@@ -83,6 +84,10 @@ impl UnitOfWork for PostgresUoW {
         PostgresRepo::with_tx(&mut self.tx)
     }
 
+    fn role_repo(&mut self) -> Self::RoleRepo<'_> {
+        PostgresRepo::with_tx(&mut self.tx)
+    }
+
     async fn commit(self) -> anyhow::Result<()> {
         self.tx.commit().await?;
         Ok(())
@@ -110,6 +115,7 @@ impl Query for PostgresQuery {
     type WorkLogRepo<'a> = PostgresRepo<'a, WorkLogRepo>;
     type UserRepo<'a> = PostgresRepo<'a, UserRepo>;
     type UserRoleRepo<'a> = PostgresRepo<'a, UserRoleRepo>;
+    type RoleRepo<'a> = PostgresRepo<'a, RoleRepo>;
 
     fn resource_repo(&self) -> Self::ResourceRepo<'_> {
         PostgresRepo::from_pool(&self.pool)
@@ -128,6 +134,10 @@ impl Query for PostgresQuery {
     }
 
     fn user_role_repo(&self) -> Self::UserRoleRepo<'_> {
+        PostgresRepo::from_pool(&self.pool)
+    }
+
+    fn role_repo(&self) -> Self::RoleRepo<'_> {
         PostgresRepo::from_pool(&self.pool)
     }
 }

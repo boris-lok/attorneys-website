@@ -1,5 +1,5 @@
 use crate::domain::role::entity::Role;
-use crate::domain::role::repository::RoleRepository;
+use crate::domain::role::repository::{RoleReadRepository, RoleRepository, RoleWriteRepository};
 use crate::infrastructure::db::connection::{PostgresRepo, RoleRepo};
 
 const LIST_ROLES: &str = r"
@@ -9,7 +9,7 @@ const LIST_ROLES: &str = r"
 type PostgresRoleRepo<'tx> = PostgresRepo<'tx, RoleRepo>;
 
 #[async_trait::async_trait]
-impl<'tx> RoleRepository for PostgresRoleRepo<'tx> {
+impl<'tx> RoleReadRepository for PostgresRoleRepo<'tx> {
     async fn list(&mut self) -> Vec<Role> {
         let conn = self.conn().await;
         if conn.is_err() {
@@ -25,6 +25,10 @@ impl<'tx> RoleRepository for PostgresRoleRepo<'tx> {
         }
     }
 }
+
+impl RoleWriteRepository for PostgresRoleRepo<'_> {}
+
+impl RoleRepository for PostgresRoleRepo<'_> {}
 
 #[derive(Debug, sqlx::FromRow)]
 struct RoleFromSQLx {

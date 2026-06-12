@@ -1,16 +1,18 @@
 use anyhow::anyhow;
 use backend::domain::role::repository::RoleReadRepository;
+use backend::domain::session::store::SessionStore;
 use backend::domain::uow::common::Query;
 use backend::domain::uow::user::UserUoW;
 use backend::domain::users;
 use backend::domain::users::entity::UserID;
 use backend::get_configuration;
-use backend::infrastructure::db::connection::{PostgresRepo, UserRepo};
 use backend::infrastructure::db::uow::{PostgresQuery, PostgresUoWFactory};
+use backend::infrastructure::session::redis::RedisSessionStore;
 use clap::Parser;
 use dialoguer::{theme::ColorfulTheme, MultiSelect, Password};
 use secrecy::SecretBox;
 use sqlx::postgres::PgPoolOptions;
+use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -25,10 +27,15 @@ async fn main() -> anyhow::Result<()> {
         ))
         .connect_lazy_with(configuration.settings.database.with_db());
 
+    let redis_client = redis::Client::open(configuration.settings.redis_uri.as_str())
+        .expect("Failed to connect the redis server");
+
+    let session_store = Arc::new(RedisSessionStore::new(redis_client.clone()));
+
     match cli.commands {
         Commands::List => list_users(conn).await?,
         Commands::Create { username, nickname } => create_user(conn, username, nickname).await?,
-        Commands::Delete { id } => delete_user(conn, id).await?,
+        Commands::Delete { id } => delete_user(conn, id, session_store).await?,
     }
 
     Ok(())
@@ -89,12 +96,16 @@ async fn list_users(pool: sqlx::PgPool) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn delete_user(pool: sqlx::PgPool, id: String) -> anyhow::Result<()> {
-    let mut repo = PostgresRepo::<UserRepo>::from_pool(&pool);
+async fn delete_user(
+    pool: sqlx::PgPool,
+    id: String,
+    session_store: Arc<dyn SessionStore + Send + Sync>,
+) -> anyhow::Result<()> {
+    let uow = UserUoW::new(PostgresUoWFactory::new(pool.clone()));
 
     let user_id = UserID::try_from(id).map_err(|_| anyhow!("Invalid user ID, must be a UUID"))?;
 
-    users::delete::execute(&mut repo, &user_id).await?;
+    users::delete::execute(&uow, session_store.clone(), &user_id).await?;
 
     println!("User deleted successfully");
 

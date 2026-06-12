@@ -1,9 +1,17 @@
+use crate::domain::session::store::SessionStore;
+use crate::domain::uow::common::UnitOfWorkFactory;
+use crate::domain::uow::user::UserUoW;
 use crate::domain::users::entity::UserID;
-use crate::domain::users::repository::UserWriteRepository;
+use std::sync::Arc;
 
-pub async fn execute(repo: &mut impl UserWriteRepository, user_id: &UserID) -> anyhow::Result<()> {
-    repo.delete(user_id).await?;
-    // TODO: clear the session.
+pub async fn execute<F: UnitOfWorkFactory>(
+    uow: &UserUoW<F>,
+    session: Arc<dyn SessionStore + Sync + Send>,
+    user_id: &UserID,
+) -> anyhow::Result<()> {
+    uow.delete(user_id).await?;
+
+    session.clear_user_sessions(user_id).await?;
 
     Ok(())
 }

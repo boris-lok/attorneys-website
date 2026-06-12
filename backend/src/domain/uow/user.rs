@@ -47,4 +47,12 @@ impl<F: UnitOfWorkFactory> UserUoW<F> {
 
         uow.commit().await
     }
+
+    pub async fn delete(&self, user_id: &UserID) -> anyhow::Result<()> {
+        let mut uow = self.factory.begin().await?;
+
+        uow.user_repo().delete(user_id).await?;
+
+        uow.commit().await
+    }
 }

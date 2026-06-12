@@ -48,8 +48,8 @@ pub async fn execute(
 
     session
         .create_session(
-            &id,
-            exp.unix_timestamp(),
+            &id.to_string(),
+            &format!("{}", exp.unix_timestamp()),
             jwt_expire_duration.whole_seconds() as u64,
         )
         .await

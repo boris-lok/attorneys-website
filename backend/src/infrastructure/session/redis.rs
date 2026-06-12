@@ -1,6 +1,6 @@
 use crate::domain::session::store::SessionStore;
 use crate::domain::users::entity::UserID;
-use redis::Commands;
+use redis::TypedCommands;
 
 pub struct RedisSessionStore {
     redis: redis::Client,
@@ -17,21 +17,24 @@ impl SessionStore for RedisSessionStore {
     async fn clear_user_sessions(&self, user_id: &UserID) -> anyhow::Result<()> {
         let mut c = self.redis.get_connection()?;
 
-        c.del::<_, ()>(user_id.to_string())?;
+        c.del(user_id.to_string())?;
 
         Ok(())
     }
 
-    async fn create_session(
-        &self,
-        user_id: &UserID,
-        exp: i64,
-        expired_sec: u64,
-    ) -> anyhow::Result<()> {
+    async fn create_session(&self, key: &str, value: &str, expired_sec: u64) -> anyhow::Result<()> {
         let mut c = self.redis.get_connection()?;
 
-        c.set_ex::<_, _, ()>(user_id.to_string(), exp, expired_sec)?;
+        c.set_ex(key, value, expired_sec)?;
 
         Ok(())
+    }
+
+    async fn get_session(&self, key: &str) -> anyhow::Result<Option<String>> {
+        let mut c = self.redis.get_connection()?;
+
+        let res = c.get(key)?;
+
+        Ok(res)
     }
 }

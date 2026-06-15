@@ -3,7 +3,7 @@ import type {
     APIResponse,
     CaseData,
     CreateCaseRequest,
-    UpdateCaseRequest
+    UpdateCaseRequest,
 } from '$lib/types'
 import { ADMIN_URL, TIMEOUT } from '$lib/constant'
 
@@ -15,10 +15,10 @@ async function save(
             method: 'id' in req ? 'PUT' : 'POST',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(req),
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
 
         if (!resp.ok) {
@@ -48,9 +48,9 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
             method: 'GET',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
 
         const json = await resp.json()
@@ -80,7 +80,7 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
                         endedAt: new Date(e.ended_at),
                         pendingLogs: e.pending_logs,
                         billingCycle: e.billing_cycle,
-                        settledAt: e.settled_at ? new Date(e.settled_at) : null
+                        settledAt: e.settled_at ? new Date(e.settled_at) : null,
                     }
                 }
             )
@@ -98,9 +98,9 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
             method: 'DELETE',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
         if (!resp.ok) {
             return { error: true, message: `Error: ${resp.status}` }
@@ -117,12 +117,12 @@ async function settle(id: string): Promise<APIError | APIResponse<void>> {
             method: 'PUT',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                case_id: id
+                case_id: id,
             }),
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
         if (!resp.ok) {
             return { error: true, message: `Error: ${resp.status}` }
@@ -137,5 +137,5 @@ export const CaseServices = {
     save: save,
     list: list,
     delete: del,
-    settle: settle
+    settle: settle,
 }

@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode'
 export type PayLoad = {
     sub: string
     exp: number
-    roles: string[]
+    roles: App.Role[]
     nickname: string
 }
 

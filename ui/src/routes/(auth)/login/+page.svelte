@@ -2,60 +2,78 @@
     import Input from '$lib/components/common/Input.svelte'
     import { UserService } from '$lib/services/user.service'
     import { goto } from '$app/navigation'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import LoadingButton from '$lib/components/LoadingButton.svelte'
 
     let isLoading = $state(false)
     let username = $state('')
     let password = $state('')
+    let errorMsg = $state('')
 
     function validate() {
-        if (username === '' || password === '') {
+        if (username.trim() === '') {
+            errorMsg = 'Username is required'
             return false
         }
+
+        if (password === '') {
+            errorMsg = 'Password is required'
+            return false
+        }
+
         return true
     }
 
     async function onSubmitClicked() {
+        // reset the error message
+        errorMsg = ''
+
+        // validate the input fields
         if (!validate()) {
             return
         }
 
+        // Start an API call
         isLoading = true
-        const resp = await UserService.login({ username, password })
+        try {
+            const resp = await UserService.login({ username, password })
 
-        if (resp.error) {
-            console.error(`login failed: ${resp}`)
+            if (resp.error) {
+                errorMsg = 'Invalid credentials'
+                return
+            }
+
+            await goto(`/b/dashboard`)
+        } finally {
             isLoading = false
-            return
         }
-
-        await goto(`/b/dashboard`)
     }
 </script>
 
-{#if isLoading}
-    <Loading />
-{:else}
-    <div class="mx-auto mt-[10%] mb-4 w-11/12 rounded bg-white px-8 pt-6 pb-8 shadow-md md:w-96">
-        <Input
-            label="Username"
-            name="username"
-            type="text"
-            bind:value={username}
-        />
-        <Input
-            label="Password"
-            name="password"
-            type="password"
-            bind:value={password}
-        />
-        <div class="flex items-center justify-center">
-            <button
-                class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none disabled:bg-gray-500"
-                disabled={isLoading}
-                onclick={onSubmitClicked}
-            >Login
-            </button>
-        </div>
+<div class="mx-auto mt-[10%] mb-4 w-11/12 rounded bg-white px-8 pt-6 pb-8 shadow-md md:w-96">
+    {#if errorMsg}
+        <p class="mt-2 mb-4 text-center text-red-500">{errorMsg}</p>
+    {/if}
+
+    <Input
+        label="Username"
+        name="username"
+        type="text"
+        bind:value={username}
+    />
+    <Input
+        label="Password"
+        name="password"
+        type="password"
+        bind:value={password}
+    />
+    <div class="flex items-center justify-center">
+        <LoadingButton
+            isLoading={isLoading}
+            onclick={onSubmitClicked}
+            loadingText="Logging in..."
+        >
+            <p>Login</p>
+        </LoadingButton>
+
     </div>
-{/if}
+</div>

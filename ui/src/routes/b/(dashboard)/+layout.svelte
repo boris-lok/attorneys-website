@@ -22,7 +22,7 @@
                     console.error(resp.message)
                 }
                 Cookies.remove('token')
-                await goto('/admin/login')
+                await goto('/login')
             },
         },
     ]

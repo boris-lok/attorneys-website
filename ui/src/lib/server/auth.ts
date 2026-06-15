@@ -9,7 +9,9 @@ export function requireAuth(locals: App.Locals) {
 // "user must have AT LEAST ONE of these roles"
 export function requireAnyRole(locals: App.Locals, ...roles: App.Role[]) {
     const user = requireAuth(locals)
-    const hasRole = roles.some((r) => user.roles.includes(r))
+    const hasRole = roles.some((r) =>
+        user.roles.map((e) => e.toLowerCase()).includes(r.toLowerCase())
+    )
     if (!hasRole) error(403, 'Forbidden')
     return user
 }
@@ -17,12 +19,14 @@ export function requireAnyRole(locals: App.Locals, ...roles: App.Role[]) {
 // "user must have ALL of these roles"
 export function requireAllRoles(locals: App.Locals, ...roles: App.Role[]) {
     const user = requireAuth(locals)
-    const hasAll = roles.every((r) => user.roles.includes(r))
+    const hasAll = roles.every((r) =>
+        user.roles.map((e) => e.toLowerCase()).includes(r.toLowerCase())
+    )
     if (!hasAll) error(403, 'Forbidden')
     return user
 }
 
 // handy boolean for UI logic
 export function hasRole(user: NonNullable<App.Locals['user']>, ...roles: App.Role[]) {
-    return roles.some((r) => user.roles.includes(r))
+    return roles.some((r) => user.roles.map((e) => e.toLowerCase()).includes(r.toLowerCase()))
 }

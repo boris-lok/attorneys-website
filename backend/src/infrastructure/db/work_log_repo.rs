@@ -29,7 +29,7 @@ const UPDATE_WORK_LOG_QUERY: &str = r"
   UPDATE work_logs SET
     started_at = coalesce($1, started_at),
     ended_at = coalesce($2, ended_at),
-    description = coalesce($3, description),
+    description = coalesce($3, description)
   WHERE id = $4;
 ";
 

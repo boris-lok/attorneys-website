@@ -21,7 +21,7 @@
     ></textarea>
 </div>
 
-<style>
+<style lang="postcss">
     /* use reference to import global css for using *@apply* */
     @reference '../../../app.css';
 

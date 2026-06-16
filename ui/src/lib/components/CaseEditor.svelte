@@ -4,7 +4,7 @@
     import { CaseServices } from '$lib/services/case.service'
     import Loading from '$lib/components/common/Loading.svelte'
     import type { CaseData } from '$lib/types'
-    import DateTimePicker from '$lib/components/DateTimePicker.svelte'
+    import DateTimePicker from '$lib/components/common/DateTimePicker.svelte'
 
     type Props = {
         id: string

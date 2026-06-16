@@ -1,5 +1,5 @@
 <script lang="ts">
-    import NavigateBar from '$lib/components/sidebar/NavigateBar.svelte'
+    import NavigateBar from '$lib/components/layout/NavigateBar.svelte'
     import type { NavigationItem } from '$lib/types'
     import { UserService } from '$lib/services/user.service'
     import { goto } from '$app/navigation'

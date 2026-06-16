@@ -2,7 +2,7 @@
     import Input from '$lib/components/common/Input.svelte'
     import { UserService } from '$lib/services/user.service'
     import { goto } from '$app/navigation'
-    import LoadingButton from '$lib/components/LoadingButton.svelte'
+    import LoadingButton from '$lib/components/common/LoadingButton.svelte'
 
     let isLoading = $state(false)
     let username = $state('')

@@ -4,7 +4,7 @@
     import type { CategoryData, Language, SimpleArticle } from '$lib/types'
     import { ArticleServices } from '$lib/services/article.service'
     import CategorySelector from '$lib/components/CategorySelector.svelte'
-    import PaginationComponent from '$lib/components/PaginationComponent.svelte'
+    import PaginationComponent from '$lib/components/common/PaginationComponent.svelte'
 
     let isLoading = $state(false)
     let articles: SimpleArticle[] = $state([])

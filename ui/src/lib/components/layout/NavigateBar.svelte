@@ -1,5 +1,5 @@
 <script lang="ts">
-    import NavigateItem from '$lib/components/sidebar/NavigateItem.svelte'
+    import NavigateItem from '$lib/components/layout/NavigateItem.svelte'
     import IconifyIcon from '@iconify/svelte'
     import logo from '$lib/assets/logo.webp'
     import smLogo from '$lib/assets/logo.sm.webp'

@@ -1,8 +1,8 @@
 <script lang="ts">
-    import NavigateBar from '$lib/components/sidebar/NavigateBar.svelte'
-    import Background from '$lib/components/Background.svelte'
+    import NavigateBar from '$lib/components/layout/NavigateBar.svelte'
+    import Background from '$lib/components/layout/Background.svelte'
     import type { NavigationItem } from '$lib/types'
-    import Footer from '$lib/components/Footer.svelte'
+    import Footer from '$lib/components/layout/Footer.svelte'
 
     let { children } = $props()
 

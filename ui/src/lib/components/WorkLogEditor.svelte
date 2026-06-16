@@ -1,5 +1,5 @@
 <script lang="ts">
-    import DateTimePicker from '$lib/components/DateTimePicker.svelte'
+    import DateTimePicker from '$lib/components/common/DateTimePicker.svelte'
     import { type SimpleUser, UserService } from '$lib/services/user.service'
     import {
         type Collaborator,

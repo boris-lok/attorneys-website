@@ -40,7 +40,35 @@ async function save(
     }
 }
 
-async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
+type CaseAPIResponse = {
+    id: string
+    name: string
+    used_minutes: number
+    estimated_minutes: number
+    billing_cycle: number
+    created_at: string
+    started_at: string
+    ended_at: string
+    settled_at: string | null
+    pending_logs: number
+}
+
+function mapCase(e: CaseAPIResponse): CaseData {
+    return {
+        id: e.id,
+        name: e.name,
+        usedMinutes: e.used_minutes,
+        estimatedMinutes: e.estimated_minutes,
+        createdAt: new Date(e.created_at),
+        startedAt: new Date(e.started_at),
+        endedAt: new Date(e.ended_at),
+        pendingLogs: e.pending_logs,
+        billingCycle: e.billing_cycle,
+        settledAt: e.settled_at ? new Date(e.settled_at) : null,
+    }
+}
+
+async function list(fetch: FetchFn): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
     let url = `${ADMIN_URL}/cases`
 
     try {
@@ -53,38 +81,12 @@ async function list(): Promise<APIError | APIResponse<{ cases: CaseData[] }>> {
             signal: AbortSignal.timeout(TIMEOUT),
         })
 
-        const json = await resp.json()
-        let cases = []
-
-        if ('cases' in json && json.cases.length > 0) {
-            cases = json.cases.map(
-                (e: {
-                    id: string
-                    name: string
-                    used_minutes: number
-                    estimated_minutes: number
-                    billing_cycle: number
-                    created_at: string
-                    started_at: string
-                    ended_at: string
-                    settled_at: string | null
-                    pending_logs: number
-                }) => {
-                    return {
-                        id: e.id,
-                        name: e.name,
-                        usedMinutes: e.used_minutes,
-                        estimatedMinutes: e.estimated_minutes,
-                        createdAt: new Date(e.created_at),
-                        startedAt: new Date(e.started_at),
-                        endedAt: new Date(e.ended_at),
-                        pendingLogs: e.pending_logs,
-                        billingCycle: e.billing_cycle,
-                        settledAt: e.settled_at ? new Date(e.settled_at) : null,
-                    }
-                }
-            )
+        if (!resp.ok) {
+            return { error: true, message: `Error: ${resp.status}` }
         }
+
+        const json = await resp.json()
+        const cases = (json.cases ?? []).map(mapCase)
 
         return { error: false, cases: cases }
     } catch (error) {
@@ -138,4 +140,11 @@ export const CaseServices = {
     list: list,
     delete: del,
     settle: settle,
+}
+
+type FetchFn = typeof fetch
+export function createCaseServices(fetch: FetchFn) {
+    return {
+        list: () => list(fetch),
+    }
 }

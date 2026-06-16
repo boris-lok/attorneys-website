@@ -1,10 +1,10 @@
 <script lang="ts">
     import type { Language, SimpleMember } from '$lib/types'
     import { MemberServices } from '$lib/services/member.service'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Icon from '@iconify/svelte'
-    import Image from '$lib/components/common/Image.svelte'
+    import Image from '$lib/components/shared/Image.svelte'
 
     type InputProps = {
         isAdmin: boolean

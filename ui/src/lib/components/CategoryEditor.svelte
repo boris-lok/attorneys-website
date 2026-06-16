@@ -1,8 +1,8 @@
 <script lang="ts">
     import { CategoryService } from '$lib/services/category.service'
-    import Input from '$lib/components/common/Input.svelte'
+    import Input from '$lib/components/shared/Input.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
 
     type EditorProps = {
         id?: string

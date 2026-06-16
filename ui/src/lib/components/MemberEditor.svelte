@@ -1,11 +1,11 @@
 <script lang="ts">
-    import UploadImage from '$lib/components/common/UploadImage.svelte'
+    import UploadImage from '$lib/components/shared/UploadImage.svelte'
     import type { ImageData } from '$lib/types'
-    import Input from '$lib/components/common/Input.svelte'
-    import Textarea from '$lib/components/common/Textarea.svelte'
+    import Input from '$lib/components/shared/Input.svelte'
+    import Textarea from '$lib/components/shared/Textarea.svelte'
     import Markdown from '@magidoc/plugin-svelte-marked'
     import { MemberServices } from '$lib/services/member.service'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
 
     type InputProps = {
         id?: string

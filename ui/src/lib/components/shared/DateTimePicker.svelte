@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Input from '$lib/components/common/Input.svelte'
+    import Input from '$lib/components/shared/Input.svelte'
 
     type Props = {
         date?: Date

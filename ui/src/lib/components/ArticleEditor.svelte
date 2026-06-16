@@ -1,9 +1,9 @@
 <script lang="ts">
-    import Textarea from '$lib/components/common/Textarea.svelte'
+    import Textarea from '$lib/components/shared/Textarea.svelte'
     import Markdown from '@magidoc/plugin-svelte-marked'
-    import Input from '$lib/components/common/Input.svelte'
+    import Input from '$lib/components/shared/Input.svelte'
     import { ArticleServices } from '$lib/services/article.service'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
     import type { CategoryData } from '$lib/types'
 
     type EditorProps = {

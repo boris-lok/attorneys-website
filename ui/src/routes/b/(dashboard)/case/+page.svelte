@@ -2,7 +2,7 @@
     import type { CaseData } from '$lib/types'
     import Case from '$lib/components/Case.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
     import CaseEditor from '$lib/components/CaseEditor.svelte'
     import type { PageProps } from './$types'
 

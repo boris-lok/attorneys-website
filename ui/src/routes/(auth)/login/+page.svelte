@@ -1,8 +1,8 @@
 <script lang="ts">
-    import Input from '$lib/components/common/Input.svelte'
+    import Input from '$lib/components/shared/Input.svelte'
     import { UserService } from '$lib/services/user.service'
     import { goto } from '$app/navigation'
-    import LoadingButton from '$lib/components/common/LoadingButton.svelte'
+    import LoadingButton from '$lib/components/shared/LoadingButton.svelte'
 
     let isLoading = $state(false)
     let username = $state('')

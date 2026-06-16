@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { ImageData } from '$lib/types'
     import { iterate } from 'iterare'
-    import Image from '$lib/components/common/Image.svelte'
+    import Image from '$lib/components/shared/Image.svelte'
     import IconifyIcon from '@iconify/svelte'
 
     type InputProps = {

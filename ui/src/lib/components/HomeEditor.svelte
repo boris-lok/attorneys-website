@@ -1,8 +1,8 @@
 <script lang="ts">
-    import Textarea from '$lib/components/common/Textarea.svelte'
+    import Textarea from '$lib/components/shared/Textarea.svelte'
     import Markdown from '@magidoc/plugin-svelte-marked'
     import { HomeServices } from '$lib/services/home.service'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
 
     type EditorProps = {
         id?: string

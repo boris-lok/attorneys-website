@@ -1,14 +1,14 @@
 <script lang="ts">
-    import DateTimePicker from '$lib/components/common/DateTimePicker.svelte'
+    import DateTimePicker from '$lib/components/shared/DateTimePicker.svelte'
     import { type SimpleUser, UserService } from '$lib/services/user.service'
     import {
         type Collaborator,
         type WorkLog,
         WorkLogServices
     } from '$lib/services/work_log.service'
-    import Textarea from '$lib/components/common/Textarea.svelte'
+    import Textarea from '$lib/components/shared/Textarea.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
 
     type Props = {
         id?: string

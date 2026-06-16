@@ -1,9 +1,9 @@
 <script lang="ts">
-    import Textarea from '$lib/components/common/Textarea.svelte'
-    import Input from '$lib/components/common/Input.svelte'
+    import Textarea from '$lib/components/shared/Textarea.svelte'
+    import Input from '$lib/components/shared/Input.svelte'
     import { ServiceServices } from '$lib/services/service.service'
     import ServiceBox from '$lib/components/ServiceBox.svelte'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
 
     type EditorProps = {
         id?: string

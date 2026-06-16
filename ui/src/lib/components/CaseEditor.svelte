@@ -1,10 +1,10 @@
 <script lang="ts">
-    import Input from '$lib/components/common/Input.svelte'
+    import Input from '$lib/components/shared/Input.svelte'
     import IconifyIcon from '@iconify/svelte'
     import { CaseServices } from '$lib/services/case.service'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
     import type { CaseData } from '$lib/types'
-    import DateTimePicker from '$lib/components/common/DateTimePicker.svelte'
+    import DateTimePicker from '$lib/components/shared/DateTimePicker.svelte'
 
     type Props = {
         id: string

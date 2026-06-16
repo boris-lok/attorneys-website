@@ -1,10 +1,10 @@
 <script lang="ts">
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
     import ArticleCard from '$lib/components/ArticleCard.svelte'
     import type { CategoryData, Language, SimpleArticle } from '$lib/types'
     import { ArticleServices } from '$lib/services/article.service'
     import CategorySelector from '$lib/components/CategorySelector.svelte'
-    import PaginationComponent from '$lib/components/common/PaginationComponent.svelte'
+    import PaginationComponent from '$lib/components/shared/PaginationComponent.svelte'
 
     let isLoading = $state(false)
     let articles: SimpleArticle[] = $state([])

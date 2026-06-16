@@ -2,7 +2,7 @@
     import { ArticleServices } from '$lib/services/article.service'
     import Markdown from '@magidoc/plugin-svelte-marked'
     import IconifyIcon from '@iconify/svelte'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
 
     type InputProps = {
         id: string

@@ -2,7 +2,7 @@
     import { type PendingWorkLog, WorkLogServices } from '$lib/services/work_log.service'
     import { dateRangeFormatter, roundTo } from '$lib/utils'
     import IconifyIcon from '@iconify/svelte'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
 
     type Props = PendingWorkLog & {
         onDone?: (status: 'accepted' | 'rejected') => void

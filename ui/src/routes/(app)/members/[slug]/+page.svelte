@@ -3,10 +3,10 @@
     import { MemberServices } from '$lib/services/member.service'
     import type { ImageData } from '$lib/types'
     import Markdown from '@magidoc/plugin-svelte-marked'
-    import Image from '$lib/components/common/Image.svelte'
+    import Image from '$lib/components/shared/Image.svelte'
     import IconifyIcon from '@iconify/svelte'
     import { browser } from '$app/environment'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
 
     let { data }: PageProps = $props()
 

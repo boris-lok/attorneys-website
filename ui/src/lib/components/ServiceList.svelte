@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { ServiceData } from '$lib/types'
     import { ServiceServices } from '$lib/services/service.service'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
     import ServiceBox from '$lib/components/ServiceBox.svelte'
     import Icon from '@iconify/svelte'
 

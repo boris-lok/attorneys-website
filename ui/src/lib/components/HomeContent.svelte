@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Language } from '$lib/types'
     import { HomeServices } from '$lib/services/home.service'
-    import Loading from '$lib/components/common/Loading.svelte'
+    import Loading from '$lib/components/shared/Loading.svelte'
     import Markdown from '@magidoc/plugin-svelte-marked'
 
     type InputProps = {

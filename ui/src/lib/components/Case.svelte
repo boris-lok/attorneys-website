@@ -3,7 +3,7 @@
     import CaseEditor from '$lib/components/CaseEditor.svelte'
     import { roundTo } from '$lib/utils'
     import type { CaseData } from '$lib/types'
-    import ProgressBar from '$lib/components/common/ProgressBar.svelte'
+    import ProgressBar from '$lib/components/shared/ProgressBar.svelte'
     import { CaseServices } from '$lib/services/case.service'
 
     type Props = CaseData & {

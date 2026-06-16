@@ -11,6 +11,7 @@ export const handle = async ({ event, resolve }) => {
             event.locals.user = {
                 id: payload.sub,
                 roles: payload.roles ?? [],
+                nickname: payload.nickname ?? '',
             }
         } catch {
             payload = null

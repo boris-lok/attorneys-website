@@ -2,44 +2,33 @@
     import type { CaseData } from '$lib/types'
     import Case from '$lib/components/Case.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import Loading from '$lib/components/shared/Loading.svelte'
     import CaseEditor from '$lib/components/CaseEditor.svelte'
     import type { PageProps } from './$types'
 
     let { data }: PageProps = $props()
 
+    // data is only refreshed when SvelteKit re-runs the *load* function
+    // When that happens, the page will re-render and the cases are re-initialized
+    // svelte-ignore state_referenced_locally
+    let cases: CaseData[] = $state(data.cases)
+    // The state uses to control the creation
+    // If it is true, the editor is open, else show the creation icon
     let isCreating = $state(false)
-    let isLoaded = $state(false)
-    let cases: CaseData[] = $state([])
-    let errMsg = $state('')
 
+    // insert a new case or update an existing one
     function upsertCase(c: CaseData) {
-        cases = [
-            c,
-            ...cases.filter((e) => e.id !== c.id),
-        ]
+        const exist = cases.some(e => e.id === c.id)
+        cases = exist ?
+            cases.map((e) => e.id === c.id ? c : e) :
+            [c, ...cases]
     }
 
-    $effect(() => {
-        data.cases
-            .then(resp => {
-                if (resp.error) errMsg = resp.message
-                else cases = resp.cases
-            })
-            .finally(() => isLoaded = true)
-    })
+    // remove the case from the list
+    function removeCase(id: string) {
+        cases = cases.filter((e) => e.id !== id)
+    }
 
 </script>
-
-{#if !isLoaded}
-    <Loading />
-{/if}
-
-{#if errMsg}
-    <div class="mt-2 text-sm text-red-500 w-full text-center">
-        {errMsg}
-    </div>
-{/if}
 
 <main>
     {#if isCreating}
@@ -71,10 +60,8 @@
         {#each cases as c, i (c.id)}
             <Case
                 {...c}
-                onSaved={(updated) => {
-                    cases = cases.map((c) =>c.id === updated.id ? updated : c )
-                }}
-                onDeleted={() => (cases = cases.filter((e) => e.id !== c.id))}
+                onSaved={upsertCase}
+                onDeleted={() => removeCase(c.id)}
             />
             {#if i < cases.length - 1}
                 <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>

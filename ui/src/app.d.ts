@@ -7,6 +7,7 @@ declare global {
         interface Locals {
             user: {
                 id: string
+                nickname: string
                 roles: Role[]
             } | null
         }

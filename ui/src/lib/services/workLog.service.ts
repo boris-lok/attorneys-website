@@ -1,53 +1,14 @@
 // The request of creating work log
-import type { APIError, APIResponse, CaseData } from '$lib/types'
+import type {
+    APIError,
+    APIResponse,
+    CreateWorkLogRequest,
+    UpdateWorkLogRequest,
+    WorkLog,
+} from '$lib/types'
 import { ADMIN_URL, TIMEOUT } from '$lib/constant'
-import { getToken } from '$lib/utils'
 
-export type CreateWorkLogRequest = {
-    caseId: string
-    startedAt: Date
-    duration: number
-    description: string
-    collaboratorIds: string[]
-}
-
-export type WorkLog = {
-    id: string
-    startedAt: Date
-    endedAt: Date
-    duration: number
-    description: string
-    isCollaborative: boolean
-    collaborators: Collaborator[]
-    user: SimpleUser
-}
-
-export type SimpleUser = {
-    id: string
-    name: string
-}
-
-export type Collaborator = {
-    parentId: string
-    userId: string
-    name: string
-    status: string
-}
-
-export type PendingWorkLog = {
-    id: string
-    startedAt: Date
-    endedAt: Date
-    duration: number
-    description: string
-    user: {
-        id: string
-        name: string
-    }
-}
-
-// The request of updating work log
-export type UpdateWorkLogRequest = CreateWorkLogRequest & { id: string }
+type FetchFn = typeof fetch
 
 async function save(
     req: CreateWorkLogRequest | UpdateWorkLogRequest
@@ -89,7 +50,45 @@ async function save(
     }
 }
 
+type WorkLogAPIResponse = {
+    id: string
+    started_at: string
+    ended_at: string
+    duration: number
+    description: string
+    is_collaborative: boolean
+    collaborators: {
+        parent_id: string
+        user_id: string
+        name: string
+        status: string
+    }[]
+    user: { id: string; name: string }
+}
+
+function mapWorkLog(e: WorkLogAPIResponse): WorkLog {
+    return {
+        id: e.id,
+        startedAt: new Date(e.started_at),
+        endedAt: new Date(e.ended_at),
+        duration: e.duration,
+        description: e.description,
+        isCollaborative: e.is_collaborative,
+        collaborators: e.collaborators.map((collaborator) => ({
+            parentId: collaborator.parent_id,
+            userId: collaborator.user_id,
+            name: collaborator.name,
+            status: collaborator.status,
+        })),
+        user: {
+            id: e.user.id,
+            name: e.user.name,
+        },
+    }
+}
+
 async function list(
+    fetch: FetchFn,
     caseId: string,
     startedAt: Date | null = null,
     endedAt: Date | null = null
@@ -116,46 +115,7 @@ async function list(
         })
 
         const json = await resp.json()
-        let workLogs = []
-
-        if ('work_logs' in json && json.work_logs.length > 0) {
-            workLogs = json.work_logs.map(
-                (e: {
-                    id: string
-                    started_at: string
-                    ended_at: string
-                    duration: number
-                    description: string
-                    is_collaborative: boolean
-                    collaborators: {
-                        parent_id: string
-                        user_id: string
-                        name: string
-                        status: string
-                    }[]
-                    user: { id: string; name: string }
-                }) => {
-                    return {
-                        id: e.id,
-                        startedAt: new Date(e.started_at),
-                        endedAt: new Date(e.ended_at),
-                        duration: e.duration,
-                        description: e.description,
-                        isCollaborative: e.is_collaborative,
-                        collaborators: e.collaborators.map((collaborator) => ({
-                            parentId: collaborator.parent_id,
-                            userId: collaborator.user_id,
-                            name: collaborator.name,
-                            status: collaborator.status,
-                        })),
-                        user: {
-                            id: e.user.id,
-                            name: e.user.name,
-                        },
-                    } as WorkLog
-                }
-            )
-        }
+        const workLogs = (json.work_logs ?? []).map(mapWorkLog)
 
         return { error: false, logs: workLogs }
     } catch (error) {
@@ -164,6 +124,7 @@ async function list(
 }
 
 async function download(
+    fetch: FetchFn,
     caseId: string,
     startedAt: Date | null = null,
     endedAt: Date | null = null

@@ -85,3 +85,10 @@ export function dateRangeFormatter(startedAt: Date, endedAt: Date): string {
 
     return `${st} ~ ${ed}`
 }
+
+export function triggerDownload(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob)
+    const a = Object.assign(document.createElement('a'), { href: url, download: filename })
+    a.click()
+    URL.revokeObjectURL(url)
+}

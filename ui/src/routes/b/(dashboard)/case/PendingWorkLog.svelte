@@ -1,14 +1,16 @@
 <script lang="ts">
-    import { type PendingWorkLog, WorkLogServices } from '$lib/services/work_log.service'
+    import { WorkLogServices } from '$lib/services/workLog.service'
     import { dateRangeFormatter, roundTo } from '$lib/utils'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/shared/Loading.svelte'
+    import type { PendingWorkLog } from '$lib/types'
 
     type Props = PendingWorkLog & {
         onDone?: (status: 'accepted' | 'rejected') => void
     }
 
     let { onDone, ...rest }: Props = $props()
+    // svelte-ignore state_referenced_locally
     let copiedData: PendingWorkLog = $state({ ...rest })
     const hrs = roundTo(copiedData.duration / 60, 2)
     let isLoading = $state(false)

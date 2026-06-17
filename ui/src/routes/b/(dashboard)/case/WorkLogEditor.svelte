@@ -5,7 +5,7 @@
         type Collaborator,
         type WorkLog,
         WorkLogServices
-    } from '$lib/services/work_log.service'
+    } from '$lib/services/workLog.service'
     import Textarea from '$lib/components/shared/Textarea.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/shared/Loading.svelte'

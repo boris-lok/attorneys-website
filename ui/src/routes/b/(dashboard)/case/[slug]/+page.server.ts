@@ -1,10 +1,8 @@
 import type { PageServerLoad } from './$types'
 
-export const load: PageServerLoad = ({ params, cookies }) => {
-    const token = cookies.get('token')
-
+export const load: PageServerLoad = ({ params, locals }) => {
     return {
-        id: params.slug,
-        token,
+        caseId: params.slug,
+        user: locals.user,
     }
 }

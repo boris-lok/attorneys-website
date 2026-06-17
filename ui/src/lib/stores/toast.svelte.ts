@@ -18,7 +18,7 @@ const createToastStore = () => {
         // Here, we don't assign the new array,
         // because $state in ts file (not svelte.ts) only track the mutation
         //
-        // Initial:    toasts → [Proxy] ✅ Svelte watches this
+        // Initial: toasts → [Proxy] ✅ Svelte watches this
         // After filter: toasts → [new plain array] ❌ Svelte no longer watching
         const index = toasts.findIndex((toast) => toast.id === id)
         if (index !== -1) toasts.splice(index, 1)

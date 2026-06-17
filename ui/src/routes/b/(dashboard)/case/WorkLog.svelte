@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { type WorkLog, WorkLogServices } from '$lib/services/work_log.service'
-    import WorkLogEditor from '$lib/components/WorkLogEditor.svelte'
+    import { type WorkLog, WorkLogServices } from '$lib/services/workLog.service'
+    import WorkLogEditor from './WorkLogEditor.svelte'
     import IconifyIcon from '@iconify/svelte'
     import { roundTo } from '$lib/utils'
 

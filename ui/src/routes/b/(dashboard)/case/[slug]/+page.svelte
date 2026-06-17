@@ -1,145 +1,62 @@
 <script lang="ts">
     import type { PageProps } from './$types'
-    import WorkLogEditor from '$lib/components/WorkLogEditor.svelte'
-    import {
-        type PendingWorkLog as PendingWorkLogType,
-        type WorkLog as WorkLogType,
-        WorkLogServices
-    } from '$lib/services/work_log.service'
-    import WorkLog from '$lib/components/WorkLog.svelte'
+    import WorkLogEditor from '../WorkLogEditor.svelte'
+    import WorkLog from '../WorkLog.svelte'
     import IconifyIcon from '@iconify/svelte'
     import Loading from '$lib/components/shared/Loading.svelte'
-    import PendingWorkLog from '$lib/components/PendingWorkLog.svelte'
+    import PendingWorkLog from '../PendingWorkLog.svelte'
     import DateTimePicker from '$lib/components/shared/DateTimePicker.svelte'
-    import { untrack } from 'svelte'
-    import { jwtDecode } from 'jwt-decode'
-    import type { PayLoad } from '$lib/utils'
     import { CaseServices } from '$lib/services/case.service'
+    import { useDateRange } from '$lib/composables/useDateRange.svelte'
+    import { useWorkLog } from '$lib/composables/useWorkLog.svelte'
+    import { WorkLogServices } from '$lib/services/workLog.service'
+    import { toast } from '$lib/stores/toast.svelte'
+    import { triggerDownload } from '$lib/utils'
+    import { untrack } from 'svelte'
 
 
     let { data }: PageProps = $props()
-    let id = data.id
-    let payLoad: PayLoad | null = null
-    try {
-        payLoad = jwtDecode<PayLoad>(data.token ?? '')
-    } catch (e) {
-        console.error('Failed to decode token:', e)
-        payLoad = null
-    }
-    const selfId = payLoad?.sub ?? ''
-    const selfName = payLoad?.nickname ?? ''
-    let logs: WorkLogType[] = $state([])
-    let pendingLogs = $derived.by(() => {
-        return logs
-            .filter((log) => {
-                const collaborators = log.collaborators.filter(
-                    (collaborator) =>
-                        collaborator.status === 'pending' && collaborator.userId === selfId
-                )
-                return collaborators.length > 0
-            })
-            .map((log) => {
-                const p: PendingWorkLogType = {
-                    id: log.id,
-                    startedAt: log.startedAt,
-                    endedAt: log.endedAt,
-                    duration: log.duration,
-                    description: log.description,
-                    user: {
-                        id: selfId,
-                        name: selfName
-                    }
-                }
-
-                return p
-            })
-    })
-    let isLoading = $state(false)
+    // svelte-ignore state_referenced_locally
+    let caseId = data.caseId
+    // svelte-ignore state_referenced_locally
+    let user = data.user
+    let range = useDateRange(90)
+    let store = useWorkLog(caseId, user)
     let isCreated = $state(false)
-    let downloadLink: HTMLAnchorElement
-    let startedAt = $state(
-        setDateSuffix(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), 0, 0, 0, 0)
-    )
-    let endedAt = $state(setDateSuffix(new Date(), 23, 59, 59, 59))
-    let msg = $state('')
 
-    function setDateSuffix(date: Date, hrs: number, mins: number, s: number, ms: number): Date {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hrs, mins, s, ms)
-    }
-
-    function onDateChanged(type: 'startedAt' | 'endedAt', date: Date) {
-        if (type === 'startedAt') {
-            startedAt = date
-        } else if (type === 'endedAt') {
-            endedAt = date
-        }
-    }
-
-    function appendCase(log: WorkLogType) {
-        logs = [log, ...logs]
-        isCreated = false
-    }
-
-    async function fetchWorkLogs() {
-        isLoading = true
-        const resp = await WorkLogServices.list(id, startedAt, endedAt)
-        isLoading = false
-        if (resp.error) {
-            console.error(resp.message)
-            return
-        }
-
-        logs = resp.logs
-    }
+    $effect(() => {
+        untrack(() => store.fetch(range.startedAt, range.endedAt))
+    })
 
     async function search(e: Event) {
         e.preventDefault()
-        e.stopPropagation()
-        await fetchWorkLogs()
-    }
-
-    function editStatus(id: string, status: 'accepted' | 'pending' | 'rejected') {
-        let c = logs.find((l) => l.id === id)
-        if (!c) return
-        let collaborators = [...c.collaborators]
-        let collaborator = collaborators.find((collaborator) => collaborator.userId === selfId)
-        if (!collaborator) return
-        collaborator.status = status
-        c.collaborators = collaborators
+        await store.fetch(range.startedAt, range.endedAt)
     }
 
     async function download() {
-        const resp = await WorkLogServices.download(id, startedAt, endedAt)
+        const resp = await WorkLogServices.download(window.fetch, caseId, range.startedAt, range.endedAt)
         if (resp.error) {
-            console.error(resp.message)
+            toast.show(resp.message, 'error')
             return
         }
 
-        // Create download link
-        const urlBlob = window.URL.createObjectURL(resp.blob)
-        downloadLink.href = urlBlob
-        downloadLink.download = `${new Date().toISOString().split('T')[0]}.xlsx`
-        downloadLink.click()
-
-        URL.revokeObjectURL(urlBlob)
+        triggerDownload(resp.blob, `${new Date().toISOString().split('T')[0]}.xlsx`)
     }
+
 
     async function settle() {
-        const resp = await CaseServices.settle(id)
+        const resp = await CaseServices.settle(window.fetch, caseId)
         if (resp.error) {
-            console.error(resp.message)
+            toast.show(resp.message, 'error')
             return
         }
 
-        msg = 'Case settled successfully'
+        toast.show('Case settled successfully')
     }
 
-    $effect(() => {
-        untrack(() => fetchWorkLogs())
-    })
 </script>
 
-{#if isLoading}
+{#if store.isLoading}
     <Loading />
 {/if}
 
@@ -147,8 +64,9 @@
 <main>
     {#if isCreated}
         <div class="px-4">
-            <WorkLogEditor selfId={selfId} selfName={selfName} onClosed={() => (isCreated = false)} caseId={id}
-                           onSaved={appendCase} />
+            <WorkLogEditor selfId={user.sub} selfName={user.nickname} onClosed={() => (isCreated = false)}
+                           caseId={caseId}
+                           onSaved={store.upsert} />
         </div>
     {:else}
         <div class="my-2 flex h-16 flex-row items-center justify-end gap-4 px-4">
@@ -158,7 +76,7 @@
         </div>
     {/if}
 
-    {#if pendingLogs.length > 0}
+    {#if store.pendingLogs.length > 0}
         <p class="px-5 text-xl font-semibold">Pending Logs</p>
         <div class="md:m-4 md:rounded md:shadow">
             <div
@@ -170,9 +88,9 @@
                 <p class="text-md flex-2/12 py-3 text-left font-bold">&nbsp;</p>
             </div>
             <div class="h-fit max-h-96 w-full overflow-y-auto">
-                {#each pendingLogs as log, i (log.id)}
-                    <PendingWorkLog {...log} onDone={(e) => editStatus(log.id, e)} />
-                    {#if i < logs.length - 1}
+                {#each store.pendingLogs as log, i (log.id)}
+                    <PendingWorkLog {...log} onDone={(e) => store.editStatus(log.id, e)} />
+                    {#if i < store.logs.length - 1}
                         <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
                     {/if}
                 {/each}
@@ -187,63 +105,65 @@
     >
         <div class="m-2 flex flex-row items-center gap-4">
             <DateTimePicker
-                date={startedAt}
+                date={range.startedAt}
                 dateOnly={true}
-                onChanged={(e) => onDateChanged('startedAt', e)}
+                onChanged={(e) => range.set('startedAt', e)}
             />
             <span>~</span>
             <DateTimePicker
-                date={endedAt}
+                date={range.endedAt}
                 dateOnly={true}
-                onChanged={(e) => onDateChanged('endedAt', e)}
+                onChanged={(e) => range.set('endedAt', e)}
             />
         </div>
 
         <div class="flex flex-row items-center gap-2">
-            <button class="group relative cursor-pointer" onclick={download}>
-                <IconifyIcon class="h-6 w-6" icon="tabler:download" />
+            <div class="relative group">
+                <button class="cursor-pointer" onclick={download}>
+                    <IconifyIcon class="h-6 w-6" icon="tabler:download" />
+
+                </button>
                 <p
                     class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
                 >
                     Download
                 </p>
-            </button>
+            </div>
 
-            <button class="group relative cursor-pointer" onclick={search}>
-                <IconifyIcon icon="tabler:file-search" class="h-6 w-6" />
+            <div class="relative group">
+                <button class="group relative cursor-pointer" onclick={search}>
+                    <IconifyIcon icon="tabler:file-search" class="h-6 w-6" />
+                </button>
                 <p
                     class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
                 >
                     Search
                 </p>
-            </button>
+            </div>
 
-            <button
-                class="group relative"
-                class:text-red-500={logs.length > 0}
-                class:cursor-pointer={logs.length > 0}
-                class:text-gray-300={logs.length === 0}
-                onclick={settle}
-                disabled={logs.length === 0}
-            >
-                <IconifyIcon icon="tabler:align-box-right-top"
-                             class="h-6 w-6" />
+
+            <div class="relative group">
+                <button
+                    class="group relative"
+                    class:text-red-500={store.logs.length > 0}
+                    class:cursor-pointer={store.logs.length > 0}
+                    class:text-gray-300={store.logs.length === 0}
+                    onclick={settle}
+                    disabled={store.logs.length === 0}
+                >
+                    <IconifyIcon icon="tabler:align-box-right-top"
+                                 class="h-6 w-6" />
+                </button>
                 <p
                     class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
                 >
                     Settle
                 </p>
-            </button>
+            </div>
+
         </div>
 
     </div>
-
-
-    {#if msg}
-        <div class="text-green-600 w-full text-center text-md">
-            {msg}
-        </div>
-    {/if}
 
     <div class="md:m-4 md:rounded md:shadow">
         <div
@@ -256,20 +176,18 @@
             <p class="text-md flex-1/12 py-3 text-left font-bold">&nbsp;</p>
         </div>
 
-        {#if logs.length > 0}
+        {#if store.logs.length > 0}
             <div class="h-fit max-h-96 w-full overflow-y-auto">
-                {#each logs as log, i (log.id)}
+                {#each store.logs as log, i (log.id)}
                     <WorkLog
-                        selfId={selfId}
-                        selfName={selfName}
-                        caseId={id}
+                        selfId={user.sub}
+                        selfName={user.nickname}
+                        caseId={caseId}
                         {log}
-                        onSaved={(updated) => {
-                            logs = logs.map(l => updated.id === l.id ? updated : l)
-                        }}
-                        onDeleted={() => (logs = logs.filter((l) => l.id !== log.id))}
+                        onSaved={store.upsert}
+                        onDeleted={() => (store.remove(log.id))}
                     />
-                    {#if i < logs.length - 1}
+                    {#if i < store.logs.length - 1}
                         <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
                     {/if}
                 {/each}
@@ -280,6 +198,4 @@
             </div>
         {/if}
     </div>
-
-    <a bind:this={downloadLink} class="hidden"></a>
 </main>

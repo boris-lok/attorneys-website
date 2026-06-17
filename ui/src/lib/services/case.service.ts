@@ -113,7 +113,7 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
     }
 }
 
-async function settle(id: string): Promise<APIError | APIResponse<void>> {
+async function settle(fetch: FetchFn, id: string): Promise<APIError | APIResponse<void>> {
     try {
         const resp = await fetch(`${ADMIN_URL}/case/settle`, {
             method: 'PUT',
@@ -146,5 +146,6 @@ type FetchFn = typeof fetch
 export function createCaseServices(fetch: FetchFn) {
     return {
         list: () => list(fetch),
+        settle: (id: string) => settle(fetch, id),
     }
 }

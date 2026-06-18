@@ -1,15 +1,25 @@
+<!-- svelte-ignore state_referenced_locally -->
 <script lang="ts">
     import DateTimePicker from '$lib/components/shared/DateTimePicker.svelte'
     import { type SimpleUser, UserService } from '$lib/services/user.service'
-    import {
-        type Collaborator,
-        type WorkLog,
-        WorkLogServices
-    } from '$lib/services/workLog.service'
     import Textarea from '$lib/components/shared/Textarea.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import Loading from '$lib/components/shared/Loading.svelte'
+    import type { WorkLog } from '$lib/types'
+    import { toast } from '$lib/stores/toast.svelte'
+    import { WorkLogServices } from '$lib/services/workLog.service'
 
+    // Constants
+    const FIFTEEN_MINUTES_MS = 15 * 60 * 1000
+
+    const VALIDATION_MESSAGE = {
+        missingStartedAt: 'Please select a start date',
+        missingEndedAt: 'Please select a end data',
+        missingDescription: 'Please enter a description',
+        invalidDuration: 'Duration must be at least 15 minutes',
+        missingCollaborator: 'Please select at least one collaborator',
+    } as const
+
+    // Types
     type Props = {
         id?: string
         selfId: string
@@ -24,39 +34,91 @@
         onSaved?: (log: WorkLog) => void
     }
 
+    // Props
     let {
         id,
         caseId,
         selfId,
         selfName,
         startedAt = new Date(),
-        endedAt = new Date(),
+        endedAt = new Date(Date.now() + FIFTEEN_MINUTES_MS),
         description = '',
         collaboratorIds = [],
         hideShare = false,
         onSaved,
-        onClosed
+        onClosed,
     }: Props = $props()
-    let users: SimpleUser[] = $state([])
-    let loaded = false
+
+    // State
+    let lawyers: SimpleUser[] = $state([])
+    let isLawyerLoaded = false
+
     let share = $state(false)
+    let isLoading = $state(false)
+    let errMsg = $state('')
+
     let _startedAt = $state(startedAt)
     let _endedAt = $state(endedAt)
     let _description = $state(description)
     let _collaboratorIds = $state(collaboratorIds)
-    let errMsg = $state('')
-    let isLoading = $state(false)
-    let duration = $derived.by(() => {
-        const _e = new Date(_endedAt)
-        const _s = new Date(_startedAt)
 
+    // Derived
+    let duration = $derived(computeDuration(_startedAt, _endedAt))
+
+    // Pure Helpers
+    function computeDuration(start: Date, end: Date) {
+        const s = new Date(start)
+        const e = new Date(end)
         // ignore time part
-        _e.setSeconds(0, 0)
-        _s.setSeconds(0, 0)
+        e.setSeconds(0, 0)
+        s.setSeconds(0, 0)
 
-        return (_e.getTime() - _s.getTime()) / 1000 / 60
-    })
-    let fifteenMinutes = 15 * 60 * 1000
+        return (e.getTime() - s.getTime()) / 1000 / 60
+    }
+
+    function buildCollaborators(ids: string[], users: SimpleUser[], parentId: string) {
+        return users
+            .filter(u => ids.includes(u.id))
+            .map(e => {
+                return {
+                    parentId,
+                    userId: e.id,
+                    name: e.nickname,
+                    status: 'pending' as const,
+                }
+            })
+    }
+
+    // Data fetching
+    async function fetchLawyers() {
+        if (isLawyerLoaded) return
+        isLawyerLoaded = true
+        const resp = await UserService.list()
+
+        if (resp.error) {
+            isLawyerLoaded = false
+            toast.show(`Error loading users: ${resp.message}`)
+            return
+        }
+
+        lawyers = resp.users.filter((e) => e.id !== selfId).filter((e) => e.roles.includes('Lawyer'))
+    }
+
+    // Event Handlers
+    function onStartedDateChanged(date: Date) {
+        _startedAt = date
+        _endedAt = new Date(date.getTime() + FIFTEEN_MINUTES_MS)
+    }
+
+    async function onShareToggle() {
+        _collaboratorIds = []
+
+        if (share) {
+            await fetchLawyers()
+            _collaboratorIds = lawyers.map((e) => e.id)
+        }
+    }
+
 
     function onCollaboratorIdsChanged(id: string, checked: boolean) {
         let newIds = [..._collaboratorIds]
@@ -68,44 +130,25 @@
         _collaboratorIds = newIds
     }
 
-    async function fetchUsers() {
-        if (loaded) return
-        loaded = true
-        const resp = await UserService.list()
-
-        if (resp.error) {
-            loaded = false
-            console.error('Error loading users:', resp.message)
-            return
-        }
-
-        users = resp.users.filter((e) => e.id !== selfId).filter((e) => e.roles.includes('Lawyer'))
-    }
-
-    async function onShareChanged() {
-        if (share) {
-            await fetchUsers()
-            _collaboratorIds = users.map((e) => e.id)
-        } else {
-            _collaboratorIds = []
-        }
-    }
-
     function validate() {
         if (!_startedAt) {
-            errMsg = 'Please select start time'
+            errMsg = VALIDATION_MESSAGE.missingStartedAt
             return false
         }
         if (!_endedAt) {
-            errMsg = 'Please select end time'
+            errMsg = VALIDATION_MESSAGE.missingEndedAt
             return false
         }
         if (!_description) {
-            errMsg = 'Please enter description'
+            errMsg = VALIDATION_MESSAGE.missingDescription
             return false
         }
         if (duration <= 0) {
-            errMsg = 'Ended date must be later than start date'
+            errMsg = VALIDATION_MESSAGE.invalidDuration
+            return false
+        }
+        if (share && _collaboratorIds.length === 0) {
+            errMsg = VALIDATION_MESSAGE.missingCollaborator
             return false
         }
 
@@ -113,34 +156,24 @@
     }
 
     async function onSave() {
-        if (!validate()) {
-            return
-        }
+        errMsg = ''
+        if (!validate()) return
 
         isLoading = true
-        const resp = await WorkLogServices.save({
+        const resp = await WorkLogServices.save(window.fetch, {
             ...(id ? { id: id } : {}),
             caseId: caseId,
             collaboratorIds: _collaboratorIds,
             description: _description,
             duration: duration,
-            startedAt: _startedAt
+            startedAt: _startedAt,
         })
         isLoading = false
 
         if (resp.error) {
-            console.error('Error saving work log:', resp.message)
+            toast.show(`Error saving work log: got an error: ${resp.message}`, 'error')
             return
         }
-
-        let collaborators: Collaborator[] = users
-            .filter((e) => _collaboratorIds.includes(e.id))
-            .map((e) => ({
-                parentId: resp.id,
-                userId: e.id,
-                name: e.nickname,
-                status: 'pending'
-            }))
 
         onSaved?.({
             id: resp.id,
@@ -149,11 +182,11 @@
             duration: duration,
             description: _description,
             isCollaborative: share,
-            collaborators: collaborators,
+            collaborators: buildCollaborators(_collaboratorIds, lawyers, resp.id),
             user: {
                 id: selfId,
-                name: selfName
-            }
+                name: selfName,
+            },
         })
     }
 </script>
@@ -166,18 +199,11 @@
     </div>
 {/if}
 
-{#if isLoading}
-    <Loading />
-{/if}
-
 <div class="flex flex-col gap-4">
     <div class="flex flex-row items-center justify-between md:justify-normal md:gap-4">
         <div class="flex flex-col gap-1 md:flex-row md:items-center md:gap-2">
             <span class="text-sm font-semibold">Working Time: </span>
-            <DateTimePicker date={_startedAt} onChanged={(e) => {
-                _startedAt = e
-                _endedAt = new Date(_startedAt.getTime() + fifteenMinutes)
-            }} />
+            <DateTimePicker date={_startedAt} onChanged={onStartedDateChanged} />
             <span class="text-center"> ~ </span>
             <DateTimePicker date={_endedAt} onChanged={(e) => _endedAt = e} />
         </div>
@@ -196,16 +222,16 @@
 
     {#if !hideShare}
         <label class="inline-flex cursor-pointer items-center">
-            <input type="checkbox" bind:checked={share} class="peer sr-only" onchange={onShareChanged} />
+            <input type="checkbox" bind:checked={share} class="peer sr-only" onchange={onShareToggle} />
             <div
-                class="peer relative h-5 w-9 rounded-full bg-gray-500 peer-checked:bg-blue-500 peer-focus:outline-none after:absolute after:start-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
+                class="peer relative h-5 w-9 rounded-full bg-gray-500 peer-checked:bg-blue-500 peer-focus:outline-none after:absolute after:inset-s-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
             ></div>
             <span class="text-heading ms-3 text-sm font-medium select-none">Share</span>
         </label>
 
         {#if share}
             <div class="mx-2 my-1 flex flex-row flex-wrap gap-4 rounded bg-gray-100 px-2 py-2">
-                {#each users as user (user.id)}
+                {#each lawyers as user (user.id)}
                     <label for={user.id} class="text-md cursor-pointer font-medium">
                         <input
                             type="checkbox"
@@ -224,14 +250,20 @@
     {/if}
 
     <div class="flex h-fit flex-row justify-center gap-0.5">
-        <button class="cursor-pointer md:m-2" onclick={onSave}>
-            <IconifyIcon
-                class=" h-6 w-6 text-green-500"
-                icon="line-md:circle-to-confirm-circle-transition"
-            />
-        </button>
-        <button class="cursor-pointer md:m-2" onclick={onClosed}>
-            <IconifyIcon class="h-6 w-6 text-red-500" icon="line-md:close-circle" />
-        </button>
+        {#if isLoading}
+            <div>
+                <IconifyIcon class="text-blue-500 h-6 w-6 mr-6" icon="svg-spinners:90-ring-with-bg" />
+            </div>
+        {:else}
+            <button class="cursor-pointer md:m-2" onclick={onSave}>
+                <IconifyIcon
+                    class=" h-6 w-6 text-green-500"
+                    icon="line-md:circle-to-confirm-circle-transition"
+                />
+            </button>
+            <button class="cursor-pointer md:m-2" onclick={onClosed}>
+                <IconifyIcon class="h-6 w-6 text-red-500" icon="line-md:close-circle" />
+            </button>
+        {/if}
     </div>
 </div>

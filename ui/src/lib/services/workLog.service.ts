@@ -11,6 +11,7 @@ import { ADMIN_URL, TIMEOUT } from '$lib/constant'
 type FetchFn = typeof fetch
 
 async function save(
+    fetch: FetchFn,
     req: CreateWorkLogRequest | UpdateWorkLogRequest
 ): Promise<APIError | APIResponse<{ id: string }>> {
     try {

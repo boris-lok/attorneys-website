@@ -63,7 +63,7 @@
 
 <main>
     {#if isCreated}
-        <div class="px-4">
+        <div class="px-2 md:px-8 md:mx-8 md:mt-8 md:rounded md:shadow md:py-4">
             <WorkLogEditor selfId={user.sub} selfName={user.nickname} onClosed={() => (isCreated = false)}
                            caseId={caseId}
                            onSaved={store.upsert} />

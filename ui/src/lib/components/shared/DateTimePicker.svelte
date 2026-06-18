@@ -103,7 +103,7 @@
             type="text"
             inputmode="numeric"
             {maxlength}
-            variant="outlined"
+            variant="fit"
             aria-label={key}
             value={draft[key]}
             oninput={(e) => updateField(key, e.currentTarget.value)}
@@ -113,17 +113,17 @@
     </div>
 {/snippet}
 
-<div class="flex flex-wrap items-center gap-1">
-    {@render field('year', 'w-16', 4)}
-    <span class="text-gray-500">/</span>
-    {@render field('month', 'w-10', 2)}
-    <span class="text-gray-500">/</span>
-    {@render field('day', 'w-10', 2)}
+<div class="flex flex-wrap items-center gap-0.5">
+    {@render field('year', 'w-12', 4)}
+    <span class="text-gray-500 mb-2">/</span>
+    {@render field('month', 'w-8', 2)}
+    <span class="text-gray-500 mb-2">/</span>
+    {@render field('day', 'w-8', 2)}
 
     {#if !dateOnly}
         <span class="w-2"></span>
-        {@render field('hour', 'w-10', 2)}
-        <span class="text-gray-500">:</span>
-        {@render field('minute', 'w-10', 2)}
+        {@render field('hour', 'w-8', 2)}
+        <span class="text-gray-500 mb-2">:</span>
+        {@render field('minute', 'w-8', 2)}
     {/if}
 </div>

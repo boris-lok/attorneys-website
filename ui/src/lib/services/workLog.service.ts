@@ -141,6 +141,8 @@ async function download(
         url.searchParams.set('ended_at', endedAt.toISOString())
     }
 
+    url.searchParams.set('settled', 'false')
+
     try {
         const resp = await fetch(url.toString(), {
             method: 'GET',

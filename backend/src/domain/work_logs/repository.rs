@@ -10,6 +10,7 @@ pub trait WorkLogsWriteRepository {
     async fn create(&mut self, req: CreateWorkLogRequest) -> anyhow::Result<()>;
     async fn delete(&mut self, id: &Uuid) -> anyhow::Result<()>;
     async fn update(&mut self, req: UpdateWorkLogRequest) -> anyhow::Result<()>;
+    async fn settle(&mut self, case_id: &CaseID) -> anyhow::Result<()>;
 }
 
 #[async_trait::async_trait]

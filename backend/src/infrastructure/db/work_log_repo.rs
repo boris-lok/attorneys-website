@@ -76,6 +76,10 @@ const LIST_WORK_LOGS_QUERY: &str = r"
     )
 ";
 
+const SETTLE_WORK_LOGS_QUERY: &str = r"
+  update work_logs set settled_at = now() where case_id = $1 and settled_at is null
+";
+
 pub type PostgresWorkLogRepo<'tx> = PostgresRepo<'tx, WorkLogRepo>;
 
 #[async_trait::async_trait]
@@ -110,6 +114,15 @@ impl<'tx> WorkLogsWriteRepository for PostgresWorkLogRepo<'tx> {
             .bind(req.ended_at)
             .bind(req.description)
             .bind(req.id)
+            .execute(self.conn().await?)
+            .await?;
+
+        Ok(())
+    }
+
+    async fn settle(&mut self, case_id: &CaseID) -> anyhow::Result<()> {
+        sqlx::query(SETTLE_WORK_LOGS_QUERY)
+            .bind(Uuid::from(case_id))
             .execute(self.conn().await?)
             .await?;
 

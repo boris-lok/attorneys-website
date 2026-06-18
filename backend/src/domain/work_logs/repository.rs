@@ -1,6 +1,8 @@
 use crate::domain::cases::entity::CaseID;
 use crate::domain::users::entity::UserID;
-use crate::domain::work_logs::entity::{CreateWorkLogRequest, UpdateWorkLogRequest, WorkLog};
+use crate::domain::work_logs::entity::{
+    CreateWorkLogRequest, UpdateWorkLogRequest, WorkLog, WorkLogFilters,
+};
 use uuid::Uuid;
 
 #[async_trait::async_trait]
@@ -15,9 +17,7 @@ pub trait WorkLogsReadRepository {
     async fn list(
         &mut self,
         case_id: &CaseID,
-        started_at: Option<chrono::DateTime<chrono::Utc>>,
-        ended_at: Option<chrono::DateTime<chrono::Utc>>,
-        include_settled: bool,
+        filters: &WorkLogFilters,
     ) -> anyhow::Result<Vec<WorkLog>>;
     async fn is_creator(&mut self, id: &Uuid, user_id: &UserID) -> anyhow::Result<bool>;
     async fn is_collaborator_work_log(

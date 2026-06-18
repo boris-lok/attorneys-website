@@ -2,7 +2,7 @@ use crate::domain::cases::entity::CaseID;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use crate::domain::work_logs::entity::{
-    Collaborator, CreateWorkLogRequest, SimpleUser, UpdateWorkLogRequest, WorkLog,
+    Collaborator, CreateWorkLogRequest, SimpleUser, UpdateWorkLogRequest, WorkLog, WorkLogFilters,
 };
 use crate::domain::work_logs::repository::{
     WorkLogsReadRepository, WorkLogsRepository, WorkLogsWriteRepository,
@@ -69,7 +69,11 @@ const LIST_WORK_LOGS_QUERY: &str = r"
     and wl.deleted_at is null
     and ($2::timestamptz is null or wl.started_at >= $2)
     and ($3::timestamptz is null or wl.ended_at <= $3)
-    and ($4::boolean or wl.settled_at is null)
+    and (
+      $4::boolean is null
+      or ($4::boolean = true and wl.settled_at is not null)
+      or ($4::boolean = false and wl.settled_at is null)
+    )
 ";
 
 pub type PostgresWorkLogRepo<'tx> = PostgresRepo<'tx, WorkLogRepo>;
@@ -118,15 +122,13 @@ impl<'tx> WorkLogsReadRepository for PostgresWorkLogRepo<'tx> {
     async fn list(
         &mut self,
         case_id: &CaseID,
-        started_at: Option<DateTime<Utc>>,
-        ended_at: Option<DateTime<Utc>>,
-        include_settled: bool,
+        filters: &WorkLogFilters,
     ) -> anyhow::Result<Vec<WorkLog>> {
         let rows = sqlx::query_as::<_, WorkLogFromSQLx>(LIST_WORK_LOGS_QUERY)
             .bind(Uuid::from(case_id))
-            .bind(started_at)
-            .bind(ended_at)
-            .bind(include_settled)
+            .bind(filters.started_at)
+            .bind(filters.ended_at)
+            .bind(filters.settled)
             .fetch_all(self.conn().await?)
             .await?;
 

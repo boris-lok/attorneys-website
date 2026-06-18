@@ -1,5 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::api::extractors::query::QueryExtractor;
+use crate::api::work_logs::entity::APIWorkLogFilters;
 use crate::domain::cases::entity::CaseID;
 use crate::domain::entity::Claims;
 use crate::domain::work_logs::entity::WorkLog;
@@ -12,8 +13,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize)]
 pub struct ListWorkLogsRequest {
     case_id: String,
-    started_at: Option<chrono::DateTime<chrono::Utc>>,
-    ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    #[serde(flatten)]
+    filters: APIWorkLogFilters,
 }
 
 #[derive(Debug, Serialize)]
@@ -28,9 +29,7 @@ pub async fn list_work_logs(
 ) -> Result<Json<ListWorkLogsResponse>, ApiError> {
     let req = Request {
         case_id: CaseID::try_from(query.case_id.clone()).map_err(|_| ApiError::BadRequest)?,
-        started_at: query.started_at,
-        ended_at: query.ended_at,
-        include_settled: true,
+        filters: query.filters.clone().try_into()?,
     };
 
     let res = execute(&q, req).await;

@@ -46,3 +46,10 @@ pub struct Collaborator {
     pub name: String,
     pub status: String,
 }
+
+#[derive(Debug)]
+pub struct WorkLogFilters {
+    pub started_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub settled: Option<bool>,
+}

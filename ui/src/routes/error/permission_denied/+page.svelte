@@ -1,1 +1,0 @@
-<div>Permission Denied</div>

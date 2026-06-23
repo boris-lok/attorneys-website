@@ -1,8 +1,9 @@
+use crate::domain::uow::case::asset_case_is_not_closed_and_exist;
 use crate::domain::uow::common::{UnitOfWork, UnitOfWorkFactory};
 use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use crate::domain::work_log_mapping::repository::WorkLogMappingRepository;
-use crate::domain::work_logs::entity::{CreateWorkLogRequest, UpdateWorkLogRequest};
+use crate::domain::work_logs::entity::{CreateWorkLogRequest, SimpleWorkLog, UpdateWorkLogRequest};
 use crate::domain::work_logs::error::WorkLogError;
 use crate::domain::work_logs::repository::{WorkLogsRepository, WorkLogsWriteRepository};
 use crate::impl_uow;
@@ -51,7 +52,10 @@ impl<F: UnitOfWorkFactory> WorkLogUoW<F> {
             .await
             .map_err(|e| WorkLogError::Unknown(e.to_string()))?;
 
-        asset_exist(&mut uow.work_log_repo(), id).await?;
+        let log = retrieve_work_log(&mut uow.work_log_repo(), id).await?;
+        asset_case_is_not_closed_and_exist(&mut uow.case_repo(), &log.case_id)
+            .await
+            .map_err(WorkLogError::from)?;
         if !force {
             asset_owner(&mut uow.work_log_repo(), id, user_id).await?;
         }
@@ -78,7 +82,10 @@ impl<F: UnitOfWorkFactory> WorkLogUoW<F> {
             .await
             .map_err(|e| WorkLogError::Unknown(e.to_string()))?;
 
-        asset_exist(&mut uow.work_log_repo(), &req.id).await?;
+        let log = retrieve_work_log(&mut uow.work_log_repo(), &req.id).await?;
+        asset_case_is_not_closed_and_exist(&mut uow.case_repo(), &log.case_id)
+            .await
+            .map_err(WorkLogError::from)?;
 
         if !force {
             asset_owner(&mut uow.work_log_repo(), &req.id, user_id).await?;
@@ -107,7 +114,10 @@ impl<F: UnitOfWorkFactory> WorkLogUoW<F> {
             .await
             .map_err(|e| WorkLogError::Unknown(e.to_string()))?;
 
-        asset_exist(&mut uow.work_log_repo(), id).await?;
+        let log = retrieve_work_log(&mut uow.work_log_repo(), id).await?;
+        asset_case_is_not_closed_and_exist(&mut uow.case_repo(), &log.case_id)
+            .await
+            .map_err(WorkLogError::from)?;
 
         uow.work_log_mapping_repo()
             .update_status(id, user_id, status)
@@ -120,16 +130,14 @@ impl<F: UnitOfWorkFactory> WorkLogUoW<F> {
     }
 }
 
-async fn asset_exist(repo: &mut impl WorkLogsRepository, id: &Uuid) -> Result<(), WorkLogError> {
-    let is_exist = repo
-        .is_work_log_exist(id)
+async fn retrieve_work_log(
+    repo: &mut impl WorkLogsRepository,
+    id: &Uuid,
+) -> Result<SimpleWorkLog, WorkLogError> {
+    repo.retrieve(id)
         .await
-        .map_err(|e| WorkLogError::Unknown(e.to_string()))?;
-
-    match is_exist {
-        true => Ok(()),
-        false => Err(WorkLogError::NotFound),
-    }
+        .map_err(|e| WorkLogError::Unknown(e.to_string()))?
+        .ok_or(WorkLogError::NotFound)
 }
 
 async fn asset_owner(

@@ -56,5 +56,7 @@ pub async fn download(
         Err(WorkLogError::Unknown(e)) => Err(ApiError::InternalServerError(e)),
         Err(WorkLogError::NotFound) => Err(ApiError::NotFound),
         Err(WorkLogError::PermissionDenied) => Err(ApiError::PermissionDenied),
+        Err(WorkLogError::CaseIsClosed) => Err(ApiError::Forbidden),
+        Err(WorkLogError::CaseNotFound) => Err(ApiError::NotFound),
     }
 }

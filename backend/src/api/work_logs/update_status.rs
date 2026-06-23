@@ -38,5 +38,7 @@ pub async fn update_work_log_status(
         Err(WorkLogError::NotFound) => Err(ApiError::NotFound),
         Err(WorkLogError::Unknown(e)) => Err(ApiError::InternalServerError(e)),
         Err(WorkLogError::PermissionDenied) => Err(ApiError::PermissionDenied),
+        Err(WorkLogError::CaseIsClosed) => Err(ApiError::Forbidden),
+        Err(WorkLogError::CaseNotFound) => Err(ApiError::NotFound),
     }
 }

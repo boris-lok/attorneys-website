@@ -53,3 +53,9 @@ pub struct WorkLogFilters {
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
     pub settled: Option<bool>,
 }
+
+#[derive(Debug)]
+pub struct SimpleWorkLog {
+    pub id: Uuid,
+    pub case_id: CaseID,
+}

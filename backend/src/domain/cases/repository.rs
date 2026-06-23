@@ -1,4 +1,6 @@
-use crate::domain::cases::entity::{Case, CaseID, CreateCaseRequest, UpdateCaseRequest};
+use crate::domain::cases::entity::{
+    Case, CaseID, CreateCaseRequest, SimpleCase, UpdateCaseRequest,
+};
 use crate::domain::users::entity::UserID;
 
 #[async_trait::async_trait]
@@ -12,6 +14,7 @@ pub trait CaseWriteRepository {
 #[async_trait::async_trait]
 pub trait CaseReadRepository {
     async fn list(&mut self, user_id: &UserID) -> anyhow::Result<Vec<Case>>;
+    async fn retrieve(&mut self, case_id: &CaseID) -> anyhow::Result<Option<SimpleCase>>;
 }
 
 pub trait CaseRepository: CaseReadRepository + CaseWriteRepository {}

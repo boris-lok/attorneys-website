@@ -23,17 +23,9 @@ impl TryFrom<APIWorkLogFilters> for WorkLogFilters {
         let parse_dt = |s: &str| s.parse::<DateTime<Utc>>().map_err(|_| ApiError::BadRequest);
 
         Ok(Self {
-            started_at: value
-                .started_at
-                .as_deref()
-                .map(|s| parse_dt(s))
-                .transpose()?,
-            ended_at: value.ended_at.as_deref().map(|s| parse_dt(s)).transpose()?,
-            settled: value
-                .settled
-                .as_deref()
-                .map(|s| parse_bool(s))
-                .transpose()?,
+            started_at: value.started_at.as_deref().map(parse_dt).transpose()?,
+            ended_at: value.ended_at.as_deref().map(parse_dt).transpose()?,
+            settled: value.settled.as_deref().map(parse_bool).transpose()?,
         })
     }
 }

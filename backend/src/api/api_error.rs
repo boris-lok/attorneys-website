@@ -24,6 +24,8 @@ pub enum ApiError {
     PermissionDenied,
     #[error("unauthorized")]
     Unauthorized,
+    #[error("forbidden")]
+    Forbidden,
 }
 
 impl IntoResponse for ApiError {
@@ -41,6 +43,7 @@ impl IntoResponse for ApiError {
             ApiError::ExpiredCredentials => (StatusCode::FORBIDDEN, self.to_string()),
             ApiError::PermissionDenied => (StatusCode::FORBIDDEN, self.to_string()),
             ApiError::Unauthorized => (StatusCode::UNAUTHORIZED, self.to_string()),
+            ApiError::Forbidden => (StatusCode::FORBIDDEN, self.to_string()),
         };
 
         let payload = json!({

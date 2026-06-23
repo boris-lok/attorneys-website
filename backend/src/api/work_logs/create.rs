@@ -57,5 +57,7 @@ pub async fn create_work_log(
         Err(WorkLogError::Unknown(e)) => Err(ApiError::InternalServerError(e)),
         Err(WorkLogError::NotFound) => Err(ApiError::NotFound),
         Err(WorkLogError::PermissionDenied) => Err(ApiError::PermissionDenied),
+        Err(WorkLogError::CaseIsClosed) => Err(ApiError::Forbidden),
+        Err(WorkLogError::CaseNotFound) => Err(ApiError::NotFound),
     }
 }

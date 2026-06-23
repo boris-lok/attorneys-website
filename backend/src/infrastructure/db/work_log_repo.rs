@@ -2,7 +2,8 @@ use crate::domain::cases::entity::CaseID;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use crate::domain::work_logs::entity::{
-    Collaborator, CreateWorkLogRequest, SimpleUser, UpdateWorkLogRequest, WorkLog, WorkLogFilters,
+    Collaborator, CreateWorkLogRequest, SimpleUser, SimpleWorkLog, UpdateWorkLogRequest, WorkLog,
+    WorkLogFilters,
 };
 use crate::domain::work_logs::repository::{
     WorkLogsReadRepository, WorkLogsRepository, WorkLogsWriteRepository,
@@ -78,6 +79,10 @@ const LIST_WORK_LOGS_QUERY: &str = r"
 
 const SETTLE_WORK_LOGS_QUERY: &str = r"
   update work_logs set settled_at = now() where case_id = $1 and settled_at is null
+";
+
+const RETRIEVE_WORK_LOG_QUERY: &str = r"
+  select id, case_id from work_logs where id = $1;
 ";
 
 pub type PostgresWorkLogRepo<'tx> = PostgresRepo<'tx, WorkLogRepo>;
@@ -180,9 +185,33 @@ impl<'tx> WorkLogsReadRepository for PostgresWorkLogRepo<'tx> {
 
         Ok(!row.is_empty())
     }
+
+    async fn retrieve(&mut self, id: &Uuid) -> anyhow::Result<Option<SimpleWorkLog>> {
+        let res = sqlx::query_as::<_, SimpleWorkLogFromSQLx>(RETRIEVE_WORK_LOG_QUERY)
+            .bind(id)
+            .fetch_optional(self.conn().await?)
+            .await?;
+
+        Ok(res.map(|r| r.into()))
+    }
 }
 
 impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {}
+
+#[derive(Debug, sqlx::FromRow)]
+pub struct SimpleWorkLogFromSQLx {
+    id: Uuid,
+    case_id: Uuid,
+}
+
+impl From<SimpleWorkLogFromSQLx> for SimpleWorkLog {
+    fn from(value: SimpleWorkLogFromSQLx) -> Self {
+        Self {
+            id: value.id,
+            case_id: CaseID::from(value.case_id),
+        }
+    }
+}
 
 #[derive(Debug, sqlx::FromRow)]
 pub struct WorkLogFromSQLx {

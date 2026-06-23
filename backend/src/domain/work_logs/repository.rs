@@ -1,7 +1,7 @@
 use crate::domain::cases::entity::CaseID;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_logs::entity::{
-    CreateWorkLogRequest, UpdateWorkLogRequest, WorkLog, WorkLogFilters,
+    CreateWorkLogRequest, SimpleWorkLog, UpdateWorkLogRequest, WorkLog, WorkLogFilters,
 };
 use uuid::Uuid;
 
@@ -27,6 +27,7 @@ pub trait WorkLogsReadRepository {
         user_id: &UserID,
     ) -> anyhow::Result<bool>;
     async fn is_work_log_exist(&mut self, id: &Uuid) -> anyhow::Result<bool>;
+    async fn retrieve(&mut self, id: &Uuid) -> anyhow::Result<Option<SimpleWorkLog>>;
 }
 
 pub trait WorkLogsRepository: WorkLogsWriteRepository + WorkLogsReadRepository {}

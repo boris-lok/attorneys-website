@@ -1,4 +1,6 @@
-use crate::domain::cases::entity::{Case, CaseID, CreateCaseRequest, UpdateCaseRequest};
+use crate::domain::cases::entity::{
+    Case, CaseID, CreateCaseRequest, SimpleCase, UpdateCaseRequest,
+};
 use crate::domain::cases::repository::{CaseReadRepository, CaseRepository, CaseWriteRepository};
 use crate::domain::users::entity::UserID;
 use crate::infrastructure::db::connection::{CaseRepo, PostgresRepo};
@@ -52,7 +54,8 @@ const LIST_CASES_QUERY: &str = r"
     COALESCE(
         SUM(cnt.pending_cnt),
         0
-    )::INT4 AS pending_logs
+    )::INT4 AS pending_logs,
+    c.closed
   FROM cases c
   LEFT JOIN work_logs wl
     ON c.id = wl.case_id
@@ -69,6 +72,10 @@ const LIST_CASES_QUERY: &str = r"
     c.deleted_at IS NULL
   GROUP BY
     c.id
+";
+
+const RETRIEVE_CASE_QUERY: &str = r"
+  select id, closed from cases where id = $1;
 ";
 
 pub type PostgresCaseRepo<'tx> = PostgresRepo<'tx, CaseRepo>;
@@ -133,6 +140,15 @@ impl<'tx> CaseReadRepository for PostgresCaseRepo<'tx> {
         let cases = res.into_iter().map(|r| r.into()).collect::<Vec<Case>>();
         Ok(cases)
     }
+
+    async fn retrieve(&mut self, case_id: &CaseID) -> anyhow::Result<Option<SimpleCase>> {
+        let res = sqlx::query_as::<_, SimpleCaseFromSQLx>(RETRIEVE_CASE_QUERY)
+            .bind(Uuid::from(case_id))
+            .fetch_optional(self.conn().await?)
+            .await?;
+
+        Ok(res.map(|r| r.into()))
+    }
 }
 
 impl<'tx> CaseRepository for PostgresCaseRepo<'tx> {}
@@ -149,6 +165,7 @@ struct CaseFromSQLx {
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub ended_at: chrono::DateTime<chrono::Utc>,
     pub settled_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub closed: bool,
 }
 
 impl From<CaseFromSQLx> for Case {
@@ -164,6 +181,22 @@ impl From<CaseFromSQLx> for Case {
             ended_at: value.ended_at,
             pending_logs: value.pending_logs,
             settled_at: value.settled_at,
+            closed: value.closed,
+        }
+    }
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct SimpleCaseFromSQLx {
+    pub id: Uuid,
+    pub closed: bool,
+}
+
+impl From<SimpleCaseFromSQLx> for SimpleCase {
+    fn from(value: SimpleCaseFromSQLx) -> Self {
+        Self {
+            id: CaseID::from(value.id),
+            closed: value.closed,
         }
     }
 }

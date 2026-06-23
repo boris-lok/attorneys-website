@@ -43,6 +43,7 @@ pub struct Case {
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub ended_at: chrono::DateTime<chrono::Utc>,
     pub settled_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub closed: bool,
 }
 
 #[derive(Debug)]
@@ -63,4 +64,10 @@ pub struct UpdateCaseRequest {
     pub billing_cycle: Option<i32>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug)]
+pub struct SimpleCase {
+    pub id: CaseID,
+    pub closed: bool,
 }

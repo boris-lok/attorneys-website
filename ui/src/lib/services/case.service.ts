@@ -51,6 +51,7 @@ type CaseAPIResponse = {
     ended_at: string
     settled_at: string | null
     pending_logs: number
+    closed: boolean
 }
 
 function mapCase(e: CaseAPIResponse): CaseData {
@@ -65,6 +66,7 @@ function mapCase(e: CaseAPIResponse): CaseData {
         pendingLogs: e.pending_logs,
         billingCycle: e.billing_cycle,
         settledAt: e.settled_at ? new Date(e.settled_at) : null,
+        closed: e.closed,
     }
 }
 

@@ -10,7 +10,9 @@
     // data is only refreshed when SvelteKit re-runs the *load* function
     // When that happens, the page will re-render and the cases are re-initialized
     // svelte-ignore state_referenced_locally
-    let cases: CaseData[] = $state(data.cases)
+    let allCases = $state(data.cases)
+    let cases: CaseData[] = $derived(allCases.filter(e => !e.closed))
+    let closedCases = $derived(allCases.filter(e => e.closed))
     // The state uses to control the creation
     // If it is true, the editor is open, else show the creation icon
     let isCreating = $state(false)
@@ -18,17 +20,31 @@
     // insert a new case or update an existing one
     function upsertCase(c: CaseData) {
         const exist = cases.some(e => e.id === c.id)
-        cases = exist ?
-            cases.map((e) => e.id === c.id ? c : e) :
-            [c, ...cases]
+        allCases = exist ?
+            allCases.map((e) => e.id === c.id ? c : e) :
+            [c, ...allCases]
     }
 
     // remove the case from the list
     function removeCase(id: string) {
-        cases = cases.filter((e) => e.id !== id)
+        allCases = allCases.filter((e) => e.id !== id)
     }
 
 </script>
+
+{#snippet tableHeader(showActions: boolean)}
+    <div class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300">
+        <p class="text-md flex-3/12 px-2 py-3 text-left font-bold">Case Name</p>
+        <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">Period</p>
+        <p class="text-md flex-2/12 px-2 py-3 text-left font-bold text-nowrap">Used Hrs</p>
+        <p class="text-md flex-1/12 px-2 py-3 text-left font-bold text-nowrap">Next Billing</p>
+        <p class="text-md {showActions ? 'flex-1/12' : 'flex-auto'} px-2 py-3 text-left font-bold text-nowrap">Last
+            Billing</p>
+        {#if showActions}
+            <p class="text-md flex-auto px-2 py-3 text-left font-bold">&nbsp;</p>
+        {/if}
+    </div>
+{/snippet}
 
 <main>
     {#if isCreating}
@@ -47,25 +63,29 @@
     {/if}
 
     <div class="md:m-4 md:rounded md:shadow">
-        <div
-            class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
-        >
-            <p class="text-md flex-3/12 px-2 py-3 text-left font-bold">Case Name</p>
-            <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">Period</p>
-            <p class="text-md flex-2/12 px-2 py-3 text-left font-bold text-nowrap">Used Hrs</p>
-            <p class="text-md flex-1/12 px-2 py-3 text-left font-bold text-nowrap">Next Billing</p>
-            <p class="text-md flex-1/12 px-2 py-3 text-left font-bold text-nowrap">Last Billing</p>
-            <p class="text-md flex-auto px-2 py-3 text-left font-bold">&nbsp;</p>
-        </div>
+        {@render tableHeader(true)}
         {#each cases as c, i (c.id)}
             <Case
                 {...c}
                 onSaved={upsertCase}
                 onDeleted={() => removeCase(c.id)}
+                editable
             />
             {#if i < cases.length - 1}
                 <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
             {/if}
         {/each}
     </div>
+
+    {#if closedCases.length > 0}
+        <div class="md:m-4 md:rounded md:shadow">
+            {@render tableHeader(false)}
+            {#each closedCases as c, i (c.id)}
+                <Case {...c} />
+                {#if i < closedCases.length - 1}
+                    <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
+                {/if}
+            {/each}
+        </div>
+    {/if}
 </main>

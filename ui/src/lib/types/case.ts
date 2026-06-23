@@ -21,4 +21,5 @@ export type CaseData = {
     pendingLogs: number
     billingCycle: number
     settledAt: Date | null
+    closed: boolean
 }

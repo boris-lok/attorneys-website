@@ -117,17 +117,9 @@
         <div
             class="my-1 flex flex-2/12 flex-row items-center text-sm text-gray-500 md:my-0 md:flex-col md:text-gray-700"
         >
-            <DateTimePicker
-                date={_startedAt}
-                onChanged={(e) => _startedAt = e }
-                dateOnly={true}
-            />
+            <DateTimePicker value={_startedAt} />
             <span>~</span>
-            <DateTimePicker
-                date={_endedAt}
-                onChanged={(e) => _endedAt = e }
-                dateOnly={true}
-            />
+            <DateTimePicker value={_endedAt} />
         </div>
 
         <div class="flex-1/12 text-sm">

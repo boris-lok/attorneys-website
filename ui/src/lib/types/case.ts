@@ -2,10 +2,10 @@ import type { WithId } from '$lib/types/common'
 
 export type CreateCaseRequest = {
     name: string
-    estimatedMinutes: number
-    billingCycle: number
-    startedAt: Date
-    endedAt: Date
+    estimated_minutes: number
+    billing_cycle: number
+    started_at: Date
+    ended_at: Date
 }
 
 export type UpdateCaseRequest = WithId<CreateCaseRequest>

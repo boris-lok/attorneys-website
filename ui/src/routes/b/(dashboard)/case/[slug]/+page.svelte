@@ -104,17 +104,9 @@
         class="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-end md:gap-4 md:px-6"
     >
         <div class="m-2 flex flex-row items-center gap-4">
-            <DateTimePicker
-                date={range.startedAt}
-                dateOnly={true}
-                onChanged={(e) => range.set('startedAt', e)}
-            />
+            <DateTimePicker value={range.startedAt} />
             <span>~</span>
-            <DateTimePicker
-                date={range.endedAt}
-                dateOnly={true}
-                onChanged={(e) => range.set('endedAt', e)}
-            />
+            <DateTimePicker value={range.endedAt} />
         </div>
 
         <div class="flex flex-row items-center gap-2">

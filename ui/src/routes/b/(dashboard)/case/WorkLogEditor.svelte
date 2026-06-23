@@ -105,7 +105,8 @@
     }
 
     // Event Handlers
-    function onStartedDateChanged(date: Date) {
+    function onStartedDateChanged(date: Date | null) {
+        if (!date) return
         _startedAt = date
         _endedAt = new Date(date.getTime() + FIFTEEN_MINUTES_MS)
     }
@@ -201,14 +202,14 @@
 
 <div class="flex flex-col gap-4">
     <div class="flex flex-row items-center justify-between md:justify-normal md:gap-4">
-        <div class="flex flex-col gap-1 md:flex-row md:items-center md:gap-2">
-            <span class="text-sm font-semibold md:mb-2 mb-0">Working Time: </span>
-            <DateTimePicker date={_startedAt} onChanged={onStartedDateChanged} />
-            <span class="text-center md:mb-4 hidden md:block"> ~ </span>
-            <DateTimePicker date={_endedAt} onChanged={(e) => _endedAt = e} />
+        <div class="flex flex-col gap-1 sm:flex-row md:items-center md:gap-2 sm:items-center">
+            <span class="text-sm font-semibold h-fit">Working Time: </span>
+            <DateTimePicker value={_startedAt} onchange={onStartedDateChanged} showTime />
+            <span class="text-center hidden sm:block"> ~ </span>
+            <DateTimePicker value={_endedAt} showTime />
         </div>
 
-        <span class="h-fit mb-0 md:mb-2"> ({duration} min)</span>
+        <span class="h-fit"> ({duration} min)</span>
     </div>
 
     <div>

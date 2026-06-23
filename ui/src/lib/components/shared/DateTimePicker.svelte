@@ -1,129 +1,174 @@
 <script lang="ts">
-    import Input from '$lib/components/shared/Input.svelte'
-
-    type Props = {
-        date?: Date
-        onChanged?: (date: Date) => void
-        dateOnly?: boolean
+    interface Parts {
+        year: string;
+        month: string;
+        day: string;
+        hour: string;
+        minute: string;
     }
 
-    let { date = new Date(), onChanged, dateOnly = false }: Props = $props()
-
-    type Draft = {
-        year: string
-        month: string
-        day: string
-        hour: string
-        minute: string
+    interface Props {
+        value?: Date | null;
+        showTime?: boolean;
+        onchange?: (value: Date | null) => void;
     }
 
-    function toDraft(d: Date): Draft {
+    let {
+        value = $bindable(null),
+        showTime = false,
+        onchange
+    }: Props = $props();
+
+    function partsFromDate(d: Date | null): Parts {
+        if (!(d instanceof Date) || isNaN(d.getTime())) {
+            return { year: '', month: '', day: '', hour: '', minute: '' };
+        }
         return {
             year: String(d.getFullYear()),
-            month: String(d.getMonth() + 1),
-            day: String(d.getDate()),
-            hour: String(d.getHours()),
-            minute: String(d.getMinutes()),
-        }
+            month: String(d.getMonth() + 1).padStart(2, '0'),
+            day: String(d.getDate()).padStart(2, '0'),
+            hour: String(d.getHours()).padStart(2, '0'),
+            minute: String(d.getMinutes()).padStart(2, '0')
+        };
     }
 
-    let lastSource = $state(date)
-    let draft = $state<Draft>(toDraft(date))
+    let parts = $state<Parts>(partsFromDate(value));
 
-    function tryCommit(): boolean {
-        const y = Number(draft.year)
-        const m = Number(draft.month)
-        const d = Number(draft.day)
-        const h = dateOnly ? 0 : Number(draft.hour)
-        const min = dateOnly ? 0 : Number(draft.minute)
+    // Track the date this component last produced, so we can tell an
+    // external `value` change apart from the user's own typing.
+    let lastEmitted: Date | null = value;
 
-        const requiredEmpty =
-            draft.year === '' ||
-            draft.month === '' ||
-            draft.day === '' ||
-            (!dateOnly && (draft.hour === '' || draft.minute === ''))
-
-        if (requiredEmpty || [y, m, d, h, min].some(Number.isNaN)) return false
-
-        // Range checks
-        if (y < 1000 || y > 9999) return false
-        if (m < 1 || m > 12) return false
-        if (d < 1 || d > 31) return false
-        if (!dateOnly && (h < 0 || h > 23 || min < 0 || min > 59)) return false
-
-        const newDate = new Date(y, m - 1, d, h, min)
-        newDate.setFullYear(y) // guard against 2-digit-year legacy
-
-        // Detect rollover (e.g. Feb 30 → Mar 2)
-        if (
-            newDate.getFullYear() !== y ||
-            newDate.getMonth() !== m - 1 ||
-            newDate.getDate() !== d
-        ) {
-            return false
-        }
-
-        if (newDate.getTime() === date.getTime()) return true // no-op
-
-        lastSource = newDate
-        onChanged?.(newDate)
-        return true
-    }
-
-    function commitOrRevert() {
-        if (!tryCommit()) {
-            draft = toDraft(date)
-        }
-    }
-
-    function updateField(key: keyof Draft, value: string) {
-        if (value !== '' && !/^\d+$/.test(value)) return
-        draft[key] = value
-    }
-
-    function onKeyDown(e: KeyboardEvent) {
-        if (e.key === 'Enter') {
-            ;(e.currentTarget as HTMLInputElement).blur()
-        }
-    }
-
-    // sync from parent only when its date actually changes
     $effect(() => {
-        if (date.getTime() !== lastSource.getTime()) {
-            lastSource = date
-            draft = toDraft(date)
+        // Re-sync the visible fields only when the parent changed 'value'.
+        if (value?.getTime() !== lastEmitted?.getTime()) {
+            lastEmitted = value;
+            parts = partsFromDate(value);
         }
-    })
+    });
+
+    let yearEl: HTMLInputElement | undefined = $state();
+    let monthEl: HTMLInputElement | undefined = $state();
+    let dayEl: HTMLInputElement | undefined = $state();
+    let hourEl: HTMLInputElement | undefined = $state();
+    let minuteEl: HTMLInputElement | undefined = $state();
+
+    function clampDigits(str: string, maxLen: number): string {
+        return str.replace(/\D/g, '').slice(0, maxLen);
+    }
+
+    function buildDate(): Date | null {
+        const { year, month, day, hour, minute } = parts;
+        if (!year || !month || !day) return null;
+        const y = +year;
+        const mo = +month - 1;
+        const d = +day;
+        const h = showTime ? +(hour || 0) : 0;
+        const mi = showTime ? +(minute || 0) : 0;
+        const dt = new Date(y, mo, d, h, mi);
+        if (isNaN(dt.getTime())) return null;
+        // Reject overflow (e.g. month 13, day 32, Feb 30)
+        if (dt.getMonth() !== mo || dt.getDate() !== d) return null;
+        return dt;
+    }
+
+    function commit() {
+        value = buildDate();
+        lastEmitted = value;
+        onchange?.(value);
+    }
+
+    function handle(field: keyof Parts, maxLen: number, nextEl?: HTMLInputElement) {
+        return (e: Event & { currentTarget: HTMLInputElement }) => {
+            const cleaned = clampDigits(e.currentTarget.value, maxLen);
+            parts[field] = cleaned;
+            e.currentTarget.value = cleaned;
+            commit();
+            if (cleaned.length === maxLen && nextEl) {
+                nextEl.focus();
+                nextEl.select();
+            }
+        };
+    }
+
+    function handleBackspace(prevEl?: HTMLInputElement) {
+        return (e: KeyboardEvent & { currentTarget: HTMLInputElement }) => {
+            if (e.key === 'Backspace' && e.currentTarget.value === '' && prevEl) {
+                prevEl.focus();
+            }
+        };
+    }
+
+    function padOnBlur(field: keyof Parts) {
+        return () => {
+            if (parts[field].length === 1) {
+                parts[field] = parts[field].padStart(2, '0');
+                commit();
+            }
+        };
+    }
 </script>
 
-{#snippet field(key: keyof Draft, width: string, maxlength: number)}
-    <div class={width}>
-        <Input
-            name={key}
-            type="text"
-            inputmode="numeric"
-            {maxlength}
-            variant="fit"
-            aria-label={key}
-            value={draft[key]}
-            oninput={(e) => updateField(key, e.currentTarget.value)}
-            onblur={commitOrRevert}
-            onkeydown={onKeyDown}
-        />
-    </div>
-{/snippet}
+<div
+    class="inline-flex items-center gap-0.5 border-b px-2 py-1 font-mono text-gray-700 focus-within:border-b-blue-500"
+>
+    <input
+        bind:this={yearEl}
+        value={parts.year}
+        oninput={handle('year', 4, monthEl)}
+        placeholder="YYYY"
+        inputmode="numeric"
+        size="4"
+        class="w-12 appearance-none bg-transparent text-center placeholder:text-gray-400 focus:outline-none"
+    />
+    <span class="text-gray-400">/</span>
+    <input
+        bind:this={monthEl}
+        value={parts.month}
+        oninput={handle('month', 2, dayEl)}
+        onkeydown={handleBackspace(yearEl)}
+        onblur={padOnBlur('month')}
+        placeholder="MM"
+        inputmode="numeric"
+        size="2"
+        class="w-7 appearance-none bg-transparent text-center placeholder:text-gray-400 focus:outline-none"
+    />
+    <span class="text-gray-400">/</span>
+    <input
+        bind:this={dayEl}
+        value={parts.day}
+        oninput={handle('day', 2, showTime ? hourEl : undefined)}
+        onkeydown={handleBackspace(monthEl)}
+        onblur={padOnBlur('day')}
+        placeholder="DD"
+        inputmode="numeric"
+        size="2"
+        class="w-7 appearance-none bg-transparent text-center placeholder:text-gray-400 focus:outline-none"
+    />
 
-<div class="flex flex-wrap items-center gap-0.5">
-    {@render field('year', 'w-12', 4)}
-    <span class="text-gray-500 mb-2">/</span>
-    {@render field('month', 'w-8', 2)}
-    <span class="text-gray-500 mb-2">/</span>
-    {@render field('day', 'w-8', 2)}
-
-    {#if !dateOnly}
+    {#if showTime}
         <span class="w-2"></span>
-        {@render field('hour', 'w-8', 2)}
-        <span class="text-gray-500 mb-2">:</span>
-        {@render field('minute', 'w-8', 2)}
+        <input
+            bind:this={hourEl}
+            value={parts.hour}
+            oninput={handle('hour', 2, minuteEl)}
+            onkeydown={handleBackspace(dayEl)}
+            onblur={padOnBlur('hour')}
+            placeholder="HH"
+            inputmode="numeric"
+            size="2"
+            class="w-7 appearance-none bg-transparent text-center placeholder:text-gray-400 focus:outline-none"
+        />
+        <span class="text-gray-400">:</span>
+        <input
+            bind:this={minuteEl}
+            value={parts.minute}
+            oninput={handle('minute', 2, undefined)}
+            onkeydown={handleBackspace(hourEl)}
+            onblur={padOnBlur('minute')}
+            placeholder="mm"
+            inputmode="numeric"
+            size="2"
+            class="w-7 appearance-none bg-transparent text-center placeholder:text-gray-400 focus:outline-none"
+        />
     {/if}
 </div>

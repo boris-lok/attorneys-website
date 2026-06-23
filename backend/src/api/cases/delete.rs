@@ -1,5 +1,5 @@
 use crate::api::api_error::ApiError;
-use crate::domain::cases::delete::{execute, Error};
+use crate::domain::cases::delete::execute;
 use crate::domain::cases::entity::CaseID;
 use crate::domain::entity::Claims;
 use crate::startup::AppState;
@@ -15,10 +15,7 @@ pub async fn delete_case(
     let id = params.get("id").ok_or(ApiError::BadRequest)?;
     let case_id = CaseID::try_from(id.clone()).map_err(|_| ApiError::BadRequest)?;
 
-    let res = execute(&state.case_uow(), &case_id).await;
+    execute(&state.case_uow(), &case_id).await?;
 
-    match res {
-        Ok(_) => Ok(StatusCode::OK),
-        Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
-    }
+    Ok(StatusCode::OK)
 }

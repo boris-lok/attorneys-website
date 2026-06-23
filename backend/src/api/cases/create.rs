@@ -36,12 +36,7 @@ pub async fn create_case(
         ended_at: req.ended_at,
     };
 
-    let resp = crate::domain::cases::create::execute(&state.case_uow(), req).await;
+    let resp = crate::domain::cases::create::execute(&state.case_uow(), req).await?;
 
-    match resp {
-        Ok(id) => Ok(Json(CreateCaseResponse { id: id.into() })),
-        Err(crate::domain::cases::create::Error::Unknown(e)) => {
-            Err(ApiError::InternalServerError(e))
-        }
-    }
+    Ok(Json(CreateCaseResponse { id: resp.into() }))
 }

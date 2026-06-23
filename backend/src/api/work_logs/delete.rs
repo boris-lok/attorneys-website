@@ -2,7 +2,6 @@ use crate::api::api_error::ApiError;
 use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use crate::domain::work_logs::delete::{execute, Request};
-use crate::domain::work_logs::error::WorkLogError;
 use crate::startup::AppState;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
@@ -23,14 +22,7 @@ pub async fn delete_work_log(
         force: false,
     };
 
-    let res = execute(&state.work_log_uow(), req).await;
+    execute(&state.work_log_uow(), req).await?;
 
-    match res {
-        Ok(_) => Ok(StatusCode::OK),
-        Err(WorkLogError::Unknown(e)) => Err(ApiError::InternalServerError(e)),
-        Err(WorkLogError::NotFound) => Err(ApiError::NotFound),
-        Err(WorkLogError::PermissionDenied) => Err(ApiError::PermissionDenied),
-        Err(WorkLogError::CaseIsClosed) => Err(ApiError::Forbidden),
-        Err(WorkLogError::CaseNotFound) => Err(ApiError::NotFound),
-    }
+    Ok(StatusCode::OK)
 }

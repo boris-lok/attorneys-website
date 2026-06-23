@@ -4,7 +4,6 @@ use crate::api::work_logs::entity::APIWorkLogFilters;
 use crate::domain::cases::entity::CaseID;
 use crate::domain::entity::Claims;
 use crate::domain::work_logs::entity::WorkLog;
-use crate::domain::work_logs::error::WorkLogError;
 use crate::domain::work_logs::list::{execute, Request};
 use axum::extract::Query;
 use axum::Json;
@@ -32,14 +31,7 @@ pub async fn list_work_logs(
         filters: query.filters.clone().try_into()?,
     };
 
-    let res = execute(&q, req).await;
+    let res = execute(&q, req).await?;
 
-    match res {
-        Ok(work_logs) => Ok(Json(ListWorkLogsResponse { work_logs })),
-        Err(WorkLogError::Unknown(e)) => Err(ApiError::InternalServerError(e)),
-        Err(WorkLogError::NotFound) => Err(ApiError::NotFound),
-        Err(WorkLogError::PermissionDenied) => Err(ApiError::PermissionDenied),
-        Err(WorkLogError::CaseIsClosed) => Err(ApiError::Forbidden),
-        Err(WorkLogError::CaseNotFound) => Err(ApiError::NotFound),
-    }
+    Ok(Json(ListWorkLogsResponse { work_logs: res }))
 }

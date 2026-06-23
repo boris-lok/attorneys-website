@@ -1,7 +1,7 @@
 use crate::api::api_error::ApiError;
 use crate::api::extractors::query::QueryExtractor;
 use crate::domain::cases::entity::Case;
-use crate::domain::cases::list::{execute, Error};
+use crate::domain::cases::list::execute;
 use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use axum::Json;
@@ -18,10 +18,7 @@ pub async fn list_cases(
 ) -> Result<Json<ListCasesResponse>, ApiError> {
     let user_id = UserID::try_from(c.sub.clone()).map_err(|_| ApiError::BadRequest)?;
 
-    let res = execute(&query, &user_id).await;
+    let res = execute(&query, &user_id).await?;
 
-    match res {
-        Ok(cases) => Ok(Json(ListCasesResponse { cases })),
-        Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
-    }
+    Ok(Json(ListCasesResponse { cases: res }))
 }

@@ -1,7 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::domain::cases::entity::CaseID;
 use crate::domain::cases::settle;
-use crate::domain::cases::settle::Error;
 use crate::domain::entity::Claims;
 use crate::startup::AppState;
 use axum::extract::State;
@@ -23,10 +22,7 @@ pub async fn settle(
 ) -> Result<impl IntoResponse, ApiError> {
     let case_id = CaseID::try_from(req.case_id).map_err(|_| ApiError::BadRequest)?;
 
-    let res = settle::execute(&state.case_uow(), &case_id).await;
+    settle::execute(&state.case_uow(), &case_id).await?;
 
-    match res {
-        Ok(_) => Ok(StatusCode::OK),
-        Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e.to_string())),
-    }
+    Ok(StatusCode::OK)
 }

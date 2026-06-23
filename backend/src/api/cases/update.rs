@@ -1,6 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::domain::cases::entity::CaseID;
-use crate::domain::cases::update::{execute, Error};
+use crate::domain::cases::update::execute;
 use crate::domain::entity::Claims;
 use crate::startup::AppState;
 use axum::extract::State;
@@ -33,10 +33,7 @@ pub async fn update_case(
         billing_cycle: req.billing_cycle,
     };
 
-    let res = execute(&state.case_uow(), req).await;
+    execute(&state.case_uow(), req).await?;
 
-    match res {
-        Ok(_) => Ok(StatusCode::OK),
-        Err(Error::Unknown(e)) => Err(ApiError::InternalServerError(e)),
-    }
+    Ok(StatusCode::OK)
 }

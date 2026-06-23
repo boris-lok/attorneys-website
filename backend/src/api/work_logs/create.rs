@@ -2,7 +2,6 @@ use crate::api::api_error::ApiError;
 use crate::domain::cases::entity::CaseID;
 use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
-use crate::domain::work_logs::error::WorkLogError;
 use crate::startup::AppState;
 use axum::extract::State;
 use axum::Json;
@@ -50,14 +49,9 @@ pub async fn create_work_log(
         collaborator_ids,
     };
 
-    let res = crate::domain::work_logs::create::execute(&state.work_log_uow(), req).await;
+    let res = crate::domain::work_logs::create::execute(&state.work_log_uow(), req).await?;
 
-    match res {
-        Ok(id) => Ok(Json(CreateWorkLogResponse { id: id.to_string() })),
-        Err(WorkLogError::Unknown(e)) => Err(ApiError::InternalServerError(e)),
-        Err(WorkLogError::NotFound) => Err(ApiError::NotFound),
-        Err(WorkLogError::PermissionDenied) => Err(ApiError::PermissionDenied),
-        Err(WorkLogError::CaseIsClosed) => Err(ApiError::Forbidden),
-        Err(WorkLogError::CaseNotFound) => Err(ApiError::NotFound),
-    }
+    Ok(Json(CreateWorkLogResponse {
+        id: res.to_string(),
+    }))
 }

@@ -14,7 +14,6 @@
             window.history.back()
         }
     }
-
 </script>
 
 <div class="my-8 px-4 md:mx-auto md:my-16 md:max-w-5xl md:px-8">
@@ -38,7 +37,7 @@
         <button
             class="h-10 w-36 cursor-pointer rounded border transition-[background-color,font-size] duration-500 hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] hover:text-lg hover:text-white"
             onclick={onBackClicked}
-        >返回
+            >返回
         </button>
     </div>
 </div>

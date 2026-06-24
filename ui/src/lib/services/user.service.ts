@@ -1,20 +1,5 @@
 import { ADMIN_URL, TIMEOUT } from '$lib/constant'
-import { getToken } from '$lib/utils'
-import type { APIError, APIResponse } from '$lib/types'
-
-export type Credential = {
-    userId: string
-    username: string
-    nickname: string
-    token: string
-    roles: string[]
-}
-
-export type SimpleUser = {
-    id: string
-    nickname: string
-    roles: string[]
-}
+import type { APIError, APIResponse, SimpleUser } from '$lib/types'
 
 /**
  * Authenticates a user by sending their credentials to the login endpoint.

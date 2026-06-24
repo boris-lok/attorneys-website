@@ -8,6 +8,7 @@ import type {
 } from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
+import type { FetchFn } from '$lib/services/common'
 
 /**
  * Sends a request to save a home entity. If the request contains an "id" property,
@@ -78,10 +79,14 @@ async function retrieve(
 /**
  * Fetches data from the home endpoint using the specified language.
  *
+ * @param fetch
  * @param {Language} language - The language preference for the request headers.
  * @return {Promise<APIError | APIResponse<{home: HomeData[]>}>} - A promise that resolves to an object containing either the fetched data or an error message.
  */
-async function list(language: Language): Promise<APIError | APIResponse<{ home: HomeData[] }>> {
+async function list(
+    fetch: FetchFn,
+    language: Language
+): Promise<APIError | APIResponse<{ home: HomeData[] }>> {
     try {
         const resp = await fetch(`${BASE_URL}/home`, {
             method: 'GET',

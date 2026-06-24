@@ -18,10 +18,10 @@ export type WorkLog = {
     description: string
     isCollaborative: boolean
     collaborators: Collaborator[]
-    user: SimpleUser
+    user: Creator
 }
 
-export type SimpleUser = {
+export type Creator = {
     id: string
     name: string
 }
@@ -43,4 +43,10 @@ export type PendingWorkLog = {
         id: string
         name: string
     }
+}
+
+export type SimpleUser = {
+    id: string
+    nickname: string
+    roles: string[]
 }

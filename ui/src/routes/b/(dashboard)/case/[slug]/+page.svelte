@@ -18,7 +18,7 @@
     // svelte-ignore state_referenced_locally
     let caseId = data.caseId
     // svelte-ignore state_referenced_locally
-    let user = data.user
+    let user = data.user!
     let range = useDateRange(90)
     let store = useWorkLog(caseId, user)
     let isCreated = $state(false)

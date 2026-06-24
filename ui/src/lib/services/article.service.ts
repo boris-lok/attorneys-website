@@ -4,10 +4,12 @@ import type {
     ArticleData,
     CreateArticleRequest,
     Language,
+    SimpleArticle,
     UpdateArticleRequest,
 } from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
+import type { FetchFn } from '$lib/services/common'
 
 /**
  * Saves an article by sending a request to the server.
@@ -45,6 +47,7 @@ async function save(
 /**
  * Fetches an article from the specified API endpoint based on the given ID and language.
  *
+ * @param fetch
  * @param {string} id - The unique identifier of the article to retrieve.
  * @param {Language} language - The language in which the article should be fetched.
  * @return {Promise<{error: boolean, article?: ArticleData, message?: string}>} A promise that resolves with the response object.
@@ -52,6 +55,7 @@ async function save(
  *         If an error occurs, the object contains an error flag and a message describing the issue.
  */
 async function retrieve(
+    fetch: FetchFn,
     id: string,
     language: Language
 ): Promise<APIError | APIResponse<{ article: ArticleData }>> {
@@ -83,6 +87,7 @@ async function retrieve(
 /**
  * Fetches a list of articles based on the specified language, category, pagination, and page size.
  *
+ * @param fetch
  * @param {Language} language - The language in which the articles should be retrieved.
  * @param {string | null} categoryId - The ID of the category to filter articles by, or null if no category filter is needed.
  * @param {number} page - The page number to retrieve.
@@ -91,6 +96,7 @@ async function retrieve(
  *         A promise that resolves to an object containing either the list of articles and total count if successful, or an error message if an error occurs.
  */
 async function list(
+    fetch: FetchFn,
     language: Language,
     categoryId: string | null,
     page: number,
@@ -98,14 +104,7 @@ async function list(
 ): Promise<
     | APIError
     | APIResponse<{
-          articles: {
-              id: string
-              title: string
-              language: Language
-              createdAt: Date
-              createdAtString: string
-              seq: number
-          }
+          articles: SimpleArticle[]
           total: number
       }>
 > {
@@ -125,7 +124,7 @@ async function list(
         })
 
         const json = await resp.json()
-        let articles = []
+        let articles: SimpleArticle[] = []
 
         if ('articles' in json && json.articles.length > 0) {
             articles = json.articles.map(
@@ -143,9 +142,8 @@ async function list(
                         title: article.title,
                         language: article.language,
                         createdAt: date,
-                        createdAtString: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
                         seq: article.seq,
-                    }
+                    } as SimpleArticle
                 }
             )
         }

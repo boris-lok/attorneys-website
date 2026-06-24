@@ -1,3 +1,4 @@
+<!-- svelte-ignore state_referenced_locally -->
 <script lang="ts">
     import Input from '$lib/components/shared/Input.svelte'
     import IconifyIcon from '@iconify/svelte'
@@ -87,7 +88,8 @@
                 pendingLogs: 0,
                 billingCycle: _billingCycle,
                 settledAt: settledAt ?? null,
-            })
+                closed: false,
+            } as CaseData)
         }
 
         isLoading = false

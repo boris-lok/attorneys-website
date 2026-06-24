@@ -11,11 +11,9 @@
 
     function goToPage(page: number) {
         if (page >= 0 && page < totalPages && page !== currentPage) {
-            currentPage = page
+            onPageChanged(page)
         }
     }
-
-    $effect(() => onPageChanged(currentPage))
 </script>
 
 <div class="flex items-center justify-center space-x-8 py-4">

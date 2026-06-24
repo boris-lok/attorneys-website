@@ -7,8 +7,7 @@ import type {
     WorkLog,
 } from '$lib/types'
 import { ADMIN_URL, TIMEOUT } from '$lib/constant'
-
-type FetchFn = typeof fetch
+import type { FetchFn } from '$lib/services/common'
 
 async function save(
     fetch: FetchFn,

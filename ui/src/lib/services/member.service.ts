@@ -9,6 +9,7 @@ import type {
 } from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT, UPLOAD_IMAGE_TIMEOUT } from '$lib/constant'
 import { getToken } from '$lib/utils'
+import type { FetchFn } from '$lib/services/common'
 
 /**
  * Saves a new member or updates an existing member based on the request object provided.
@@ -51,12 +52,14 @@ async function save(
  * Fetches member data by a given ID from a remote service.
  * The request is performed using the specified language header for localization.
  *
+ * @param fetch
  * @param {string} id - The unique identifier of the member to be retrieved.
  * @param {Language} language - The preferred language to be included in the request headers.
  * @return {Promise<APIError | APIResponse<{member: MemberData}>>} - A promise that resolves to an object indicating success or failure.
  * If successful, the object contains the member data. If unsuccessful, an error flag and message are provided.
  */
 async function retrieve(
+    fetch: FetchFn,
     id: string,
     language: Language
 ): Promise<APIError | APIResponse<{ member: MemberData }>> {
@@ -87,10 +90,12 @@ async function retrieve(
 /**
  * Fetches a list of members from a remote server.
  *
+ * @param fetch
  * @param {Language} language - The preferred language for the response, used to set the Accept-Language header.
  * @return {Promise<APIError | APIResponse<{members: SimpleMember[]}>>} A promise that resolves to an object containing a list of members or an error message.
  */
 async function list(
+    fetch: FetchFn,
     language: Language
 ): Promise<APIError | APIResponse<{ members: SimpleMember[] }>> {
     try {

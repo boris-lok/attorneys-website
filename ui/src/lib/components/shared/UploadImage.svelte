@@ -12,6 +12,7 @@
     // The avatarUrl that displays the avatar
     let { imageData, onChange }: InputProps = $props()
     // The snapshot of image data
+    // svelte-ignore state_referenced_locally
     let data = $state($state.snapshot(imageData))
     // The flag is used to indicate that user is dragging
     let isDragging = $state(false)

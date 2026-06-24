@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { type WorkLog, WorkLogServices } from '$lib/services/workLog.service'
+    import { WorkLogServices } from '$lib/services/workLog.service'
     import WorkLogEditor from './WorkLogEditor.svelte'
     import IconifyIcon from '@iconify/svelte'
     import { roundTo } from '$lib/utils'
+    import type { WorkLog } from '$lib/types'
 
     type Props = {
         log: WorkLog
@@ -15,6 +16,7 @@
 
     let { log, caseId, selfId, selfName, onSaved, onDeleted }: Props = $props()
     let isEditMode = $state(false)
+    // svelte-ignore state_referenced_locally
     let copiedData = $state(log)
 
     function _onSaved(newValue: WorkLog) {

@@ -57,9 +57,9 @@
 
 <nav class="relative z-50">
     <div
-        class="relative flex h-16 flex-row items-center gap-12 overflow-hidden bg-[var(--primary-color)] px-4 md:px-8"
+        class="relative flex h-16 flex-row items-center gap-12 overflow-hidden bg-(--primary-color) px-4 md:px-8"
     >
-        <div class="relative flex h-12 w-[100%] flex-row items-center justify-between">
+        <div class="relative flex h-12 w-full flex-row items-center justify-between">
             <!-- Logo -->
             <div>
                 <a href={rootUrl}>
@@ -106,7 +106,7 @@
 
 <!-- Becuase backdrop-filter: blur causes some issue on mobile, we use background to achieve the same feature -->
 <div
-    class="absolute z-[49] h-[calc(100vh-4rem)] w-full translate-y-[calc(-100vh+4rem)] overflow-hidden bg-gray-300/95 opacity-0 transition-[translate,z-index,opacity] duration-500 ease-in-out [&.show]:translate-y-0 [&.show]:opacity-100"
+    class="absolute z-49 h-[calc(100vh-4rem)] w-full translate-y-[calc(-100vh+4rem)] overflow-hidden bg-gray-300/95 opacity-0 transition-[translate,z-index,opacity] duration-500 ease-in-out [&.show]:translate-y-0 [&.show]:opacity-100"
     class:show
 >
     <!--Dropdown Navigate Item -->

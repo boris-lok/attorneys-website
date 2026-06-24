@@ -7,6 +7,7 @@ import type {
     UpdateServiceRequest,
 } from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
+import type { FetchFn } from '$lib/services/common'
 
 /**
  * Sends a request to save a service. Determines whether to create or update based on the presence of an `id` in the request object.
@@ -76,6 +77,7 @@ async function retrieve(
 /**
  * Fetches a list of services from the server based on the provided language.
  *
+ * @param fetch
  * @param {Language} language - The language code to retrieve services with the appropriate language settings.
  * @return {Promise<APIError | APIResponse<{services: ServiceData[]}>>}
  * Returns a promise that resolves with an object containing:
@@ -84,6 +86,7 @@ async function retrieve(
  * - `message` (optional string): An error message if the operation fails.
  */
 async function list(
+    fetch: FetchFn,
     language: Language
 ): Promise<APIError | APIResponse<{ services: ServiceData[] }>> {
     try {

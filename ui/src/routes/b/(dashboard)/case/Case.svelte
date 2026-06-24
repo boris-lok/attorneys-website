@@ -1,10 +1,10 @@
 <script lang="ts">
     import IconifyIcon from '@iconify/svelte'
-    import CaseEditor from '$lib/components/CaseEditor.svelte'
     import { roundTo } from '$lib/utils'
     import type { CaseData } from '$lib/types'
     import ProgressBar from '$lib/components/shared/ProgressBar.svelte'
     import { CaseServices } from '$lib/services/case.service'
+    import CaseEditor from './CaseEditor.svelte'
 
     type Props = CaseData & {
         onSaved?: (data: CaseData) => void

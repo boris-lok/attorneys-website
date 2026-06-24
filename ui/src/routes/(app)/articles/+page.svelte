@@ -1,109 +1,62 @@
 <script lang="ts">
-    import Loading from '$lib/components/shared/Loading.svelte'
-    import ArticleCard from '$lib/components/ArticleCard.svelte'
-    import type { CategoryData, Language, SimpleArticle } from '$lib/types'
-    import { ArticleServices } from '$lib/services/article.service'
-    import CategorySelector from '$lib/components/CategorySelector.svelte'
+    import { goto } from '$app/navigation'
+    import { page as pageStore } from '$app/state'
+    import ArticleCard from '$lib/components/feature/ArticleCard.svelte'
+    import CategorySelector from '$lib/components/feature/CategorySelector.svelte'
     import PaginationComponent from '$lib/components/shared/PaginationComponent.svelte'
 
-    let isLoading = $state(false)
-    let articles: SimpleArticle[] = $state([])
-    let categories: CategoryData[] = $state([])
-    let lang: Language = $state('zh')
-    let page = $state(0)
-    let selectedCategoryId = $state<string | null>(null)
-    let pageSize = 10
-    let totalPages = $state(0)
+    let { data } = $props()
 
-    async function fetchArticlesObservable(
-        lang: Language,
-        categoryId: string | null,
-        page: number,
-        pageSize: number
-    ) {
-        const resp = await ArticleServices.list(lang, categoryId, page, pageSize)
-
-        if (resp.error) {
-            console.error(resp.message)
-            return {
-                articles: [],
-                totalPages: 0,
-            }
+    function updateParams(changes: Record<string, string | null>) {
+        const params = new URLSearchParams(pageStore.url.searchParams)
+        for (const [key, value] of Object.entries(changes)) {
+            if (value === null) params.delete(key)
+            else params.set(key, value)
         }
-
-        return {
-            articles: resp.articles ?? [],
-            totalPages:
-                Math.floor((resp.total ?? 0) / pageSize) +
-                ((resp.total ?? 0) % pageSize > 0 ? 1 : 0),
-        }
-    }
-
-    function fetchCategoriesObservable(lang: Language) {
-        // return CategoryService
-        //     .list(lang)
-        //     .pipe(
-        //         tap(resp => {
-        //             categories = resp
-        //         })
-        //     )
+        goto(`?${params}`)
     }
 
     function onCategoryChanged(categoryId: string | null) {
-        selectedCategoryId = categoryId
+        updateParams({ category: categoryId, page: '0' })
     }
 
-    function onPageChanged(page: number) {
-        page = page
+    function onPageChanged(newPage: number) {
+        updateParams({ page: String(newPage) })
     }
-
-    $effect(() => {
-        ;(async (
-            lang: Language,
-            selectedCategoryId: string | null,
-            page: number,
-            pageSize: number
-        ) => {
-            const resp = await fetchArticlesObservable(lang, selectedCategoryId, page, pageSize)
-
-            articles = resp.articles
-            totalPages = resp.totalPages
-        })(lang, selectedCategoryId, page, pageSize)
-    })
 </script>
 
-{#if isLoading}
-    <Loading />
-{:else}
-    <div class="mb-8 px-4 lg:px-16">
-        <div class="mb-8">
-            <h1
-                class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-[var(--primary-color)] md:px-8 lg:px-16"
-            >
-                文章
-            </h1>
-        </div>
+<div class="mb-8 px-4 lg:px-16">
+    <div class="mb-8">
+        <h1
+            class="mb-8 px-4 pt-16 text-center text-4xl font-bold text-(--primary-color) md:px-8 lg:px-16"
+        >
+            文章
+        </h1>
+    </div>
 
-        <div class="flex flex-col-reverse gap-4 lg:flex-row lg:gap-8">
-            <div class="flex-4">
-                <div class="grid grid-cols-1 gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3">
-                    {#each articles as article (article.id)}
-                        <ArticleCard
-                            id={article.id}
-                            title={article.title}
-                            createdAt={article.createdAtString}
-                        />
-                    {/each}
-                </div>
-            </div>
-
-            <div class="flex-1">
-                <CategorySelector {categories} onChanged={onCategoryChanged} {selectedCategoryId} />
+    <div class="flex flex-col-reverse gap-4 lg:flex-row lg:gap-8">
+        <div class="flex-4">
+            <div class="grid grid-cols-1 gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3">
+                {#each data.articles as article (article.id)}
+                    <ArticleCard
+                        id={article.id}
+                        title={article.title}
+                        createdAt={article.createdAt}
+                    />
+                {/each}
             </div>
         </div>
 
-        <div class="mt-8 lg:mt-16">
-            <PaginationComponent {totalPages} {onPageChanged} currentPage={page} />
+        <div class="flex-1">
+            <CategorySelector
+                categories={[]}
+                onChanged={onCategoryChanged}
+                selectedCategoryId={data.categoryId}
+            />
         </div>
     </div>
-{/if}
+
+    <div class="mt-8 lg:mt-16">
+        <PaginationComponent totalPages={data.totalPages} {onPageChanged} currentPage={data.page} />
+    </div>
+</div>

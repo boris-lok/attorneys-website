@@ -16,10 +16,10 @@
             class="relative mt-4 flex flex-col gap-8 px-4 md:flex-row md:justify-center md:px-24 lg:px-48"
         >
             {#each data.data as member (member.id)}
-                <div
-                    class="flex h-36 w-full flex-row justify-between rounded px-4 py-4 shadow-md md:w-84 lg:w-96"
-                >
-                    <a href="/members/{member.id}" class="flex flex-row items-center gap-4">
+                <a href="/members/{member.id}">
+                    <div
+                        class="flex h-36 w-full flex-row rounded px-4 py-4 shadow-md md:w-84 lg:w-96 items-center gap-4"
+                    >
                         {#if member.avatar}
                             <div class="h-24 w-24">
                                 <Image alt={member.name} image={member.avatar} />
@@ -27,9 +27,9 @@
                         {:else}
                             <IconifyIcon icon="tabler:user-circle" class="h-24 w-24" />
                         {/if}
-                        <p class="text-2xl">{member.name}</p>
-                    </a>
-                </div>
+                        <p class="text-2xl h-fit">{member.name}</p>
+                    </div>
+                </a>
             {/each}
         </div>
     </div>

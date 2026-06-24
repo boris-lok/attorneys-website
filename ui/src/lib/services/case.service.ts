@@ -6,6 +6,7 @@ import type {
     UpdateCaseRequest,
 } from '$lib/types'
 import { ADMIN_URL, TIMEOUT } from '$lib/constant'
+import type { FetchFn } from '$lib/services/common'
 
 async function save(
     req: CreateCaseRequest | UpdateCaseRequest
@@ -144,7 +145,6 @@ export const CaseServices = {
     settle: settle,
 }
 
-type FetchFn = typeof fetch
 export function createCaseServices(fetch: FetchFn) {
     return {
         list: () => list(fetch),

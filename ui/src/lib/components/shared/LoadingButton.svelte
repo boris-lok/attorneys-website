@@ -1,5 +1,6 @@
 <script lang="ts">
     import IconifyIcon from '@iconify/svelte'
+    import type { Snippet } from 'svelte'
 
     type Variant = 'primary' | 'secondary' | 'danger'
     type Size = 'sm' | 'md' | 'lg'
@@ -12,7 +13,7 @@
         loadingText?: string
         type?: 'button' | 'submit' | 'reset'
         onclick?: () => void
-        children: import().Snippet
+        children: Snippet
     }
 
     let {

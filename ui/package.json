@@ -21,6 +21,7 @@
         "@tailwindcss/postcss": "^4.1.10",
         "@tailwindcss/typography": "^0.5.16",
         "@types/js-cookie": "^3.0.6",
+        "@types/node": "^26.0.0",
         "autoprefixer": "^10.4.21",
         "iterare": "^1.2.1",
         "js-cookie": "^3.0.5",

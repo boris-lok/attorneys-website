@@ -1,10 +1,10 @@
 <!-- svelte-ignore state_referenced_locally -->
 <script lang="ts">
     import DateTimePicker from '$lib/components/shared/DateTimePicker.svelte'
-    import { type SimpleUser, UserService } from '$lib/services/user.service'
+    import { UserService } from '$lib/services/user.service'
     import Textarea from '$lib/components/shared/Textarea.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import type { WorkLog } from '$lib/types'
+    import type { SimpleUser, WorkLog } from '$lib/types'
     import { toast } from '$lib/stores/toast.svelte'
     import { WorkLogServices } from '$lib/services/workLog.service'
 

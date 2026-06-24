@@ -7,7 +7,6 @@ import type {
     UpdateCategoryRequest,
 } from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
-import { getToken } from '$lib/utils'
 
 /**
  * Saves a category by sending either a creation or an update request to the server.

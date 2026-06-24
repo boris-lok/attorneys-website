@@ -1,8 +1,10 @@
 <script lang="ts">
+    import { formatDateTime } from '$lib/utils'
+
     type InputProps = {
         id: string
         title: string
-        createdAt: string
+        createdAt: Date
         disabled?: boolean
     }
 
@@ -16,7 +18,7 @@
         </h2>
 
         <p class="mt-4 text-xs text-gray-500">
-            發佈時間: {createdAt}
+            發佈時間: {formatDateTime(createdAt)}
         </p>
     </div>
 {:else}
@@ -25,7 +27,7 @@
         href="/articles/{id}"
     >
         <h2
-            class="text-xl font-semibold text-gray-800 transition group-hover:text-[var(--primary-color)]"
+            class="text-xl font-semibold text-gray-800 transition group-hover:text-(--primary-color)"
         >
             {title}
         </h2>

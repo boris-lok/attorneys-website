@@ -13,9 +13,9 @@
 
     function selectCategory(categoryId: string | null) {
         selectedCategoryId = categoryId
+        onChanged(categoryId)
+        isOpen = false
     }
-
-    $effect(() => onChanged(selectedCategoryId))
 </script>
 
 <div class="flex flex-col gap-2 px-8">
@@ -30,13 +30,13 @@
         class:active={isOpen}
     >
         <button
-            class="w-36 cursor-pointer text-left text-base hover:text-xl hover:text-[var(--primary-color)]"
+            class="w-36 cursor-pointer text-left text-base hover:text-xl hover:text-(--primary-color)"
             onclick={() => selectCategory(null)}
             >全部
         </button>
         {#each categories as category (category.id)}
             <button
-                class="w-36 cursor-pointer text-left text-base hover:text-xl hover:text-[var(--primary-color)]"
+                class="w-36 cursor-pointer text-left text-base hover:text-xl hover:text-(--primary-color)"
                 onclick={() => selectCategory(category.id)}>{category.data.name}</button
             >
         {/each}

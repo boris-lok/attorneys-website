@@ -12,8 +12,8 @@
     // Check if we use debug mode
     const debug = import.meta.env.VITE_DEBUG === 'true'
 
-    let lgImage = $derived(typeof image !== 'string' ? organizeURL(image.large_image) : '')
-    let smImage = $derived(organizeURL(typeof image !== 'string' ? image.small_image : image))
+    let lgImage = $derived(typeof image !== 'string' ? organizeURL(image.lgImage) : '')
+    let smImage = $derived(organizeURL(typeof image !== 'string' ? image.smImage : image))
 
     function organizeURL(path: string) {
         if (!path) return ''

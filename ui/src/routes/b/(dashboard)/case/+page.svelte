@@ -1,8 +1,8 @@
 <script lang="ts">
     import type { CaseData } from '$lib/types'
-    import Case from '$lib/components/Case.svelte'
+    import Case from './Case.svelte'
     import IconifyIcon from '@iconify/svelte'
-    import CaseEditor from '$lib/components/CaseEditor.svelte'
+    import CaseEditor from './CaseEditor.svelte'
     import type { PageProps } from './$types'
 
     let { data }: PageProps = $props()

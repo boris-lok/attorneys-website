@@ -8,15 +8,10 @@ export const handle = async ({ event, resolve }) => {
     if (token) {
         try {
             payload = jwtDecode<PayLoad>(token)
-            event.locals.user = {
-                id: payload.sub,
-                roles: payload.roles ?? [],
-                nickname: payload.nickname ?? '',
-            }
         } catch {
             payload = null
-            event.locals.user = null
         }
+        event.locals.user = payload
     }
 
     return await resolve(event)

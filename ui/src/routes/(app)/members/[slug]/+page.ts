@@ -1,7 +1,15 @@
 import type { PageLoad } from './$types'
+import { MemberServices } from '$lib/services/member.service'
+import { error } from '@sveltejs/kit'
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageLoad = async ({ params }) => {
+    const resp = await MemberServices.retrieve(params.slug, 'zh')
+
+    if (resp.error) {
+        throw error(502, resp.message)
+    }
+
     return {
-        id: params.slug,
+        data: resp.member,
     }
 }

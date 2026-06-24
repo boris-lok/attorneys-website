@@ -1,10 +1,11 @@
 <script lang="ts">
-    import HomeContent from '$lib/components/HomeContent.svelte'
-    import type { Language } from '$lib/types'
+    import Markdown from '@magidoc/plugin-svelte-marked'
 
-    let language: Language = 'zh'
+    let { data } = $props()
 </script>
 
 <div class="md:animate-[--right-to-left_1s_ease-in-out]">
-    <HomeContent {language} />
+    <div class="prose mx-auto my-6 w-full px-6 md:my-16 md:min-w-2xl md:px-16 lg:min-w-3xl">
+        <Markdown source={data.data}></Markdown>
+    </div>
 </div>

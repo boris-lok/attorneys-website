@@ -67,7 +67,7 @@ impl ResourceType {
     pub fn as_str(&self) -> &str {
         match self {
             Self::Member => "member",
-            Self::Service => "services",
+            Self::Service => "service",
             Self::Home => "home",
             Self::Contact => "contact",
             Self::Article => "article",

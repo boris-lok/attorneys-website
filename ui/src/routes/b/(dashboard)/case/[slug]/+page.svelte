@@ -14,7 +14,6 @@
     import { triggerDownload } from '$lib/utils'
     import { untrack } from 'svelte'
 
-
     let { data }: PageProps = $props()
     // svelte-ignore state_referenced_locally
     let caseId = data.caseId
@@ -34,7 +33,12 @@
     }
 
     async function download() {
-        const resp = await WorkLogServices.download(window.fetch, caseId, range.startedAt, range.endedAt)
+        const resp = await WorkLogServices.download(
+            window.fetch,
+            caseId,
+            range.startedAt,
+            range.endedAt
+        )
         if (resp.error) {
             toast.show(resp.message, 'error')
             return
@@ -42,7 +46,6 @@
 
         triggerDownload(resp.blob, `${new Date().toISOString().split('T')[0]}.xlsx`)
     }
-
 
     async function settle() {
         const resp = await CaseServices.settle(window.fetch, caseId)
@@ -53,20 +56,22 @@
 
         toast.show('Case settled successfully')
     }
-
 </script>
 
 {#if store.isLoading}
     <Loading />
 {/if}
 
-
 <main>
     {#if isCreated}
-        <div class="px-2 md:px-8 md:mx-8 md:mt-8 md:rounded md:shadow md:py-4">
-            <WorkLogEditor selfId={user.sub} selfName={user.nickname} onClosed={() => (isCreated = false)}
-                           caseId={caseId}
-                           onSaved={store.upsert} />
+        <div class="px-2 md:mx-8 md:mt-8 md:rounded md:px-8 md:py-4 md:shadow">
+            <WorkLogEditor
+                selfId={user.sub}
+                selfName={user.nickname}
+                onClosed={() => (isCreated = false)}
+                {caseId}
+                onSaved={store.upsert}
+            />
         </div>
     {:else}
         <div class="my-2 flex h-16 flex-row items-center justify-end gap-4 px-4">
@@ -110,10 +115,9 @@
         </div>
 
         <div class="flex flex-row items-center gap-2">
-            <div class="relative group">
+            <div class="group relative">
                 <button class="cursor-pointer" onclick={download}>
                     <IconifyIcon class="h-6 w-6" icon="tabler:download" />
-
                 </button>
                 <p
                     class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
@@ -122,7 +126,7 @@
                 </p>
             </div>
 
-            <div class="relative group">
+            <div class="group relative">
                 <button class="group relative cursor-pointer" onclick={search}>
                     <IconifyIcon icon="tabler:file-search" class="h-6 w-6" />
                 </button>
@@ -133,8 +137,7 @@
                 </p>
             </div>
 
-
-            <div class="relative group">
+            <div class="group relative">
                 <button
                     class="group relative"
                     class:text-red-500={store.logs.length > 0}
@@ -143,8 +146,7 @@
                     onclick={settle}
                     disabled={store.logs.length === 0}
                 >
-                    <IconifyIcon icon="tabler:align-box-right-top"
-                                 class="h-6 w-6" />
+                    <IconifyIcon icon="tabler:align-box-right-top" class="h-6 w-6" />
                 </button>
                 <p
                     class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
@@ -152,9 +154,7 @@
                     Settle
                 </p>
             </div>
-
         </div>
-
     </div>
 
     <div class="md:m-4 md:rounded md:shadow">
@@ -174,10 +174,10 @@
                     <WorkLog
                         selfId={user.sub}
                         selfName={user.nickname}
-                        caseId={caseId}
+                        {caseId}
                         {log}
                         onSaved={store.upsert}
-                        onDeleted={() => (store.remove(log.id))}
+                        onDeleted={() => store.remove(log.id)}
                     />
                     {#if i < store.logs.length - 1}
                         <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>

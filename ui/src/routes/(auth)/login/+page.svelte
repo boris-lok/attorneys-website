@@ -54,26 +54,11 @@
         <p class="mt-2 mb-4 text-center text-red-500">{errorMsg}</p>
     {/if}
 
-    <Input
-        label="Username"
-        name="username"
-        type="text"
-        bind:value={username}
-    />
-    <Input
-        label="Password"
-        name="password"
-        type="password"
-        bind:value={password}
-    />
+    <Input label="Username" name="username" type="text" bind:value={username} />
+    <Input label="Password" name="password" type="password" bind:value={password} />
     <div class="flex items-center justify-center">
-        <LoadingButton
-            isLoading={isLoading}
-            onclick={onSubmitClicked}
-            loadingText="Logging in..."
-        >
+        <LoadingButton {isLoading} onclick={onSubmitClicked} loadingText="Logging in...">
             <p>Login</p>
         </LoadingButton>
-
     </div>
 </div>

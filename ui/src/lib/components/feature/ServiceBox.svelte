@@ -12,9 +12,7 @@
 </script>
 
 <div class="group relative h-72 w-72 overflow-clip rounded-xl">
-    <div
-        class="relative h-full w-full rounded-xl border border-(--primary-color) p-4"
-    >
+    <div class="relative h-full w-full rounded-xl border border-(--primary-color) p-4">
         <div
             class="flex h-full w-full flex-col items-center justify-center gap-2 text-2xl font-bold text-(--primary-color) group-hover:opacity-20"
         >
@@ -26,10 +24,10 @@
     </div>
 
     <div
-        class="absolute inset-0 bg-white opacity-0 group-hover:opacity-80 transition-opacity duration-200"
+        class="absolute inset-0 bg-white opacity-0 transition-opacity duration-200 group-hover:opacity-80"
     ></div>
     <div
-        class="prose absolute inset-0 overflow-y-auto p-4 text-left opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200"
+        class="prose pointer-events-none absolute inset-0 overflow-y-auto p-4 text-left opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100"
     >
         <Markdown source={content} />
     </div>

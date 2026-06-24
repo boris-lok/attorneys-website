@@ -21,7 +21,17 @@
     }
     type PartialProps = Partial<Props> & Output
 
-    let { onClosed, onSaved, id, name, hrs, startedAt, endedAt, billingCycle, settledAt }: PartialProps = $props()
+    let {
+        onClosed,
+        onSaved,
+        id,
+        name,
+        hrs,
+        startedAt,
+        endedAt,
+        billingCycle,
+        settledAt,
+    }: PartialProps = $props()
     let _id = $state(id ?? '')
     let _name = $state(name ?? '')
     let _hrs = $state(hrs ?? 0)
@@ -60,7 +70,7 @@
             estimated_minutes: _hrs * 60,
             billing_cycle: _billingCycle,
             started_at: _startedAt,
-            ended_at: _endedAt
+            ended_at: _endedAt,
         })
 
         if (resp.error) {
@@ -76,7 +86,7 @@
                 endedAt: _endedAt,
                 pendingLogs: 0,
                 billingCycle: _billingCycle,
-                settledAt: settledAt ?? null
+                settledAt: settledAt ?? null,
             })
         }
 
@@ -95,7 +105,7 @@
 
 <div class="w-full">
     {#if errMsg}
-        <div class="mt-2 text-sm text-red-500 w-full text-center">
+        <div class="mt-2 w-full text-center text-sm text-red-500">
             {errMsg}
         </div>
     {/if}
@@ -103,7 +113,6 @@
     <div
         class="m-4 w-full p-4 md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:p-2"
     >
-
         <div class="my-2 flex-4/12 font-semibold text-nowrap md:my-0 md:font-medium">
             <Input
                 label="Case Name"
@@ -130,10 +139,10 @@
                 variant="outlined"
                 value={_hrs}
                 oninput={(e) => {
-                const n = Number(e.currentTarget.value)
-                if (Number.isNaN(n)) return
-                _hrs = n
-            }}
+                    const n = Number(e.currentTarget.value)
+                    if (Number.isNaN(n)) return
+                    _hrs = n
+                }}
             />
         </div>
 
@@ -145,10 +154,10 @@
                 variant="outlined"
                 value={_billingCycle}
                 oninput={(e) => {
-                const n = Number(e.currentTarget.value)
-                if (Number.isNaN(n)) return
-                _billingCycle = n
-            }}
+                    const n = Number(e.currentTarget.value)
+                    if (Number.isNaN(n)) return
+                    _billingCycle = n
+                }}
             />
         </div>
 
@@ -164,7 +173,4 @@
             </button>
         </div>
     </div>
-
 </div>
-
-

@@ -24,13 +24,7 @@
     {#if label}
         <label class="block text-sm font-bold text-gray-700" for={inputId}>{label}</label>
     {/if}
-    <input
-        {...props}
-        class="base-classes input--{variant}"
-        bind:value
-        id={inputId}
-        {name}
-    />
+    <input {...props} class="base-classes input--{variant}" bind:value id={inputId} {name} />
 </div>
 
 <style lang="postcss">
@@ -50,7 +44,7 @@
     }
 
     .input--fit {
-        @apply px-0 md:px-0 pb-1 text-center;
+        @apply px-0 pb-1 text-center md:px-0;
         @apply border-b border-b-black focus:border-b-blue-500;
     }
 </style>

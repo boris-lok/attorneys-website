@@ -12,7 +12,7 @@
         loadingText?: string
         type?: 'button' | 'submit' | 'reset'
         onclick?: () => void
-        children: import('svelte').Snippet
+        children: import().Snippet
     }
 
     let {
@@ -34,8 +34,7 @@
             'bg-blue-500 text-white hover:bg-blue-600 focus-visible:ring-blue-500 disabled:bg-blue-300',
         secondary:
             'bg-gray-100 text-gray-800 hover:bg-gray-200 focus-visible:ring-gray-400 disabled:bg-gray-50 disabled:text-gray-400',
-        danger:
-            'bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500 disabled:bg-red-300',
+        danger: 'bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500 disabled:bg-red-300',
     }
 
     const sizes: Record<Size, string> = {

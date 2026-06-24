@@ -11,25 +11,22 @@
     // When that happens, the page will re-render and the cases are re-initialized
     // svelte-ignore state_referenced_locally
     let allCases = $state(data.cases)
-    let cases: CaseData[] = $derived(allCases.filter(e => !e.closed))
-    let closedCases = $derived(allCases.filter(e => e.closed))
+    let cases: CaseData[] = $derived(allCases.filter((e) => !e.closed))
+    let closedCases = $derived(allCases.filter((e) => e.closed))
     // The state uses to control the creation
     // If it is true, the editor is open, else show the creation icon
     let isCreating = $state(false)
 
     // insert a new case or update an existing one
     function upsertCase(c: CaseData) {
-        const exist = cases.some(e => e.id === c.id)
-        allCases = exist ?
-            allCases.map((e) => e.id === c.id ? c : e) :
-            [c, ...allCases]
+        const exist = cases.some((e) => e.id === c.id)
+        allCases = exist ? allCases.map((e) => (e.id === c.id ? c : e)) : [c, ...allCases]
     }
 
     // remove the case from the list
     function removeCase(id: string) {
         allCases = allCases.filter((e) => e.id !== id)
     }
-
 </script>
 
 {#snippet tableHeader(showActions: boolean)}
@@ -38,8 +35,13 @@
         <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">Period</p>
         <p class="text-md flex-2/12 px-2 py-3 text-left font-bold text-nowrap">Used Hrs</p>
         <p class="text-md flex-1/12 px-2 py-3 text-left font-bold text-nowrap">Next Billing</p>
-        <p class="text-md {showActions ? 'flex-1/12' : 'flex-auto'} px-2 py-3 text-left font-bold text-nowrap">Last
-            Billing</p>
+        <p
+            class="text-md {showActions
+                ? 'flex-1/12'
+                : 'flex-auto'} px-2 py-3 text-left font-bold text-nowrap"
+        >
+            Last Billing
+        </p>
         {#if showActions}
             <p class="text-md flex-auto px-2 py-3 text-left font-bold">&nbsp;</p>
         {/if}
@@ -49,10 +51,13 @@
 <main>
     {#if isCreating}
         <div class="mx-4 my-4 flex items-center justify-center rounded px-8 shadow">
-            <CaseEditor onClosed={() => (isCreating = false)} onSaved={(e) => {
-                isCreating = false
-                upsertCase(e)
-            }} />
+            <CaseEditor
+                onClosed={() => (isCreating = false)}
+                onSaved={(e) => {
+                    isCreating = false
+                    upsertCase(e)
+                }}
+            />
         </div>
     {:else}
         <div class="my-2 flex h-16 flex-row items-center justify-end gap-2 px-4">
@@ -65,12 +70,7 @@
     <div class="md:m-4 md:rounded md:shadow">
         {@render tableHeader(true)}
         {#each cases as c, i (c.id)}
-            <Case
-                {...c}
-                onSaved={upsertCase}
-                onDeleted={() => removeCase(c.id)}
-                editable
-            />
+            <Case {...c} onSaved={upsertCase} onDeleted={() => removeCase(c.id)} editable />
             {#if i < cases.length - 1}
                 <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
             {/if}

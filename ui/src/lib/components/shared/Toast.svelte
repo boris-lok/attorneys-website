@@ -4,7 +4,7 @@
     import IconifyIcon from '@iconify/svelte'
 </script>
 
-<div class="fixed bottom-4 md:bottom-8 w-full flex flex-col gap-1 items-center-safe">
+<div class="fixed bottom-4 flex w-full flex-col items-center-safe gap-1 md:bottom-8">
     {#each toast.toasts as item (item.id)}
         <div
             class="toast toast--{item.type}"
@@ -12,7 +12,7 @@
             out:fly={{ x: 100, duration: 150, opacity: 0 }}
         >
             <p>{item.message}</p>
-            <button class="text-black cursor-pointer" onclick={() => toast.dismiss(item.id)}>
+            <button class="cursor-pointer text-black" onclick={() => toast.dismiss(item.id)}>
                 <IconifyIcon icon="solar:close-circle-line-duotone" />
             </button>
         </div>
@@ -23,7 +23,7 @@
     @reference '../../../app.css';
 
     .toast {
-        @apply my-1 bg-gray-300/50 px-3 py-1 rounded sm:min-w-sm md:min-w-md max-w-full w-fit text-center flex flex-row justify-between;
+        @apply my-1 flex w-fit max-w-full flex-row justify-between rounded bg-gray-300/50 px-3 py-1 text-center sm:min-w-sm md:min-w-md;
     }
 
     .toast--success {

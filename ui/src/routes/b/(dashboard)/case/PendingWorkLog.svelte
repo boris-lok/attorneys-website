@@ -46,18 +46,32 @@
     <div class="flex h-fit flex-2/12 flex-row justify-end gap-2">
         {#if isLoading}
             <div>
-                <IconifyIcon class="text-blue-500 h-6 w-6 mr-6" icon="svg-spinners:90-ring-with-bg" />
+                <IconifyIcon
+                    class="mr-6 h-6 w-6 text-blue-500"
+                    icon="svg-spinners:90-ring-with-bg"
+                />
             </div>
         {:else}
-            <button class="cursor-pointer" onclick={() => onClicked('accepted')} aria-label="Accept work log">
+            <button
+                class="cursor-pointer"
+                onclick={() => onClicked('accepted')}
+                aria-label="Accept work log"
+            >
                 <IconifyIcon
                     class="h-4 w-4 text-green-500 md:h-6 md:w-6"
                     icon="line-md:circle-to-confirm-circle-transition"
                 />
             </button>
 
-            <button class="cursor-pointer" onclick={() => onClicked('rejected')} aria-label="Reject work log">
-                <IconifyIcon class="h-4 w-4 text-red-500 md:h-6 md:w-6" icon="line-md:close-circle" />
+            <button
+                class="cursor-pointer"
+                onclick={() => onClicked('rejected')}
+                aria-label="Reject work log"
+            >
+                <IconifyIcon
+                    class="h-4 w-4 text-red-500 md:h-6 md:w-6"
+                    icon="line-md:close-circle"
+                />
             </button>
         {/if}
     </div>

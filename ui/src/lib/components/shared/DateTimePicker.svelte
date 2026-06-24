@@ -1,110 +1,106 @@
 <script lang="ts">
     interface Parts {
-        year: string;
-        month: string;
-        day: string;
-        hour: string;
-        minute: string;
+        year: string
+        month: string
+        day: string
+        hour: string
+        minute: string
     }
 
     interface Props {
-        value?: Date | null;
-        showTime?: boolean;
-        onchange?: (value: Date | null) => void;
+        value?: Date | null
+        showTime?: boolean
+        onchange?: (value: Date | null) => void
     }
 
-    let {
-        value = $bindable(null),
-        showTime = false,
-        onchange
-    }: Props = $props();
+    let { value = $bindable(null), showTime = false, onchange }: Props = $props()
 
     function partsFromDate(d: Date | null): Parts {
         if (!(d instanceof Date) || isNaN(d.getTime())) {
-            return { year: '', month: '', day: '', hour: '', minute: '' };
+            return { year: '', month: '', day: '', hour: '', minute: '' }
         }
         return {
             year: String(d.getFullYear()),
             month: String(d.getMonth() + 1).padStart(2, '0'),
             day: String(d.getDate()).padStart(2, '0'),
             hour: String(d.getHours()).padStart(2, '0'),
-            minute: String(d.getMinutes()).padStart(2, '0')
-        };
+            minute: String(d.getMinutes()).padStart(2, '0'),
+        }
     }
 
-    let parts = $state<Parts>(partsFromDate(value));
+    let parts = $state<Parts>(partsFromDate(value))
 
     // Track the date this component last produced, so we can tell an
     // external `value` change apart from the user's own typing.
-    let lastEmitted: Date | null = value;
+    let lastEmitted: Date | null = value
 
     $effect(() => {
         // Re-sync the visible fields only when the parent changed 'value'.
         if (value?.getTime() !== lastEmitted?.getTime()) {
-            lastEmitted = value;
-            parts = partsFromDate(value);
+            lastEmitted = value
+            parts = partsFromDate(value)
         }
-    });
+    })
 
-    let yearEl: HTMLInputElement | undefined = $state();
-    let monthEl: HTMLInputElement | undefined = $state();
-    let dayEl: HTMLInputElement | undefined = $state();
-    let hourEl: HTMLInputElement | undefined = $state();
-    let minuteEl: HTMLInputElement | undefined = $state();
+    let yearEl: HTMLInputElement | undefined = $state()
+    let monthEl: HTMLInputElement | undefined = $state()
+    let dayEl: HTMLInputElement | undefined = $state()
+    let hourEl: HTMLInputElement | undefined = $state()
+    let minuteEl: HTMLInputElement | undefined = $state()
 
     function clampDigits(str: string, maxLen: number): string {
-        return str.replace(/\D/g, '').slice(0, maxLen);
+        return str.replace(/\D/g, '').slice(0, maxLen)
     }
 
     function buildDate(): Date | null {
-        const { year, month, day, hour, minute } = parts;
-        if (!year || !month || !day) return null;
-        const y = +year;
-        const mo = +month - 1;
-        const d = +day;
-        const h = showTime ? +(hour || 0) : 0;
-        const mi = showTime ? +(minute || 0) : 0;
-        const dt = new Date(y, mo, d, h, mi);
-        if (isNaN(dt.getTime())) return null;
+        const { year, month, day, hour, minute } = parts
+        if (!year || !month || !day) return null
+        const y = +year
+        const mo = +month - 1
+        const d = +day
+        const h = showTime ? +(hour || 0) : 0
+        const mi = showTime ? +(minute || 0) : 0
+        const dt = new Date(y, mo, d, h, mi)
+        if (isNaN(dt.getTime())) return null
         // Reject overflow (e.g. month 13, day 32, Feb 30)
-        if (dt.getMonth() !== mo || dt.getDate() !== d) return null;
-        return dt;
+        if (dt.getMonth() !== mo || dt.getDate() !== d) return null
+        return dt
     }
 
     function commit() {
-        value = buildDate();
-        lastEmitted = value;
-        onchange?.(value);
+        value = buildDate()
+        lastEmitted = value
+        onchange?.(value)
     }
 
     function handle(field: keyof Parts, maxLen: number, nextEl?: HTMLInputElement) {
         return (e: Event & { currentTarget: HTMLInputElement }) => {
-            const cleaned = clampDigits(e.currentTarget.value, maxLen);
-            parts[field] = cleaned;
-            e.currentTarget.value = cleaned;
-            commit();
+            const cleaned = clampDigits(e.currentTarget.value, maxLen)
+            parts[field] = cleaned
+            e.currentTarget.value = cleaned
+            commit()
             if (cleaned.length === maxLen && nextEl) {
-                nextEl.focus();
-                nextEl.select();
+                nextEl.focus()
+                nextEl.select()
             }
-        };
+        }
     }
 
     function handleBackspace(prevEl?: HTMLInputElement) {
         return (e: KeyboardEvent & { currentTarget: HTMLInputElement }) => {
             if (e.key === 'Backspace' && e.currentTarget.value === '' && prevEl) {
-                prevEl.focus();
+                prevEl.focus()
             }
-        };
+        }
     }
 
     function padOnBlur(field: keyof Parts) {
         return () => {
             if (parts[field].length === 1) {
-                parts[field] = parts[field].padStart(2, '0');
-                commit();
+                parts[field] = parts[field].padStart(2, '0')
+                commit()
             }
-        };
+        }
     }
 </script>
 

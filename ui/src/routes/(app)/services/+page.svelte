@@ -2,7 +2,6 @@
     import ServiceBox from '$lib/components/feature/ServiceBox.svelte'
 
     let { data } = $props()
-
 </script>
 
 <div class="relative flex flex-col md:flex-row md:items-center">

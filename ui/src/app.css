@@ -2,8 +2,8 @@
 @import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai+Mono+TC&family=LXGW+WenKai+TC&display=swap');
 
 @tailwind utilities;
-@plugin "@tailwindcss/typography";
-@source "./safelist.txt";
+@plugin '@tailwindcss/typography';
+@source './safelist.txt';
 
 @theme {
     --primary-color: #697b43;

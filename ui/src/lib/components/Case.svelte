@@ -29,9 +29,7 @@
     let isEditMode = $state(false)
 
     const hrs = $derived(roundTo(estimatedMinutes / 60, 2))
-    const usedPercentage = $derived(
-        roundTo((usedMinutes * 100) / estimatedMinutes, 0),
-    )
+    const usedPercentage = $derived(roundTo((usedMinutes * 100) / estimatedMinutes, 0))
     const usedHrs = $derived(roundTo(usedMinutes / 60, 2))
     const billingAt = $derived(nextBillingDate(settledAt, billingCycle, startedAt))
 
@@ -48,8 +46,8 @@
         const monthsSinceStart = Math.max(
             0,
             (anchor.getFullYear() - defaultAt.getFullYear()) * 12 +
-            (anchor.getMonth() - defaultAt.getMonth()) -
-            (anchor.getDate() < defaultAt.getDate() ? 1 : 0),
+                (anchor.getMonth() - defaultAt.getMonth()) -
+                (anchor.getDate() < defaultAt.getDate() ? 1 : 0)
         )
         const cyclesPassed = Math.floor(monthsSinceStart / cycling)
         const next = new Date(defaultAt)
@@ -68,7 +66,7 @@
         e.stopPropagation()
 
         const confirmed = confirm(
-            'Are you sure you want to delete this case? This action cannot be undone.',
+            'Are you sure you want to delete this case? This action cannot be undone.'
         )
 
         if (confirmed) {
@@ -87,18 +85,17 @@
         isEditMode = false
         onSaved?.({ ...data, usedMinutes })
     }
-
 </script>
 
 {#if isEditMode}
     <CaseEditor
-        id={id}
-        name={name}
+        {id}
+        {name}
         {hrs}
-        startedAt={startedAt}
-        endedAt={endedAt}
-        billingCycle={billingCycle}
-        settledAt={settledAt}
+        {startedAt}
+        {endedAt}
+        {billingCycle}
+        {settledAt}
         onSaved={_onSaved}
         onClosed={() => (isEditMode = false)}
     />

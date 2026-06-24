@@ -53,7 +53,7 @@
             day: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            hour12: false,
         })
 
         let year: '2-digit' | undefined =
@@ -71,7 +71,7 @@
                 day,
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: false
+                hour12: false,
             })
         } else {
             ed = endedAt.toLocaleString('en-US', {
@@ -80,7 +80,7 @@
                 day: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: false
+                hour12: false,
             })
         }
 
@@ -99,8 +99,8 @@
         <WorkLogEditor
             id={log.id}
             {caseId}
-            selfId={selfId}
-            selfName={selfName}
+            {selfId}
+            {selfName}
             startedAt={log.startedAt}
             endedAt={log.endedAt}
             description={log.description}

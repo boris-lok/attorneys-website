@@ -78,8 +78,8 @@
 
     function buildCollaborators(ids: string[], users: SimpleUser[], parentId: string) {
         return users
-            .filter(u => ids.includes(u.id))
-            .map(e => {
+            .filter((u) => ids.includes(u.id))
+            .map((e) => {
                 return {
                     parentId,
                     userId: e.id,
@@ -101,7 +101,9 @@
             return
         }
 
-        lawyers = resp.users.filter((e) => e.id !== selfId).filter((e) => e.roles.includes('Lawyer'))
+        lawyers = resp.users
+            .filter((e) => e.id !== selfId)
+            .filter((e) => e.roles.includes('Lawyer'))
     }
 
     // Event Handlers
@@ -119,7 +121,6 @@
             _collaboratorIds = lawyers.map((e) => e.id)
         }
     }
-
 
     function onCollaboratorIdsChanged(id: string, checked: boolean) {
         let newIds = [..._collaboratorIds]
@@ -202,10 +203,10 @@
 
 <div class="flex flex-col gap-4">
     <div class="flex flex-row items-center justify-between md:justify-normal md:gap-4">
-        <div class="flex flex-col gap-1 sm:flex-row md:items-center md:gap-2 sm:items-center">
-            <span class="text-sm font-semibold h-fit">Working Time: </span>
+        <div class="flex flex-col gap-1 sm:flex-row sm:items-center md:items-center md:gap-2">
+            <span class="h-fit text-sm font-semibold">Working Time: </span>
             <DateTimePicker value={_startedAt} onchange={onStartedDateChanged} showTime />
-            <span class="text-center hidden sm:block"> ~ </span>
+            <span class="hidden text-center sm:block"> ~ </span>
             <DateTimePicker value={_endedAt} showTime />
         </div>
 
@@ -213,17 +214,17 @@
     </div>
 
     <div>
-        <Textarea
-            label="Description"
-            name="description"
-            bind:value={_description}
-            height="h-36"
-        />
+        <Textarea label="Description" name="description" bind:value={_description} height="h-36" />
     </div>
 
     {#if !hideShare}
         <label class="inline-flex cursor-pointer items-center">
-            <input type="checkbox" bind:checked={share} class="peer sr-only" onchange={onShareToggle} />
+            <input
+                type="checkbox"
+                bind:checked={share}
+                class="peer sr-only"
+                onchange={onShareToggle}
+            />
             <div
                 class="peer relative h-5 w-9 rounded-full bg-gray-500 peer-checked:bg-blue-500 peer-focus:outline-none after:absolute after:inset-s-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
             ></div>
@@ -253,7 +254,10 @@
     <div class="flex h-fit flex-row justify-center gap-0.5">
         {#if isLoading}
             <div>
-                <IconifyIcon class="text-blue-500 h-6 w-6 mr-6" icon="svg-spinners:90-ring-with-bg" />
+                <IconifyIcon
+                    class="mr-6 h-6 w-6 text-blue-500"
+                    icon="svg-spinners:90-ring-with-bg"
+                />
             </div>
         {:else}
             <button class="cursor-pointer md:m-2" onclick={onSave}>

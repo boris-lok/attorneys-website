@@ -7,7 +7,6 @@ import type {
     UpdateServiceRequest,
 } from '$lib/types'
 import { ADMIN_URL, BASE_URL, TIMEOUT } from '$lib/constant'
-import { getToken } from '$lib/utils'
 
 /**
  * Sends a request to save a service. Determines whether to create or update based on the presence of an `id` in the request object.

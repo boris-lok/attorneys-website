@@ -16,8 +16,6 @@ export const load: PageLoad = async () => {
         throw error(404, 'Content not found')
     }
 
-    console.log('Home', home.data.data)
-
     return {
         data: home.data.data,
     }

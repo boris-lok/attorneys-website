@@ -11,8 +11,8 @@
     let line = '@594ylsoj'
 </script>
 
-<div class="relative flex h-[calc(100vh-144px-96px)] min-h-[48rem] flex-col items-center">
-    <p class="px-16 pt-16 text-4xl font-bold text-[var(--primary-color)]">聯絡我們</p>
+<div class="relative flex h-[calc(100vh-144px-96px)] min-h-192 flex-col items-center">
+    <p class="px-16 pt-16 text-4xl font-bold text-(--primary-color)">聯絡我們</p>
     <div
         class="relative flex flex-col md:mx-auto md:mt-12 md:w-full md:max-w-4xl md:flex-col md:gap-8"
     >

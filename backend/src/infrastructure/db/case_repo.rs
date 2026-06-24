@@ -19,7 +19,8 @@ const UPDATE_CASE_QUERY: &str = r"
     name = COALESCE($3, name),
     billing_cycle = COALESCE($4, billing_cycle),
     started_at = COALESCE($5, started_at),
-    ended_at = COALESCE($6, ended_at)
+    ended_at = COALESCE($6, ended_at),
+    closed = COALESCE($7, closed)
   WHERE id = $1
 ";
 
@@ -104,6 +105,7 @@ impl<'tx> CaseWriteRepository for PostgresCaseRepo<'tx> {
             .bind(req.billing_cycle)
             .bind(req.started_at)
             .bind(req.ended_at)
+            .bind(req.closed)
             .execute(self.conn().await?)
             .await?;
 

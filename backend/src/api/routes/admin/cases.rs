@@ -9,7 +9,7 @@ use axum::Router;
 
 pub fn router() -> Router<AppState> {
     Router::new()
-        .route("/cases", post(create_case).put(update_case).get(list_cases))
-        .route("/cases/{id}", delete(delete_case))
-        .route("/case/settle", put(settle))
+        .route("/cases", post(create_case).get(list_cases))
+        .route("/cases/{id}", delete(delete_case).patch(update_case))
+        .route("/case/{id}/settlement", post(settle))
 }

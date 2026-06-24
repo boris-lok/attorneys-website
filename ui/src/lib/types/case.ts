@@ -8,7 +8,9 @@ export type CreateCaseRequest = {
     ended_at: Date
 }
 
-export type UpdateCaseRequest = WithId<CreateCaseRequest>
+export type UpdateCaseRequest = WithId<Partial<CreateCaseRequest>> & {
+    closed?: boolean
+}
 
 export type CaseData = {
     id: string

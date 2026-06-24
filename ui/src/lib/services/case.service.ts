@@ -3,7 +3,7 @@ import type {
     APIResponse,
     CaseData,
     CreateCaseRequest,
-    UpdateCaseRequest,
+    UpdateCaseRequest
 } from '$lib/types'
 import { ADMIN_URL, TIMEOUT } from '$lib/constant'
 import type { FetchFn } from '$lib/services/common'
@@ -12,14 +12,15 @@ async function save(
     req: CreateCaseRequest | UpdateCaseRequest
 ): Promise<APIError | APIResponse<{ id: string }>> {
     try {
-        const resp = await fetch(`${ADMIN_URL}/cases`, {
-            method: 'id' in req ? 'PUT' : 'POST',
+        const url = 'id' in req ? `${ADMIN_URL}/cases/${req.id}` : `${ADMIN_URL}/cases`
+        const resp = await fetch(url, {
+            method: 'id' in req ? 'PATCH' : 'POST',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(req),
-            signal: AbortSignal.timeout(TIMEOUT),
+            signal: AbortSignal.timeout(TIMEOUT)
         })
 
         if (!resp.ok) {
@@ -67,7 +68,7 @@ function mapCase(e: CaseAPIResponse): CaseData {
         pendingLogs: e.pending_logs,
         billingCycle: e.billing_cycle,
         settledAt: e.settled_at ? new Date(e.settled_at) : null,
-        closed: e.closed,
+        closed: e.closed
     }
 }
 
@@ -79,9 +80,9 @@ async function list(fetch: FetchFn): Promise<APIError | APIResponse<{ cases: Cas
             method: 'GET',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            signal: AbortSignal.timeout(TIMEOUT),
+            signal: AbortSignal.timeout(TIMEOUT)
         })
 
         if (!resp.ok) {
@@ -103,9 +104,9 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
             method: 'DELETE',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            signal: AbortSignal.timeout(TIMEOUT),
+            signal: AbortSignal.timeout(TIMEOUT)
         })
         if (!resp.ok) {
             return { error: true, message: `Error: ${resp.status}` }
@@ -118,17 +119,15 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
 
 async function settle(fetch: FetchFn, id: string): Promise<APIError | APIResponse<void>> {
     try {
-        const resp = await fetch(`${ADMIN_URL}/case/settle`, {
-            method: 'PUT',
+        const resp = await fetch(`${ADMIN_URL}/case/${id}/settlement`, {
+            method: 'POST',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                case_id: id,
-            }),
-            signal: AbortSignal.timeout(TIMEOUT),
+            signal: AbortSignal.timeout(TIMEOUT)
         })
+
         if (!resp.ok) {
             return { error: true, message: `Error: ${resp.status}` }
         }
@@ -142,12 +141,12 @@ export const CaseServices = {
     save: save,
     list: list,
     delete: del,
-    settle: settle,
+    settle: settle
 }
 
 export function createCaseServices(fetch: FetchFn) {
     return {
         list: () => list(fetch),
-        settle: (id: string) => settle(fetch, id),
+        settle: (id: string) => settle(fetch, id)
     }
 }

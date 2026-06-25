@@ -5,16 +5,19 @@
     import ProgressBar from '$lib/components/shared/ProgressBar.svelte'
     import { CaseServices } from '$lib/services/case.service'
     import CaseEditor from './CaseEditor.svelte'
+    import { toast } from '$lib/stores/toast.svelte'
 
     type Props = CaseData & {
         onSaved?: (data: CaseData) => void
         onDeleted?: () => void
+        onClosed?: () => void
         editable?: boolean
     }
 
     let {
         onSaved,
         onDeleted,
+        onClosed,
         editable = false,
         id,
         name,
@@ -46,8 +49,8 @@
         const monthsSinceStart = Math.max(
             0,
             (anchor.getFullYear() - defaultAt.getFullYear()) * 12 +
-                (anchor.getMonth() - defaultAt.getMonth()) -
-                (anchor.getDate() < defaultAt.getDate() ? 1 : 0)
+            (anchor.getMonth() - defaultAt.getMonth()) -
+            (anchor.getDate() < defaultAt.getDate() ? 1 : 0),
         )
         const cyclesPassed = Math.floor(monthsSinceStart / cycling)
         const next = new Date(defaultAt)
@@ -66,18 +69,41 @@
         e.stopPropagation()
 
         const confirmed = confirm(
-            'Are you sure you want to delete this case? This action cannot be undone.'
+            'Are you sure you want to delete this case? This action cannot be undone.',
         )
 
         if (confirmed) {
             const resp = await CaseServices.delete(id)
             if (resp.error) {
-                alert(resp.message)
+                toast.show(resp.message, 'error')
                 return
             }
 
-            alert('Case deleted successfully')
+            toast.show('Case deleted successfully')
             onDeleted?.()
+        }
+    }
+
+    async function onClosedClicked(e: Event) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const confirmed = confirm(
+            'Are you sure you want to close this case? After the case is closed, you will no longer be able to edit it.',
+        )
+
+        if (confirmed) {
+            const resp = await CaseServices.save({
+                id,
+                closed: true,
+            })
+            if (resp.error) {
+                toast.show(resp.message, 'error')
+                return
+            }
+
+            toast.show('Case closed successfully')
+            onClosed?.()
         }
     }
 
@@ -163,6 +189,14 @@
                         <span class="md:hidden">Edit</span>
                     </button>
 
+                    <button class="mt-4 cursor-pointer md:mt-0" onclick={onClosedClicked}>
+                        <IconifyIcon
+                            class="hidden h-4 w-4 hover:text-shadow-yellow-500 md:block md:h-6 md:w-6"
+                            icon="tabler:clipboard-off"
+                        />
+                        <span class="md:hidden">Close</span>
+                    </button>
+
                     <button class="mt-4 cursor-pointer md:mt-0" onclick={onDeleteClicked}>
                         <IconifyIcon
                             class="hidden h-4 w-4 hover:text-red-500 md:block md:h-6 md:w-6"
@@ -170,6 +204,7 @@
                         />
                         <span class="md:hidden">Delete</span>
                     </button>
+
                 </div>
             {/if}
         </div>

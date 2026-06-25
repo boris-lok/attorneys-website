@@ -23,6 +23,11 @@
         allCases = exist ? allCases.map((e) => (e.id === c.id ? c : e)) : [c, ...allCases]
     }
 
+    // close the case
+    function closeCase(id: string) {
+        allCases = allCases.map((e) => (e.id === id ? { ...e, closed: true } : e))
+    }
+
     // remove the case from the list
     function removeCase(id: string) {
         allCases = allCases.filter((e) => e.id !== id)
@@ -70,7 +75,8 @@
     <div class="md:m-4 md:rounded md:shadow">
         {@render tableHeader(true)}
         {#each cases as c, i (c.id)}
-            <Case {...c} onSaved={upsertCase} onDeleted={() => removeCase(c.id)} editable />
+            <Case {...c} onSaved={upsertCase} onDeleted={() => removeCase(c.id)} editable
+                  onClosed={() => closeCase(c.id)} />
             {#if i < cases.length - 1}
                 <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
             {/if}

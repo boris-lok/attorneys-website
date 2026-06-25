@@ -174,11 +174,11 @@
                 </div>
             </div>
 
-            <div class="flex-1/12 text-sm text-amber-500">
+            <div class="flex-1/12 text-sm text-amber-500 text-left">
                 {formatter(billingAt)}
             </div>
 
-            <div class="flex-1/12 text-sm text-gray-500" class:flex-auto={!editable}>
+            <div class="flex-1/12 text-sm text-gray-500 text-left" class:flex-auto={!editable} class:w-20={!editable}>
                 {#if settledAt}
                     {formatter(settledAt)}
                 {:else}

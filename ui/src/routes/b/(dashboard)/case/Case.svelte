@@ -50,8 +50,8 @@
         const monthsSinceStart = Math.max(
             0,
             (anchor.getFullYear() - defaultAt.getFullYear()) * 12 +
-            (anchor.getMonth() - defaultAt.getMonth()) -
-            (anchor.getDate() < defaultAt.getDate() ? 1 : 0),
+                (anchor.getMonth() - defaultAt.getMonth()) -
+                (anchor.getDate() < defaultAt.getDate() ? 1 : 0)
         )
         const cyclesPassed = Math.floor(monthsSinceStart / cycling)
         const next = new Date(defaultAt)
@@ -92,13 +92,12 @@
         e.stopPropagation()
 
         const confirmed = await confirm({
-                title: 'Close Case: ' + name,
-                message:
-                    'Are you sure you want to close this case? After the case is closed, you will no longer be able to edit it.',
-                confirmText: 'Yes',
-                cancelText: 'No',
-            },
-        )
+            title: 'Close Case: ' + name,
+            message:
+                'Are you sure you want to close this case? After the case is closed, you will no longer be able to edit it.',
+            confirmText: 'Yes',
+            cancelText: 'No',
+        })
 
         if (confirmed) {
             const resp = await CaseServices.save({
@@ -212,7 +211,6 @@
                         />
                         <span class="md:hidden">Delete</span>
                     </button>
-
                 </div>
             {/if}
         </div>

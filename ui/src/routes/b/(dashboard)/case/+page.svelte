@@ -35,13 +35,17 @@
 </script>
 
 {#snippet tableHeader(showActions: boolean)}
-    <div class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300 md:p-2 md:gap-4">
+    <div
+        class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300 md:p-2 md:gap-4"
+    >
         <p class="text-md flex-3/12 py-3 text-left font-bold">Case Name</p>
         <p class="text-md flex-2/12 py-3 text-left font-bold">Period</p>
         <p class="text-md flex-2/12 py-3 text-left font-bold text-nowrap">Used Hrs</p>
         <p class="text-md flex-1/12 py-3 text-left font-bold text-nowrap">Next Billing</p>
         <p
-            class="text-md py-3 text-left font-bold text-nowrap {showActions ? 'flex-1/12' : 'flex-auto'}"
+            class="text-md py-3 text-left font-bold text-nowrap {showActions
+                ? 'flex-1/12'
+                : 'flex-auto'}"
         >
             Last Billing
         </p>
@@ -73,8 +77,13 @@
     <div class="md:m-4 md:rounded md:shadow">
         {@render tableHeader(true)}
         {#each cases as c, i (c.id)}
-            <Case {...c} onSaved={upsertCase} onDeleted={() => removeCase(c.id)} editable
-                  onClosed={() => closeCase(c.id)} />
+            <Case
+                {...c}
+                onSaved={upsertCase}
+                onDeleted={() => removeCase(c.id)}
+                editable
+                onClosed={() => closeCase(c.id)}
+            />
             {#if i < cases.length - 1}
                 <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
             {/if}

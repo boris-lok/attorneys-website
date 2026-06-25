@@ -1,5 +1,4 @@
 <script lang="ts">
-
     import { confirmState, resolveConfirm } from '$lib/composables/confirm.svelte'
 
     function onKeydown(e: KeyboardEvent) {
@@ -42,10 +41,10 @@
                     {confirmState.options.cancelText ?? 'Cancel'}
                 </button>
                 <button
-                    class="rounded-lg px-4 py-2 text-sm font-medium text-white {confirmState
-            .options.danger
-            ? 'bg-red-500 hover:bg-red-600'
-            : 'bg-blue-500 hover:bg-blue-600'} cursor-pointer"
+                    class="rounded-lg px-4 py-2 text-sm font-medium text-white {confirmState.options
+                        .danger
+                        ? 'bg-red-500 hover:bg-red-600'
+                        : 'bg-blue-500 hover:bg-blue-600'} cursor-pointer"
                     onclick={() => resolveConfirm(true)}
                 >
                     {confirmState.options.confirmText ?? 'Confirm'}

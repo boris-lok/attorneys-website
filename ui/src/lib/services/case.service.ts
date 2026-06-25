@@ -3,7 +3,7 @@ import type {
     APIResponse,
     CaseData,
     CreateCaseRequest,
-    UpdateCaseRequest
+    UpdateCaseRequest,
 } from '$lib/types'
 import { ADMIN_URL, TIMEOUT } from '$lib/constant'
 import type { FetchFn } from '$lib/services/common'
@@ -17,10 +17,10 @@ async function save(
             method: 'id' in req ? 'PATCH' : 'POST',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(req),
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
 
         if (!resp.ok) {
@@ -68,7 +68,7 @@ function mapCase(e: CaseAPIResponse): CaseData {
         pendingLogs: e.pending_logs,
         billingCycle: e.billing_cycle,
         settledAt: e.settled_at ? new Date(e.settled_at) : null,
-        closed: e.closed
+        closed: e.closed,
     }
 }
 
@@ -80,9 +80,9 @@ async function list(fetch: FetchFn): Promise<APIError | APIResponse<{ cases: Cas
             method: 'GET',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
 
         if (!resp.ok) {
@@ -104,9 +104,9 @@ async function del(id: string): Promise<APIError | APIResponse<void>> {
             method: 'DELETE',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
         if (!resp.ok) {
             return { error: true, message: `Error: ${resp.status}` }
@@ -123,9 +123,9 @@ async function settle(fetch: FetchFn, id: string): Promise<APIError | APIRespons
             method: 'POST',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(TIMEOUT)
+            signal: AbortSignal.timeout(TIMEOUT),
         })
 
         if (!resp.ok) {
@@ -141,12 +141,12 @@ export const CaseServices = {
     save: save,
     list: list,
     delete: del,
-    settle: settle
+    settle: settle,
 }
 
 export function createCaseServices(fetch: FetchFn) {
     return {
         list: () => list(fetch),
-        settle: (id: string) => settle(fetch, id)
+        settle: (id: string) => settle(fetch, id),
     }
 }

@@ -1,14 +1,14 @@
 import type { WithId } from '$lib/types/common'
 
 export type CreateWorkLogRequest = {
-    caseId: string
-    startedAt: Date
+    case_id: string
+    started_at: Date
     duration: number
     description: string
-    collaboratorIds: string[]
+    collaborator_ids: string[]
 }
 
-export type UpdateWorkLogRequest = WithId<CreateWorkLogRequest>
+export type UpdateWorkLogRequest = WithId<Omit<Partial<CreateWorkLogRequest>, 'collaborator_ids'>>
 
 export type WorkLog = {
     id: string

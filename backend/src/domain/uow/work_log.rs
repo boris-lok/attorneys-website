@@ -92,6 +92,13 @@ impl<F: UnitOfWorkFactory> WorkLogUoW<F> {
             asset_not_collaborator(&mut uow.work_log_repo(), &req.id, user_id).await?;
         }
 
+        if (req.status.is_some()) {
+            uow.work_log_mapping_repo()
+                .update_status(&req.id, user_id, req.status.clone().unwrap())
+                .await
+                .map_err(|e| WorkLogError::Unknown(e.to_string()))?;
+        }
+
         uow.work_log_repo()
             .update(req)
             .await

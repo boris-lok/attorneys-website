@@ -1,6 +1,7 @@
 use crate::domain::uow::common::UnitOfWorkFactory;
 use crate::domain::uow::work_log::WorkLogUoW;
 use crate::domain::users::entity::UserID;
+use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use crate::domain::work_logs::entity::UpdateWorkLogRequest;
 use crate::domain::work_logs::error::WorkLogError;
 use uuid::Uuid;
@@ -12,6 +13,7 @@ pub struct Request {
     pub description: Option<String>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub status: Option<WorkLogMappingStatus>,
     /// force update, ignore the following checking
     ///
     /// - check the work_log's creator is an owner.
@@ -30,6 +32,7 @@ pub async fn execute<F: UnitOfWorkFactory>(
         description: req.description,
         started_at: req.started_at,
         ended_at: req.ended_at,
+        status: req.status,
     };
 
     uow.update(req, user_id, force).await

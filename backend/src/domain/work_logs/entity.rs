@@ -1,4 +1,5 @@
 use crate::domain::cases::entity::CaseID;
+use crate::domain::work_log_mapping::entity::WorkLogMappingStatus;
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -19,6 +20,7 @@ pub struct UpdateWorkLogRequest {
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     pub ended_at: Option<chrono::DateTime<chrono::Utc>>,
     pub description: Option<String>,
+    pub status: Option<WorkLogMappingStatus>,
 }
 
 #[derive(Debug, Serialize)]

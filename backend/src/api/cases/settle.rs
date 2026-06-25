@@ -8,7 +8,6 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use std::collections::HashMap;
 
-
 pub async fn settle(
     _: Claims,
     State(state): State<AppState>,

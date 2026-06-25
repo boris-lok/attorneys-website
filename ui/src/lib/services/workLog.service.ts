@@ -14,20 +14,14 @@ async function save(
     req: CreateWorkLogRequest | UpdateWorkLogRequest
 ): Promise<APIError | APIResponse<{ id: string }>> {
     try {
-        const resp = await fetch(`${ADMIN_URL}/work_logs`, {
-            method: 'id' in req ? 'PUT' : 'POST',
+        const url = 'id' in req ? `${ADMIN_URL}/work_logs/${req.id}` : `${ADMIN_URL}/work_logs`
+        const resp = await fetch(url, {
+            method: 'id' in req ? 'PATCH' : 'POST',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                ...('id' in req ? { id: req.id } : {}),
-                case_id: req.caseId,
-                started_at: req.startedAt,
-                duration: req.duration,
-                description: req.description,
-                collaborator_ids: req.collaboratorIds,
-            }),
+            body: JSON.stringify(req),
             signal: AbortSignal.timeout(TIMEOUT),
         })
 
@@ -184,13 +178,13 @@ async function updateStatus(
     status: 'approved' | 'rejected' | 'pending'
 ): Promise<APIError | APIResponse<void>> {
     try {
-        const resp = await fetch(`${ADMIN_URL}/work_logs/status`, {
-            method: 'PUT',
+        const resp = await fetch(`${ADMIN_URL}/work_logs/${id}`, {
+            method: 'PATCH',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: id, status: status }),
+            body: JSON.stringify({ status: status }),
             signal: AbortSignal.timeout(TIMEOUT),
         })
         if (!resp.ok) {

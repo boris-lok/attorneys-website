@@ -164,11 +164,11 @@
         isLoading = true
         const resp = await WorkLogServices.save(window.fetch, {
             ...(id ? { id: id } : {}),
-            caseId: caseId,
-            collaboratorIds: _collaboratorIds,
+            case_id: caseId,
+            collaborator_ids: _collaboratorIds,
             description: _description,
             duration: duration,
-            startedAt: _startedAt,
+            started_at: _startedAt,
         })
         isLoading = false
 

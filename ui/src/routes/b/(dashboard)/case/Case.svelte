@@ -188,7 +188,7 @@
             </div>
 
             {#if editable}
-                <div class="flex h-fit flex-auto flex-row justify-end gap-2">
+                <div class="flex h-fit flex-auto flex-row justify-end gap-2 w-24">
                     <button class="mt-4 cursor-pointer md:mt-0" onclick={onEditClicked}>
                         <IconifyIcon
                             class="hidden h-4 w-4 hover:text-green-400 md:block md:h-6 md:w-6"

@@ -35,20 +35,18 @@
 </script>
 
 {#snippet tableHeader(showActions: boolean)}
-    <div class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300">
-        <p class="text-md flex-3/12 px-2 py-3 text-left font-bold">Case Name</p>
-        <p class="text-md flex-2/12 px-2 py-3 text-left font-bold">Period</p>
-        <p class="text-md flex-2/12 px-2 py-3 text-left font-bold text-nowrap">Used Hrs</p>
-        <p class="text-md flex-1/12 px-2 py-3 text-left font-bold text-nowrap">Next Billing</p>
+    <div class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300 md:p-2 md:gap-4">
+        <p class="text-md flex-3/12 py-3 text-left font-bold">Case Name</p>
+        <p class="text-md flex-2/12 py-3 text-left font-bold">Period</p>
+        <p class="text-md flex-2/12 py-3 text-left font-bold text-nowrap">Used Hrs</p>
+        <p class="text-md flex-1/12 py-3 text-left font-bold text-nowrap">Next Billing</p>
         <p
-            class="text-md {showActions
-                ? 'flex-1/12'
-                : 'flex-auto'} px-2 py-3 text-left font-bold text-nowrap"
+            class="text-md py-3 text-left font-bold text-nowrap {showActions ? 'flex-1/12' : 'flex-auto'}"
         >
             Last Billing
         </p>
         {#if showActions}
-            <p class="text-md flex-auto px-2 py-3 text-left font-bold">&nbsp;</p>
+            <p class="text-md flex-auto py-3 text-left font-bold w-24">&nbsp;</p>
         {/if}
     </div>
 {/snippet}

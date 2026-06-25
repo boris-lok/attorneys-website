@@ -38,17 +38,14 @@ export function useWorkLog(caseId: string, payLoad: PayLoad) {
         logs = resp.logs
     }
 
-    function editStatus(id: string, status: 'accepted' | 'pending' | 'rejected') {
-        logs = logs.filter((log) =>
-            log.id !== id
-                ? log
-                : {
-                      ...log,
-                      collaborators: log.collaborators.map((c) =>
-                          c.userId === payLoad.sub ? { ...c, status } : c
-                      ),
-                  }
-        )
+    function editStatus(id: string, status: 'approved' | 'rejected') {
+        const log = logs.find((l) => l.id === id)
+        if (log) {
+            log.collaborators = log.collaborators.map((c) =>
+                c.userId === payLoad.sub ? { ...c, status } : c
+            )
+        }
+        console.log(logs)
     }
 
     function upsert(log: WorkLog) {

@@ -5,18 +5,18 @@
     import type { PendingWorkLog } from '$lib/types'
 
     type Props = PendingWorkLog & {
-        onDone?: (status: 'accepted' | 'rejected') => void
+        onDone?: (status: 'approved' | 'rejected') => void
     }
 
     let { onDone, ...rest }: Props = $props()
     const hrs = $derived(roundTo(rest.duration / 60, 2))
     let isLoading = $state(false)
 
-    async function onClicked(status: 'accepted' | 'rejected') {
+    async function onClicked(status: 'approved' | 'rejected') {
         if (isLoading) return
 
         isLoading = true
-        if (status === 'accepted') {
+        if (status === 'approved') {
             await WorkLogServices.accept(rest.id)
         } else {
             await WorkLogServices.reject(rest.id)
@@ -54,7 +54,7 @@
         {:else}
             <button
                 class="cursor-pointer"
-                onclick={() => onClicked('accepted')}
+                onclick={() => onClicked('approved')}
                 aria-label="Accept work log"
             >
                 <IconifyIcon

@@ -145,7 +145,7 @@
         </div>
 
         <div class="flex h-fit flex-1/12 flex-row justify-end gap-2">
-            {#if !copiedData.isCollaborative}
+            {#if !copiedData.isCollaborative && copiedData.user.id === selfId}
                 <button class="mt-4 cursor-pointer md:mt-0" onclick={onEditClicked}>
                     <IconifyIcon
                         class="hidden h-4 w-4 hover:text-green-400 md:block md:h-6 md:w-6"

@@ -20,6 +20,7 @@ pub fn cors_layer() -> CorsLayer {
             Method::PUT,
             Method::DELETE,
             Method::OPTIONS,
+            Method::PATCH,
         ])
         .allow_headers([CONTENT_TYPE, ACCEPT_LANGUAGE])
 }

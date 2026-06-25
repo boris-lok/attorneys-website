@@ -70,7 +70,10 @@
                 selfName={user.nickname}
                 onClosed={() => (isCreated = false)}
                 {caseId}
-                onSaved={store.upsert}
+                onSaved={(log) => {
+                    store.upsert(log)
+                    isCreated = false
+                }}
             />
         </div>
     {:else}

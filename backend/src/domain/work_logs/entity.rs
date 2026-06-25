@@ -60,4 +60,5 @@ pub struct WorkLogFilters {
 pub struct SimpleWorkLog {
     pub id: Uuid,
     pub case_id: CaseID,
+    pub is_collaborative: bool,
 }

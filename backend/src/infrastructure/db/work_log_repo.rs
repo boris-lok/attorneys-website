@@ -82,7 +82,7 @@ const SETTLE_WORK_LOGS_QUERY: &str = r"
 ";
 
 const RETRIEVE_WORK_LOG_QUERY: &str = r"
-  select id, case_id from work_logs where id = $1;
+  select id, case_id, is_collaborative from work_logs where id = $1;
 ";
 
 pub type PostgresWorkLogRepo<'tx> = PostgresRepo<'tx, WorkLogRepo>;
@@ -202,6 +202,7 @@ impl<'tx> WorkLogsRepository for PostgresWorkLogRepo<'tx> {}
 pub struct SimpleWorkLogFromSQLx {
     id: Uuid,
     case_id: Uuid,
+    is_collaborative: bool,
 }
 
 impl From<SimpleWorkLogFromSQLx> for SimpleWorkLog {
@@ -209,6 +210,7 @@ impl From<SimpleWorkLogFromSQLx> for SimpleWorkLog {
         Self {
             id: value.id,
             case_id: CaseID::from(value.case_id),
+            is_collaborative: value.is_collaborative,
         }
     }
 }

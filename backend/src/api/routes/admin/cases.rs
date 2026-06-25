@@ -4,7 +4,7 @@ use crate::api::cases::list::list_cases;
 use crate::api::cases::settle::settle;
 use crate::api::cases::update::update_case;
 use crate::startup::AppState;
-use axum::routing::{delete, post, put};
+use axum::routing::{delete, post};
 use axum::Router;
 
 pub fn router() -> Router<AppState> {

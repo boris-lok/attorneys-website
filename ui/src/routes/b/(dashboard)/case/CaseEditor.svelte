@@ -128,9 +128,9 @@
         <div
             class="my-1 flex flex-2/12 flex-row items-center text-sm text-gray-500 md:my-0 md:flex-col md:text-gray-700"
         >
-            <DateTimePicker value={_startedAt} />
+            <DateTimePicker bind:value={_startedAt} />
             <span>~</span>
-            <DateTimePicker value={_endedAt} />
+            <DateTimePicker bind:value={_endedAt} />
         </div>
 
         <div class="flex-1/12 text-sm">

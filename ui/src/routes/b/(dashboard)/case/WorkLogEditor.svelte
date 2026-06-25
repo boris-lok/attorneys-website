@@ -207,7 +207,7 @@
             <span class="h-fit text-sm font-semibold">Working Time: </span>
             <DateTimePicker value={_startedAt} onchange={onStartedDateChanged} showTime />
             <span class="hidden text-center sm:block"> ~ </span>
-            <DateTimePicker value={_endedAt} showTime />
+            <DateTimePicker bind:value={_endedAt} showTime />
         </div>
 
         <span class="h-fit"> ({duration} min)</span>

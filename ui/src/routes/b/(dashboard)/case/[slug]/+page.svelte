@@ -109,9 +109,9 @@
         class="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-end md:gap-4 md:px-6"
     >
         <div class="m-2 flex flex-row items-center gap-4">
-            <DateTimePicker value={range.startedAt} />
+            <DateTimePicker bind:value={range.startedAt} />
             <span>~</span>
-            <DateTimePicker value={range.endedAt} />
+            <DateTimePicker bind:value={range.endedAt} />
         </div>
 
         <div class="flex flex-row items-center gap-2">

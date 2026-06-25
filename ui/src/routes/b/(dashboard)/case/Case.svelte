@@ -6,6 +6,7 @@
     import { CaseServices } from '$lib/services/case.service'
     import CaseEditor from './CaseEditor.svelte'
     import { toast } from '$lib/stores/toast.svelte'
+    import { confirm } from '$lib/composables/confirm.svelte'
 
     type Props = CaseData & {
         onSaved?: (data: CaseData) => void
@@ -68,10 +69,12 @@
         e.preventDefault()
         e.stopPropagation()
 
-        const confirmed = confirm(
-            'Are you sure you want to delete this case? This action cannot be undone.',
-        )
-
+        const confirmed = await confirm({
+            title: 'Delete Case: ' + name,
+            message: 'Are you sure you want to delete this case? This action cannot be undone.',
+            confirmText: 'Yes',
+            cancelText: 'No',
+        })
         if (confirmed) {
             const resp = await CaseServices.delete(id)
             if (resp.error) {
@@ -88,8 +91,13 @@
         e.preventDefault()
         e.stopPropagation()
 
-        const confirmed = confirm(
-            'Are you sure you want to close this case? After the case is closed, you will no longer be able to edit it.',
+        const confirmed = await confirm({
+                title: 'Close Case: ' + name,
+                message:
+                    'Are you sure you want to close this case? After the case is closed, you will no longer be able to edit it.',
+                confirmText: 'Yes',
+                cancelText: 'No',
+            },
         )
 
         if (confirmed) {
@@ -191,7 +199,7 @@
 
                     <button class="mt-4 cursor-pointer md:mt-0" onclick={onClosedClicked}>
                         <IconifyIcon
-                            class="hidden h-4 w-4 hover:text-shadow-yellow-500 md:block md:h-6 md:w-6"
+                            class="hidden h-4 w-4 hover:text-yellow-500 md:block md:h-6 md:w-6"
                             icon="tabler:clipboard-off"
                         />
                         <span class="md:hidden">Close</span>

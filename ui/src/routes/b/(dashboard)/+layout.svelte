@@ -21,7 +21,6 @@
                 if (resp.error) {
                     console.error(resp.message)
                 }
-                Cookies.remove('token')
                 await goto('/login')
             },
         },

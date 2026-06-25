@@ -2,6 +2,7 @@
     import '../app.css'
     import Toast from '$lib/components/shared/Toast.svelte'
     import { navigating } from '$app/state'
+    import ConfirmModal from '$lib/components/shared/ConfirmModal.svelte'
 
     let { children } = $props()
 </script>
@@ -17,3 +18,5 @@
 </div>
 
 <Toast />
+
+<ConfirmModal />

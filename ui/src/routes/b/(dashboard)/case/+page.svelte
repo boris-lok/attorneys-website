@@ -76,29 +76,37 @@
 
     <div class="md:m-4 md:rounded md:shadow">
         {@render tableHeader(true)}
-        {#each cases as c, i (c.id)}
-            <Case
-                {...c}
-                onSaved={upsertCase}
-                onDeleted={() => removeCase(c.id)}
-                editable
-                onClosed={() => closeCase(c.id)}
-            />
-            {#if i < cases.length - 1}
-                <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
-            {/if}
-        {/each}
-    </div>
-
-    {#if closedCases.length > 0}
-        <div class="md:m-4 md:rounded md:shadow">
-            {@render tableHeader(false)}
-            {#each closedCases as c, i (c.id)}
-                <Case {...c} />
-                {#if i < closedCases.length - 1}
+        <div class="overflow-y-auto max-h-56">
+            {#each cases as c, i (c.id)}
+                <Case
+                    {...c}
+                    onSaved={upsertCase}
+                    onDeleted={() => removeCase(c.id)}
+                    editable
+                    onClosed={() => closeCase(c.id)}
+                />
+                {#if i < cases.length - 1}
                     <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
                 {/if}
             {/each}
+        </div>
+    </div>
+
+    {#if closedCases.length > 0}
+        <div class="mt-12">
+            <p class="font-bold text-md lg:text-xl px-4">Closed Cases</p>
+        </div>
+
+        <div class="md:m-4 md:rounded md:shadow">
+            {@render tableHeader(false)}
+            <div class="overflow-y-auto max-h-56">
+                {#each closedCases as c, i (c.id)}
+                    <Case {...c} />
+                    {#if i < closedCases.length - 1}
+                        <div class="mx-2 hidden h-px bg-gray-200 md:block">&nbsp;</div>
+                    {/if}
+                {/each}
+            </div>
         </div>
     {/if}
 </main>

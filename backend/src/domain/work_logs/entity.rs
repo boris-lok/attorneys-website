@@ -33,6 +33,7 @@ pub struct WorkLog {
     pub description: String,
     pub is_collaborative: bool,
     pub collaborators: Vec<Collaborator>,
+    pub closed: bool,
 }
 
 #[derive(Debug, Serialize)]

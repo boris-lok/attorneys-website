@@ -12,5 +12,5 @@ export const CASE_COLUMNS: Column[] = [
 ]
 
 // Single source of truth for column sizing
-export const GRID_COLS_WITH_ACTIONS = 'md:grid-cols-[3fr_2fr_2fr_1fr_1fr_auto]'
-export const GRID_COLS_WITHOUT_ACTIONS = 'md:grid-cols-[3fr_2fr_2fr_1fr_1fr]'
+export const CASE_GRID_COLS_WITH_ACTIONS = 'md:grid-cols-[3fr_2fr_2fr_1fr_1fr_auto]'
+export const CASE_GRID_COLS_WITHOUT_ACTIONS = 'md:grid-cols-[3fr_2fr_2fr_1fr_1fr]'

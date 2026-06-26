@@ -6,9 +6,9 @@
     import type { PageProps } from './$types'
     import {
         CASE_COLUMNS,
-        GRID_COLS_WITH_ACTIONS,
-        GRID_COLS_WITHOUT_ACTIONS,
-    } from '$lib/config/case-column'
+        CASE_GRID_COLS_WITH_ACTIONS,
+        CASE_GRID_COLS_WITHOUT_ACTIONS,
+    } from '$lib/config/column'
 
     let { data }: PageProps = $props()
 
@@ -42,7 +42,7 @@
 {#snippet tableHeader(showActions: boolean)}
     <div
         class="hidden rounded-t md:grid md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300 md:p-2 md:gap-2 lg:gap-4
-               {showActions ? GRID_COLS_WITH_ACTIONS : GRID_COLS_WITHOUT_ACTIONS}"
+               {showActions ? CASE_GRID_COLS_WITH_ACTIONS : CASE_GRID_COLS_WITHOUT_ACTIONS}"
     >
         {#each CASE_COLUMNS as col}
             <p class="text-md py-3 text-left font-bold {col.class ?? ''}">{col.label}</p>

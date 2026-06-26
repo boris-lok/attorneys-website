@@ -22,6 +22,8 @@ impl<F: UnitOfWorkFactory> WorkLogUoW<F> {
             .await
             .map_err(|e| WorkLogError::Unknown(e.to_string()))?;
 
+        asset_case_is_not_closed_and_exist(&mut uow.case_repo(), &log.case_id).await?;
+
         async {
             let id = log.id;
             uow.work_log_repo().create(log).await?;

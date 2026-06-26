@@ -19,6 +19,7 @@ export type WorkLog = {
     isCollaborative: boolean
     collaborators: Collaborator[]
     user: Creator
+    closed: boolean
 }
 
 export type Creator = {

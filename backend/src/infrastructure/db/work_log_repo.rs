@@ -60,9 +60,11 @@ const LIST_WORK_LOGS_QUERY: &str = r"
     wlm.status,
     wlm.parent_id,
     wlm.user_id as collaborator_user_id,
-    cu.nickname as collaborator_name
+    cu.nickname as collaborator_name,
+    c.closed
   from work_logs wl
   join users u on u.id = wl.user_id
+  join cases c on c.id = wl.case_id
   left join work_logs_mapping wlm on wlm.parent_id = wl.id
   left join users cu on wlm.user_id = cu.id
   where
@@ -229,6 +231,7 @@ pub struct WorkLogFromSQLx {
     parent_id: Option<Uuid>,
     collaborator_user_id: Option<Uuid>,
     collaborator_name: Option<String>,
+    closed: bool,
 }
 
 fn parse_work_log_from_sqlx(rows: Vec<WorkLogFromSQLx>) -> Vec<WorkLog> {
@@ -249,6 +252,7 @@ fn parse_work_log_from_sqlx(rows: Vec<WorkLogFromSQLx>) -> Vec<WorkLog> {
             description: row.description,
             is_collaborative: row.is_collaborative,
             collaborators: vec![],
+            closed: row.closed,
         });
 
         // Attach collaborator if present

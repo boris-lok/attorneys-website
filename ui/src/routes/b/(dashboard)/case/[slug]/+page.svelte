@@ -13,6 +13,14 @@
     import { toast } from '$lib/stores/toast.svelte'
     import { triggerDownload } from '$lib/utils'
     import { untrack } from 'svelte'
+    import {
+        PENDING_LOG_COLUMNS,
+        PENDING_LOG_GRID_COLS,
+        WORK_LOG_COLUMNS,
+        WORK_LOG_GRID_COLS_WITH_ACTIONS,
+        WORK_LOG_GRID_COLS_WITHOUT_ACTIONS,
+        CLOSED_WORK_LOG_COLUMNS,
+    } from '$lib/config/log-column'
 
     let { data }: PageProps = $props()
     // svelte-ignore state_referenced_locally
@@ -76,7 +84,7 @@
                 }}
             />
         </div>
-    {:else}
+    {:else if !store.closed}
         <div class="my-2 flex h-16 flex-row items-center justify-end gap-4 px-4">
             <button class="cursor-pointer" onclick={() => (isCreated = true)}>
                 <IconifyIcon class="h-6 w-6" icon="tabler:library-plus" />
@@ -88,12 +96,12 @@
         <p class="px-5 text-xl font-semibold">Pending Logs</p>
         <div class="md:m-4 md:rounded md:shadow">
             <div
-                class="hidden rounded-t px-4 md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-orange-300"
+                class="hidden rounded-t px-4 md:grid md:gap-2 lg:gap-4 md:w-full md:border-b md:border-b-gray-200 md:bg-orange-300
+           {PENDING_LOG_GRID_COLS}"
             >
-                <p class="text-md flex-5/12 py-3 text-left font-bold">Description</p>
-                <p class="text-md flex-4/12 py-3 text-left font-bold">Period</p>
-                <p class="text-md flex-1/12 py-3 text-left font-bold">Used Hrs</p>
-                <p class="text-md flex-2/12 py-3 text-left font-bold">&nbsp;</p>
+                {#each PENDING_LOG_COLUMNS as col}
+                    <p class="text-md py-3 text-left font-bold {col.class ?? ''}">{col.label}</p>
+                {/each}
             </div>
             <div class="h-fit max-h-96 w-full overflow-y-auto">
                 {#each store.pendingLogs as log, i (log.id)}
@@ -154,39 +162,40 @@
                 </p>
             </div>
 
-            <div class="group relative">
-                <button
-                    class="group relative"
-                    class:text-red-500={store.logs.length > 0}
-                    class:cursor-pointer={store.logs.length > 0}
-                    class:text-gray-300={store.logs.length === 0}
-                    onclick={settle}
-                    disabled={store.logs.length === 0}
-                >
-                    <IconifyIcon icon="tabler:align-box-right-top" class="h-6 w-6" />
-                </button>
-                <p
-                    class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
-                >
-                    Settle
-                </p>
-            </div>
+            {#if !store.closed}
+                <div class="group relative">
+                    <button
+                        class="group relative"
+                        class:text-red-500={store.logs.length > 0}
+                        class:cursor-pointer={store.logs.length > 0}
+                        class:text-gray-300={store.logs.length === 0}
+                        onclick={settle}
+                        disabled={store.logs.length === 0}
+                    >
+                        <IconifyIcon icon="tabler:align-box-right-top" class="h-6 w-6" />
+                    </button>
+                    <p
+                        class="absolute top-6 right-3 hidden rounded bg-black/50 px-2 py-1 text-white group-hover:block"
+                    >
+                        Settle
+                    </p>
+                </div>
+            {/if}
         </div>
     </div>
 
     <div class="md:m-4 md:rounded md:shadow">
         <div
-            class="hidden rounded-t px-4 md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300"
+            class="hidden rounded-t px-4 md:grid md:gap-2 lg:gap-4 md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300
+           {store.closed ? WORK_LOG_GRID_COLS_WITHOUT_ACTIONS : WORK_LOG_GRID_COLS_WITH_ACTIONS}"
         >
-            <p class="text-md flex-5/12 py-3 text-left font-bold">Description</p>
-            <p class="text-md flex-2/12 py-3 text-left font-bold">Period</p>
-            <p class="text-md flex-1/12 py-3 text-left font-bold">Used Hrs</p>
-            <p class="text-md flex-2/12 py-3 text-left font-bold">Participants</p>
-            <p class="text-md flex-1/12 py-3 text-left font-bold">&nbsp;</p>
+            {#each store.closed ? CLOSED_WORK_LOG_COLUMNS : WORK_LOG_COLUMNS as col}
+                <p class="text-md py-3 text-left font-bold {col.class ?? ''}">{col.label}</p>
+            {/each}
         </div>
 
         {#if store.logs.length > 0}
-            <div class="h-fit max-h-96 w-full overflow-y-auto">
+            <div class="h-fit md:max-h-96 w-full md:overflow-y-auto">
                 {#each store.logs as log, i (log.id)}
                     <WorkLog
                         selfId={user.sub}

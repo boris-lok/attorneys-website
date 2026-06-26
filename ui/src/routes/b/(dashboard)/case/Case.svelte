@@ -7,7 +7,7 @@
     import CaseEditor from './CaseEditor.svelte'
     import { toast } from '$lib/stores/toast.svelte'
     import { confirm } from '$lib/composables/confirm.svelte'
-    import { GRID_COLS_WITH_ACTIONS, GRID_COLS_WITHOUT_ACTIONS } from '$lib/config/case-column'
+    import { CASE_GRID_COLS_WITH_ACTIONS, CASE_GRID_COLS_WITHOUT_ACTIONS } from '$lib/config/column'
 
     type Props = CaseData & {
         onSaved?: (data: CaseData) => void
@@ -138,7 +138,7 @@
         <div
             class="m-4 rounded p-4 shadow
            md:m-0 md:grid md:min-h-12 md:items-center md:gap-2 lg:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50
-           {editable ? GRID_COLS_WITH_ACTIONS : GRID_COLS_WITHOUT_ACTIONS}"
+           {editable ? CASE_GRID_COLS_WITH_ACTIONS : CASE_GRID_COLS_WITHOUT_ACTIONS}"
         >
             <div class="font-semibold md:my-0 md:font-medium">
                 {#if pendingLogs > 0}

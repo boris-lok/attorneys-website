@@ -23,6 +23,7 @@ export function useWorkLog(caseId: string, payLoad: PayLoad) {
     })
     let isLoading = $state(false)
     let errMsg = $state('')
+    let closed = $derived(logs.some((e) => e.closed))
 
     async function fetch(startedAt: Date, endedAt: Date) {
         isLoading = true
@@ -69,6 +70,9 @@ export function useWorkLog(caseId: string, payLoad: PayLoad) {
         },
         get errMsg() {
             return errMsg
+        },
+        get closed() {
+            return closed
         },
         fetch,
         editStatus,

@@ -58,6 +58,7 @@ type WorkLogAPIResponse = {
         status: string
     }[]
     user: { id: string; name: string }
+    closed: boolean
 }
 
 function mapWorkLog(e: WorkLogAPIResponse): WorkLog {
@@ -78,6 +79,7 @@ function mapWorkLog(e: WorkLogAPIResponse): WorkLog {
             id: e.user.id,
             name: e.user.name,
         },
+        closed: e.closed,
     }
 }
 

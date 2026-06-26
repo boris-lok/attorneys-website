@@ -4,6 +4,10 @@
     import IconifyIcon from '@iconify/svelte'
     import { roundTo } from '$lib/utils'
     import type { WorkLog } from '$lib/types'
+    import {
+        WORK_LOG_GRID_COLS_WITH_ACTIONS,
+        WORK_LOG_GRID_COLS_WITHOUT_ACTIONS,
+    } from '$lib/config/log-column'
 
     type Props = {
         log: WorkLog
@@ -114,22 +118,23 @@
     </div>
 {:else}
     <div
-        class="m-4 rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50"
+        class="m-4 rounded p-4 shadow md:m-0 md:grid md:min-h-12 md:items-center md:gap-2 lg:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50
+{log.closed ? WORK_LOG_GRID_COLS_WITHOUT_ACTIONS : WORK_LOG_GRID_COLS_WITH_ACTIONS}"
     >
-        <div class="my-2 flex-5/12 font-semibold text-nowrap md:my-0 md:font-medium">
+        <div class="my-2 font-semibold text-nowrap md:my-0 md:font-medium">
             {copiedData.description}
         </div>
 
-        <div class="my-1 flex-2/12 text-sm text-gray-500 md:my-0 md:text-gray-700">
+        <div class="my-1 text-sm text-gray-500 md:my-0 md:text-gray-700">
             <p>{formater(copiedData.startedAt, copiedData.endedAt)}</p>
         </div>
 
-        <div class="flex-1/12 text-sm">
+        <div class="text-sm">
             <span class="text-gray-600 md:hidden">Duration: </span>
             <span>{hrs} hrs</span>
         </div>
 
-        <div class="flex-2/12 text-sm">
+        <div class="text-sm">
             <span class="text-gray-600 md:hidden">Participants: </span>
             <span>{copiedData.user.name}</span>
             {#if copiedData.collaborators.length > 0}
@@ -144,7 +149,7 @@
             {/if}
         </div>
 
-        <div class="flex h-fit flex-1/12 flex-row justify-end gap-2">
+        <div class="flex h-fit flex-row justify-end gap-2">
             {#if !copiedData.isCollaborative && copiedData.user.id === selfId}
                 <button class="mt-4 cursor-pointer md:mt-0" onclick={onEditClicked}>
                     <IconifyIcon
@@ -164,7 +169,7 @@
                 </button>
             {/if}
 
-            <div class="flex h-fit flex-1/12 flex-row justify-end gap-2">&nbsp;</div>
+            <div class="flex h-fit flex-row justify-end gap-2">&nbsp;</div>
         </div>
     </div>
 {/if}

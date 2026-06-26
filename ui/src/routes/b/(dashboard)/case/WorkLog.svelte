@@ -149,27 +149,29 @@
             {/if}
         </div>
 
-        <div class="flex h-fit flex-row justify-end gap-2">
-            {#if !copiedData.isCollaborative && copiedData.user.id === selfId}
-                <button class="mt-4 cursor-pointer md:mt-0" onclick={onEditClicked}>
-                    <IconifyIcon
-                        class="hidden h-4 w-4 hover:text-green-400 md:block md:h-6 md:w-6"
-                        icon="tabler:edit"
-                    />
-                    <span class="md:hidden">Edit</span>
-                </button>
-            {/if}
-            {#if copiedData.user.id === selfId}
-                <button class="mt-4 cursor-pointer md:mt-0" onclick={onDeleteClicked}>
-                    <IconifyIcon
-                        class="hidden h-4 w-4 hover:text-red-500 md:block md:h-6 md:w-6"
-                        icon="tabler:trash"
-                    />
-                    <span class="md:hidden">Delete</span>
-                </button>
-            {/if}
+        {#if !log.closed}
+            <div class="flex h-fit flex-row justify-end gap-2">
+                {#if !copiedData.isCollaborative && copiedData.user.id === selfId}
+                    <button class="mt-4 cursor-pointer md:mt-0" onclick={onEditClicked}>
+                        <IconifyIcon
+                            class="hidden h-4 w-4 hover:text-green-400 md:block md:h-6 md:w-6"
+                            icon="tabler:edit"
+                        />
+                        <span class="md:hidden">Edit</span>
+                    </button>
+                {/if}
+                {#if copiedData.user.id === selfId}
+                    <button class="mt-4 cursor-pointer md:mt-0" onclick={onDeleteClicked}>
+                        <IconifyIcon
+                            class="hidden h-4 w-4 hover:text-red-500 md:block md:h-6 md:w-6"
+                            icon="tabler:trash"
+                        />
+                        <span class="md:hidden">Delete</span>
+                    </button>
+                {/if}
 
-            <div class="flex h-fit flex-row justify-end gap-2">&nbsp;</div>
-        </div>
+                <div class="flex h-fit flex-row justify-end gap-2">&nbsp;</div>
+            </div>
+        {/if}
     </div>
 {/if}

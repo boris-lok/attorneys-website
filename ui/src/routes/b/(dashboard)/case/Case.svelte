@@ -7,6 +7,7 @@
     import CaseEditor from './CaseEditor.svelte'
     import { toast } from '$lib/stores/toast.svelte'
     import { confirm } from '$lib/composables/confirm.svelte'
+    import { GRID_COLS_WITH_ACTIONS, GRID_COLS_WITHOUT_ACTIONS } from '$lib/config/case-column'
 
     type Props = CaseData & {
         onSaved?: (data: CaseData) => void
@@ -135,11 +136,11 @@
 {:else}
     <a href={`/b/case/${id}`}>
         <div
-            class="m-4 rounded p-4 shadow md:m-0 md:flex md:min-h-12 md:flex-row md:items-center md:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50"
+            class="m-4 rounded p-4 shadow
+           md:m-0 md:grid md:min-h-12 md:items-center md:gap-2 lg:gap-4 md:rounded-none md:p-2 md:shadow-none md:hover:bg-gray-50
+           {editable ? GRID_COLS_WITH_ACTIONS : GRID_COLS_WITHOUT_ACTIONS}"
         >
-            <div
-                class="my-2 flex flex-3/12 flex-row items-center gap-1 font-semibold text-nowrap md:my-0 md:font-medium"
-            >
+            <div class="font-semibold md:my-0 md:font-medium">
                 {#if pendingLogs > 0}
                     <div
                         class="inline-block h-5 w-5 rounded-[50%] border bg-red-500 text-center text-sm"
@@ -152,13 +153,13 @@
                 <p>{name}</p>
             </div>
 
-            <div class="my-1 flex-2/12 text-sm text-gray-500 md:my-0 md:text-gray-700">
+            <div class="text-sm text-gray-500 md:my-0 md:text-gray-700">
                 {formatter(startedAt)} -> {formatter(endedAt)}
             </div>
 
-            <div class="flex-2/12 text-sm md:text-right">
-                <div class="flex flex-col-reverse md:flex-row md:items-center md:gap-2">
-                    <div class="w-full md:w-20">
+            <div class="text-sm md:text-right">
+                <div class="flex flex-col-reverse lg:flex-row lg:items-center lg:gap-2">
+                    <div class="w-full lg:w-20">
                         <ProgressBar progress={usedPercentage} />
                     </div>
                     <div class="my-1 flex flex-row gap-1">
@@ -174,11 +175,15 @@
                 </div>
             </div>
 
-            <div class="flex-1/12 text-sm text-amber-500 text-left">
+            <div class="text-sm text-amber-500 text-left min-w-24">
                 {formatter(billingAt)}
             </div>
 
-            <div class="flex-1/12 text-sm text-gray-500 text-left" class:flex-auto={!editable} class:w-20={!editable}>
+            <div
+                class="text-sm text-gray-500 text-left min-w-24"
+                class:flex-auto={!editable}
+                class:w-20={!editable}
+            >
                 {#if settledAt}
                     {formatter(settledAt)}
                 {:else}
@@ -187,7 +192,7 @@
             </div>
 
             {#if editable}
-                <div class="flex h-fit flex-auto flex-row justify-end gap-2 w-24">
+                <div class="flex h-fit flex-row justify-end gap-2 w-fit md:w-24">
                     <button class="mt-4 cursor-pointer md:mt-0" onclick={onEditClicked}>
                         <IconifyIcon
                             class="hidden h-4 w-4 hover:text-green-400 md:block md:h-6 md:w-6"

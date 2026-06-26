@@ -4,6 +4,11 @@
     import IconifyIcon from '@iconify/svelte'
     import CaseEditor from './CaseEditor.svelte'
     import type { PageProps } from './$types'
+    import {
+        CASE_COLUMNS,
+        GRID_COLS_WITH_ACTIONS,
+        GRID_COLS_WITHOUT_ACTIONS,
+    } from '$lib/config/case-column'
 
     let { data }: PageProps = $props()
 
@@ -36,21 +41,14 @@
 
 {#snippet tableHeader(showActions: boolean)}
     <div
-        class="hidden rounded-t md:flex md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300 md:p-2 md:gap-4"
+        class="hidden rounded-t md:grid md:w-full md:border-b md:border-b-gray-200 md:bg-gray-300 md:p-2 md:gap-2 lg:gap-4
+               {showActions ? GRID_COLS_WITH_ACTIONS : GRID_COLS_WITHOUT_ACTIONS}"
     >
-        <p class="text-md flex-3/12 py-3 text-left font-bold">Case Name</p>
-        <p class="text-md flex-2/12 py-3 text-left font-bold">Period</p>
-        <p class="text-md flex-2/12 py-3 text-left font-bold text-nowrap">Used Hrs</p>
-        <p class="text-md flex-1/12 py-3 text-left font-bold text-nowrap">Next Billing</p>
-        <p
-            class="text-md py-3 text-left font-bold text-nowrap {showActions
-                ? 'flex-1/12'
-                : 'flex-auto'}"
-        >
-            Last Billing
-        </p>
+        {#each CASE_COLUMNS as col}
+            <p class="text-md py-3 text-left font-bold {col.class ?? ''}">{col.label}</p>
+        {/each}
         {#if showActions}
-            <p class="text-md flex-auto py-3 text-left font-bold w-24">&nbsp;</p>
+            <p class="text-md py-3 text-left font-bold w-24">&nbsp;</p>
         {/if}
     </div>
 {/snippet}
@@ -76,7 +74,7 @@
 
     <div class="md:m-4 md:rounded md:shadow">
         {@render tableHeader(true)}
-        <div class="overflow-y-auto max-h-56">
+        <div class="md:overflow-y-auto md:max-h-56">
             {#each cases as c, i (c.id)}
                 <Case
                     {...c}
@@ -99,7 +97,7 @@
 
         <div class="md:m-4 md:rounded md:shadow">
             {@render tableHeader(false)}
-            <div class="overflow-y-auto max-h-56">
+            <div class="md:overflow-y-auto md:max-h-56">
                 {#each closedCases as c, i (c.id)}
                     <Case {...c} />
                     {#if i < closedCases.length - 1}

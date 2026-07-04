@@ -7,8 +7,9 @@ use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use utoipa::ToSchema;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateCaseRequest {
     name: String,
     estimated_minutes: i32,
@@ -17,11 +18,21 @@ pub struct CreateCaseRequest {
     ended_at: chrono::DateTime<chrono::Utc>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct CreateCaseResponse {
     id: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/cases",
+    request_body = CreateCaseRequest,
+    responses(
+        (status = 200, description = "Case created", body = CreateCaseResponse),
+        (status = 400, description = "Bad request", body = ApiError),
+        (status = 500, description = "Internal Server Error", body = ApiError)
+    ),
+)]
 pub async fn create_case(
     _: Claims,
     State(state): State<AppState>,

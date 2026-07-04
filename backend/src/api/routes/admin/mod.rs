@@ -8,6 +8,8 @@ mod services;
 mod users;
 mod work_logs;
 
+pub use cases::CasesApi;
+
 use crate::startup::AppState;
 use axum::Router;
 

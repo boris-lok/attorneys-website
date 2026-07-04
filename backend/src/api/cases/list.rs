@@ -6,12 +6,22 @@ use crate::domain::entity::Claims;
 use crate::domain::users::entity::UserID;
 use axum::Json;
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ListCasesResponse {
     cases: Vec<Case>,
 }
 
+#[utoipa::path(
+    get,
+    path = "/cases",
+    responses(
+        (status = 200, description = "List of cases", body = ListCasesResponse),
+        (status = 400, description = "Bad request", body = ApiError),
+        (status = 500, description = "Internal Server Error", body = ApiError)
+    )
+)]
 pub async fn list_cases(
     c: Claims,
     QueryExtractor(query): QueryExtractor,

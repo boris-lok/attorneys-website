@@ -9,8 +9,9 @@ use axum::Json;
 use axum_extra::extract::WithRejection;
 use serde::Deserialize;
 use std::collections::HashMap;
+use utoipa::ToSchema;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct UpdateCaseRequest {
     pub name: Option<String>,
     pub started_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -20,6 +21,16 @@ pub struct UpdateCaseRequest {
     pub closed: Option<bool>,
 }
 
+#[utoipa::path(
+    patch,
+    path = "/cases/{id}",
+    request_body = UpdateCaseRequest,
+    responses(
+        (status = 200, description = "Case updated"),
+        (status = 400, description = "Bad request", body = ApiError),
+        (status = 500, description = "Internal Server Error", body = ApiError)
+    )
+)]
 pub async fn update_case(
     _: Claims,
     State(state): State<AppState>,

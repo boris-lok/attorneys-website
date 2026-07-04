@@ -7,6 +7,15 @@ use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use std::collections::HashMap;
 
+#[utoipa::path(
+    delete,
+    path = "/cases/{id}",
+    responses(
+        (status = 200, description = "Case deleted"),
+        (status = 400, description = "Bad request", body = ApiError),
+        (status = 500, description = "Internal Server Error", body = ApiError)
+    )
+)]
 pub async fn delete_case(
     _: Claims,
     State(state): State<AppState>,

@@ -38,7 +38,7 @@ uuid = { version = "1.23.1", features = ["v4", "serde"] }
 secrecy = { version = "0.10.3", features = ["serde"] }
 argon2 = { version = "0.5.3", features = ["std"] }
 rand = "0.10.1"
-jsonwebtoken = { version = "10.4.0" , features = ["rust_crypto"]}
+jsonwebtoken = { version = "10.4.0", features = ["rust_crypto"] }
 redis = { version = "1.2.1", features = ["tokio-comp"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["json"] }
@@ -47,3 +47,5 @@ dialoguer = "0.12.0"
 clap = { version = "4.6.1", features = ["derive"] }
 rust_xlsxwriter = { version = "0.95.0", features = ["chrono", "serde"] }
 time = "0.3.37"
+utoipa = { version = "5.5.0", features = ["uuid", "chrono"] }
+utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }

@@ -8,6 +8,15 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use std::collections::HashMap;
 
+#[utoipa::path(
+    post,
+    path = "/cases/{id}/settlement",
+    responses(
+        (status = 200, description = "Case settled"),
+        (status = 400, description = "Bad request", body = ApiError),
+        (status = 500, description = "Internal Server Error", body = ApiError)
+    )
+)]
 pub async fn settle(
     _: Claims,
     State(state): State<AppState>,

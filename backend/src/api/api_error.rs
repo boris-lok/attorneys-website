@@ -5,10 +5,12 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use serde_json::json;
+use utoipa::ToSchema;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, ToSchema)]
 pub enum ApiError {
     #[error(transparent)]
+    #[schema(value_type = String)]
     JsonExtractorRejection(#[from] JsonRejection),
     #[error("Internal Server Error")]
     InternalServerError(String),
@@ -28,6 +30,7 @@ pub enum ApiError {
     Unauthorized,
     #[error("{message}")]
     Custom {
+        #[schema(value_type = u16)]
         status_code: StatusCode,
         message: String,
     },

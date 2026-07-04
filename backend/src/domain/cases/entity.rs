@@ -1,4 +1,5 @@
 use serde::Serialize;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
@@ -31,8 +32,9 @@ impl From<CaseID> for String {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct Case {
+    #[schema(value_type = String, format = "uuid")]
     pub id: CaseID,
     pub name: String,
     pub used_minutes: i32,

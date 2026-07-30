@@ -14,17 +14,21 @@ pub async fn logout(
     jar: CookieJar,
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let user_id = UserID::try_from(c.sub.clone()).map_err(|_| ApiError::BadRequest)?;
+    let jar = jar.remove(
+        Cookie::build(("token", ""))
+            .path("/")
+            .max_age(time::Duration::seconds(0)),
+    );
 
-    auth::logout::execute(state.session_store.clone(), &user_id)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
-
-    let cookie = Cookie::build(("token", ""))
-        .path("/")
-        .max_age(time::Duration::seconds(0));
-
-    let jar = jar.remove(cookie);
-
-    Ok((jar, StatusCode::OK))
+    let status = match UserID::try_from(c.sub.clone()) {
+        Ok(user_id) => match auth::logout::execute(state.session_store.clone(), &user_id).await {
+            Ok(()) => StatusCode::OK,
+            Err(e) => {
+                tracing::error!("session invalidation failed: {e}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        },
+        Err(_) => StatusCode::BAD_REQUEST,
+    };
+    Ok((jar, status))
 }
